@@ -1,0 +1,11 @@
+# Never send these to Vercel: keys, test sign-in keys, local build output.
+.env*
+!.env.example
+.test-authenticators.json
+.next
+node_modules
+supabase/.temp
+test-results
+playwright-report
+docs/screens
+docs/review

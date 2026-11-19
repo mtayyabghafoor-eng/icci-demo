@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICCI Control Dashboard: Technical Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-800: #004236; --green-600: #006b54; --green-50: #f3f8f6;
+    --gold-500: #b8985a; --gold-100: #f4eedf; --cream: #faf8f3; --ink: #1f2a27; --ink-60: #5b6663; --line: #e3e0d6;
+  }
+  @page { size: A4; margin: 14mm 14mm 16mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 9.6pt/1.5 "Plus Jakarta Sans", Arial, sans-serif; }
+  .wrap { max-width: 182mm; margin: 0 auto; padding: 16px; }
+  h1, h2 { font-family: "Cormorant Garamond", Georgia, serif; color: var(--green-800); line-height: 1.15; margin: 0; }
+  h2 { font-size: 15pt; margin: 14px 0 4px; break-after: avoid; }
+  p { margin: 4px 0; }
+  .muted { color: var(--ink-60); }
+  .head { display: flex; gap: 16px; align-items: center; background: var(--green-800); color: #fff; border-radius: 12px; padding: 16px 20px; }
+  .head img { width: 64px; height: 64px; flex: none; }
+  .head h1 { color: #fff; font-size: 21pt; }
+  .head .sub { color: #e9e1cf; font-size: 10pt; margin-top: 2px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; break-inside: avoid; }
+  .card h2 { margin-top: 0; }
+  ul { margin: 4px 0; padding-left: 16px; }
+  li { margin: 2px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 9pt; }
+  th, td { text-align: left; padding: 5px 7px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--green-50); color: var(--ink-60); font-weight: 600; }
+  .note { background: var(--gold-100); border-left: 4px solid var(--gold-500); border-radius: 8px; padding: 8px 12px; margin: 10px 0; }
+  .pill { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 8pt; font-weight: 600; }
+  .now { background: #e3f2e7; color: #1b6b3a; } .next { background: #fbf1dc; color: #8a5a00; } .later { background: #eef0ef; color: #4a5250; }
+  @media screen and (max-width: 600px) { .grid { grid-template-columns: 1fr; } .head { flex-direction: column; text-align: center; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <img src="../../public/brand/icci-logo-512.png" alt="ICCI logo">
+  <div>
+    <h1>ICCI Control Dashboard</h1>
+    <div class="sub">Technical summary for the review team · November 2026</div>
+  </div>
+</div>
+
+<p style="margin-top:10px">A private web system for the admin team of the Islamic Cultural Centre of Ireland, Clonskeagh. It covers inventory and assets,
+people and Garda vetting, training, policies and sign-offs, vehicles and renewals, with rota, maintenance, a library, expenses and a monthly
+report to follow. It runs in a normal web browser on a PC or phone; there is nothing to install. Only named admins can sign in.</p>
+
+<div class="note">The demo at <b>icci-demo.vercel.app</b> runs on a separate database filled with made-up data only. A review account can be
+provided to your team on request.</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>How it is built</h2>
+    <ul>
+      <li><b>Website:</b> Next.js 16 with TypeScript (React).</li>
+      <li><b>Database, sign-in and file storage:</b> Supabase (PostgreSQL 17).</li>
+      <li><b>Hosting:</b> Vercel. Site and database both in the EU (Frankfurt today; Ireland can be chosen for the live system).</li>
+      <li><b>Three separate copies:</b> development and staging (made-up data only) and production.</li>
+      <li>Mainstream, open technologies: any experienced Next.js or PostgreSQL developer can maintain it.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Sign-in and access</h2>
+    <ul>
+      <li>Two-factor sign-in (authenticator app) for every account, no exceptions.</li>
+      <li>Passwords of at least 12 characters; automatic sign-out after 15 minutes idle.</li>
+      <li>Roles: Super Admin, Centre Admin, Finance, and a limited Library role.</li>
+      <li>No staff or volunteer logins, by design, to keep the number of accounts small.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Security: enforced in the database, not only on screen</h2>
+<table>
+  <tr><th style="width:34%">Rule</th><th>How it is enforced</th></tr>
+  <tr><td>Each role sees and changes only what it should</td><td>Row-level security on every table. Automated tests prove that each role, and a signed-out visitor, is refused what it should not do.</td></tr>
+  <tr><td>Nobody approves their own entry</td><td>Checked by the database itself on every approval (stock corrections, asset changes, stocktakes, policy publishing).</td></tr>
+  <tr><td>Nothing is deleted</td><td>No hard deletes anywhere. Records are deactivated, or corrected by a new linked entry.</td></tr>
+  <tr><td>Every change is traceable</td><td>An append-only audit log records who did what, and when. It cannot be edited.</td></tr>
+  <tr><td>Stock figures cannot be overwritten</td><td>Quantities are worked out from movements and counts, so every number can be traced back.</td></tr>
+  <tr><td>Database changes are controlled</td><td>Every change is a numbered migration file under version control; nothing is changed by hand.</td></tr>
+  <tr><td>Keys stay secret</td><td>Keys live outside the code. The website holds only the public key; the database's master key is never sent to it.</td></tr>
+  <tr><td>Labels reveal nothing</td><td>A QR label holds only a link with its number. Scanning one without signing in shows nothing.</td></tr>
+</table>
+<p class="muted">A full security review of the codebase was carried out after the first stage, and its fixes are in place.</p>
+
+<div class="grid" style="margin-top:8px">
+  <div class="card">
+    <h2>Data protection</h2>
+    <ul>
+      <li>Collects the minimum. It never stores vetting disclosures, medical details, identity documents, home addresses, bank or card numbers, or PPS numbers.</li>
+      <li>Hosted in the EU, with the providers' standard data processing agreements.</li>
+      <li>A written agreement and data protection paperwork with ICCI come before any real data is entered.</li>
+      <li>The prototype has never held real personal data.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Quality</h2>
+    <ul>
+      <li>Over 1,100 automated checks run before every change is accepted: type checks, code checks, unit tests, database permission tests, and browser tests on PC and phone screens.</li>
+      <li>Every change is tried on the staging copy before it goes live.</li>
+      <li>Readable colour contrast (WCAG AA), keyboard use and a skip link are tested.</li>
+      <li>Built with AI-assisted development (Claude Code); every change reviewed and tested before acceptance.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Ownership, handover and continuity</h2>
+<ul>
+  <li>All service accounts are registered with a project email so they can be transferred to ICCI.</li>
+  <li>The Centre owns its data at all times and can export it in standard formats (CSV).</li>
+  <li>A handover pack (specification, operating guide, service list, incident log) lets another developer take over.</li>
+  <li>A named backup developer on a small retainer covers absence or problems beyond the main developer.</li>
+  <li>Daily backups on the live system; a previous version of the site can be restored in minutes.</li>
+</ul>
+
+<h2>Running costs (live system)</h2>
+<table>
+  <tr><th>Item</th><th style="width:22%">Per month</th><th>Purpose</th></tr>
+  <tr><td>Supabase Pro</td><td>about $25</td><td>Database, daily backups, sign-in, files</td></tr>
+  <tr><td>Vercel Pro</td><td>about $20</td><td>Hosting for organisational use</td></tr>
+  <tr><td>Domain, monitoring, error alerts</td><td>a few euro</td><td>Web address (for example under icci.ie) and alerts</td></tr>
+  <tr><td><b>Total infrastructure</b></td><td><b>about €60</b></td><td>Support and further development are quoted separately</td></tr>
+</table>
+
+<h2>Stages</h2>
+<table>
+  <tr><th style="width:12%">Stage</th><th>Content</th><th style="width:14%">Status</th></tr>
+  <tr><td>1</td><td>Inventory and assets: labels, scanning, stock, approvals, room stocktake, asset register</td><td><span class="pill now">Built</span></td></tr>
+  <tr><td>2</td><td>People directory, Garda vetting, training, policies and sign-offs, vehicles, renewals and reminders</td><td><span class="pill now">Mostly built</span></td></tr>
+  <tr><td>3</td><td>Rota and maintenance log; building map and quick information (contacts, contractors, what to do)</td><td><span class="pill next">Next</span></td></tr>
+  <tr><td>4</td><td>Library: lending, plus books and Qurans given or sold in bulk, with a record of where they went</td><td><span class="pill later">Planned</span></td></tr>
+  <tr><td>5</td><td>Expenses with second approval, and a one-page monthly report for the Board and funders</td><td><span class="pill later">Planned</span></td></tr>
+  <tr><td>6</td><td>Service registers (funeral, shahada, nikah), Super Admin only</td><td><span class="pill later">Planned</span></td></tr>
+</table>
+
+<h2>Questions for your team</h2>
+<ul>
+  <li>Do you have a preferred hosting region or provider for the live system?</li>
+  <li>Would you like a review account on the demo, or read access to the code?</li>
+  <li>Should the monthly report go to a named person in your team, and in English, Arabic, or both?</li>
+</ul>
+
+</div>
+</body>
+</html>

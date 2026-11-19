@@ -1,0 +1,52 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { KIND_LABEL } from "@/lib/items/rules";
+import { createClient } from "@/lib/supabase/server";
+import { ITEM_COLUMNS, loadLookups, type ItemRow } from "../../data";
+import { EditForm } from "./edit-form";
+
+export const metadata: Metadata = { title: "Edit item | ICCI Control Dashboard" };
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default function EditItemPage(props: PageProps<"/items/[id]/edit">) {
+  return (
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+      <Suspense fallback={<p>Loading item…</p>}>
+        <Content params={props.params} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function Content({ params }: { params: PageProps<"/items/[id]/edit">["params"] }) {
+  const { id } = await params;
+  if (!UUID.test(id)) notFound();
+  const supabase = await createClient();
+  const { data } = await supabase.from("items").select(ITEM_COLUMNS).eq("id", id).maybeSingle();
+  if (!data) notFound();
+  const item = data as ItemRow;
+  const { categories, locationName } = await loadLookups(supabase);
+
+  return (
+    <>
+      <p className="text-sm">
+        <Link className="back-link" href={`/items/${id}`}>← Back to the item</Link>
+      </p>
+      <h1 className="page-title text-[28px] md:text-[34px] mt-2">Edit Details</h1>
+      <p className="mt-2">
+        {KIND_LABEL[item.kind]} · label {item.label_serial} · {locationName.get(item.location_id)}
+      </p>
+      <p className="mt-1 text-sm">
+        The kind and label cannot be changed. Moving the item and changing its condition come in a later step. The old
+        details stay in the history.
+      </p>
+      <EditForm
+        item={item}
+        categories={categories.filter((c) => c.active || c.id === item.category_id)}
+      />
+    </>
+  );
+}

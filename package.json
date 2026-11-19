@@ -1,0 +1,45 @@
+{
+  "name": "icci-control-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "npm run typecheck && npm run lint && vitest run && playwright test",
+    "test:unit": "vitest run --project unit",
+    "test:permissions": "vitest run --project db",
+    "test:browser": "playwright test",
+    "screenshots": "playwright test",
+    "walkthrough": "playwright test -c playwright.walkthrough.config.ts",
+    "setup:test-password": "node scripts/setup-test-password.mjs",
+    "setup:reminder-key": "node scripts/setup-reminder-key.mts",
+    "db:push": "supabase db push --remote",
+    "db:reset": "node --env-file=.env.local -e \"if(process.env.ICCI_ENVIRONMENT!=='development'){console.error('Refusing: not development');process.exit(1)}\" && supabase db reset --remote --yes --no-seed && npm run db:seed",
+    "db:seed": "node --env-file=.env.local scripts/seed.mts",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
+    "lucide-react": "1.65.0",
+    "next": "16.4.6",
+    "qrcode-generator": "2.0.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "supabase": "^3.1.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  }
+}

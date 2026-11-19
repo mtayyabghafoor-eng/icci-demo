@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICCI Control Dashboard: Stage 1 Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-900: #002b23; --green-800: #004236; --green-600: #006b54; --green-50: #f3f8f6;
+    --gold-500: #b8985a; --gold-100: #f4eedf; --cream: #faf8f3; --ink: #1f2a27; --ink-60: #5b6663; --line: #e3e0d6;
+  }
+  @page { size: A4; margin: 14mm 14mm 16mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 10.5pt/1.55 "Plus Jakarta Sans", Arial, sans-serif; }
+  .wrap { max-width: 182mm; margin: 0 auto; padding: 16px; }
+  h1, h2, h3 { font-family: "Cormorant Garamond", Georgia, serif; color: var(--green-800); line-height: 1.15; margin: 0; }
+  h2 { font-size: 22pt; margin: 0 0 6px; }
+  h3 { font-size: 14pt; margin: 18px 0 4px; }
+  p { margin: 6px 0; }
+  .muted { color: var(--ink-60); }
+  .cover { background: var(--green-800); color: #fff; border-radius: 14px; padding: 34px 30px 30px; text-align: center; }
+  .cover img { width: 110px; height: 110px; }
+  .cover h1 { color: #fff; font-size: 30pt; margin-top: 14px; }
+  .cover .sub { color: #e9e1cf; font-size: 12pt; margin-top: 6px; }
+  .cover .stage { display: inline-block; margin-top: 16px; padding: 6px 14px; border: 1px solid #d9c9a3; border-radius: 999px; color: #f4eedf; font-weight: 600; }
+  .note { background: var(--gold-100); border-left: 4px solid var(--gold-500); border-radius: 8px; padding: 10px 14px; margin: 14px 0; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 12px 0; }
+  .section { break-before: page; padding-top: 4px; }
+  .kicker { font-size: 8.5pt; letter-spacing: .12em; text-transform: uppercase; color: var(--green-600); font-weight: 700; }
+  ol.steps { padding-left: 20px; margin: 6px 0; }
+  ol.steps li { margin: 2px 0; }
+  figure { margin: 10px 0 14px; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 8px; display: block; background: #fff; }
+  figcaption { font-size: 9pt; color: var(--ink-60); margin-top: 4px; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .phones.two { grid-template-columns: repeat(2, 1fr); max-width: 120mm; }
+  .ask { background: var(--green-50); border: 1px solid #cfe0d9; border-radius: 10px; padding: 10px 14px; margin: 10px 0 4px; break-inside: avoid; }
+  .ask b { color: var(--green-800); }
+  .ask ul { margin: 4px 0 0; padding-left: 18px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--green-50); color: var(--ink-60); font-weight: 600; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 8.5pt; font-weight: 600; }
+  .now { background: #e3f2e7; color: #1b6b3a; } .next { background: #fbf1dc; color: #8a5a00; } .later { background: #eef0ef; color: #4a5250; }
+  .timeline { list-style: none; padding: 0; margin: 8px 0; }
+  .timeline li { position: relative; padding: 0 0 12px 26px; break-inside: avoid; }
+  .timeline li::before { content: ""; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold-500); }
+  .timeline li::after { content: ""; position: absolute; left: 10px; top: 18px; bottom: 0; width: 2px; background: var(--line); }
+  .timeline li:last-child::after { display: none; }
+  .feedback td:last-child { width: 45%; }
+  .feedback td { height: 34px; }
+  @media screen and (max-width: 600px) { .phones { grid-template-columns: 1fr 1fr; } .cover h1 { font-size: 24pt; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Cover -->
+<div class="cover">
+  <img src="../../public/brand/icci-logo-512.png" alt="ICCI logo">
+  <h1>ICCI Control Dashboard</h1>
+  <div class="sub">A working prototype for the Islamic Cultural Centre of Ireland, Clonskeagh</div>
+  <div class="stage">Stage 1 for review: Inventory and assets</div>
+</div>
+
+<div class="note">
+  <b>Everything you see is made up.</b> Every name, room, item and number in these screens is
+  fictional test data, marked "Test". No real person or record of the Centre is in the system.
+</div>
+
+<h3>What this is</h3>
+<p>One secure website, used only by two or three Centre admins, to see what the Centre owns,
+where it is, and what has happened to it. It works on a computer and on a phone. Every change is
+recorded with who did it and when, and nothing is ever deleted.</p>
+
+<h3>What we are asking you</h3>
+<p>Please look at each workflow below and tell us whether it matches how the Centre actually works.
+Each section ends with a few short questions. A one-page feedback sheet is at the end. Honest
+"this would not work here" answers are the most useful kind.</p>
+
+<div class="card">
+  <b>In this pack</b>
+  <ol class="steps">
+    <li>Signing in safely</li>
+    <li>The home page</li>
+    <li>Finding any item</li>
+    <li>Labels and registering a new item</li>
+    <li>Stock: counts, deliveries and corrections</li>
+    <li>Furniture and equipment: moves, damage, missing, disposal</li>
+    <li>Stocktake of a room</li>
+    <li>Lists and the asset register</li>
+    <li>Who can see what</li>
+    <li>What comes after</li>
+    <li>Your feedback</li>
+  </ol>
+</div>
+
+<!-- 1 -->
+<div class="section">
+  <div class="kicker">Workflow 1</div>
+  <h2>Signing In Safely</h2>
+  <p>Each admin signs in with their email, a password and a 6-digit code from an authenticator
+  app on their phone. After 15 minutes without use, the system signs them out, with a two-minute warning first.</p>
+  <figure><img src="../screens/walkthrough/01-sign-in-desktop.png" alt=""><figcaption>The sign-in page, with a photo of the Centre.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/02-code-desktop.png" alt=""><figcaption>The second step: the 6-digit code from the admin's phone.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Is a code from a phone app acceptable for every admin?</li>
+    <li>Is 15 minutes the right time before an automatic sign-out?</li>
+  </ul></div>
+</div>
+
+<!-- 2 -->
+<div class="section">
+  <div class="kicker">Workflow 2</div>
+  <h2>The Home Page</h2>
+  <p>The first screen shows what needs attention today: shelves that are low or empty, items that
+  are missing or damaged, and entries waiting for an admin's approval. Each box opens its list.</p>
+  <figure><img src="../screens/walkthrough/03-home-desktop.png" alt=""><figcaption>Home page on a computer.</figcaption></figure>
+  <div class="phones two">
+    <figure><img src="../screens/walkthrough/03-home-phone.png" alt=""><figcaption>The same page on a phone.</figcaption></figure>
+    <figure><img src="../screens/walkthrough/04-menu-phone.png" alt=""><figcaption>The phone menu.</figcaption></figure>
+  </div>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Are these the things you would want to see first each morning?</li>
+  </ul></div>
+</div>
+
+<!-- 3 -->
+<div class="section">
+  <div class="kicker">Workflow 3</div>
+  <h2>Finding Any Item</h2>
+  <p>Everything the Centre owns or keeps in stock is in one list. You can search by name or label
+  number, and filter by kind, category, location and condition.</p>
+  <figure><img src="../screens/walkthrough/10-items-list-desktop.png" alt=""><figcaption>The list of all items, 50 at a time.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/11-items-search-desktop.png" alt=""><figcaption>Searching for "kettle".</figcaption></figure>
+  <figure><img src="../screens/walkthrough/12-asset-detail-desktop.png" alt=""><figcaption>One item: its details, the actions you can take, and its full history. Nothing in the history can be changed.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Are these the right details to keep for each item (value, purchase date, warranty, photo, notes)?</li>
+    <li>Are the categories and the building, room, store room and shelf layout right for the Centre?</li>
+  </ul></div>
+</div>
+
+<!-- 4 -->
+<div class="section">
+  <div class="kicker">Workflow 4</div>
+  <h2>Labels and Registering a New Item</h2>
+  <p>Every item gets a printed sticker with a QR code and a number such as ICCI-000123. Labels are
+  printed in sheets before they are used. Scanning a new label with a phone starts registering the
+  item; scanning a used label opens the item. The code holds only the number, nothing private.</p>
+  <ol class="steps">
+    <li>Print a sheet of new labels.</li>
+    <li>Stick a label on the item, or on the shelf for things like soap and bin bags.</li>
+    <li>Scan it and fill in two short steps: what it is, then where it is.</li>
+  </ol>
+  <figure><img src="../screens/walkthrough/16-print-labels-desktop.png" alt=""><figcaption>Choosing how many new labels to print.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/17-label-sheet-desktop.png" alt=""><figcaption>A sheet of labels ready to print on standard sticker paper.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/14-register-step-1-filled-desktop.png" alt=""><figcaption>Register, step 1: the label number, the kind of item, and its name.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/15-register-step-2-desktop.png" alt=""><figcaption>Register, step 2: category, location and an optional photo.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Would one sticker per piece of furniture or equipment be practical?</li>
+    <li>For shelf stock (cleaning supplies, tissues and so on), is one sticker per shelf right?</li>
+  </ul></div>
+</div>
+
+<!-- 5 -->
+<div class="section">
+  <div class="kicker">Workflow 5</div>
+  <h2>Stock: Counts, Deliveries and Corrections</h2>
+  <p>For things that get used up, the system never just overwrites a number. It keeps every count
+  and every delivery, and works out the current amount from them. A mistake is fixed with a correction
+  and a reason, and a <b>different</b> admin must approve it. Nobody can approve their own entry.</p>
+  <figure><img src="../screens/walkthrough/20-stock-desktop.png" alt=""><figcaption>The low-stock list: everything at or below its minimum level, or out.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/26-weekly-count-desktop.png" alt=""><figcaption>The weekly count: pick a store room and enter what is on each shelf.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/22-consumable-detail-desktop.png" alt=""><figcaption>One shelf item, with every count and delivery listed.</figcaption></figure>
+  <div class="phones">
+    <figure><img src="../screens/walkthrough/23-count-shelf-phone.png" alt=""><figcaption>Counting a shelf on a phone, with big minus and plus buttons.</figcaption></figure>
+  </div>
+  <figure><img src="../screens/walkthrough/24-add-stock-desktop.png" alt=""><figcaption>Recording a delivery.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/25-correct-entry-desktop.png" alt=""><figcaption>Correcting a wrong entry: the new number and a reason. The original stays in the history.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/27-stock-approvals-own-desktop.png" alt=""><figcaption>The admin who asked for a correction sees it waiting, with no Approve button.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/28-stock-approvals-other-admin-desktop.png" alt=""><figcaption>A different admin sees Approve and Reject. Rejecting needs a short reason.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Is a weekly count realistic? Who would do it, and which store rooms?</li>
+    <li>Are you comfortable that every correction needs a second admin to approve it?</li>
+  </ul></div>
+</div>
+
+<!-- 6 -->
+<div class="section">
+  <div class="kicker">Workflow 6</div>
+  <h2>Furniture and Equipment</h2>
+  <p>Fixed assets are single things such as chairs, kettles, projectors and carpets. From the item's
+  page an admin can move it, report damage, mark it missing, or ask for it to be disposed of. Each one
+  records a note, an optional photo, and who reported it. Disposal needs a second admin's approval.</p>
+  <figure><img src="../screens/walkthrough/30-move-desktop.png" alt=""><figcaption>Moving an asset to another room.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/31-report-damage-desktop.png" alt=""><figcaption>Reporting damage.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/32-mark-missing-desktop.png" alt=""><figcaption>Marking an asset missing. It can later be marked found.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/33-dispose-desktop.png" alt=""><figcaption>Asking to dispose of an asset.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/37-disposals-waiting-desktop.png" alt=""><figcaption>Disposals waiting for a different admin to approve.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Should any other action be recorded, for example lending an item to another organisation?</li>
+    <li>Is a second approval for disposal right, or too strict for low-value items?</li>
+  </ul></div>
+</div>
+
+<!-- 7 -->
+<div class="section">
+  <div class="kicker">Workflow 7</div>
+  <h2>Stocktake of a Room</h2>
+  <p>An admin walks around one room with a phone and scans every label. At the end the system lists
+  what was expected but not found, and anything found in the wrong place. Nothing changes until a
+  <b>different</b> admin approves each difference.</p>
+  <ol class="steps">
+    <li>Pick the room and start the stocktake.</li>
+    <li>Scan each label: tap "Seen here" for furniture, or enter the number on a shelf.</li>
+    <li>Check the list of what was not found, then send it for approval.</li>
+    <li>Another admin approves or rejects each difference.</li>
+  </ol>
+  <figure><img src="../screens/walkthrough/40-stocktake-start-desktop.png" alt=""><figcaption>Starting a stocktake, with earlier ones listed.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/41-stocktake-open-desktop.png" alt=""><figcaption>A stocktake under way.</figcaption></figure>
+  <div class="phones">
+    <figure><img src="../screens/walkthrough/42-stocktake-scan-asset-phone.png" alt=""><figcaption>A scanned chair that belongs in another room: the system says so.</figcaption></figure>
+    <figure><img src="../screens/walkthrough/43-stocktake-count-shelf-phone.png" alt=""><figcaption>A scanned shelf: enter how many are there.</figcaption></figure>
+    <figure><img src="../screens/walkthrough/50-scan-phone.png" alt=""><figcaption>Scanning works with the phone's own camera app.</figcaption></figure>
+  </div>
+  <figure><img src="../screens/walkthrough/44-stocktake-check-and-finish-desktop.png" alt=""><figcaption>Check and finish: what was expected here but not found.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/45-stocktake-approval-desktop.png" alt=""><figcaption>A different admin decides on each difference.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Which rooms would you stocktake first, and how often?</li>
+  </ul></div>
+</div>
+
+<!-- 8 -->
+<div class="section">
+  <div class="kicker">Workflow 8</div>
+  <h2>Lists and the Asset Register</h2>
+  <figure><img src="../screens/walkthrough/34-missing-and-damaged-desktop.png" alt=""><figcaption>Everything missing or damaged, with its value.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/35-not-seen-12-months-desktop.png" alt=""><figcaption>Assets nobody has scanned or checked for a year: a prompt to go and look.</figcaption></figure>
+  <figure><img src="../screens/walkthrough/36-asset-register-desktop.png" alt=""><figcaption>The asset register by location and value. It downloads as a spreadsheet (CSV) for insurance or the accountant.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Does your insurer or accountant need the register in a particular layout?</li>
+  </ul></div>
+</div>
+
+<!-- 9 -->
+<div class="section">
+  <div class="kicker">Workflow 9</div>
+  <h2>Who Can See What</h2>
+  <p>Each admin has a role. Centre admins use every part of the system. A finance account sees only
+  what finance needs; in this stage that is just the home page. The database itself enforces these
+  rules, not only the screens, and this is tested for every role and for anyone not signed in.</p>
+  <figure><img src="../screens/walkthrough/70-finance-home-desktop.png" alt=""><figcaption>Signed in as a finance user: no stock or asset pages.</figcaption></figure>
+  <div class="ask"><b>Please check</b><ul>
+    <li>Who would hold each role at the Centre? (No names needed yet, only the number of people.)</li>
+  </ul></div>
+</div>
+
+<!-- 10 -->
+<div class="section">
+  <div class="kicker">What comes after</div>
+  <h2>The Road from Prototype to Daily Use</h2>
+  <p>The system is built in stages, so each part is checked by you before the next is added.</p>
+  <table>
+    <tr><th>Stage</th><th>What it covers</th><th>Status</th></tr>
+    <tr><td>1</td><td>Inventory and assets (this pack)</td><td><span class="pill now">Ready for your review</span></td></tr>
+    <tr><td>2</td><td>People directory, Garda vetting status and dates, training dates, policies and sign-offs, vehicles, and a renewals register with email reminders</td><td><span class="pill next">In progress</span></td></tr>
+    <tr><td>3</td><td>Weekly rota (prayers, Jumu'ah, security, cleaning, reception, Ramadan and Eid templates) and a maintenance log</td><td><span class="pill later">Planned</span></td></tr>
+    <tr><td>4</td><td>Lending library</td><td><span class="pill later">Planned</span></td></tr>
+    <tr><td>5</td><td>Expenses with approvals and fund tags, and a one-click monthly Board report</td><td><span class="pill later">Planned</span></td></tr>
+    <tr><td>6</td><td>Service registers (funerals, shahada, nikah), once those services have settled</td><td><span class="pill later">Later</span></td></tr>
+  </table>
+
+  <h3>Steps before real use</h3>
+  <ol class="timeline">
+    <li><b>Your feedback on this stage.</b> We adjust the workflows to fit how the Centre really works.</li>
+    <li><b>Stage 2 review pack.</b> The same kind of walkthrough for people, vetting and training.</li>
+    <li><b>A written proposal.</b> It covers the running costs (secure hosting in the EU, backups), the build fee, ongoing support, and what is included.</li>
+    <li><b>Agreement and data protection.</b> A short written agreement, including how the Centre's data is handled and how long records of people who leave are kept.</li>
+    <li><b>A small pilot.</b> Real data in one area, for example one store room and its shelves, for a few weeks.</li>
+    <li><b>Training and go-live.</b> A short session for each admin, then the rest of the Centre is added room by room.</li>
+  </ol>
+
+  <h3>Already built in</h3>
+  <ul>
+    <li>All data is kept in the European Union.</li>
+    <li>Two-step sign-in and automatic sign-out.</li>
+    <li>Nothing is ever deleted; every change is recorded with who and when.</li>
+    <li>Nobody can approve their own entry.</li>
+    <li>Garda vetting: only the status and dates, never the disclosure itself.</li>
+  </ul>
+</div>
+
+<!-- 11 -->
+<div class="section">
+  <div class="kicker">Your feedback</div>
+  <h2>Feedback Sheet</h2>
+  <p class="muted">Short answers are fine. Please return it however is easiest: written on paper, a photo, or by email.</p>
+  <table class="feedback">
+    <tr><th>Question</th><th>Your answer</th></tr>
+    <tr><td>Overall, does this fit how the Centre manages its belongings and supplies?</td><td></td></tr>
+    <tr><td>Which workflow would be most useful first?</td><td></td></tr>
+    <tr><td>Is anything missing that you would need on day one?</td><td></td></tr>
+    <tr><td>Is anything here you would not use?</td><td></td></tr>
+    <tr><td>Are the categories and locations right? What would you change?</td><td></td></tr>
+    <tr><td>Who would do the weekly count and stocktakes?</td><td></td></tr>
+    <tr><td>How many admins, and in which roles?</td><td></td></tr>
+    <tr><td>Who handles data protection at the Centre?</td><td></td></tr>
+    <tr><td>Anything else?</td><td></td></tr>
+  </table>
+  <p class="muted" style="margin-top:18px">Prototype screens dated 16 November 2026. All data shown is fictional.</p>
+</div>
+
+</div>
+</body>
+</html>
