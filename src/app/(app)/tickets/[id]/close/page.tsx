@@ -2,7 +2,6 @@
 // the asset repaired" when the ticket is about an asset marked damaged.
 // Phone-first.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -11,6 +10,7 @@ import { MAY_SEE_TICKETS, shortDescription, STATUS_LABEL, ticketNumber, type Tic
 import { StatusBadge } from "../../../items/ui";
 import { CannotSeeTickets } from "../../cannot-see";
 import { CloseTicketForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Close a ticket | ICCI Control Dashboard" };
 
@@ -41,11 +41,7 @@ async function Content({ params }: { params: PageProps<"/tickets/[id]/close">["p
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/tickets/${t.id}`}>
-          ← Back to the ticket
-        </Link>
-      </p>
+      <BackLink href={`/tickets/${t.id}`}>Back to the ticket</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Close Ticket {ticketNumber(t.id)}</h1>
       <p className="mt-2 text-lg font-semibold" dir="auto">
         {shortDescription(t.description)}

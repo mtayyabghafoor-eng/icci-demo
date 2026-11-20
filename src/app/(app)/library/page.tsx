@@ -10,6 +10,7 @@ import { BOOK_COLUMNS, formatIsbn, LANGUAGE_LABEL, mayUseLibrary, searchTerm, ty
 import { createClient } from "@/lib/supabase/server";
 import { PrimaryLink } from "../items/ui";
 import { CannotSeeLibrary } from "./cannot-see";
+import { DeskTabs } from "./desk-tabs";
 
 export const metadata: Metadata = { title: "Library | ICCI Control Dashboard" };
 
@@ -19,6 +20,7 @@ const SHOWN = 100;
 export default function LibraryPage(props: PageProps<"/library">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <DeskTabs />
       <h1 className="page-title text-[28px] md:text-[34px]">Library</h1>
       <p className="mt-2">Every book in the lending library, and how many copies of each.</p>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>

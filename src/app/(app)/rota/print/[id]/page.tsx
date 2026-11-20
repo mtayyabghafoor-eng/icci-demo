@@ -6,9 +6,8 @@
 // slots taken off are listed under the grid. Names and roles only, never
 // phone numbers (owner's choice, 15 Nov 2026).
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { Logo, Notice } from "@/components/ui";
+import { BackLink, Logo, Notice } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { personText, printRows, PUBLICATION_COLUMNS, publishedAtText, removedText, type FrozenEntry, type Publication } from "@/lib/rota/publish";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
@@ -43,11 +42,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/prin
   if (!pub) {
     return (
       <>
-        <p className="text-sm">
-          <Link className="back-link" href="/rota">
-            ← Rota week
-          </Link>
-        </p>
+        <BackLink href="/rota">Rota week</BackLink>
         <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Published Rota</h1>
         <p className="mt-4">This published rota could not be found.</p>
       </>
@@ -70,14 +65,10 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/prin
   return (
     <div className="rota-print-page">
       <div className="print:hidden">
-        <p className="text-sm">
-          <Link className="back-link" href={`/rota?week=${monday}`}>
-            ← {weekTitle(monday)}
-          </Link>
-        </p>
+        <BackLink href={`/rota?week=${monday}`}>{weekTitle(monday)}</BackLink>
         {query.new === "1" && (
           <div className="mt-3">
-            <Notice tone="success" testId="notice">
+            <Notice tone="success" floating testId="notice">
               Published. This is the one-page rota to print or save as a PDF.
             </Notice>
           </div>

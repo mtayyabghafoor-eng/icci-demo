@@ -5,6 +5,7 @@ import {
   friendlyLabelError,
   labelLink,
   labelsAreTest,
+  labelTag,
   layoutSheets,
   LABELS_PER_SHEET,
   parsePrintCount,
@@ -118,6 +119,13 @@ describe("the Print labels screen", () => {
     expect(labelsAreTest("development")).toBe(true);
     expect(labelsAreTest(undefined)).toBe(true);
     expect(labelsAreTest("production")).toBe(false);
+  });
+
+  it("UI-9: the printed tag is red TEST LABEL in development, a quiet DEMO on the demo, nothing in production", () => {
+    expect(labelTag("development")).toBe("TEST LABEL");
+    expect(labelTag(undefined)).toBe("TEST LABEL");
+    expect(labelTag("staging")).toBe("DEMO");
+    expect(labelTag("production")).toBeNull();
   });
 
   it("turns database messages into plain words", () => {

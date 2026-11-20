@@ -228,17 +228,136 @@ a.list-card:hover {
   border-color: var(--icci-gold-300);
 }
 
-/* "← Back to the item" and similar links above a page title (UI-6). */
-.back-link {
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-decoration: none;
+/*
+  UI-9: the top bar's "← Back" replaces the small logo on a phone
+  (back-link.tsx fills the slot).
+*/
+header:has(#top-bar-back > *) .top-bar-logo {
+  display: none;
 }
-.back-link:hover {
-  text-decoration: underline;
+
+/*
+  UI-9: folding menu groups (menu-links.tsx). The height opens smoothly by
+  growing a one-row grid from 0 to its full size. A closed group is also
+  hidden from screen readers and the keyboard (visibility switches at the
+  end of the closing slide). The negative margin keeps room for the gold
+  focus ring, which the clipping would otherwise cut off.
+*/
+.menu-fold {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 200ms ease-out,
+    visibility 200ms;
+}
+.menu-fold > div {
+  min-height: 0;
+  overflow: hidden;
+  margin: -4px;
+  padding: 4px;
+}
+.menu-fold[data-open="false"] {
+  grid-template-rows: 0fr;
+  visibility: hidden;
+}
+/* The tablet rail shows every icon: folding starts at PC width. */
+@media (width < 64rem) {
+  .menu-fold[data-rail][data-open="false"] {
+    grid-template-rows: 1fr;
+    visibility: visible;
+  }
+}
+
+/*
+  UI-9: a saved message floating over the page (toast.tsx): under the top
+  bar on the right on a PC, just above the bottom bar on a phone.
+*/
+.icci-toast {
+  position: fixed;
+  z-index: 40;
+  top: 5rem;
+  right: 1.5rem;
+  width: min(26rem, calc(100vw - 2rem));
+  animation: icci-toast-in 200ms ease-out;
+  transition:
+    opacity 200ms ease-in,
+    transform 200ms ease-in;
+}
+.icci-toast[data-state="out"] {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+@media (width < 48rem) {
+  .icci-toast {
+    top: auto;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+  .icci-toast[data-state="out"] {
+    transform: translateY(0.5rem);
+  }
+}
+@keyframes icci-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+@media print {
+  .icci-toast {
+    display: none;
+  }
+}
+
+/*
+  UI-9: thin rounded scrollbars, cream on the page and gold-tinted on the
+  dark green sidebar, and smooth scrolling for people who have not asked
+  their device for less motion.
+*/
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #c3cfca transparent;
+}
+.icci-pattern {
+  scrollbar-color: rgb(217 201 163 / 0.35) transparent;
+}
+.icci-pattern * {
+  scrollbar-color: rgb(217 201 163 / 0.35) transparent;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c3cfca;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9fb0a9;
+}
+.icci-pattern ::-webkit-scrollbar-thumb {
+  background: rgb(217 201 163 / 0.35);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* UI-9: gentle hover on rows and cards that open something. */
+.list-card {
+  transition:
+    border-color 150ms,
+    box-shadow 200ms,
+    transform 200ms;
+}
+a.list-card:hover {
+  box-shadow: var(--icci-shadow-raised);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -274,6 +393,7 @@ a.list-card:hover {
   overflow: hidden;
 }
 .label-filled {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 2mm;
@@ -291,6 +411,10 @@ a.list-card:hover {
   gap: 0.8mm;
   min-width: 0;
   line-height: 1.1;
+}
+/* UI-9: room above the words for the dome emblem in the top-right corner. */
+.label-filled .label-text {
+  padding-top: 4.6mm;
 }
 /* Item labels as property tags (slice P1.15): the number large enough to
    read across a room, whose it is, and "Do not remove". */
@@ -333,6 +457,29 @@ a.list-card:hover {
   color: var(--icci-error);
   font-size: 2.3mm;
   font-weight: 700;
+}
+/* UI-9: the quiet tag on the online demo (staging), instead of the red one. */
+.label-demo {
+  align-self: flex-start;
+  margin-top: 0.8mm;
+  padding: 0.2mm 0.9mm;
+  border: 0.25mm solid #8a8a8a;
+  border-radius: 0.6mm;
+  color: #6b6b6b;
+  font-size: 1.9mm;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.place-label-top .label-demo {
+  margin-top: 0;
+}
+/* UI-9: the black dome emblem in the label's top-right corner. */
+.label-emblem {
+  position: absolute;
+  top: 2.4mm;
+  right: 2.4mm;
+  width: 6.2mm;
+  height: 6.2mm;
 }
 
 /*

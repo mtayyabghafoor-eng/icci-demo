@@ -1,7 +1,6 @@
 // "On loan" list (slice P4.5): Every book that is out, soonest due first.
 // Designed for a PC first. CSV download for a Super Admin or Centre Admin only.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayDownloadLibraryCsv } from "@/lib/library/lists";
@@ -10,17 +9,16 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeLibrary } from "../cannot-see";
 import { loadBorrowers, loadCopyList } from "../data";
 import { CsvButton, LoanTable } from "../list-parts";
+import { BackLink } from "@/components/ui";
+import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "On Loan | ICCI Control Dashboard" };
 
 export default function Page() {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/library">
-          ← Library
-        </Link>
-      </p>
+      <DeskTabs />
+      <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">On loan</h1>
       <p className="mt-2">Every book that is out, soonest due first.</p>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>

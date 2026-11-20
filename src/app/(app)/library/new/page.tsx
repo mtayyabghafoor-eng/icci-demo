@@ -16,15 +16,16 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeLibrary } from "../cannot-see";
 import { NewBookForm } from "../forms";
 import { IsbnCamera } from "../isbn-camera";
+import { BackLink } from "@/components/ui";
+import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Add a Book | ICCI Control Dashboard" };
 
 export default function NewBookPage(props: PageProps<"/library/new">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/library">← Library</Link>
-      </p>
+      <DeskTabs />
+      <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Add a Book</h1>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content searchParams={props.searchParams} />

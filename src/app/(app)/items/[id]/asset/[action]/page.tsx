@@ -2,7 +2,6 @@
 // one phone-first screen for one fixed asset.
 import { titleCase } from "@/lib/ui/text";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { actionsFor, ASSET_ACTIONS, isAssetAction } from "@/lib/assets/rules";
@@ -14,6 +13,7 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { AssetEventForm } from "../../../../assets/forms";
 import { loadLookups, type ItemRow } from "../../../data";
 import { ItemStatus } from "../../../ui";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Asset | ICCI Control Dashboard" };
 
@@ -53,9 +53,7 @@ async function Content({ params }: { params: PageProps<"/items/[id]/asset/[actio
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/items/${item.id}`}>← Back to the item</Link>
-      </p>
+      <BackLink href={`/items/${item.id}`}>Back to the item</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">{titleCase(ASSET_ACTIONS[action].title)}</h1>
       <p className="mt-2 text-lg font-semibold">{item.name}</p>
       <p className="text-sm">

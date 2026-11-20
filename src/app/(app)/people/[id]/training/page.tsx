@@ -2,7 +2,6 @@
 // (type, date done, expiry). Never for the person linked to your own account
 // (the database refuses it too).
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -12,6 +11,7 @@ import { TRAINING_TYPE_COLUMNS, type TrainingType } from "@/lib/training/rules";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePeople } from "../../cannot-see";
 import { TrainingForm } from "./training-form";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Record training | ICCI Control Dashboard" };
 
@@ -43,9 +43,7 @@ async function Content({ params }: { params: PageProps<"/people/[id]/training">[
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/people/${p.id}`}>← Back to {p.full_name}</Link>
-      </p>
+      <BackLink href={`/people/${p.id}`}>Back to {p.full_name}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Record Training</h1>
       <p className="mt-1 font-semibold" dir="auto">
         {p.full_name}

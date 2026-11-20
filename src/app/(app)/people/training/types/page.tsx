@@ -3,7 +3,6 @@
 // and switch it off (never delete). A switched-off type keeps its old
 // entries but cannot be picked for new ones. Designed for a PC first.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
@@ -14,6 +13,7 @@ import { CannotSeePeople } from "../../cannot-see";
 import { setTrainingTypeActive } from "../../training-actions";
 import { loadTrainingTypes } from "../data";
 import { AddTypeForm, EditTypeForm } from "./type-forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Training types | ICCI Control Dashboard" };
 
@@ -28,9 +28,7 @@ const DONE: Record<string, string> = {
 export default function TrainingTypesPage(props: PageProps<"/people/training/types">) {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/people/training">← Training</Link>
-      </p>
+      <BackLink href="/people/training">Training</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Training Types</h1>
       <p className="mt-2">
         The courses that can be recorded. The usual length fills in the expiry date when training is recorded; it can
@@ -55,9 +53,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/people/trai
   return (
     <>
       {typeof done === "string" && DONE[done] && (
-        <div data-testid="notice">
-          <Notice>{DONE[done]}</Notice>
-        </div>
+        <Notice floating testId="notice">{DONE[done]}</Notice>
       )}
       <p id="years-hint" className="sr-only">
         A whole number of years from 1 to {MAX_YEARS}, or empty for no expiry.

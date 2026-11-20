@@ -1,6 +1,5 @@
 // Edit a person's details (slice P2.1). Designed for a PC first.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -9,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeePeople } from "../../cannot-see";
 import { loadPeopleLists, PERSON_COLUMNS, type PersonRow } from "../../data";
 import { PersonForm } from "../../person-form";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Edit person | ICCI Control Dashboard" };
 
@@ -37,9 +37,7 @@ async function Content({ params }: { params: PageProps<"/people/[id]/edit">["par
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/people/${id}`}>← Back to {person.full_name}</Link>
-      </p>
+      <BackLink href={`/people/${id}`}>Back to {person.full_name}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Edit Person</h1>
       <p className="mt-2 text-sm">The old details are kept in the audit log.</p>
       <PersonForm

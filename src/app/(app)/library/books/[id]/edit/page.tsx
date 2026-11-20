@@ -1,6 +1,5 @@
 // Correct a book's details (slice P4.2). The audit log keeps the old values.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -9,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeLibrary } from "../../../cannot-see";
 import { loadBook } from "../../../data";
 import { EditBookForm } from "../../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Correct a Book | ICCI Control Dashboard" };
 
@@ -30,11 +30,7 @@ async function Content({ params }: Pick<PageProps<"/library/books/[id]/edit">, "
   if (!book) notFound();
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/library/books/${book.id}`}>
-          ← Back to the book
-        </Link>
-      </p>
+      <BackLink href={`/library/books/${book.id}`}>Back to the book</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Correct the Details</h1>
       <p className="mt-1">Fix a spelling mistake or a missing detail. What it said before is kept in the record&rsquo;s history.</p>
       <EditBookForm book={book} />

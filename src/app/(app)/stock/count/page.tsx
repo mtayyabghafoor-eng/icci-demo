@@ -9,15 +9,14 @@ import { loadLookups } from "../../items/data";
 import { fieldClass, Notice } from "../../items/ui";
 import type { StockLevel } from "../data";
 import { WeeklyCountForm, type CountRow } from "../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Weekly count | ICCI Control Dashboard" };
 
 export default function WeeklyCountPage(props: PageProps<"/stock/count">) {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/stock">← Low stock</Link>
-      </p>
+      <BackLink href="/stock">Low stock</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Weekly Count</h1>
       <Suspense fallback={<p className="mt-4">Loading store rooms…</p>}>
         <Content searchParams={props.searchParams} />

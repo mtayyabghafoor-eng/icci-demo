@@ -2,6 +2,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { StockStatus } from "@/lib/stock/rules";
 import { allRows } from "@/lib/supabase/all-rows";
+import { IMPORTED } from "@/lib/ui/text";
 
 export type StockLevel = {
   item_id: string;
@@ -40,11 +41,11 @@ export async function stockLevelOf(supabase: SupabaseClient, itemId: string): Pr
   return (data as StockLevel | null) ?? null;
 }
 
-/** Display names of the admins (empty id = the seed script). */
+/** Display names of the admins (empty id = made by the set-up script: "Initial import", UI-9). */
 export async function adminNames(supabase: SupabaseClient) {
   const data = await allRows<{ id: string; display_name: string }>((from, to) =>
     supabase.from("app_users").select("id, display_name").order("id").range(from, to),
   );
   const names = new Map(data.map((u) => [u.id, u.display_name]));
-  return (id: string | null) => (id ? (names.get(id) ?? "Another admin") : "Seed script");
+  return (id: string | null) => (id ? (names.get(id) ?? "Another admin") : IMPORTED);
 }

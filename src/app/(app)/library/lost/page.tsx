@@ -2,7 +2,6 @@
 // found, and copies withdrawn for good. Open a copy to mark it found.
 // CSV download for a Super Admin or Centre Admin only.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayDownloadLibraryCsv } from "@/lib/library/lists";
@@ -11,6 +10,8 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeLibrary } from "../cannot-see";
 import { loadCopyList } from "../data";
 import { CsvButton, FlaggedList } from "../list-parts";
+import { BackLink } from "@/components/ui";
+import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Lost and Withdrawn | ICCI Control Dashboard" };
 
@@ -23,11 +24,8 @@ const FLAGGED_ORDER = [
 export default function Page() {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/library">
-          ← Library
-        </Link>
-      </p>
+      <DeskTabs />
+      <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Lost and withdrawn</h1>
       <p className="mt-2">Copies marked lost (they can be found again) and copies withdrawn for good.</p>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>

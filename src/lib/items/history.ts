@@ -1,6 +1,7 @@
 // Turns the database's record of changes into plain sentences for the
 // item's history list.
 import { CONDITION_STATUS, formatDate, formatEuro, type Condition } from "./rules";
+import { whoName } from "@/lib/ui/text";
 
 export type HistoryRow = {
   id: number;
@@ -53,7 +54,7 @@ export function describeHistory(rows: HistoryRow[], lookups: Lookups): HistoryLi
       return {
         id: row.id,
         when: row.changed_at,
-        who: row.changed_by_name,
+        who: whoName(row.changed_by_name),
         title: "Registered",
         changes: [`Label ${String(row.new_values.label_serial)}`],
       };
@@ -72,7 +73,7 @@ export function describeHistory(rows: HistoryRow[], lookups: Lookups): HistoryLi
     return {
       id: row.id,
       when: row.changed_at,
-      who: row.changed_by_name,
+      who: whoName(row.changed_by_name),
       title: only("Location:") ? "Moved" : only("Condition:") ? "Condition changed" : "Details changed",
       changes: changes.length ? changes : ["Saved with no changes"],
     };

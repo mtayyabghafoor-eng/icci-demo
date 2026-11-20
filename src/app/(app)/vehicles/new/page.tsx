@@ -10,15 +10,14 @@ import { MAY_SEE_VEHICLES } from "@/lib/vehicles/rules";
 import { CannotSeeVehicles } from "../cannot-see";
 import { assetChoices, keeperChoices } from "../data";
 import { VehicleForm } from "../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Register a vehicle | ICCI Control Dashboard" };
 
 export default function NewVehiclePage() {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/vehicles">← Vehicles</Link>
-      </p>
+      <BackLink href="/vehicles">Vehicles</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Register a Vehicle</h1>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content />

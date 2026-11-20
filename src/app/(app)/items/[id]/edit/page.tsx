@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { KIND_LABEL } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { ITEM_COLUMNS, loadLookups, type ItemRow } from "../../data";
 import { EditForm } from "./edit-form";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Edit item | ICCI Control Dashboard" };
 
@@ -32,9 +32,7 @@ async function Content({ params }: { params: PageProps<"/items/[id]/edit">["para
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/items/${id}`}>← Back to the item</Link>
-      </p>
+      <BackLink href={`/items/${id}`}>Back to the item</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Edit Details</h1>
       <p className="mt-2">
         {KIND_LABEL[item.kind]} · label {item.label_serial} · {locationName.get(item.location_id)}

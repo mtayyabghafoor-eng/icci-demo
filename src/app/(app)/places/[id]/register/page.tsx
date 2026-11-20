@@ -110,7 +110,21 @@ async function Content({
     <>
       {header}
       <div className="space-y-4">
-        {done && <Notice tone="success">{done} registered here. Scan the next label.</Notice>}
+        {done && (
+          // UI-9: a clear green confirmation that stays on the screen while the next label is scanned.
+          <div
+            role="status"
+            data-testid="registered-banner"
+            className="flex items-center gap-3 rounded-2xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3.5 text-[var(--icci-ok-text)] shadow-card"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--icci-ok-text)] text-white">
+              <Check aria-hidden size={22} strokeWidth={3} />
+            </span>
+            <p className="text-[15px] leading-snug text-icci-text">
+              <strong className="font-mono text-[var(--icci-ok-text)]">{done}</strong> registered here. Scan the next label.
+            </p>
+          </div>
+        )}
         {used && (
           <Notice tone="warning" testId="label-in-use">
             {scanned} is already on <Link href={`/items/${used.id}`}>{used.name}</Link>, recorded in{" "}
@@ -151,7 +165,7 @@ async function Content({
         </Card>
 
         <form action={finish}>
-          <Button type="submit" kind="outline" className="w-full">
+          <Button type="submit" kind="outline" size="lg" className="w-full">
             Finish registering here
           </Button>
         </form>

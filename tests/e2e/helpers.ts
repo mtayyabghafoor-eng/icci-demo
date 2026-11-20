@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { readTestAuthenticators } from "../../scripts/test-authenticators.mts";
 import { secondsLeftInWindow, totp } from "../../scripts/totp.mts";
@@ -135,9 +135,19 @@ export async function mainMenu(page: Page) {
   return sheet.getByRole("navigation", { name: "Main" });
 }
 
-/** Opens a page from the main menu. */
+/** Opens a page from the main menu, unfolding its group first if it is closed (UI-9). */
 export async function clickMenuLink(page: Page, name: string) {
-  await (await mainMenu(page)).getByRole("link", { name, exact: true }).click();
+  const menu = await mainMenu(page);
+  await openMenuGroups(menu);
+  await menu.getByRole("link", { name, exact: true }).click();
+}
+
+/** UI-9: unfolds every closed menu group, so all links can be found by name. */
+export async function openMenuGroups(menu: Locator) {
+  const closed = menu.locator('button[aria-expanded="false"]');
+  for (let n = await closed.count(); n > 0; n = await closed.count()) {
+    await closed.first().click();
+  }
 }
 
 /** Checks the menu marks this link as the current page, then closes the phone sheet. */

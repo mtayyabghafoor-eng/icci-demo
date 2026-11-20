@@ -20,6 +20,7 @@ import { Reporter, reporterNames } from "../../people/reporter";
 import { adminNames, MOVEMENT_COLUMNS, stockLevelOf, type Movement } from "../../stock/data";
 import { ITEM_COLUMNS, loadLookups, PHOTO_BUCKET, type ItemRow } from "../data";
 import { ItemStatus, Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../ui";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Item | ICCI Control Dashboard" };
 
@@ -112,20 +113,19 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href="/items">← All items</Link>
-      </p>
+      <BackLink href="/items">All items</BackLink>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="page-title text-[28px] md:text-[34px]">{item.name}</h1>
         <ItemStatus kind={item.kind} condition={item.condition} stock={level?.status} />
       </div>
-      {done === "registered" && <Notice>Item registered. Label {item.label_serial} now opens this page.</Notice>}
-      {done === "saved" && <Notice>Changes saved. The history below shows what changed.</Notice>}
-      {done === "counted" && <Notice>Count saved.</Notice>}
-      {done === "restocked" && <Notice>Stock added.</Notice>}
-      {done === "correction" && <Notice>Correction sent. It counts once a different admin approves it.</Notice>}
+      {done === "registered" && <Notice floating>Item registered. Label {item.label_serial} now opens this page.</Notice>}
+      {done === "saved" && <Notice floating>Changes saved. The history below shows what changed.</Notice>}
+      {done === "counted" && <Notice floating>Count saved.</Notice>}
+      {done === "restocked" && <Notice floating>Stock added.</Notice>}
+      {done === "correction" && <Notice floating>Correction sent. It counts once a different admin approves it.</Notice>}
       {typeof done === "string" && isAssetAction(done) && (
-        <Notice>
+        // A damage report offers "Open a ticket for this": that link must stay on the page.
+        <Notice floating={!(done === "damage" && latestDamage && !tickets.some((t) => t.asset_event_id === latestDamage.id))}>
           {ASSET_ACTIONS[done].done}
           {/* P3.6: a damage report can become a maintenance ticket that remembers it. */}
           {done === "damage" && latestDamage && !tickets.some((t) => t.asset_event_id === latestDamage.id) && (

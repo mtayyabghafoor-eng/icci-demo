@@ -16,6 +16,7 @@ import { ItemStatus } from "../../../items/ui";
 import { stockLevelOf } from "../../../stock/data";
 import { ITEM_BRIEF, type ItemBrief, loadStocktake } from "../../data";
 import { ScanForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Stocktake scan | ICCI Control Dashboard" };
 
@@ -46,9 +47,7 @@ async function Content({
   const lookups = await loadLookups(supabase);
   const roomPath = lookups.locationName.get(st.location_id) ?? "";
   const back = (
-    <p className="text-sm">
-      <Link className="back-link" href={`/stocktake/${id}`}>← Stocktake: {roomPath.split(" › ").at(-1)}</Link>
-    </p>
+    <BackLink href={`/stocktake/${id}`}>Stocktake: {roomPath.split(" › ").at(-1)}</BackLink>
   );
 
   const problem = (title: string, text: React.ReactNode) => (

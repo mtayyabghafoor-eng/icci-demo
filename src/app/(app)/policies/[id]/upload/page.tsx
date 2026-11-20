@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePolicies } from "../../cannot-see";
 import { VersionForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Upload a new version | ICCI Control Dashboard" };
 
@@ -42,9 +43,7 @@ async function Content({ params }: { params: PageProps<"/policies/[id]/upload">[
   const draft = (drafts ?? [])[0] as { id: string } | undefined;
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/policies/${policy.id}`}>← Back to {policy.title}</Link>
-      </p>
+      <BackLink href={`/policies/${policy.id}`}>Back to {policy.title}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Upload a New Version</h1>
       <p className="mt-1 font-semibold" dir="auto">
         {policy.title}

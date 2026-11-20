@@ -119,6 +119,16 @@ export function labelsAreTest(environment: string | undefined): boolean {
   return environment !== "production";
 }
 
+/**
+ * UI-9: the small tag printed on each label. Development keeps the red
+ * "TEST LABEL"; the online demo (staging) shows a quiet grey "DEMO";
+ * production prints none.
+ */
+export function labelTag(environment: string | undefined): "TEST LABEL" | "DEMO" | null {
+  if (environment === "production") return null;
+  return environment === "staging" ? "DEMO" : "TEST LABEL";
+}
+
 /** Database messages in plain words. */
 export function friendlyLabelError(message: string): string {
   if (/between 1 and 210/i.test(message)) return `Choose between 1 and ${MAX_LABELS_PER_PRINT} labels (${MAX_LABELS_PER_PRINT} is ten sheets).`;

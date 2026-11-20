@@ -2,7 +2,6 @@
 // needed, notes. Due dates are never changed here: use "Mark renewed", or
 // withdraw a wrong entry. Changes are kept in the audit log.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -11,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeRenewals } from "../../cannot-see";
 import { ownerChoices } from "../../data";
 import { RenewalForm, type RenewalDetails } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Change renewal | ICCI Control Dashboard" };
 
@@ -37,9 +37,7 @@ async function Content({ params }: { params: PageProps<"/renewals/[id]/edit">["p
   const r = data as RenewalDetails;
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/renewals/${r.id}`}>← Back to {r.title}</Link>
-      </p>
+      <BackLink href={`/renewals/${r.id}`}>Back to {r.title}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Change Renewal</h1>
       <RenewalForm people={await ownerChoices(supabase, r.owner_person_id)} renewal={r} />
     </>

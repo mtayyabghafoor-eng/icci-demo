@@ -1,7 +1,7 @@
 // Slice 9: the words and colours on the home page counter cards.
 // The numbers themselves come from the database (tests/db/home-counters.test.ts).
 import { describe, expect, it } from "vitest";
-import { attentionSentence, counterCards, greeting, longDate, MAY_SEE_COUNTERS, splitCards, type HomeCounters } from "@/lib/home/counters";
+import { approvalsTotal, attentionSentence, counterCards, greeting, longDate, lowStockDetail, MAY_SEE_COUNTERS, splitCards, type HomeCounters } from "@/lib/home/counters";
 
 const zero: HomeCounters = {
   low_stock: 0,
@@ -55,10 +55,18 @@ describe("home page counter cards", () => {
     for (const c of counterCards(some).filter((x) => x.id !== "rota-today")) expect(c.tone).toBe("red");
   });
 
-  it("says how many low items are out completely", () => {
-    expect(card({ ...zero, low_stock: 3, out_of_stock: 1 }, "low-stock").detail).toBe("Low or out. 1 is out completely.");
-    expect(card({ ...zero, low_stock: 3, out_of_stock: 2 }, "low-stock").detail).toBe("Low or out. 2 are out completely.");
-    expect(card({ ...zero, low_stock: 3 }, "low-stock").detail).toBe("Low or out. None is out completely.");
+  it("UI-9: says plainly how many are out, how many are low, and how many are not counted yet", () => {
+    expect(card({ ...zero, low_stock: 3, out_of_stock: 1 }, "low-stock").detail).toBe("1 out of stock · 2 running low");
+    expect(card({ ...zero, low_stock: 9, out_of_stock: 9 }, "low-stock").detail).toBe("9 out of stock");
+    expect(card({ ...zero, low_stock: 3 }, "low-stock").detail).toBe("3 running low");
+    expect(lowStockDetail({ ...zero, low_stock: 9, out_of_stock: 9 }, 11)).toBe("9 out of stock · 11 not counted yet");
+    expect(lowStockDetail({ ...zero, low_stock: 1 }, 1)).toBe("1 running low · 1 not counted yet");
+    expect(lowStockDetail(zero, 4)).toBe("All clear. Nothing counted is low · 4 not counted yet");
+    expect(lowStockDetail(zero, 0)).toBe("All clear. Every counted item is above its minimum.");
+  });
+  it("UI-9: adds up everything waiting for your approval", () => {
+    expect(approvalsTotal(zero)).toBe(0);
+    expect(approvalsTotal({ ...zero, corrections_for_me: 2, disposals_for_me: 1, stocktake_diffs_for_me: 4 })).toBe(7);
   });
 
   it("adds missing and damaged together and says each", () => {

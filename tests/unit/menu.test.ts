@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { idleMsLeft, IDLE_LIMIT_MS } from "@/lib/auth/rules";
-import { activeLink, bottomBarFor, MENU, mayScan, menuFor, whereAmI } from "@/lib/ui/menu";
+import { activeLink, bottomBarFor, foldsMenu, groupFor, MENU, mayScan, menuFor, whereAmI } from "@/lib/ui/menu";
 
 const labels = (role: string) => menuFor(role).flatMap((g) => g.links.map((l) => l.label));
 
 describe("menuFor: each role sees only what it can use", () => {
-  it("Super Admin and Centre Admin see every current link", () => {
-    const all = MENU.flatMap((g) => g.links.map((l) => l.label));
+  it("Super Admin and Centre Admin see every current link except the Library Operator's own desk links", () => {
+    const deskOnly = ["Library", "Add a book", "Lend", "Return", "Borrowers", "On loan", "Overdue", "Most borrowed", "Lost and withdrawn"];
+    const all = MENU.flatMap((g) => g.links.map((l) => l.label)).filter((l) => !deskOnly.includes(l));
     expect(labels("super_admin")).toEqual(all);
     expect(labels("centre_admin")).toEqual(all);
   });
@@ -122,6 +123,24 @@ describe("the Library menu (slice P4.2)", () => {
       ["Library", ["Library", "Add a book", "Lend", "Return", "Borrowers", "On loan", "Overdue", "Most borrowed", "Lost and withdrawn"]],
     ]);
   });
+  it("UI-9: admins see two calm Library links; the desk pages sit in a tab bar", () => {
+    for (const role of ["centre_admin", "super_admin"]) {
+      expect(menuFor(role).find((g) => g.title === "Library")!.links.map((l) => [l.label, l.href])).toEqual([
+        ["Library overview", "/library/overview"],
+        ["Library desk", "/library"],
+      ]);
+    }
+  });
+  it("UI-9: the right Library link lights up for each role", () => {
+    expect(activeLink("/library", "centre_admin")?.link.label).toBe("Library desk");
+    expect(activeLink("/library/on-loan", "centre_admin")?.link.label).toBe("Library desk");
+    expect(activeLink("/library/copies/abc/lend", "super_admin")?.link.label).toBe("Library desk");
+    expect(activeLink("/library/overview", "centre_admin")?.link.label).toBe("Library overview");
+    expect(activeLink("/library", "library_operator")?.link.label).toBe("Library");
+    expect(activeLink("/library/on-loan", "library_operator")?.link.label).toBe("On loan");
+    expect(activeLink("/library/overview", "library_operator")?.link.label).toBe("Library");
+    expect(activeLink("/stock", "finance")).toBeNull();
+  });
   it("admins see the Library group too; Finance does not", () => {
     expect(menuFor("centre_admin").some((g) => g.title === "Library")).toBe(true);
     expect(menuFor("super_admin").some((g) => g.title === "Library")).toBe(true);
@@ -145,6 +164,22 @@ describe("the Library menu (slice P4.2)", () => {
     expect(whereAmI("/library/most-borrowed")).toEqual({ group: "Library", page: "Most borrowed" });
     expect(whereAmI("/library/lost")).toEqual({ group: "Library", page: "Lost and withdrawn" });
     expect(whereAmI("/library/copies/abc/lend")).toEqual({ page: "Library" });
+  });
+});
+
+describe("UI-9: folding menu groups", () => {
+  it("folds only for roles with more than two groups", () => {
+    expect(foldsMenu("centre_admin")).toBe(true);
+    expect(foldsMenu("super_admin")).toBe(true);
+    expect(foldsMenu("library_operator")).toBe(false);
+    expect(foldsMenu("finance")).toBe(false);
+  });
+  it("opens the group of the current page", () => {
+    expect(groupFor("/stock/count", "centre_admin")).toBe("Items and stock");
+    expect(groupFor("/people/vetting", "centre_admin")).toBe("People");
+    expect(groupFor("/library/on-loan", "centre_admin")).toBe("Library");
+    expect(groupFor("/", "centre_admin")).toBe("Overview");
+    expect(groupFor("/nowhere", "centre_admin")).toBeNull();
   });
 });
 

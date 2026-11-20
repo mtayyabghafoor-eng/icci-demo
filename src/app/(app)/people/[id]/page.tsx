@@ -38,6 +38,7 @@ import { withdrawVetting } from "../vetting-actions";
 import { withdrawTraining } from "../training-actions";
 import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists, PERSON_COLUMNS, type PersonRow } from "../data";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Person | ICCI Control Dashboard" };
 
@@ -74,9 +75,7 @@ const ROLE_LABEL: Record<string, string> = {
 export default function PersonPage(props: PageProps<"/people/[id]">) {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/people">← People</Link>
-      </p>
+      <BackLink href="/people">People</BackLink>
       <Suspense fallback={<p className="mt-4">Loading…</p>}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
@@ -163,9 +162,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
         </span>
       </div>
       {typeof done === "string" && DONE[done] && (
-        <div data-testid="notice">
-          <Notice>{DONE[done]}</Notice>
-        </div>
+        <Notice floating testId="notice">{DONE[done]}</Notice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">

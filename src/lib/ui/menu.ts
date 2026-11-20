@@ -37,7 +37,8 @@ export type IconKey =
   | "onLoan"
   | "overdueBooks"
   | "mostBorrowed"
-  | "lostBooks";
+  | "lostBooks"
+  | "libraryOverview";
 
 export type MenuLink = {
   href: string;
@@ -52,8 +53,13 @@ export type MenuGroup = { title: string; links: MenuLink[] };
 
 const EVERYONE = ["super_admin", "centre_admin", "finance", "library_operator"] as const;
 const ADMINS = ["super_admin", "centre_admin"] as const;
-/** The library (Phase 4): the admins and the Library Operator, not Finance. */
-const LIBRARY = ["super_admin", "centre_admin", "library_operator"] as const;
+/**
+ * The library (Phase 4) is for the admins and the Library Operator, not
+ * Finance. UI-9: the Library Operator's desk links. Lending is their whole job, so
+ * they keep one click to each page; admins get two calm links instead and
+ * reach the same pages through the "Library desk" tab bar.
+ */
+const OPERATOR = ["library_operator"] as const;
 
 export const MENU: MenuGroup[] = [
   {
@@ -114,15 +120,18 @@ export const MENU: MenuGroup[] = [
   {
     title: "Library",
     links: [
-      { href: "/library", label: "Library", icon: "library", roles: LIBRARY },
-      { href: "/library/new", label: "Add a book", icon: "addBook", roles: LIBRARY },
-      { href: "/library/lend", label: "Lend", icon: "lend", roles: LIBRARY },
-      { href: "/library/return", label: "Return", icon: "returnBook", roles: LIBRARY },
-      { href: "/library/borrowers", label: "Borrowers", icon: "borrowers", roles: LIBRARY },
-      { href: "/library/on-loan", label: "On loan", icon: "onLoan", roles: LIBRARY },
-      { href: "/library/overdue", label: "Overdue", icon: "overdueBooks", roles: LIBRARY },
-      { href: "/library/most-borrowed", label: "Most borrowed", icon: "mostBorrowed", roles: LIBRARY },
-      { href: "/library/lost", label: "Lost and withdrawn", icon: "lostBooks", roles: LIBRARY },
+      // The operator's links come first, so the top bar names each desk page.
+      { href: "/library", label: "Library", icon: "library", roles: OPERATOR },
+      { href: "/library/new", label: "Add a book", icon: "addBook", roles: OPERATOR },
+      { href: "/library/lend", label: "Lend", icon: "lend", roles: OPERATOR },
+      { href: "/library/return", label: "Return", icon: "returnBook", roles: OPERATOR },
+      { href: "/library/borrowers", label: "Borrowers", icon: "borrowers", roles: OPERATOR },
+      { href: "/library/on-loan", label: "On loan", icon: "onLoan", roles: OPERATOR },
+      { href: "/library/overdue", label: "Overdue", icon: "overdueBooks", roles: OPERATOR },
+      { href: "/library/most-borrowed", label: "Most borrowed", icon: "mostBorrowed", roles: OPERATOR },
+      { href: "/library/lost", label: "Lost and withdrawn", icon: "lostBooks", roles: OPERATOR },
+      { href: "/library/overview", label: "Library overview", icon: "libraryOverview", roles: ADMINS },
+      { href: "/library", label: "Library desk", icon: "library", roles: ADMINS },
     ],
   },
 ];
@@ -139,11 +148,12 @@ function matches(prefix: string, pathname: string): boolean {
 
 /**
  * The menu link for this page: the longest matching address wins, so
- * /items/new is "Register an item" and /items/12 is "Items".
+ * /items/new is "Register an item" and /items/12 is "Items". With a role,
+ * only that role's links count (an admin's /library/on-loan is "Library desk").
  */
-export function activeLink(pathname: string): { link: MenuLink; group: MenuGroup } | null {
+export function activeLink(pathname: string, roleCode?: string): { link: MenuLink; group: MenuGroup } | null {
   let best: { link: MenuLink; group: MenuGroup; length: number } | null = null;
-  for (const group of MENU) {
+  for (const group of roleCode ? menuFor(roleCode) : MENU) {
     for (const link of group.links) {
       for (const prefix of [link.href, ...(link.also ?? [])]) {
         if (matches(prefix, pathname) && (!best || prefix.length > best.length)) {
@@ -153,6 +163,19 @@ export function activeLink(pathname: string): { link: MenuLink; group: MenuGroup
     }
   }
   return best && { link: best.link, group: best.group };
+}
+
+/** UI-9: the group that always stays open; every other group folds on a PC and in the phone menu. */
+export const FIXED_GROUP = "Overview";
+
+/** UI-9: only a long menu folds. The Library Operator and Finance have two groups or fewer. */
+export function foldsMenu(roleCode: string): boolean {
+  return menuFor(roleCode).length > 2;
+}
+
+/** UI-9: the group holding this page, opened by itself when the page loads. */
+export function groupFor(pathname: string, roleCode: string): string | null {
+  return activeLink(pathname, roleCode)?.group.title ?? null;
 }
 
 /** May this role open labels with the Scan button (items, or library books)? */

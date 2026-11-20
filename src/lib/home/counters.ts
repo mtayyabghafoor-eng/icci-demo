@@ -44,19 +44,33 @@ export const MAY_SEE_COUNTERS = ["super_admin", "centre_admin"];
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-export function counterCards(c: HomeCounters): CounterCard[] {
+/**
+ * UI-9: the Low stock line in plain parts, leaving out any part that is
+ * zero: "9 out of stock · 2 running low · 11 not counted yet". Items never
+ * counted are not in the number (they cannot be low yet), but are named so
+ * nobody thinks they were forgotten.
+ */
+export function lowStockDetail(c: Pick<HomeCounters, "low_stock" | "out_of_stock">, notCounted = 0): string {
+  const later = notCounted > 0 ? `${notCounted} not counted yet` : "";
+  if (c.low_stock === 0) return later ? `All clear. Nothing counted is low · ${later}` : "All clear. Every counted item is above its minimum.";
+  const lowOnly = c.low_stock - c.out_of_stock;
+  return [c.out_of_stock > 0 ? `${c.out_of_stock} out of stock` : "", lowOnly > 0 ? `${lowOnly} running low` : "", later].filter(Boolean).join(" · ");
+}
+
+/** UI-9: everything waiting for this admin's approval, for the Home headline card. */
+export function approvalsTotal(c: Pick<HomeCounters, "corrections_for_me" | "disposals_for_me" | "stocktake_diffs_for_me">): number {
+  return c.corrections_for_me + c.disposals_for_me + c.stocktake_diffs_for_me;
+}
+
+/** `notCounted`: consumables never counted (UI-9), named on the Low stock card. */
+export function counterCards(c: HomeCounters, notCounted = 0): CounterCard[] {
   const tone = (n: number): Tone => (n > 0 ? "red" : "green");
   return [
     {
       id: "low-stock",
       title: "Low stock",
       count: c.low_stock,
-      detail:
-        c.low_stock === 0
-          ? "All clear. Every counted item is above its minimum."
-          : c.out_of_stock > 0
-            ? `Low or out. ${plural(c.out_of_stock, "is", "are")} out completely.`
-            : "Low or out. None is out completely.",
+      detail: lowStockDetail(c, notCounted),
       href: "/stock",
       tone: tone(c.low_stock),
     },

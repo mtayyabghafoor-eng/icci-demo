@@ -1,6 +1,7 @@
 // Small building blocks shared by the item screens.
 import Link from "next/link";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, Toast } from "@/components/ui";
+import { cx } from "@/lib/ui/text";
 import { CONDITION_STATUS, type Condition, type Tone } from "@/lib/items/rules";
 import { STOCK_STATUS, type StockStatus } from "@/lib/stock/rules";
 
@@ -38,7 +39,7 @@ export const fieldClass =
 
 export function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className={buttonClass("primary")}>
+    <Link href={href} className={buttonClass("primary", "md", "max-md:min-h-12")}>
       {children}
     </Link>
   );
@@ -46,16 +47,25 @@ export function PrimaryLink({ href, children }: { href: string; children: React.
 
 export function SecondaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className={buttonClass("outline")}>
+    <Link href={href} className={buttonClass("outline", "md", "max-md:min-h-12")}>
       {children}
     </Link>
   );
 }
 
-export function Notice({ children }: { children: React.ReactNode }) {
-  return (
-    <p role="status" className="mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3">
+export function Notice({ children, floating = false, testId }: { children: React.ReactNode; floating?: boolean; testId?: string }) {
+  const box = (
+    <p
+      role="status"
+      data-testid={testId}
+      className={cx(
+        "rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3",
+        floating ? "pr-12 shadow-raised" : "mt-4",
+      )}
+    >
       {children}
     </p>
   );
+  // UI-9: "saved" messages float over the page for a few seconds.
+  return floating ? <Toast>{box}</Toast> : box;
 }

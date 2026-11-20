@@ -1,13 +1,13 @@
 // The shared frame of the "Count this shelf", "Add stock" and "Correct an
 // entry" screens for one consumable (phone-first).
 import { titleCase } from "@/lib/ui/text";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { STOCK_STATUS } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../items/data";
 import { StatusBadge } from "../items/ui";
 import { stockLevelOf, type StockLevel } from "./data";
+import { BackLink } from "@/components/ui";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -24,9 +24,7 @@ export function StockHeader({ level, place, title }: { level: StockLevel; place:
   const s = STOCK_STATUS[level.status];
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/items/${level.item_id}`}>← Back to the item</Link>
-      </p>
+      <BackLink href={`/items/${level.item_id}`}>Back to the item</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">{titleCase(title)}</h1>
       <p className="mt-2 text-lg font-semibold">{level.name}</p>
       <p className="text-sm">

@@ -1,7 +1,6 @@
 // Change a policy's title or owner (slice P2.5). Who must sign it is changed
 // on the policy page itself.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -10,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeePolicies } from "../../cannot-see";
 import { ownerChoices } from "../../data";
 import { PolicyForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Change policy | ICCI Control Dashboard" };
 
@@ -36,9 +36,7 @@ async function Content({ params }: { params: PageProps<"/policies/[id]/edit">["p
   const policy = data as { id: string; title: string; owner_person_id: string };
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/policies/${policy.id}`}>← Back to {policy.title}</Link>
-      </p>
+      <BackLink href={`/policies/${policy.id}`}>Back to {policy.title}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Change Policy</h1>
       <PolicyForm people={await ownerChoices(supabase, policy.owner_person_id)} policy={policy} />
     </>

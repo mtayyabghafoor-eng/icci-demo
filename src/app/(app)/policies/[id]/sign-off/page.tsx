@@ -2,7 +2,6 @@
 // people who must sign and have not yet; your own name is shown but cannot be
 // ticked (the database refuses it too). Several people at once for one sheet.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -13,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePolicies } from "../../cannot-see";
 import { SignoffForm, type Candidate } from "./signoff-form";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Record sign-off | ICCI Control Dashboard" };
 
@@ -53,9 +53,7 @@ async function Content({ params }: { params: PageProps<"/policies/[id]/sign-off"
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/policies/${p.id}`}>← Back to {p.title}</Link>
-      </p>
+      <BackLink href={`/policies/${p.id}`}>Back to {p.title}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Record Sign-off</h1>
       <p className="mt-1 font-semibold" dir="auto">
         {p.title}

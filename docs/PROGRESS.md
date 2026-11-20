@@ -36,8 +36,10 @@ Home cards), which completes Phase 4 (PLAN.md 5.4). After the
 Clonskeagh visit the owner chose a week of inventory work first:
 P1.12 (places and place labels), P1.13 (register a room), P1.14
 (disposal routes and sale record), P1.15 (property-tag asset label) and
-P1.16 (Home and menu polish) are done (20 Nov 2026). Next: the demo
-refill (needs the owner's .env.staging), then Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
+P1.16 (Home and menu polish) are done (20 Nov 2026), and so is UI-9, the
+presentation polish (calmer Home, folding menu, Back button, Library
+overview and desk tabs, label emblem, demo names; 20 Nov 2026). Next:
+Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -367,6 +369,17 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Disposal routes (P1.14, 20 Nov 2026, owner's answers of 19 Nov): seven
   routes; a sale is a record only, not accounting; a different admin still
   approves; the route and sale details can never change.
+- UI-9 presentation polish (20 Nov 2026, owner's prompt and four mockups;
+  plan approved): Home follows mockup 4 (four headline numbers, slim Needs
+  attention rows, green all-clear chips, four action tiles plus "More
+  actions"); menu groups fold, Overview always open; "Back" in the top bar
+  goes one level up, never browser history; saved messages float for 8 s;
+  admins get "Library overview" and "Library desk" (tab bar), the Library
+  Operator keeps all nine links; labels get a hand-drawn black dome emblem
+  (not the logo) and "DEMO" instead of "TEST LABEL" on staging only.
+  Left out: bell, recent activity with photos, trend arrows. The code
+  freeze for the demo video was lifted; the owner agreed to one more wipe
+  of the demo, refilled with realistic demo-only admin names and fleet numbers.
 - Tests run on a local Supabase in Docker (20 Nov 2026, owner's choice);
   the demo database may be wiped once and refilled with demo-only names
   (owner agreed 20 Nov 2026).
@@ -381,6 +394,17 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 20 Nov 2026, session 42 (UI-9 presentation polish, no migrations): the
+  owner's review prompt and four ChatGPT mockups compared; mockup 4 chosen
+  for Home. Built: folding menu, top-bar Back (52 pages), floating saved
+  messages (18 pages), loading shapes, thin scrollbars, calmer Home, new
+  /library/overview and the Library desk tab bar, label dome emblem and
+  DEMO tag, 48 px phone buttons, staging-only prayer note, demo names
+  (Tariq A. Demo, ICCI-VAN-01...), "Initial import" instead of "Seed
+  script". Tests first; new tests/e2e/ui-polish.spec.ts. After this
+  commit: push to main, wipe and refill the demo (owner agreed); the owner
+  then pairs the demo phone sign-in again.
 
 - 20 Nov 2026, session 41 (overnight, P1.13-P1.16, owner asleep, asked for
   no prompts): P1.13 register a room: "Register items in this room" on a

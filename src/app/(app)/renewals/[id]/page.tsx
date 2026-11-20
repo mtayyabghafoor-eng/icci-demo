@@ -14,6 +14,7 @@ import { daysBetween, todayInDublin } from "@/lib/vetting/rules";
 import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui";
 import { setRenewalActive, withdrawDueDate } from "../actions";
 import { CannotSeeRenewals } from "../cannot-see";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Renewal | ICCI Control Dashboard" };
 
@@ -56,9 +57,7 @@ type DueEntry = {
 export default function RenewalPage(props: PageProps<"/renewals/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/renewals">← Renewals</Link>
-      </p>
+      <BackLink href="/renewals">Renewals</BackLink>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
@@ -107,9 +106,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
         {!r.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <div data-testid="notice">
-          <Notice>{DONE[done]}</Notice>
-        </div>
+        <Notice floating testId="notice">{DONE[done]}</Notice>
       )}
 
       {current && (

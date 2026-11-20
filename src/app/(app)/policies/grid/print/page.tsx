@@ -2,7 +2,6 @@
 // filters as the grid page, with the date it was printed. "Save as PDF" in the
 // browser's print window makes a file, the same way label sheets work.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
@@ -14,6 +13,7 @@ import { PrintNowButton } from "../../../labels/forms";
 import { loadPeopleLists } from "../../../people/data";
 import { CannotSeePolicies } from "../../cannot-see";
 import { GridTable } from "../grid-table";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Policy grid (print) | ICCI Control Dashboard" };
 
@@ -45,9 +45,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/policies/gr
   return (
     <div className="policy-grid-page">
       <div className="print:hidden">
-        <p className="text-sm">
-          <Link className="back-link" href={`/policies/grid${back ? `?${back}` : ""}`}>← Policy grid</Link>
-        </p>
+        <BackLink href={`/policies/grid${back ? `?${back}` : ""}`}>Policy grid</BackLink>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <PrintNowButton />
           <span className="text-sm">In the print window choose A4 and landscape. &ldquo;Save as PDF&rdquo; makes a file.</span>

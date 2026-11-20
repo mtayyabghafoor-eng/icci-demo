@@ -1,7 +1,6 @@
 // Correct a borrower's name or contact (slice P4.4). The audit log keeps
 // what it said before.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -10,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeLibrary } from "../../../cannot-see";
 import { loadBorrower } from "../../../data";
 import { BorrowerForm } from "../../../loan-forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Correct a Borrower | ICCI Control Dashboard" };
 
@@ -31,11 +31,7 @@ async function Content({ params }: Pick<PageProps<"/library/borrowers/[id]/edit"
   if (!b) notFound();
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/library/borrowers/${b.id}`}>
-          ← Back to the borrower
-        </Link>
-      </p>
+      <BackLink href={`/library/borrowers/${b.id}`}>Back to the borrower</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Correct the Details</h1>
       <BorrowerForm borrower={b} />
     </>

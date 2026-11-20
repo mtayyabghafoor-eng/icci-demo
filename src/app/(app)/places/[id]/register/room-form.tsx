@@ -114,7 +114,7 @@ export function RoomForm(props: {
       </details>
 
       <FormError message={state.error} />
-      <Button type="submit" kind="primary" disabled={pending} className="w-full">
+      <Button type="submit" kind="primary" size="lg" disabled={pending} className="w-full">
         {pending ? "Saving…" : "Save and scan the next"}
       </Button>
     </form>

@@ -46,9 +46,16 @@ test("Centre Admin: every menu group, the current page marked, the page named in
   }
   await expect(menu.getByRole("link", { name: "Stock", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(menu.getByRole("link", { name: "Items", exact: true })).not.toHaveAttribute("aria-current", "page");
+  // UI-9: the group of this page is open; the other long groups fold away.
+  await expect(menu.getByRole("button", { name: "Items and stock", exact: true })).toHaveAttribute("aria-expanded", "true");
+  const people = menu.getByRole("button", { name: "People", exact: true });
+  await expect(people).toHaveAttribute("aria-expanded", "false");
+  await expect(menu.getByRole("link", { name: "Garda vetting", exact: true })).toBeHidden();
   await s(page, phone ? "menu-sheet" : "stock-with-sidebar", info.project.name);
 
-  // A menu link opens its page and the sheet closes behind it.
+  // Opening a group shows its links; a menu link opens its page and the sheet closes behind it.
+  await people.click();
+  await expect(people).toHaveAttribute("aria-expanded", "true");
   await menu.getByRole("link", { name: "Garda vetting", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Garda vetting" })).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Menu" })).toBeHidden();

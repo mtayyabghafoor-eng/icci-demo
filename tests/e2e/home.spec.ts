@@ -41,7 +41,15 @@ test("home page counters match their lists and open them", async ({ page }, info
   );
   // Every card in "Needs attention" says so in words, not colour alone.
   for (const card of await attentionCards.all()) await expect(card).toContainText(/Needs attention|Check/);
-  for (const action of ["Register an item", "Register a room", "Report a problem", "Weekly count", "Move or report an asset", "Stocktake", "Garda vetting", "Print labels"]) {
+  // UI-9: four headline numbers at the top; four big actions, the rest behind "More actions".
+  for (const id of ["items", "low-stock", "missing", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
+  await expect(page.getByTestId("headline-low-stock").getByTestId("headline-count")).toHaveText(String(await count(page, "low-stock")));
+  for (const action of ["Register an item", "Register a room", "Report a problem", "Move or report an asset"]) {
+    await expect(page.getByRole("link", { name: new RegExp(`^${action}`) }).last()).toBeVisible();
+  }
+  await expect(page.getByRole("link", { name: /^Weekly count/ })).toBeHidden();
+  await page.getByText("More actions", { exact: true }).click();
+  for (const action of ["Weekly count", "Stocktake", "Garda vetting", "Print labels"]) {
     await expect(page.getByRole("link", { name: new RegExp(`^${action}`) }).last()).toBeVisible();
   }
 

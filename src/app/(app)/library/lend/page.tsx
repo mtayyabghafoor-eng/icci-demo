@@ -6,12 +6,14 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { CannotSeeLibrary } from "../cannot-see";
 import { FindCopyForm } from "../loan-forms";
+import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Lend a Book | ICCI Control Dashboard" };
 
 export default function LendPage() {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <DeskTabs />
       <h1 className="page-title text-[28px] md:text-[34px]">Lend a Book</h1>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content />

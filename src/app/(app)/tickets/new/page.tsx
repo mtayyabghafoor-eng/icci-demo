@@ -12,6 +12,7 @@ import { ItemStatus } from "../../items/ui";
 import { CannotSeeTickets } from "../cannot-see";
 import { reportPlaces } from "../data";
 import { ReportProblemForm } from "../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Report a problem | ICCI Control Dashboard" };
 
@@ -58,11 +59,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/tickets/new
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={item ? `/items/${item.id}` : "/tickets"}>
-          {item ? "← Back to the item" : "← All tickets"}
-        </Link>
-      </p>
+      <BackLink href={item ? `/items/${item.id}` : "/tickets"}>{item ? "← Back to the item" : "← All tickets"}</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Report a Problem</h1>
       {item ? (
         <>

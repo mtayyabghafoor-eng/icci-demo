@@ -12,17 +12,16 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { fieldClass } from "../../items/ui";
 import { CannotSeeLibrary } from "../cannot-see";
 import { CsvButton } from "../list-parts";
+import { BackLink } from "@/components/ui";
+import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Most Borrowed | ICCI Control Dashboard" };
 
 export default function Page(props: PageProps<"/library/most-borrowed">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/library">
-          ← Library
-        </Link>
-      </p>
+      <DeskTabs />
+      <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Most borrowed</h1>
       <p className="mt-2">Books that were lent most often, counting every loan in the period.</p>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>

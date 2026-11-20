@@ -3,6 +3,9 @@
 // amber), quick actions, and the all-clear counters in a quieter row. Each
 // counter opens its list. Designed for a PC first; everything stacks on a
 // phone. The numbers come from the database (public.home_counters).
+// UI-9 (calmer Home): four headline numbers, Needs attention as slim rows,
+// the all-clear counters as green chips, and four big actions with the
+// rest behind "More actions".
 import type { Metadata } from "next";
 import Image from "next/image";
 import {
@@ -13,12 +16,15 @@ import {
   CalendarClock,
   CalendarDays,
   ChartColumn,
+  ChevronDown,
   CircleCheck,
   ClipboardCheck,
   FileSignature,
   Inbox,
   MapPin,
+  Package,
   PackagePlus,
+  PackageX,
   Printer,
   QrCode,
   ScanLine,
@@ -28,9 +34,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Suspense } from "react";
-import { Card, CardTitle, CounterCard, Notice, QuickAction, Skeleton } from "@/components/ui";
+import { ActionTile, AttentionRow, Card, CardTitle, ClearChip, CounterCard, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
 import { requireAdmin, type CurrentAdmin } from "@/lib/auth/current-admin";
 import {
+  approvalsTotal,
   attentionSentence,
   counterCards,
   greeting,
@@ -75,6 +82,7 @@ const ICON: Record<string, LucideIcon> = {
   renewals: CalendarClock,
   "rota-today": CalendarDays,
   "library-overdue": BookOpen,
+  tickets: Wrench,
 };
 
 async function HomeContent() {
@@ -108,23 +116,79 @@ async function HomeContent() {
 
   // P4.5: the library's own counter (a separate call, so a library problem never hides the rest).
   const { data: lib } = await supabase.rpc("library_counters").single<LibraryCounters>();
-  const { attention, clear } = splitCards([...counterCards(data), ...(lib ? libraryCards(lib) : [])]);
+  // UI-9: two plain counts the admins can already read: items still with the
+  // Centre, and consumables never counted (named on the Low stock line).
+  const [{ count: registered }, { count: notCounted }] = await Promise.all([
+    supabase.from("items").select("id", { count: "exact", head: true }).or("condition.is.null,condition.neq.disposed"),
+    supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
+  ]);
+  const cards = [...counterCards(data, notCounted ?? 0), ...(lib ? libraryCards(lib) : [])];
+  const { attention, clear } = splitCards(cards);
+  const approvals = approvalsTotal(data);
+  const approvalQueues = cards.filter((c) => c.id.endsWith("-for-me") && c.count > 0);
+  const missing = data.damaged + data.missing;
   return (
     <>
       <Greeting me={me} line={attentionSentence(attention.length)} />
 
-      <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_340px]">
-        <section aria-labelledby="attention-title">
-          <h2 id="attention-title" className="mb-4 text-lg font-bold text-icci-green-dark">
-            Needs attention
-          </h2>
+      <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" aria-label="At a glance">
+        <li>
+          <HeadlineCard href="/items" icon={Package} label="Items registered" count={registered ?? 0} tone="neutral" testId="headline-items" />
+        </li>
+        <li>
+          <HeadlineCard
+            href="/stock"
+            icon={TriangleAlert}
+            label="Low stock"
+            count={data.low_stock}
+            tone={data.out_of_stock > 0 ? "red" : data.low_stock > 0 ? "amber" : "neutral"}
+            testId="headline-low-stock"
+          />
+        </li>
+        <li>
+          <HeadlineCard href="/assets" icon={PackageX} label="Missing or damaged" count={missing} tone={missing > 0 ? "red" : "neutral"} testId="headline-missing" />
+        </li>
+        <li>
+          <HeadlineCard
+            href={approvalQueues.length === 1 ? approvalQueues[0].href : "#attention-title"}
+            icon={ClipboardCheck}
+            label="For you to approve"
+            count={approvals}
+            tone={approvals > 0 ? "gold" : "neutral"}
+            testId="headline-approvals"
+          />
+        </li>
+      </ul>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_380px]">
+        <section aria-labelledby="attention-title" className="self-start overflow-hidden rounded-2xl border border-icci-line bg-white shadow-card">
+          <div className="flex items-center gap-3 border-b border-icci-line px-4 py-4 md:px-5">
+            <span aria-hidden className="h-6 w-1 rounded-full bg-icci-gold" />
+            <h2 id="attention-title" className="scroll-mt-24 text-lg font-bold text-icci-green-dark">
+              Needs attention
+            </h2>
+            {attention.length > 0 && (
+              <span className="ml-auto rounded-full bg-icci-panel px-2.5 py-0.5 text-sm font-semibold text-icci-green-dark">{attention.length}</span>
+            )}
+          </div>
           {attention.length > 0 ? (
-            <CardGrid cards={attention} />
+            <ul className="divide-y divide-icci-line">
+              {attention.map((c) => (
+                <li key={c.id}>
+                  <AttentionRow
+                    href={c.href}
+                    icon={ICON[c.id] ?? Inbox}
+                    title={c.title}
+                    count={c.count}
+                    detail={c.detail}
+                    tone={c.tone}
+                    testId={`counter-${c.id}`}
+                  />
+                </li>
+              ))}
+            </ul>
           ) : (
-            <div
-              data-testid="all-clear"
-              className="flex items-center gap-4 rounded-2xl border border-[var(--icci-ok-text)]/20 bg-[var(--icci-ok-fill)] p-5"
-            >
+            <div data-testid="all-clear" className="flex items-center gap-4 p-5">
               <CircleCheck aria-hidden size={32} className="shrink-0 text-[var(--icci-ok-text)]" />
               <div>
                 <p className="font-bold text-[var(--icci-ok-text)]">All clear</p>
@@ -134,34 +198,71 @@ async function HomeContent() {
           )}
         </section>
 
-        <Card className="self-start">
-          <CardTitle>Quick actions</CardTitle>
-          <div className="-mx-3 flex flex-col">
-            <QuickAction href="/items/new" icon={PackagePlus} label="Register an item" hint="Add details to a new label" />
-            <QuickAction href="/places" icon={MapPin} label="Register a room" hint="Open the room, then scan its items" />
-            <QuickAction href="/tickets/new" icon={Wrench} label="Report a problem" hint="A leak, a broken light, a fault" />
-            <QuickAction href="/stock/count" icon={ClipboardCheck} label="Weekly count" hint="Count a store room's shelves" />
-            <QuickAction href="/scan" icon={QrCode} label="Move or report an asset" hint="Open its label, then choose" />
-            <QuickAction href="/stocktake" icon={ScanLine} label="Stocktake" hint="Check a room against the records" />
-            <QuickAction href="/people/vetting" icon={ShieldCheck} label="Garda vetting" hint="Who is due, expired or missing" />
-            <QuickAction href="/policies/grid" icon={FileSignature} label="Policy grid" hint="Who has signed each policy" />
-            <QuickAction href="/renewals" icon={CalendarClock} label="Renewals" hint="What is overdue or due soon" />
-            <QuickAction href="/labels" icon={Printer} label="Print labels" hint="A4 sheets of new labels" />
-          </div>
-        </Card>
-      </div>
+        <div className="flex flex-col gap-6 self-start">
+          <section aria-labelledby="actions-title" className="rounded-2xl border border-icci-line bg-white p-4 shadow-card md:p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <span aria-hidden className="h-6 w-1 rounded-full bg-icci-gold" />
+              <h2 id="actions-title" className="text-lg font-bold text-icci-green-dark">
+                Quick actions
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <ActionTile href="/items/new" icon={PackagePlus} label="Register an item" hint="A new label" primary />
+              <ActionTile href="/places" icon={MapPin} label="Register a room" hint="Scan a room's items" />
+              <ActionTile href="/tickets/new" icon={Wrench} label="Report a problem" hint="A leak, a fault" />
+              <ActionTile href="/scan" icon={QrCode} label="Move or report an asset" hint="Open its label" />
+            </div>
+            <details className="group mt-3">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-xl px-3 font-semibold text-icci-green hover:bg-icci-green-50 [&::-webkit-details-marker]:hidden">
+                More actions
+                <ChevronDown aria-hidden size={18} className="transition-transform duration-200 group-open:rotate-180" />
+              </summary>
+              <div className="-mx-1 mt-1 flex flex-col">
+                <QuickAction href="/stock/count" icon={ClipboardCheck} label="Weekly count" hint="Count a store room's shelves" />
+                <QuickAction href="/stocktake" icon={ScanLine} label="Stocktake" hint="Check a room against the records" />
+                <QuickAction href="/people/vetting" icon={ShieldCheck} label="Garda vetting" hint="Who is due, expired or missing" />
+                <QuickAction href="/policies/grid" icon={FileSignature} label="Policy grid" hint="Who has signed each policy" />
+                <QuickAction href="/renewals" icon={CalendarClock} label="Renewals" hint="What is overdue or due soon" />
+                <QuickAction href="/labels" icon={Printer} label="Print labels" hint="A4 sheets of new labels" />
+              </div>
+            </details>
+          </section>
 
-      {clear.length > 0 && (
-        <section aria-labelledby="clear-title" className="mt-10">
-          <h2 id="clear-title" className="mb-4 text-lg font-bold text-icci-green-dark">
-            All clear
-          </h2>
-          <CardGrid cards={clear} quiet />
-        </section>
-      )}
+          {clear.length > 0 && (
+            <section aria-labelledby="clear-title" className="rounded-2xl border border-icci-line bg-white p-4 shadow-card md:p-5">
+              <h2 id="clear-title" className="mb-3 flex items-center gap-2 font-bold text-[var(--icci-ok-text)]">
+                <CircleCheck aria-hidden size={18} />
+                All clear
+              </h2>
+              <ul className="flex flex-wrap gap-2">
+                {clear.map((c) => (
+                  <li key={c.id}>
+                    <ClearChip href={c.href} title={CHIP[c.id] ?? c.title} count={c.count} testId={`counter-${c.id}`} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </div>
     </>
   );
 }
+
+/** UI-9: short names for the all-clear chips. */
+const CHIP: Record<string, string> = {
+  "low-stock": "Low stock",
+  "missing-damaged": "Missing or damaged",
+  "corrections-for-me": "Stock corrections",
+  "disposals-for-me": "Disposals",
+  "stocktake-for-me": "Stocktake differences",
+  vetting: "Garda vetting",
+  signoffs: "Policy sign-offs",
+  renewals: "Renewals",
+  "rota-today": "Today's rota",
+  tickets: "Maintenance tickets",
+  "library-overdue": "Library returns",
+};
 
 /** The Library Operator's Home: library cards and the three library actions only. */
 async function LibraryHome({ me }: { me: CurrentAdmin }) {

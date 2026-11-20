@@ -1,6 +1,6 @@
 // Home page parts (UI-PLAN 5.2): counter cards, quick actions, initials circle.
 import Link from "next/link";
-import { ArrowRight, ChevronRight, type LucideIcon } from "lucide-react";
+import { ArrowRight, ChevronRight, CircleCheck, type LucideIcon } from "lucide-react";
 import type { Tone } from "@/lib/items/rules";
 import { cx, initials } from "@/lib/ui/text";
 
@@ -89,5 +89,155 @@ export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
     >
       {initials(name)}
     </span>
+  );
+}
+
+/*
+  UI-9: the calmer Home (mockup 4 in the owner's review). Four headline
+  numbers, then one slim row per thing that needs attention, the all-clear
+  counters as small green chips, and four large action tiles.
+*/
+
+export type HeadlineTone = "neutral" | "amber" | "red" | "gold";
+
+const HEADLINE: Record<HeadlineTone, { card: string; badge: string; number: string }> = {
+  neutral: { card: "border-icci-panel bg-icci-green-50", badge: "bg-white text-icci-green-dark", number: "text-icci-green-dark" },
+  amber: { card: "border-[#efdcb5] bg-[var(--icci-warn-fill)]", badge: "bg-white text-[var(--icci-warn-text)]", number: "text-[var(--icci-warn-text)]" },
+  red: { card: "border-[#f2c9c4] bg-[var(--icci-bad-fill)]", badge: "bg-white text-icci-error", number: "text-icci-error" },
+  gold: { card: "border-icci-gold-300 bg-icci-gold-100", badge: "bg-white text-icci-green-dark", number: "text-icci-green-dark" },
+};
+
+export function HeadlineCard({
+  href,
+  icon: Icon,
+  label,
+  count,
+  tone,
+  testId,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  count: number;
+  tone: HeadlineTone;
+  testId?: string;
+}) {
+  const t = HEADLINE[tone];
+  return (
+    <Link
+      href={href}
+      data-testid={testId}
+      className={cx(
+        "group flex h-full flex-col items-start gap-3 rounded-2xl border p-4 text-icci-text! no-underline shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised sm:flex-row sm:items-center sm:gap-4 md:p-5",
+        t.card,
+      )}
+    >
+      <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm sm:h-12 sm:w-12", t.badge)}>
+        <Icon aria-hidden size={24} strokeWidth={1.9} />
+      </span>
+      <span className="min-w-0 sm:flex-1">
+        <span className={cx("block text-[30px] font-bold leading-none tracking-tight md:text-[36px]", t.number)} data-testid="headline-count">
+          {count}
+        </span>
+        <span className="mt-1.5 block text-[15px] font-semibold leading-snug">{label}</span>
+      </span>
+      <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/80 text-icci-green-dark transition-transform duration-200 group-hover:translate-x-0.5 sm:flex xl:hidden 2xl:flex">
+        <ArrowRight aria-hidden size={17} />
+      </span>
+    </Link>
+  );
+}
+
+const ROW: Record<Tone, { badge: string; pill: string }> = {
+  red: { badge: "bg-[var(--icci-bad-fill)] text-icci-error", pill: "bg-[var(--icci-bad-fill)] text-icci-error" },
+  amber: { badge: "bg-[var(--icci-warn-fill)] text-[var(--icci-warn-text)]", pill: "bg-[var(--icci-warn-fill)] text-[var(--icci-warn-text)]" },
+  green: { badge: "bg-[var(--icci-ok-fill)] text-[var(--icci-ok-text)]", pill: "bg-[var(--icci-ok-fill)] text-[var(--icci-ok-text)]" },
+  grey: { badge: "bg-icci-panel text-icci-green-dark", pill: "bg-icci-panel text-icci-green-dark" },
+};
+
+/** One slim "needs attention" row: icon, what and why, the count with its word, and an arrow. */
+export function AttentionRow({
+  href,
+  icon: Icon,
+  title,
+  count,
+  detail,
+  tone,
+  testId,
+}: {
+  href: string;
+  icon: LucideIcon;
+  title: string;
+  count: number;
+  detail?: string;
+  tone: Tone;
+  testId?: string;
+}) {
+  const t = ROW[tone];
+  return (
+    <Link
+      href={href}
+      data-testid={testId}
+      className="group flex min-h-16 items-center gap-3 px-4 py-3 text-icci-text! no-underline transition-colors duration-150 hover:bg-icci-green-50 md:gap-4 md:px-5"
+    >
+      <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", t.badge)}>
+        <Icon aria-hidden size={20} strokeWidth={1.9} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold leading-snug">{title}</span>
+        {detail && <span className="block text-sm text-icci-ink-60">{detail}</span>}
+      </span>
+      <span className={cx("inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold", t.pill)}>
+        <span data-testid="count">{count}</span>
+        <span className="hidden font-semibold sm:inline">{COUNTER[tone].word}</span>
+        <span className="sr-only sm:hidden">{COUNTER[tone].word}</span>
+      </span>
+      <ChevronRight aria-hidden size={18} className="shrink-0 text-icci-ink-60 transition-transform duration-150 group-hover:translate-x-0.5" />
+    </Link>
+  );
+}
+
+/** An all-clear counter as a small green chip that still opens its list. */
+export function ClearChip({ href, title, count, testId }: { href: string; title: string; count: number; testId?: string }) {
+  return (
+    <Link
+      href={href}
+      data-testid={testId}
+      className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--icci-ok-text)]/20 bg-[var(--icci-ok-fill)] px-3 text-[13px] font-semibold text-[var(--icci-ok-text)]! no-underline transition-colors duration-150 hover:border-[var(--icci-ok-text)]/50"
+    >
+      <CircleCheck aria-hidden size={14} />
+      {title}
+      <span className="sr-only">
+        : <span data-testid="count">{count}</span>, all clear
+      </span>
+    </Link>
+  );
+}
+
+/** A large action tile; the first on Home is filled green. */
+export function ActionTile({ href, icon: Icon, label, hint, primary = false }: { href: string; icon: LucideIcon; label: string; hint?: string; primary?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cx(
+        "group flex min-h-[7.5rem] flex-col justify-between gap-3 rounded-2xl border p-4 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised",
+        primary
+          ? "border-icci-green-dark bg-icci-green-dark text-white! shadow-card"
+          : "border-icci-line bg-white text-icci-text! shadow-card hover:border-icci-gold-300",
+      )}
+    >
+      <span
+        className={cx(
+          "flex h-11 w-11 items-center justify-center rounded-xl",
+          primary ? "bg-white/12 text-white" : "border border-icci-gold-300 bg-icci-gold-100 text-icci-green-dark",
+        )}
+      >
+        <Icon aria-hidden size={22} strokeWidth={1.9} />
+      </span>
+      <span>
+        <span className="block font-semibold leading-snug">{label}</span>
+        {hint && <span className={cx("mt-0.5 block text-[13px] leading-snug", primary ? "text-white/80" : "text-icci-ink-60")}>{hint}</span>}
+      </span>
+    </Link>
   );
 }

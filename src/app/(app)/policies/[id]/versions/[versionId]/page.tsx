@@ -2,7 +2,6 @@
 // version can never be changed; upload a new version instead. Whoever
 // changes a draft cannot then publish it.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -11,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePolicies } from "../../../cannot-see";
 import { VersionForm } from "../../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Change draft | ICCI Control Dashboard" };
 
@@ -46,9 +46,7 @@ async function Content({ params }: { params: PageProps<"/policies/[id]/versions/
   const v = version as { id: string; version_label: string; approved_on: string; next_review_on: string; status: string };
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/policies/${policy.id}`}>← Back to {policy.title}</Link>
-      </p>
+      <BackLink href={`/policies/${policy.id}`}>Back to {policy.title}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Change Draft</h1>
       <p className="mt-1 font-semibold" dir="auto">
         {policy.title}, {v.version_label}

@@ -2,13 +2,13 @@
 // and a "skip the first spaces" box. On paper: only the labels, placed for
 // A4 sheets of 21 (Avery L7160 size).
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { currentOrigin } from "@/lib/labels/origin";
 import {
   labelLink,
   labelsAreTest,
+  labelTag,
   layoutSheets,
   MAX_SKIP,
   parseSkip,
@@ -21,6 +21,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { fieldClass, Notice } from "../../../items/ui";
 import { PrintNowButton } from "../../forms";
+import { BackLink } from "@/components/ui";
+import { DomeEmblem } from "../../dome-emblem";
 
 export const metadata: Metadata = { title: "Label sheet | ICCI Control Dashboard" };
 
@@ -55,7 +57,7 @@ async function Sheet({
   if (!run) {
     return (
       <>
-        <BackLink />
+        <BackToLabels />
         <h1 className="page-title text-[28px] md:text-[34px] mt-2">Label Sheet</h1>
         <p className="mt-4">This label sheet could not be found, or your account cannot print labels.</p>
       </>
@@ -64,13 +66,14 @@ async function Sheet({
 
   const origin = await currentOrigin();
   const test = labelsAreTest(process.env.ICCI_ENVIRONMENT);
+  const tag = labelTag(process.env.ICCI_ENVIRONMENT);
   const sheets = layoutSheets(serialsInRange(run.first_number, run.last_number), skip);
   const range = run.label_count > 1 ? `${serialOf(run.first_number)} to ${serialOf(run.last_number)}` : serialOf(run.first_number);
 
   return (
     <>
       <div className="print:hidden">
-        <BackLink />
+        <BackToLabels />
         <h1 className="page-title text-[28px] md:text-[34px] mt-2">Label Sheet</h1>
         {query.new === "1" && <Notice>{run.label_count} new label numbers created.</Notice>}
         <p className="mt-3 text-lg font-semibold" data-testid="sheet-range">
@@ -113,7 +116,7 @@ async function Sheet({
         </p>
         {test && (
           <p className="mt-3 text-sm">
-            These are <strong>test labels</strong>: the app has only its temporary web address. Real labels are printed
+            These are <strong>{tag === "DEMO" ? "demo labels" : "test labels"}</strong>: the app has only its temporary web address. Real labels are printed
             once ICCI has a permanent address.
           </p>
         )}
@@ -136,7 +139,7 @@ async function Sheet({
             }}
           >
             {cells.map((serial, i) =>
-              serial ? <Label key={i} serial={serial} link={labelLink(origin, serial)} test={test} /> : <div key={i} className="label-cell" />,
+              serial ? <Label key={i} serial={serial} link={labelLink(origin, serial)} tag={tag} /> : <div key={i} className="label-cell" />,
             )}
           </section>
         ))}
@@ -145,7 +148,7 @@ async function Sheet({
   );
 }
 
-function Label({ serial, link, test }: { serial: string; link: string; test: boolean }) {
+function Label({ serial, link, tag }: { serial: string; link: string; tag: "TEST LABEL" | "DEMO" | null }) {
   const matrix = qrMatrix(link);
   const size = matrix.length + QR_MARGIN * 2;
   return (
@@ -171,16 +174,14 @@ function Label({ serial, link, test }: { serial: string; link: string; test: boo
         </span>
         <span className="label-keep">Do not remove</span>
         <span className="label-centre">Islamic Cultural Centre of Ireland</span>
-        {test && <span className="label-test">TEST LABEL</span>}
+        {tag && <span className={tag === "DEMO" ? "label-demo" : "label-test"}>{tag}</span>}
       </div>
+      {/* UI-9: a small black dome emblem in the top-right corner. */}
+      <DomeEmblem className="label-emblem" />
     </div>
   );
 }
 
-function BackLink() {
-  return (
-    <p className="text-sm">
-      <Link className="back-link" href="/labels">← Print labels</Link>
-    </p>
-  );
+function BackToLabels() {
+  return <BackLink href="/labels">Print labels</BackLink>;
 }

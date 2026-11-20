@@ -53,6 +53,34 @@ const ITEMS: Record<string, string> = {
   "Test paper cups": "Paper cups",
 };
 
+/**
+ * UI-9: whole texts that need a better demo wording than the general rules
+ * give: the admin accounts (and their linked person records), the vehicles,
+ * and the made-up disposal notes and names. Checked first.
+ */
+const EXACT: Record<string, string> = {
+  "Test Super Admin": "Yusuf K. Demo",
+  "Test Centre Admin": "Tariq A. Demo",
+  "Test Second Admin": "Layla M. Demo",
+  "Test Finance Officer": "Omar S. Demo",
+  "Test Library Operator": "Maryam H. Demo",
+  "Test Deactivated Admin": "Idris N. Demo",
+  "Test Former Library Operator": "Huda R. Demo",
+  "TEST-BUS-1": "ICCI-BUS-01",
+  "TEST-VAN-1": "ICCI-VAN-01",
+  "TEST-CAR-1": "ICCI-CAR-01",
+  "Test minibus (made up)": "Community Minibus (16-seat)",
+  "Test van (made up)": "Centre Transit Van",
+  "Test car (made up)": "Admin Pool Car",
+  "Sample Minibus 16-seat": "16-seat minibus",
+  "Example Van": "Panel van",
+  "Placeholder Hatchback": "Five-door hatchback",
+  "Test disposal: made-up, beyond repair": "Damaged beyond economical repair during Hall refurbishment",
+  "Test Buyer (made up)": "Hamza J. Demo",
+  "Test Treasurer (made up)": "Treasurer",
+  "Test Charity Shop (made up)": "Local charity shop",
+};
+
 /** People in the directory: first name, the old surname's initial, surname "Demo". */
 const PERSON = /^Test ([A-Z][a-z]+) (Sample|Example|Placeholder|Madeup)$/;
 /** Made-up book authors. */
@@ -64,6 +92,7 @@ function capitalise(s: string): string {
 }
 
 export function demoText(text: string): string {
+  if (EXACT[text]) return EXACT[text];
   if (PLACES[text]) return PLACES[text];
   // Numbered equipment: "Test folding chair 07" -> "Stacking chair 07".
   const numbered = /^(.*) (\d{2})$/.exec(text);

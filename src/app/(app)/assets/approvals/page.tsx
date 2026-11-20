@@ -13,15 +13,14 @@ import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames } from "../../stock/data";
 import { Reporter, reporterNames } from "../../people/reporter";
 import { DecideDisposalForm } from "../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Disposals waiting | ICCI Control Dashboard" };
 
 export default function DisposalApprovalsPage(props: PageProps<"/assets/approvals">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/assets">← Missing and damaged</Link>
-      </p>
+      <BackLink href="/assets">Missing and damaged</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Disposals Waiting</h1>
       <p className="mt-2">
         An asset is disposed of only after a <strong>different admin</strong> approves. Until then it stays as it is.
@@ -110,7 +109,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
                     <span className="font-semibold">Note:</span> {p.note}
                   </p>
                   <p className="text-sm">
-                    Reported by <Reporter event={p} names={reporters} /> · sent by {nameOf(p.created_by)} · {formatDateTime(p.created_at)}
+                    Reported by <Reporter event={p} names={reporters} />
+                    {/* UI-9: an entry from the first import has no admin who sent it. */}
+                    {p.created_by && <> · sent by {nameOf(p.created_by)}</>} · {formatDateTime(p.created_at)}
                   </p>
                 </div>
                 {pic && (

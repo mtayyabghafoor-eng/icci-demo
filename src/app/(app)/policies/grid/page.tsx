@@ -5,7 +5,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { buttonClass } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_POLICIES } from "@/lib/policies/rules";
@@ -21,9 +21,7 @@ export const metadata: Metadata = { title: "Policy grid | ICCI Control Dashboard
 export default function PolicyGridPage(props: PageProps<"/policies/grid">) {
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/policies">← Policies</Link>
-      </p>
+      <BackLink href="/policies">Policies</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Policy Grid</h1>
       <p className="mt-2">
         Who has signed the current version of each policy. &ldquo;Overdue&rdquo; means still unsigned {OVERDUE_DAYS} days after

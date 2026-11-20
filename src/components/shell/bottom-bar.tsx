@@ -14,7 +14,7 @@ import { MenuLinks } from "./menu-links";
 
 export function BottomBar({ roleCode, account }: { roleCode: string; account: ReactNode }) {
   const pathname = usePathname();
-  const current = activeLink(pathname)?.link.href;
+  const current = activeLink(pathname, roleCode)?.link.href;
   const sheet = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
 

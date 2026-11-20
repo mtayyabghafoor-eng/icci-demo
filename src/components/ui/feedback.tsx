@@ -2,6 +2,7 @@
 import { CircleAlert, CircleCheck, Info, TriangleAlert, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cx } from "@/lib/ui/text";
+import { Toast } from "./toast";
 
 type NoticeTone = "success" | "info" | "warning" | "error";
 
@@ -13,11 +14,12 @@ const NOTICE: Record<NoticeTone, { icon: LucideIcon; box: string; role?: "alert"
 };
 
 export function Notice({
-  tone = "info",
+  tone,
   title,
   children,
   role,
   testId,
+  floating = false,
 }: {
   tone?: NoticeTone;
   title?: string;
@@ -25,18 +27,30 @@ export function Notice({
   /** Overrides how screen readers announce it (errors are "alert" by default). */
   role?: "alert" | "status";
   testId?: string;
+  /**
+   * UI-9: a "saved" message that floats over the page for a few seconds
+   * (toast.tsx). Green unless a tone is given. Never for errors or
+   * warnings, which must stay until the person has read them.
+   */
+  floating?: boolean;
 }) {
-  const n = NOTICE[tone];
+  const t: NoticeTone = tone ?? (floating ? "success" : "info");
+  const n = NOTICE[t];
   const Icon = n.icon;
-  return (
-    <div role={role ?? n.role} data-testid={testId} className={cx("flex gap-3 rounded-xl border px-4 py-3", n.box)}>
-      <Icon aria-hidden size={20} className="mt-0.5 shrink-0" />
+  const box = (
+    <div
+      role={role ?? n.role}
+      data-testid={testId}
+      className={cx("flex gap-3 rounded-xl border px-4 py-3", n.box, floating && "pr-12 shadow-raised")}
+    >
+      <Icon aria-hidden size={floating ? 22 : 20} className="mt-0.5 shrink-0" />
       <div className="text-[15px] leading-relaxed">
         {title && <p className="font-bold">{title}</p>}
         {children && <div className={cx(title && "mt-0.5", "text-icci-text")}>{children}</div>}
       </div>
     </div>
   );
+  return floating && (t === "success" || t === "info") ? <Toast>{box}</Toast> : box;
 }
 
 export function EmptyState({ icon: Icon, title, children, action }: { icon: LucideIcon; title: string; children?: ReactNode; action?: ReactNode }) {

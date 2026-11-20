@@ -34,6 +34,7 @@ import {
   AlarmClock,
   TrendingUp,
   BookX,
+  LayoutDashboard,
   type LucideIcon,
 } from "lucide-react";
 import type { IconKey } from "@/lib/ui/menu";
@@ -73,4 +74,5 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   overdueBooks: AlarmClock,
   mostBorrowed: TrendingUp,
   lostBooks: BookX,
+  libraryOverview: LayoutDashboard,
 };

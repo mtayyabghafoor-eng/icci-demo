@@ -1,7 +1,6 @@
 // Change a vehicle's details (slice P2.7): registration, make and model,
 // keeper, and whether an NCT is needed yet. Changes are kept in the audit log.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -10,6 +9,7 @@ import { MAY_SEE_VEHICLES } from "@/lib/vehicles/rules";
 import { CannotSeeVehicles } from "../../cannot-see";
 import { keeperChoices } from "../../data";
 import { VehicleForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Change vehicle | ICCI Control Dashboard" };
 
@@ -36,9 +36,7 @@ async function Content({ params }: { params: PageProps<"/vehicles/[id]/edit">["p
   const v = data as { id: string; registration: string; make_model: string | null; keeper_person_id: string | null; nct_needed: boolean };
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/vehicles/${v.id}`}>← Back to {v.registration}</Link>
-      </p>
+      <BackLink href={`/vehicles/${v.id}`}>Back to {v.registration}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Change Vehicle</h1>
       <VehicleForm people={await keeperChoices(supabase, v.keeper_person_id)} vehicle={v} />
     </>

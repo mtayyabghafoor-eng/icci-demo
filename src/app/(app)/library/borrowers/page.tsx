@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PrimaryLink, StatusBadge } from "../../items/ui";
 import { CannotSeeLibrary } from "../cannot-see";
 import { BORROWER_COLUMNS, type Borrower } from "../data";
+import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Borrowers | ICCI Control Dashboard" };
 
@@ -19,6 +20,7 @@ const SHOWN = 100;
 export default function BorrowersPage(props: PageProps<"/library/borrowers">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <DeskTabs />
       <h1 className="page-title text-[28px] md:text-[34px]">Borrowers</h1>
       <p className="mt-2">Everyone who borrows from the library: a name and one way to contact them.</p>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>

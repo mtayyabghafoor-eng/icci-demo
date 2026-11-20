@@ -53,7 +53,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/slot-t
     <>
       {typeof done === "string" && DONE[done] && (
         <div className="mb-4">
-          <Notice tone={done === "not-allowed" ? "error" : "success"} testId="notice">
+          <Notice tone={done === "not-allowed" ? "error" : "success"} floating testId="notice">
             {DONE[done]}
           </Notice>
         </div>

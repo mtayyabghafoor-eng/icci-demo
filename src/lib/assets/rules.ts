@@ -4,6 +4,7 @@
 // (migration 0008); these only decide what the screens offer and say.
 import { describeDisposal, type DisposalDetails } from "@/lib/assets/disposal";
 import { CONDITION_STATUS, type Condition, type Tone } from "@/lib/items/rules";
+import { whoName } from "@/lib/ui/text";
 
 export type AssetEventKind = "move" | "damage" | "missing" | "back_in_use" | "disposal";
 
@@ -163,5 +164,5 @@ export function reporterOf(e: Pick<AssetEventRow, "reported_by" | "reported_by_p
   if (e.reported_by_person_id) {
     return { name: personName.get(e.reported_by_person_id) ?? "A person in the directory", personId: e.reported_by_person_id };
   }
-  return { name: e.reported_by ?? "Not recorded", personId: null as string | null };
+  return { name: e.reported_by ? whoName(e.reported_by) : "Not recorded", personId: null as string | null };
 }

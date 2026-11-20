@@ -18,6 +18,7 @@ import { CannotSeeLibrary } from "../../cannot-see";
 import { loadBook, loadBorrowers, loadCopyRow, loadLoansOfCopies, UUID, type Copy } from "../../data";
 import { CopyNoteForm } from "../../forms";
 import { MarkCopyForm, MoveDueForm, ReturnForm, UndoReturnForm } from "../../loan-forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Library Copy | ICCI Control Dashboard" };
 
@@ -34,11 +35,7 @@ const DONE: Record<string, string> = {
 export default function CopyPage(props: PageProps<"/library/copies/[id]">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/library">
-          ← Library
-        </Link>
-      </p>
+      <BackLink href="/library">Library</BackLink>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
@@ -81,9 +78,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/copies
         {book.author ?? "Author not recorded"}
       </p>
       {notice && (
-        <div data-testid="notice">
-          <Notice>{notice}</Notice>
-        </div>
+        <Notice floating testId="notice">{notice}</Notice>
       )}
       <div className="mt-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card">
         <div className="flex items-center justify-between gap-3">

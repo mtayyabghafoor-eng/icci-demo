@@ -5,6 +5,7 @@
 // only, the month grid, the slot type forms and the plain-word errors.
 import { describe, expect, it } from "vitest";
 import {
+  sampleNote,
   checkDayTimes,
   friendlyRotaError,
   fullDayLabel,
@@ -189,6 +190,10 @@ describe("words on the screens", () => {
     expect(showSampleNote("development")).toBe(true);
     expect(showSampleNote(undefined)).toBe(true);
     expect(showSampleNote("production")).toBe(false);
+  });
+  it("UI-9: the note reads as a demonstration timetable on the online demo", () => {
+    expect(sampleNote("staging")).toEqual({ title: "Sample timetable", text: "Sample Dublin prayer timetable for demonstration." });
+    expect(sampleNote("development").text).toMatch(/^This is the development copy\. The times here are sample times/);
   });
   it("only Super Admin and Centre Admin may see these screens", () => {
     expect(MAY_SEE_ROTA).toEqual(["super_admin", "centre_admin"]);

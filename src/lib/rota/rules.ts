@@ -168,6 +168,12 @@ export function showSampleNote(environment: string | undefined): boolean {
   return environment !== "production";
 }
 
+/** UI-9: the note's words. The online demo (staging) reads as a demonstration, not a development copy. */
+export function sampleNote(environment: string | undefined): { title: string; text: string } {
+  if (environment === "staging") return { title: "Sample timetable", text: "Sample Dublin prayer timetable for demonstration." };
+  return { title: "Made-up times", text: "This is the development copy. The times here are sample times, not the Centre’s timetable." };
+}
+
 // ---------------------------------------------------------------------------
 // Slot types
 

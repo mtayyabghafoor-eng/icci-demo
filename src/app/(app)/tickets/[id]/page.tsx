@@ -27,6 +27,7 @@ import { adminNames } from "../../stock/data";
 import { CannotSeeTickets } from "../cannot-see";
 import { personNames, TICKET_PHOTO_BUCKET } from "../data";
 import { TicketActions } from "../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Ticket | ICCI Control Dashboard" };
 
@@ -125,18 +126,14 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href="/tickets">
-          ← All tickets
-        </Link>
-      </p>
+      <BackLink href="/tickets">All tickets</BackLink>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="page-title text-[28px] md:text-[34px]">Ticket {ticketNumber(t.id)}</h1>
         <StatusBadge {...STATUS_LABEL[t.status]} />
         {t.priority === "urgent" && <StatusBadge {...PRIORITY_LABEL.urgent} />}
       </div>
-      {done === "reported" && <Notice>Problem reported as ticket {ticketNumber(t.id)}.</Notice>}
-      {typeof done === "string" && isTicketStep(done) && <Notice>{STEP_DONE[done]}</Notice>}
+      {done === "reported" && <Notice floating>Problem reported as ticket {ticketNumber(t.id)}.</Notice>}
+      {typeof done === "string" && isTicketStep(done) && <Notice floating>{STEP_DONE[done]}</Notice>}
 
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_280px]">
         <section className="rounded-2xl border border-icci-line bg-white p-5 shadow-card" aria-label="Details">

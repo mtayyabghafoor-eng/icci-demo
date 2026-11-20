@@ -27,7 +27,28 @@ describe("demo names (staging demo only)", () => {
   it("keeps people clearly fictional: surname Demo", () => {
     expect(demoText("Test Amina Sample")).toBe("Amina S. Demo");
     expect(demoText("Test Aisha Pageturner")).toBe("Aisha Pageturner");
-    expect(demoText("Test Centre Admin")).toBe("Centre Admin");
+  });
+
+  it("UI-9: gives the demo admins (and their linked person records) realistic made-up names", () => {
+    expect(demoText("Test Centre Admin")).toBe("Tariq A. Demo");
+    expect(demoText("Test Second Admin")).toBe("Layla M. Demo");
+    const names = dressForDemo(SEED_ADMINS.map((a) => a.displayName));
+    expect(names.every((n) => / Demo$/.test(n))).toBe(true);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it("UI-9: gives the demo vehicles Centre-style fleet numbers and names", () => {
+    expect(dressForDemo(SEED_VEHICLES).map((v) => [v.registration, v.name])).toEqual([
+      ["ICCI-BUS-01", "Community Minibus (16-seat)"],
+      ["ICCI-VAN-01", "Centre Transit Van"],
+      ["ICCI-CAR-01", "Admin Pool Car"],
+    ]);
+    expect(JSON.stringify(dressForDemo(SEED_VEHICLES))).not.toMatch(/TEST-|Sample|Example|Placeholder/);
+  });
+
+  it("UI-9: disposal notes read like real ones", () => {
+    expect(demoText("Test disposal: made-up, beyond repair")).toBe("Damaged beyond economical repair during Hall refurbishment");
+    expect(demoText("Test Charity Shop (made up)")).toBe("Local charity shop");
   });
 
   it("tidies tickets, notes, policies and books", () => {

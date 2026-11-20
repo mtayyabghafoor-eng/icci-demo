@@ -2,9 +2,8 @@
 // Admin's two buttons, and what was sent, when and to whom. Super Admin and
 // Centre Admin can see it; only a Super Admin can press the buttons.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { buttonClass } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatDateTime } from "@/lib/items/rules";
 import { emailSettings } from "@/lib/reminders/deliver";
@@ -32,9 +31,7 @@ type Delivery = { run_id: number; recipient_id: string; outcome: string; detail:
 export default function RemindersPage(props: PageProps<"/reminders">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/renewals">← Renewals</Link>
-      </p>
+      <BackLink href="/renewals">Renewals</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Email reminders</h1>
       <p className="mt-2">
         Each morning, Super Admins and Centre Admins get one email listing the renewals that have just reached 60, 30 or 7 days before they are due.
@@ -79,12 +76,10 @@ async function Content({ searchParams }: Pick<PageProps<"/reminders">, "searchPa
   return (
     <>
       {typeof done === "string" && DONE[done] && (
-        <div data-testid="notice">
-          <Notice>
+        <Notice floating testId="notice">
             {DONE[done]}
             {done === "ran" && typeof n === "string" ? ` ${n} ${n === "1" ? "renewal" : "renewals"} reminded.` : ""}
           </Notice>
-        </div>
       )}
 
       <section className="mt-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card" data-testid="reminder-setup">

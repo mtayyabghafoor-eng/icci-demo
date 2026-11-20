@@ -1,7 +1,6 @@
 // Mark a renewal as renewed (slice P2.8). Phone-friendly: two fields. A new
 // dated entry is added; the old due date stays in the history.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -10,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeeRenewals } from "../../cannot-see";
 import { RenewedForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Mark renewed | ICCI Control Dashboard" };
 
@@ -37,9 +37,7 @@ async function Content({ params }: { params: PageProps<"/renewals/[id]/renewed">
   const r = data as { id: string; title: string; active: boolean };
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/renewals/${r.id}`}>← Back to {r.title}</Link>
-      </p>
+      <BackLink href={`/renewals/${r.id}`}>Back to {r.title}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Mark Renewed</h1>
       <p className="mt-1 font-semibold" dir="auto">
         {r.title}

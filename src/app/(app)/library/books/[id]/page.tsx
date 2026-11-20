@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../../items/ui";
 import { CannotSeeLibrary } from "../../cannot-see";
 import { loadBook, loadBorrowers, loadCopies, loadCopyRows, loadLoansOfCopies } from "../../data";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Book | ICCI Control Dashboard" };
 
@@ -26,11 +27,7 @@ const DONE: Record<string, string> = {
 export default function BookPage(props: PageProps<"/library/books/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/library">
-          ← Library
-        </Link>
-      </p>
+      <BackLink href="/library">Library</BackLink>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
@@ -67,9 +64,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/books/
         </p>
       )}
       {typeof done === "string" && DONE[done] && (
-        <div data-testid="notice">
-          <Notice>{DONE[done]}</Notice>
-        </div>
+        <Notice floating testId="notice">{DONE[done]}</Notice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">

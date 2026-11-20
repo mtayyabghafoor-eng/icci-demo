@@ -1,7 +1,6 @@
 // Record a renewal of motor tax, insurance or NCT (slice P2.7). Phone-
 // friendly: three fields. "?kind=tax" picks the first one in advance.
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -10,6 +9,7 @@ import { MAY_SEE_VEHICLES, RENEWAL_KINDS, type RenewalKind } from "@/lib/vehicle
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeeVehicles } from "../../cannot-see";
 import { RenewalForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Record a renewal | ICCI Control Dashboard" };
 
@@ -39,9 +39,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]/
   const picked = typeof kind === "string" && (RENEWAL_KINDS as string[]).includes(kind) ? (kind as RenewalKind) : "";
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/vehicles/${v.id}`}>← Back to {v.registration}</Link>
-      </p>
+      <BackLink href={`/vehicles/${v.id}`}>Back to {v.registration}</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Record a Renewal</h1>
       <p className="mt-1 font-semibold">{v.registration}</p>
       {v.condition === "disposed" ? (

@@ -92,7 +92,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/temp
       />
       {done && DONE[done] && (
         <div className="mb-4">
-          <Notice tone={DONE[done].tone} testId="notice">
+          <Notice tone={DONE[done].tone} floating testId="notice">
             {DONE[done].text}
           </Notice>
         </div>

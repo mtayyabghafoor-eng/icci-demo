@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { buttonClass } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatDateTime } from "@/lib/items/rules";
 import {
@@ -67,9 +67,7 @@ const DONE: Record<string, string> = {
 export default function PolicyPage(props: PageProps<"/policies/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/policies">← Policies</Link>
-      </p>
+      <BackLink href="/policies">Policies</BackLink>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
@@ -142,9 +140,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
         {!p.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <div data-testid="notice">
-          <Notice>{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</Notice>
-        </div>
+        <Notice floating testId="notice">{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</Notice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[11rem_1fr]">

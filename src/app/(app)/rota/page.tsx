@@ -140,7 +140,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
     return (
       <>
         {header}
-        {done && <Notice tone={done.tone} testId="notice">{done.text}</Notice>}
+        {done && <Notice tone={done.tone} floating testId="notice">{done.text}</Notice>}
         {weekNav}
         <EmptyState
           icon={TriangleAlert}
@@ -186,7 +186,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
       {header}
       {done && (
         <div className="mb-4">
-          <Notice tone={done.tone} testId="notice">
+          <Notice tone={done.tone} floating testId="notice">
             {done.text}
           </Notice>
         </div>

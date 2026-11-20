@@ -17,6 +17,7 @@ import {
   readMonth,
   shiftMonth,
   shortDayLabel,
+  sampleNote,
   showSampleNote,
   toDayTimes,
   type PrayerDay,
@@ -73,7 +74,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/prayer
   return (
     <>
       {params.done === "saved" && (
-        <Notice tone="success" testId="notice">
+        <Notice tone="success" floating testId="notice">
           {added === 0 && changed === 0
             ? "Nothing had changed, so nothing new was saved."
             : `Saved: ${plural(added, "day")} added, ${plural(changed, "day")} corrected. Every change is kept in the audit log.`}
@@ -81,8 +82,8 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/prayer
       )}
       {showSampleNote(process.env.ICCI_ENVIRONMENT) && (
         <div className="mt-3">
-          <Notice tone="warning" title="Made-up times" testId="sample-note">
-            This is the development copy. The times here are sample times, not the Centre&rsquo;s timetable.
+          <Notice tone="warning" title={sampleNote(process.env.ICCI_ENVIRONMENT).title} testId="sample-note">
+            {sampleNote(process.env.ICCI_ENVIRONMENT).text}
           </Notice>
         </div>
       )}

@@ -19,6 +19,16 @@ export function titleCase(text: string): string {
 }
 
 /** Joins class names, skipping empty ones. */
+/**
+ * UI-9: records the set-up script made (before any admin existed) have no
+ * admin behind them; the database calls that "Seed script". On screen they
+ * say "Initial import", which is also what a real first import would be.
+ */
+export const IMPORTED = "Initial import";
+export function whoName(name: string | null | undefined): string {
+  return !name || name === "Seed script" ? IMPORTED : name;
+}
+
 export function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }

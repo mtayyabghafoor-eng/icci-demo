@@ -12,15 +12,14 @@ import { loadLookups } from "../../items/data";
 import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames, MOVEMENT_COLUMNS, type Movement } from "../data";
 import { DecideForm } from "../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Waiting for approval | ICCI Control Dashboard" };
 
 export default function ApprovalsPage(props: PageProps<"/stock/approvals">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <p className="text-sm">
-        <Link className="back-link" href="/stock">← Low stock</Link>
-      </p>
+      <BackLink href="/stock">Low stock</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Waiting for Approval</h1>
       <p className="mt-2">
         Corrections of stock entries. Each one counts only after a <strong>different admin</strong> approves it. The

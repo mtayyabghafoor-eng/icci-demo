@@ -1,7 +1,6 @@
 // Another copy of a book we have (slice P4.2): the new copy's label and an
 // optional note. Reached from the book page or from "Add a book".
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -11,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CannotSeeLibrary } from "../../../cannot-see";
 import { loadBook } from "../../../data";
 import { NewCopyForm } from "../../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Add a Copy | ICCI Control Dashboard" };
 
@@ -34,11 +34,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/books/
   if (!book) notFound();
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/library/books/${book.id}`}>
-          ← Back to the book
-        </Link>
-      </p>
+      <BackLink href={`/library/books/${book.id}`}>Back to the book</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Add a Copy</h1>
       <p className="mt-1">
         Another copy of <strong dir="auto">{book.title}</strong>

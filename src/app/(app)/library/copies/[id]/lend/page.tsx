@@ -11,7 +11,7 @@ import { copyStatus, LOAN_DAYS, MAX_BOOKS_OUT, nameSearch } from "@/lib/library/
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, todayInDublin } from "@/lib/vetting/rules";
-import { buttonClass } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 import { StatusBadge } from "../../../../items/ui";
 import { CannotSeeLibrary } from "../../../cannot-see";
 import { BORROWER_COLUMNS, loadBook, loadBorrower, loadCopyTitles, loadLoansOfBorrower, loadLoansOfCopies, UUID, type Borrower } from "../../../data";
@@ -48,11 +48,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/copies
 
   const header = (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/library/copies/${copy.id}`}>
-          ← Back to the book
-        </Link>
-      </p>
+      <BackLink href={`/library/copies/${copy.id}`}>Back to the book</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Lend a Book</h1>
       <p className="mt-1">
         <strong dir="auto">{book.title}</strong> <span className="font-mono text-sm">{copy.label_serial}</span>

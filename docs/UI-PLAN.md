@@ -18,6 +18,14 @@ meets 3 to 1; the in-app camera scanner uses the QR reader built into the
 browser (no new add-on), so iPhones keep the Camera-app steps; "Recent
 activity" on Home waits until after Phase 2, as agreed.
 
+**UI-9, 20 Nov 2026 (presentation polish):** Home now follows the owner's
+mockup 4: four headline numbers, Needs attention as slim rows, the
+all-clear counters as green chips, four large actions and "More actions".
+Menu groups fold (Overview always open), "← Back" sits in the top bar,
+saved messages float for 8 seconds, pages show grey loading shapes, and
+admins reach the library through "Library overview" and the "Library
+desk" tab bar. Screenshots: `docs/screens/slice-ui-9-*`.
+
 ## 1. What was wrong before, in plain words
 
 1. **The menu is a list, not a map.** Eleven links in a row that wraps onto two

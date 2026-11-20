@@ -9,7 +9,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { currentOrigin } from "@/lib/labels/origin";
-import { labelsAreTest, qrMatrix, qrSvgPath } from "@/lib/labels/sheet";
+import { labelsAreTest, labelTag, qrMatrix, qrSvgPath } from "@/lib/labels/sheet";
 import {
   KIND_WORD,
   layoutPlaceSheets,
@@ -67,6 +67,7 @@ async function Content({
   const sheets = layoutPlaceSheets(cells, skip);
   const origin = await currentOrigin();
   const test = labelsAreTest(process.env.ICCI_ENVIRONMENT);
+  const tag = labelTag(process.env.ICCI_ENVIRONMENT);
   const line = lineOf(id, byId);
   const hasInside = placeAndInside(id, all).length > 1;
 
@@ -114,7 +115,7 @@ async function Content({
         </p>
         {test && (
           <p className="mt-3 text-sm">
-            These are <strong>test labels</strong>: the app has only its temporary web address. Real labels are printed once ICCI has a permanent
+            These are <strong>{tag === "DEMO" ? "demo labels" : "test labels"}</strong>: the app has only its temporary web address. Real labels are printed once ICCI has a permanent
             address.
           </p>
         )}
@@ -137,7 +138,7 @@ async function Content({
             }}
           >
             {sheet.map((cell, i) =>
-              cell ? <PlaceLabel key={i} cell={cell} link={placeLink(origin, cell.place.code)} test={test} /> : <div key={i} className="label-cell" />,
+              cell ? <PlaceLabel key={i} cell={cell} link={placeLink(origin, cell.place.code)} tag={tag} /> : <div key={i} className="label-cell" />,
             )}
           </section>
         ))}
@@ -154,7 +155,7 @@ function nameSize(name: string): string {
   return "3.4mm";
 }
 
-function PlaceLabel({ cell, link, test }: { cell: Cell; link: string; test: boolean }) {
+function PlaceLabel({ cell, link, tag }: { cell: Cell; link: string; tag: "TEST LABEL" | "DEMO" | null }) {
   const matrix = qrMatrix(link);
   const size = matrix.length + QR_MARGIN * 2;
   const code = placeCode(cell.place.code);
@@ -167,7 +168,7 @@ function PlaceLabel({ cell, link, test }: { cell: Cell; link: string; test: bool
       <div className="place-label-text">
         <div className="place-label-top">
           <span className="place-label-kind">{KIND_WORD[cell.place.kind]}</span>
-          {test && <span className="label-test">TEST LABEL</span>}
+          {tag && <span className={tag === "DEMO" ? "label-demo" : "label-test"}>{tag}</span>}
           {/* eslint-disable-next-line @next/next/no-img-element -- printed at a fixed size; the whole round logo, never cropped */}
           <img src="/brand/icci-logo-160.png" alt="" className="place-label-logo" />
         </div>

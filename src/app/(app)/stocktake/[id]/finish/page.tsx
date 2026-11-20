@@ -2,7 +2,6 @@
 // database (stocktake_preview, the same rule that sending uses). Nothing is
 // saved until "Send for approval".
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { locationAndInside } from "@/lib/items/rules";
@@ -11,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../../../items/data";
 import { loadItems, loadScans, loadStocktake } from "../../data";
 import { SendForm } from "../../forms";
+import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Check and finish | ICCI Control Dashboard" };
 
@@ -62,9 +62,7 @@ async function Content({ params }: { params: PageProps<"/stocktake/[id]/finish">
 
   return (
     <>
-      <p className="text-sm">
-        <Link className="back-link" href={`/stocktake/${id}`}>← Keep scanning</Link>
-      </p>
+      <BackLink href={`/stocktake/${id}`}>Keep scanning</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Check and Finish</h1>
       <p className="mt-1">
         {roomPath} · {scans.latest.length} label{scans.latest.length === 1 ? "" : "s"} scanned. Nothing has been sent yet.

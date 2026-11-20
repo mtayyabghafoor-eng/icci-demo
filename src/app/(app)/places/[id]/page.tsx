@@ -91,7 +91,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/places/[i
           </div>
         }
       />
-      {done && <Notice>{done}</Notice>}
+      {done && <Notice floating>{done}</Notice>}
 
       <div className="mt-4 space-y-4">
         {place.notes && (
@@ -137,11 +137,11 @@ async function Content({ params, searchParams }: { params: PageProps<"/places/[i
               place.active ? (
                 <div className="flex flex-wrap gap-2">
                   <form action={startRoomRegister.bind(null, id)}>
-                    <Button type="submit" icon={ScanLine} kind="secondary">
+                    <Button type="submit" icon={ScanLine} kind="secondary" size="lg">
                       Register items in this room
                     </Button>
                   </form>
-                  <LinkButton href={`/items/new?location=${id}`} icon={Plus} kind="outline">
+                  <LinkButton href={`/items/new?location=${id}`} icon={Plus} kind="outline" size="lg">
                     Register an item here
                   </LinkButton>
                 </div>
