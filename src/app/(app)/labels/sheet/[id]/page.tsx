@@ -160,10 +160,17 @@ function Label({ serial, link, test }: { serial: string; link: string; test: boo
         <rect width={size} height={size} fill="#fff" />
         <path d={qrSvgPath(matrix, QR_MARGIN)} fill="#000" />
       </svg>
+      {/* A property tag (slice P1.15): the number large, whose it is, and not to remove it. */}
       <div className="label-text">
-        <span className="label-org">ICCI</span>
-        <span className="label-serial">{serial}</span>
-        <span className="label-hint">Scan with phone camera</span>
+        <span className="label-owner">Property of ICCI</span>
+        <span className="label-serial" aria-label={serial}>
+          <span className="label-prefix">{serial.slice(0, 5)}</span>
+          <span className="label-digits" data-testid="label-digits">
+            {serial.slice(5)}
+          </span>
+        </span>
+        <span className="label-keep">Do not remove</span>
+        <span className="label-centre">Islamic Cultural Centre of Ireland</span>
         {test && <span className="label-test">TEST LABEL</span>}
       </div>
     </div>

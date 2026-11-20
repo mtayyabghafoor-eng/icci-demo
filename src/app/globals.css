@@ -292,19 +292,38 @@ a.list-card:hover {
   min-width: 0;
   line-height: 1.1;
 }
-.label-org {
-  font-size: 3mm;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+/* Item labels as property tags (slice P1.15): the number large enough to
+   read across a room, whose it is, and "Do not remove". */
+.label-owner {
+  font-size: 2.3mm;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--icci-green-dark);
 }
 .label-serial {
-  font-size: 3.7mm;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-code), monospace;
   font-weight: 700;
+  line-height: 1;
   white-space: nowrap;
 }
-.label-hint {
-  font-size: 2.3mm;
+.label-prefix {
+  font-size: 2.6mm;
+}
+.label-digits {
+  font-size: 5.6mm;
+  letter-spacing: -0.02em;
+}
+.label-keep {
+  font-size: 2.4mm;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.label-centre {
+  font-size: 1.9mm;
+  line-height: 1.15;
 }
 .label-test {
   align-self: flex-start;

@@ -47,6 +47,11 @@ test("print a new sheet of 21 labels, skip spaces, and print it again", async ({
   // The QR code holds only the link with the number.
   await expect(labels.first()).toHaveAttribute("data-link", `http://localhost:3000/l/${next}`);
   await expect(labels.first().getByText("TEST LABEL")).toBeVisible();
+  // Slice P1.15: a property tag: large number, "Property of ICCI", "Do not remove", the Centre's name.
+  await expect(labels.first().getByTestId("label-digits")).toHaveText(next.slice(5));
+  await expect(labels.first()).toContainText("Property of ICCI");
+  await expect(labels.first()).toContainText("Do not remove");
+  await expect(labels.first()).toContainText("Islamic Cultural Centre of Ireland");
   await expect(page.getByRole("img", { name: `QR code for ${next}` })).toBeVisible();
   await s(page, "label-sheet", project);
 
