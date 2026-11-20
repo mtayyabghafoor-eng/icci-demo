@@ -41,7 +41,7 @@ test("home page counters match their lists and open them", async ({ page }, info
   );
   // Every card in "Needs attention" says so in words, not colour alone.
   for (const card of await attentionCards.all()) await expect(card).toContainText(/Needs attention|Check/);
-  for (const action of ["Register an item", "Weekly count", "Move or report an asset", "Stocktake", "Garda vetting", "Print labels"]) {
+  for (const action of ["Register an item", "Register a room", "Report a problem", "Weekly count", "Move or report an asset", "Stocktake", "Garda vetting", "Print labels"]) {
     await expect(page.getByRole("link", { name: new RegExp(`^${action}`) }).last()).toBeVisible();
   }
 

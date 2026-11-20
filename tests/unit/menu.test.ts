@@ -15,6 +15,11 @@ describe("menuFor: each role sees only what it can use", () => {
     expect(labels("library_operator")).toEqual(["Home", "Library", "Add a book", "Lend", "Return", "Borrowers", "On loan", "Overdue", "Most borrowed", "Lost and withdrawn"]);
     expect(menuFor("finance").map((g) => g.title)).toEqual(["Overview"]);
   });
+  it("P1.16: Places sits next to Register an item; Disposals waiting is under Assets", () => {
+    const items = MENU.find((g) => g.title === "Items and stock")!.links.map((l) => l.label);
+    expect(items.indexOf("Places")).toBe(items.indexOf("Register an item") + 1);
+    expect(MENU.find((g) => g.title === "Assets")!.links.map((l) => l.label)).toContain("Disposals waiting");
+  });
   it("an unknown role sees nothing", () => {
     expect(menuFor("someone_else")).toEqual([]);
   });
@@ -40,7 +45,9 @@ describe("activeLink: which link is marked as the current page", () => {
     ["/places/abc/labels", "Places"],
     ["/p/PL-0007", "Places"],
     ["/assets", "Missing and damaged"],
-    ["/assets/approvals", "Missing and damaged"],
+    // P1.16: Disposals waiting has its own link, so the menu marks the right one.
+    ["/assets/approvals", "Disposals waiting"],
+    ["/places/abc/register", "Places"],
     ["/assets/not-seen", "Not seen in 12 months"],
     ["/assets/register", "Asset register"],
     ["/people", "People"],

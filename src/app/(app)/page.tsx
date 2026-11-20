@@ -17,12 +17,14 @@ import {
   ClipboardCheck,
   FileSignature,
   Inbox,
+  MapPin,
   PackagePlus,
   Printer,
   QrCode,
   ScanLine,
   ShieldCheck,
   TriangleAlert,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { Suspense } from "react";
@@ -136,6 +138,8 @@ async function HomeContent() {
           <CardTitle>Quick actions</CardTitle>
           <div className="-mx-3 flex flex-col">
             <QuickAction href="/items/new" icon={PackagePlus} label="Register an item" hint="Add details to a new label" />
+            <QuickAction href="/places" icon={MapPin} label="Register a room" hint="Open the room, then scan its items" />
+            <QuickAction href="/tickets/new" icon={Wrench} label="Report a problem" hint="A leak, a broken light, a fault" />
             <QuickAction href="/stock/count" icon={ClipboardCheck} label="Weekly count" hint="Count a store room's shelves" />
             <QuickAction href="/scan" icon={QrCode} label="Move or report an asset" hint="Open its label, then choose" />
             <QuickAction href="/stocktake" icon={ScanLine} label="Stocktake" hint="Check a room against the records" />

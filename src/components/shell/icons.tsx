@@ -1,5 +1,6 @@
 // Which Lucide icon each menu link uses (docs/UI-PLAN.md 3.6).
 import {
+  Inbox,
   CalendarClock,
   CalendarDays,
   Car,
@@ -46,6 +47,7 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   labels: Printer,
   places: MapPin,
   missing: TriangleAlert,
+  disposals: Inbox,
   notSeen: EyeOff,
   assetRegister: Table2,
   people: Users,

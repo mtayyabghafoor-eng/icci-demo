@@ -12,6 +12,7 @@ export type IconKey =
   | "labels"
   | "places"
   | "missing"
+  | "disposals"
   | "notSeen"
   | "assetRegister"
   | "people"
@@ -67,16 +68,18 @@ export const MENU: MenuGroup[] = [
     links: [
       { href: "/items", label: "Items", icon: "items", roles: ADMINS, also: ["/l", "/labels/unknown", "/scan"] },
       { href: "/items/new", label: "Register an item", icon: "register", roles: ADMINS },
+      // P1.16: next to "Register an item", as a whole room is registered from its place.
+      { href: "/places", label: "Places", icon: "places", roles: ADMINS, also: ["/p"] },
       { href: "/stock", label: "Stock", icon: "stock", roles: ADMINS },
       { href: "/stocktake", label: "Stocktake", icon: "stocktake", roles: ADMINS },
       { href: "/labels", label: "Print labels", icon: "labels", roles: ADMINS },
-      { href: "/places", label: "Places", icon: "places", roles: ADMINS, also: ["/p"] },
     ],
   },
   {
     title: "Assets",
     links: [
       { href: "/assets", label: "Missing and damaged", icon: "missing", roles: ADMINS },
+      { href: "/assets/approvals", label: "Disposals waiting", icon: "disposals", roles: ADMINS },
       { href: "/assets/not-seen", label: "Not seen in 12 months", icon: "notSeen", roles: ADMINS },
       { href: "/assets/register", label: "Asset register", icon: "assetRegister", roles: ADMINS },
       { href: "/vehicles", label: "Vehicles", icon: "vehicles", roles: ADMINS },
