@@ -1,9 +1,9 @@
-import { existsSync } from "node:fs";
+import { loadTestEnv } from "./tests/test-env";
 import { defineConfig, devices } from "@playwright/test";
 
 // The browser tests create a fictional "Test run" admin and calculate test
 // authenticator codes, so they need the development settings (never printed).
-if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+loadTestEnv(); // local Docker database by default (tests/test-env.ts)
 
 export default defineConfig({
   testDir: "tests/e2e",

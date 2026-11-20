@@ -10,6 +10,7 @@ export type IconKey =
   | "stock"
   | "stocktake"
   | "labels"
+  | "places"
   | "missing"
   | "notSeen"
   | "assetRegister"
@@ -69,6 +70,7 @@ export const MENU: MenuGroup[] = [
       { href: "/stock", label: "Stock", icon: "stock", roles: ADMINS },
       { href: "/stocktake", label: "Stocktake", icon: "stocktake", roles: ADMINS },
       { href: "/labels", label: "Print labels", icon: "labels", roles: ADMINS },
+      { href: "/places", label: "Places", icon: "places", roles: ADMINS, also: ["/p"] },
     ],
   },
   {

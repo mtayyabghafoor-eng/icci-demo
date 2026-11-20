@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   // Hide the development badge so screenshots show what admins will see.
   devIndicators: false,
+  // Testing on a phone over home Wi-Fi (development only, ignored on the
+  // real website): let the dev server answer this PC's Wi-Fi address.
+  allowedDevOrigins: ["192.168.0.237"],
   // Do not announce which software runs the site.
   poweredByHeader: false,
   cacheComponents: true,

@@ -32,8 +32,11 @@ progress, priority, close, reopen) are done, which completes Phase 3
 Operator sign-in with an emailed code) and P4.2 (books and copies) are
 done, and so are P4.3 (ISBN look-up from Open Library), P4.4
 (borrowers, lend and return) and P4.5 (lists, lost and withdrawn copies,
-Home cards), which completes Phase 4 (PLAN.md 5.4). Next: the owner
-decides what follows (Phase 5 in PLAN.md). Before real use: Resend as Supabase's mail sender, then switch
+Home cards), which completes Phase 4 (PLAN.md 5.4). After the
+Clonskeagh visit the owner chose a week of inventory work first:
+P1.12 (places and place labels) is done; next P1.13 (register a room),
+then how items leave (disposal routes, sale record, ownership claims;
+needs PLAN.md wording), label polish, and a demo refresh. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -352,6 +355,14 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   codes through Supabase's own email for the prototype, Resend before real
   use; the operator may mark a book lost alone; adult borrowers only; no
   reminder emails to borrowers in Phase 4.
+- Places and room registration (19 Nov 2026, after the Clonskeagh visit,
+  owner chose all recommended answers; PLAN.md 5.1): place labels are
+  shelf-edge style, 99.1 x 38.1 mm, 14 per A4 (Avery L7163 size); place
+  numbers PL-0001, given by the database, never changed or reused, apart
+  from item labels; Super Admins and Centre Admins add, rename and switch
+  off places. Two slices: P1.12 (places) and P1.13 (register a room).
+- Staging demo (19 Nov 2026): made-up data may be seeded on staging, never
+  production; the site runs in Frankfurt (fra1) next to its database.
 
 ## Open questions
 
@@ -363,6 +374,27 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 20 Nov 2026, session 41 (P1.12 finished; tests moved to Docker; demo
+  tools): the demo database got migrations 0026-0038 (owner agreed). Cloud
+  icci-dev resets kept timing out (over its free log allowance), so the
+  owner installed Docker: tests, `db:reset` and `db:seed` now use a local
+  Supabase (`npm run setup:local-db`, `.env.localdb`); cloud versions are
+  `db:reset:cloud` / `db:seed:cloud`. Found and fixed: the Places screens
+  lost places past 1,000 rows (now read page by page). Added
+  `npm run db:seed:staging` (only ever ICCI Staging), demo-only realistic
+  names (scripts/demo-names.mts) and a "Demo: all names and records are
+  made up" banner on the demo only. Owner agreed a one-off wipe of the demo.
+  PLAN.md gained P1.14-P1.16. Next: P1.13, register a room.
+
+- 19 Nov 2026, session 40 (slice P1.12, places and place labels): merged
+  the staging demo setup into main. Migration 0039 gives every place a
+  number (PL-0001). New Places screens: the tree, add (building, or the
+  next kind down inside a place), rename, switch off or on, a page per
+  place showing what is inside and what is there, and place label sheets
+  (14 per A4). Scanning /p/PL-0001 (camera or phone camera) opens the
+  place; Finance and the Library Operator get "label not recognised".
+  "Register an item here" fills in the place. Next: P1.13, register a room.
 
 - 19 Nov 2026, session 39 (slice P4.5, library lists and lost books):
   migration 0038 (library_copy_entries: lost, withdrawn, found; never

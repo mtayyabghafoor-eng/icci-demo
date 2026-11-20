@@ -3,14 +3,15 @@
 // reader built into the browser (Chrome on Android has one), so nothing new
 // is added to the project. Where the browser has none (for example iPhone
 // Safari) this shows nothing and the page's "use the Camera app" steps apply.
-// Only an ICCI label number is ever taken from a code (labelFromScan); the
+// Only an ICCI item or place label number is ever taken from a code
+// (codeFromScan, slice P1.12); the
 // app then opens its own label page. The camera stops as soon as a label is
 // read, when Stop is pressed, or when the page is left. Nothing is recorded.
 import { useRouter } from "next/navigation";
 import { Camera, CameraOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
-import { labelFromScan } from "@/lib/items/scan";
+import { codeFromScan } from "@/lib/items/scan";
 
 // The browser's QR reader is not in TypeScript's built-in list yet.
 type Detector = { detect(source: HTMLVideoElement): Promise<{ rawValue: string }[]> };
@@ -38,8 +39,8 @@ export type ScanTarget = {
 
 const LABELS: ScanTarget = {
   formats: ["qr_code"],
-  accept: labelFromScan,
-  hrefFor: (serial) => `/l/${serial}`,
+  accept: codeFromScan,
+  hrefFor: (path) => path,
   title: "Scan with this phone",
   hint: "Point the camera at the square code on an ICCI label. It opens by itself.",
   wrongCode: "That code is not an ICCI label. Point the camera at the square code on an ICCI label.",

@@ -2,7 +2,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import { SEED_LOCATIONS, seedAdmin } from "../../scripts/seed-data.mts";
-import { asRole, signedOutClient, testName, userIdOf } from "./clients";
+import { asRole, masterKeyClient, signedOutClient, testName, userIdOf } from "./clients";
 import { consumableFields, newFixedAsset } from "./items-helpers";
 
 async function newBuilding(role = "centre_admin") {
@@ -253,5 +253,61 @@ describe("who and when are filled in by the database", () => {
       .single();
     expect(data!.created_by).toBe(b.created_by);
     expect(data!.updated_by).toBe(userIdOf(seedAdmin("super_admin").email));
+  });
+});
+
+// Slice P1.12: every place gets a number (PL-0001) for its place label.
+describe("place numbers", () => {
+  it("every seeded place has a different number", async () => {
+    const { data } = await (await asRole("centre_admin")).from("locations").select("code").like("name", "Test %");
+    const codes = data!.map((l) => l.code);
+    expect(codes.every((c) => Number.isInteger(c) && c > 0)).toBe(true);
+    expect(new Set(codes).size).toBe(codes.length);
+  });
+
+  it("a new place is numbered by the database, after the ones before it", async () => {
+    const a = await newBuilding();
+    const b = await newBuilding();
+    expect(b.code).toBeGreaterThan(a.code);
+  });
+
+  for (const role of ["super_admin", "centre_admin"]) {
+    it(`${role} cannot choose a number when adding a place`, async () => {
+      const { error } = await (await asRole(role)).from("locations").insert({ name: testName("chosen"), kind: "building", code: 999999 });
+      expect(error).not.toBeNull();
+    });
+
+    it(`${role} cannot change a place's number`, async () => {
+      const b = await newBuilding();
+      const { error } = await (await asRole(role)).from("locations").update({ code: b.code + 100000 }).eq("id", b.id);
+      expect(error).not.toBeNull();
+      const { data } = await (await asRole(role)).from("locations").select("code").eq("id", b.id).single();
+      expect(data!.code).toBe(b.code);
+    });
+  }
+
+  it("not even the master key can change a place's number", async () => {
+    const b = await newBuilding();
+    const { error } = await masterKeyClient().from("locations").update({ code: b.code + 100000 }).eq("id", b.id);
+    expect(error).not.toBeNull();
+  });
+
+  it("renaming or switching off keeps the same number", async () => {
+    const b = await newBuilding();
+    const c = await asRole("centre_admin");
+    const renamed = await c.from("locations").update({ name: b.name + " new" }).eq("id", b.id).select("code").single();
+    expect(renamed.data!.code).toBe(b.code);
+    const off = await c.from("locations").update({ active: false }).eq("id", b.id).select("code").single();
+    expect(off.data!.code).toBe(b.code);
+  });
+
+  it("signed-out visitors, finance and the library operator cannot look a place up by its number", async () => {
+    const b = await newBuilding();
+    const s = await signedOutClient().from("locations").select("id").eq("code", b.code);
+    expect(s.data ?? []).toHaveLength(0);
+    for (const who of noAccess) {
+      const { data } = await (await asRole(who.role, who.active)).from("locations").select("id").eq("code", b.code);
+      expect(data ?? [], who.label).toHaveLength(0);
+    }
   });
 });

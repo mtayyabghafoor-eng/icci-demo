@@ -54,3 +54,4 @@ supabase/.branches/
 
 # fictional test accounts' authenticator keys (slice 3)
 /.test-authenticators.json
+/.test-authenticators.local.json

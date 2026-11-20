@@ -1,8 +1,8 @@
 // After all browser tests: switch off the test records they made (tests/tidy-up.ts).
-import { existsSync } from "node:fs";
+import { loadTestEnv } from "../test-env";
 import { tidyUpTestRun } from "../tidy-up";
 
 export default async function teardown() {
-  if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+  loadTestEnv(); // local Docker database by default (tests/test-env.ts)
   await tidyUpTestRun();
 }

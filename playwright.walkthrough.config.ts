@@ -1,10 +1,10 @@
-import { existsSync } from "node:fs";
+import { loadTestEnv } from "./tests/test-env";
 import { defineConfig, devices } from "@playwright/test";
 
 // The approval walkthrough (npm run walkthrough): clean, step-by-step
 // screenshots of each workflow for the Centre's admins to review. Not part
 // of npm test. Uses only the made-up seed data. Saved to docs/screens/walkthrough/.
-if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+loadTestEnv(); // local Docker database by default (tests/test-env.ts)
 
 export default defineConfig({
   testDir: "tests/walkthrough",

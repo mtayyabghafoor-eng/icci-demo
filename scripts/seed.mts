@@ -61,6 +61,7 @@ import {
   seedTraining,
   seedVetting,
 } from "./seed-data.mts";
+import { dressForDemo, dressListInPlace } from "./demo-names.mts";
 import { storeReminderKey } from "./reminder-key.mts";
 import { readTestAuthenticators, writeTestAuthenticators } from "./test-authenticators.mts";
 import { totp } from "./totp.mts";
@@ -88,6 +89,16 @@ try {
 } catch (e) {
   console.error((e as Error).message);
   process.exit(1);
+}
+
+// On the staging demo only, the made-up names become realistic but still
+// clearly fictional ones (scripts/demo-names.mts). Development and the tests
+// keep the "Test ..." names. D() does the same for lists built further down.
+const D = <T,>(value: T): T => (environment === "staging" ? dressForDemo(value) : value);
+if (environment === "staging") {
+  for (const list of [SEED_ADMINS, SEED_LOCATIONS, SEED_PEOPLE, SEED_POLICIES, SEED_VEHICLES, SEED_TYPED_RENEWALS, SEED_TICKETS, SEED_BORROWERS] as unknown[][]) {
+    dressListInPlace(list);
+  }
 }
 
 const admin = createClient(need("NEXT_PUBLIC_SUPABASE_URL"), need("SUPABASE_SECRET_KEY"), {
@@ -202,7 +213,7 @@ const { data: cats, error: catError } = await admin.from("item_categories").sele
 if (catError) throw catError;
 const catIds = new Map(cats.map((c) => [c.name, c.id]));
 
-const items = seedItems();
+const items = D(seedItems());
 const { data: existingItems, error: existingError } = await admin
   .from("items")
   .select("label_serial")
@@ -275,7 +286,7 @@ for (const p of plans.slice(0, 2)) {
     kind: "adjustment",
     corrects_id: restock.id,
     quantity: restock.quantity + 2,
-    reason: "Test correction: the delivery note said two more",
+    reason: D("Test correction: the delivery note said two more"),
   });
   if (fix.error) throw fix.error;
 }
@@ -293,7 +304,7 @@ const { count: eventCount, error: eventCountError } = await admin
 if (eventCountError) throw eventCountError;
 let eventsAdded = 0;
 if (!eventCount) {
-  for (const e of seedAssetEvents(items)) {
+  for (const e of D(seedAssetEvents(items))) {
     const { error } = await admin.from("asset_events").insert({
       item_id: assetIdOf.get(e.label)!,
       kind: e.kind,
@@ -322,7 +333,7 @@ async function signedInAs(email: string) {
   if (v.error) throw v.error;
   return c;
 }
-const stocktakeRooms = ["Test Room A2", "Test Room B1"];
+const stocktakeRooms = [D("Test Room A2"), D("Test Room B1")];
 const { count: stocktakeCount, error: stCountError } = await admin
   .from("stocktakes")
   .select("id", { count: "exact", head: true })
@@ -361,14 +372,14 @@ if (!stocktakeCount) {
     }
     const sent = await runner.rpc("submit_stocktake", { p_stocktake_id: st.id });
     if (sent.error) throw sent.error;
-    if (roomName === "Test Room A2") {
+    if (roomName === D("Test Room A2")) {
       const decider = await signedInAs("second.admin@icci-prototype.test");
       const { data: diffs } = await decider.from("stocktake_differences").select("id, kind").eq("stocktake_id", st.id);
       for (const d of diffs ?? []) {
         const decision =
           d.kind === "quantity"
             ? { status: "approved" }
-            : { status: "rejected", decision_note: "Test: it was lent to the youth club (made-up)" };
+            : { status: "rejected", decision_note: D("Test: it was lent to the youth club (made-up)") };
         const { error } = await decider.from("stocktake_differences").update(decision).eq("id", d.id);
         if (error) throw error;
       }
@@ -438,7 +449,7 @@ if (!stocktakeCount) {
   if (countError) throw countError;
   if (!count) {
     const today = todayInDublin();
-    const rows = seedVetting().map((v) => ({
+    const rows = D(seedVetting()).map((v) => ({
       person_id: idOf.get(v.full_name),
       kind: v.kind,
       happened_on: addDays(today, -v.ago),
@@ -470,7 +481,7 @@ if (!stocktakeCount) {
   if (countError) throw countError;
   if (!count) {
     const today = todayInDublin();
-    const rows = seedTraining().map((t) => {
+    const rows = D(seedTraining()).map((t) => {
       const training_type_id = typeOf.get(t.type);
       if (!training_type_id) throw new Error(`No training type "${t.type}". Has migration 0021 been applied?`);
       return {
@@ -582,7 +593,7 @@ if (!stocktakeCount) {
       let scan_path: string | null = null;
       if (!scanned && mine.length) {
         scan_path = `signoffs/${versionId}/${crypto.randomUUID()}.pdf`;
-        const up = await centre.storage.from("signoff-scans").upload(scan_path, samplePolicyPdf("Test signed sheet", "sample scan"), { contentType: "application/pdf" });
+        const up = await centre.storage.from("signoff-scans").upload(scan_path, samplePolicyPdf(D("Test signed sheet"), "sample scan"), { contentType: "application/pdf" });
         if (up.error) throw up.error;
         scanned = true;
       }
@@ -624,7 +635,7 @@ if (!stocktakeCount) {
       if (!item) {
         const made = await admin
           .from("items")
-          .insert({ label_serial: v.label, kind: "fixed_asset", name: v.name, category_id: cat.id, location_id: ids.get("Test Building B")!, condition: "good" })
+          .insert({ label_serial: v.label, kind: "fixed_asset", name: v.name, category_id: cat.id, location_id: ids.get(D("Test Building B"))!, condition: "good" })
           .select("id")
           .single();
         if (made.error) throw made.error;
@@ -708,7 +719,7 @@ if (process.env.CRON_SECRET?.trim()) {
     .from("people_vetting")
     .select("person_id, full_name, status, needs_vetting")
     .eq("active", true)
-    .like("full_name", "Test %")
+    .in("full_name", SEED_PEOPLE.map((p) => p.full_name))
     .order("full_name");
   if (vetError) throw vetError;
   const vetted = (vet ?? []).filter((p) => p.status === "valid");
@@ -734,7 +745,7 @@ if (process.env.CRON_SECRET?.trim()) {
     const week = await admin.from("rota_weeks").insert({ week_start: start }).select("id").single();
     if (week.error) throw week.error;
     let filled = 0;
-    for (const s of seedRotaPlan()) {
+    for (const s of D(seedRotaPlan())) {
       const slot_type_id = typeId.get(s.slot);
       if (!slot_type_id) throw new Error(`No rota slot type "${s.slot}". Has migration 0028 been applied?`);
       const date = addDays(start, s.day);
@@ -879,7 +890,7 @@ if (process.env.CRON_SECRET?.trim()) {
     if (runAddError) throw runAddError;
   }
 
-  const books = seedLibrary();
+  const books = D(seedLibrary());
   const { data: haveBooks, error: hbError } = await admin.from("library_books").select("id, title").in("title", books.map((b) => b.title));
   if (hbError) throw hbError;
   const bookId = new Map(haveBooks.map((b) => [b.title, b.id]));
@@ -937,7 +948,7 @@ if (process.env.CRON_SECRET?.trim()) {
   const { data: lentAlready, error: laError } = await admin.from("library_loans").select("borrower_id").in("borrower_id", [...borrowerId.values()]);
   if (laError) throw laError;
   const hasLoans = new Set(lentAlready.map((l) => l.borrower_id));
-  const loans = seedLoans().filter((l) => !hasLoans.has(borrowerId.get(l.borrower)!));
+  const loans = D(seedLoans()).filter((l) => !hasLoans.has(borrowerId.get(l.borrower)!));
   const { data: copies, error: cError } = await admin.from("library_copies").select("id, label_serial").in("label_serial", loans.map((l) => l.label));
   if (cError) throw cError;
   const copyId = new Map(copies.map((c) => [c.label_serial, c.id as string]));

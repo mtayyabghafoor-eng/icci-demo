@@ -5,16 +5,23 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 export const AUTHENTICATORS_FILE = ".test-authenticators.json";
+/** The local Docker database keeps its own keys, so local and cloud runs never overwrite each other's. */
+export const LOCAL_AUTHENTICATORS_FILE = ".test-authenticators.local.json";
+
+export function authenticatorsFile(url: string | undefined = process.env.NEXT_PUBLIC_SUPABASE_URL): string {
+  return /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/.test(url ?? "") ? LOCAL_AUTHENTICATORS_FILE : AUTHENTICATORS_FILE;
+}
 
 export type TestAuthenticators = Record<string, { factorId: string; secret: string }>;
 
 export function readTestAuthenticators(): TestAuthenticators {
-  if (!existsSync(AUTHENTICATORS_FILE)) return {};
-  return JSON.parse(readFileSync(AUTHENTICATORS_FILE, "utf8")) as TestAuthenticators;
+  const file = authenticatorsFile();
+  if (!existsSync(file)) return {};
+  return JSON.parse(readFileSync(file, "utf8")) as TestAuthenticators;
 }
 
 export function writeTestAuthenticators(value: TestAuthenticators): void {
-  writeFileSync(AUTHENTICATORS_FILE, JSON.stringify(value, null, 2) + "\n");
+  writeFileSync(authenticatorsFile(), JSON.stringify(value, null, 2) + "\n");
 }
 
 export function testAuthenticatorSecret(email: string): string {

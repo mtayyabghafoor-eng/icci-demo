@@ -2,10 +2,10 @@
 // and a "skip the first spaces" box. On paper: only the labels, placed for
 // A4 sheets of 21 (Avery L7160 size).
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
+import { currentOrigin } from "@/lib/labels/origin";
 import {
   labelLink,
   labelsAreTest,
@@ -34,14 +34,6 @@ export default function LabelSheetPage(props: PageProps<"/labels/sheet/[id]">) {
       </Suspense>
     </main>
   );
-}
-
-/** The address the app is open on, used inside the QR codes. */
-async function currentOrigin(): Promise<string> {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (/^(localhost|127\.0\.0\.1)(:|$)/.test(host) ? "http" : "https");
-  return `${proto.split(",")[0].trim()}://${host}`;
 }
 
 async function Sheet({

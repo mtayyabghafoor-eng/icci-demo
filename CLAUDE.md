@@ -57,8 +57,16 @@ Run from the project folder. Database commands need `.env.local` (copied from
 - Run tests: `npm test` (type check, lint, unit, database, browser)
 - Run the permissions tests only: `npm run test:permissions`
 - Apply migrations: `npm run db:push`
-- Reset and seed the development database: `npm run db:reset`
-  (seed only: `npm run db:seed`; both refuse unless ICCI_ENVIRONMENT=development)
+- Tests use the LOCAL Supabase database in Docker by default (Docker Desktop
+  must be running). One-time: `npm run setup:local-db` (writes the
+  git-ignored `.env.localdb`). Cloud icci-dev instead: set
+  `ICCI_TEST_TARGET=cloud` before `npm test`.
+- Reset and seed the local test database: `npm run db:reset`
+  (seed only: `npm run db:seed`). The cloud icci-dev versions are
+  `npm run db:reset:cloud` and `npm run db:seed:cloud` (both refuse unless
+  ICCI_ENVIRONMENT=development).
+- Refill the online demo (ICCI Staging) with made-up data:
+  `npm run db:seed:staging` (needs `.env.staging`; never resets).
 - Take screenshots: `npm run screenshots` (saved to `docs/screens/`)
 - Create the test-account password in `.env.local`: `npm run setup:test-password`
 

@@ -107,6 +107,37 @@ Phase 1 acceptance checks:
 - Tests prove finance and signed-out visitors cannot read or change stock.
 - The seed script creates at least 200 fictional items across 15 locations.
 
+Places and room registration (added 19 Nov 2026, owner approved, after the
+Clonskeagh visit: two slices, P1.12 and P1.13):
+
+- P1.12 Places screen: Super Admins and Centre Admins add, rename and switch
+  off buildings, rooms, store rooms and shelves (never deleted). Each place
+  gets an automatic number `PL-0001` that never changes or is reused, kept
+  apart from item labels. A place page shows the places inside it and what
+  is there. Place labels (shelf-edge style, as in a supermarket): A4 sheets
+  of 14, 99.1 x 38.1 mm (Avery L7163 size), with the QR code (link to
+  `/p/PL-0001` only), the kind of place, its name in large type, where it
+  is, and its number. Scanning one opens the place page.
+- P1.13 Register a room: on a phone, scan a place label, then scan new item
+  labels one after another; the place and kind are filled in from the last
+  item, so each item needs only its name (and an optional photo).
+
+How items leave, labels and Home (added 19 Nov 2026, owner chose the
+recommended answers: slices P1.14 to P1.16):
+
+- P1.14 Disposal routes: every disposal picks one route: given to charity,
+  sold, recycled, shredded, thrown away, respectful disposal of religious
+  texts, or returned to owner. A different admin still approves each one.
+  Sold asks for the price, the buyer's name, the date and who took the
+  money (a sale record only, not accounting). Charity asks for the
+  charity's name; returned to owner asks for the owner's name; the other
+  routes ask for a note. Old disposals keep "route not recorded".
+- P1.15 Asset label as a property tag: large label number, "Property of
+  ICCI, do not remove" and the Centre's name beside the QR code, on the
+  same A4 sheet as now (Avery L7160 size). Place labels are unchanged.
+- P1.16 Design polish of Home and the menu only (sidebar on a PC, bottom
+  bar on a phone), following docs/UI-PLAN.md.
+
 ### 5.2 People, policies, vehicles, renewals (Phase 2)
 
 - **People directory**: name, role, section, phone or email, start date, active

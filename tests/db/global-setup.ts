@@ -8,7 +8,7 @@
 // The Library Operator accounts sign in with an emailed code instead (slice
 // P4.1). Their "full" session is an emailed-code sign-in; the code is asked
 // for directly with the master key, so no email is sent.
-import { existsSync } from "node:fs";
+import { loadTestEnv } from "../test-env";
 import { createClient } from "@supabase/supabase-js";
 import type { TestProject } from "vitest/node";
 import { SEED_ADMINS } from "../../scripts/seed-data.mts";
@@ -30,7 +30,7 @@ declare module "vitest" {
 }
 
 export default async function setup(project: TestProject) {
-  if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+  loadTestEnv(); // local Docker database by default (tests/test-env.ts)
   if (process.env.ICCI_ENVIRONMENT !== "development") {
     throw new Error('Database tests only run against the development database (ICCI_ENVIRONMENT="development").');
   }

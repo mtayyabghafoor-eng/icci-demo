@@ -84,8 +84,14 @@ test("not found: the form opens with the ISBN filled in, to type the rest", asyn
 
 test("a slow book list: the website stops waiting after 5 seconds", async ({ page }) => {
   const label = await newTestLabel();
+  await page.goto(`/l/${label}`);
+  await expect(page).toHaveURL(new RegExp(`/library/new\\?label=${label}$`));
+  await page.getByRole("textbox", { name: "ISBN" }).fill(isbnStarting(FAKE_PREFIX.SLOW));
+  // The stopwatch starts at "Look up", not before the page loads: a slow page
+  // load on the development server once pushed the total past 8 seconds
+  // although the look-up itself gave up on time (20 Nov 2026).
   const started = Date.now();
-  await lookUp(page, label, isbnStarting(FAKE_PREFIX.SLOW));
+  await page.getByRole("button", { name: "Look up" }).click();
   await expect(page.getByTestId("lookup-result")).toHaveText(/did not answer in time/);
   expect(Date.now() - started).toBeLessThan(8000);
   await expect(page.getByRole("textbox", { name: "Title" })).toBeVisible();

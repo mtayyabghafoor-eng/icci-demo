@@ -16,6 +16,8 @@ export function RegisterForm(props: {
   categories: { id: string; name: string }[];
   allPlaces: Option[];
   stockPlaces: Option[];
+  /** A place chosen before (from a place page, slice P1.12), filled in if it fits. */
+  place?: string;
 }) {
   const [state, action, pending] = useActionState<ItemFormState, FormData>(registerItem, { error: null });
   const [step, setStep] = useState(1);
@@ -108,7 +110,14 @@ export function RegisterForm(props: {
         </label>
         <label className="block">
           <span className="font-semibold">{kind === "consumable" ? "Store room or shelf" : "Location"}</span>
-          <select name="location_id" data-step="2" required defaultValue="" className={fieldClass} key={kind}>
+          <select
+            name="location_id"
+            data-step="2"
+            required
+            defaultValue={places.some((p) => p.id === props.place) ? props.place : ""}
+            className={fieldClass}
+            key={kind}
+          >
             <option value="" disabled>
               Choose where it is
             </option>

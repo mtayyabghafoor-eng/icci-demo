@@ -51,6 +51,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/items/new">
         categories={categories.filter((c) => c.active)}
         allPlaces={locationOptions(locations)}
         stockPlaces={locationOptions(locations, ["store_room", "shelf"])}
+        place={typeof params.location === "string" ? params.location : undefined}
       />
     </>
   );

@@ -31,3 +31,31 @@ export function assertSeedable(environment: string | undefined): "development" |
       "Made-up data is never added to production.",
   );
 }
+
+/** The ICCI Staging (demo) project. Its reference is part of its web address, not a secret. */
+export const STAGING_PROJECT_REF = "hqauynjxtdafxhgzmffq";
+
+/**
+ * The staging re-seed (npm run db:seed:staging) may only ever fill the ICCI
+ * Staging project, and only when its settings file says "staging". Any other
+ * database, the development one included, is refused before anything runs.
+ */
+export function assertStagingTarget(environment: string | undefined, url: string | undefined): void {
+  if (environment !== "staging") {
+    throw new Error('Refusing to seed the demo: ICCI_ENVIRONMENT must be "staging" in .env.staging.');
+  }
+  let host = "";
+  try {
+    host = new URL(url ?? "").hostname;
+  } catch {
+    host = "";
+  }
+  if (host !== `${STAGING_PROJECT_REF}.supabase.co`) {
+    throw new Error("Refusing to seed the demo: the address in .env.staging is not the ICCI Staging project.");
+  }
+}
+
+/** The "Demo: all names and records are made up" strip shows on the online demo only. */
+export function showDemoBanner(environment: string | undefined): boolean {
+  return environment === "staging";
+}
