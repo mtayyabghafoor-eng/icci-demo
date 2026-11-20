@@ -51,7 +51,7 @@ async function personOfAccount(email: string): Promise<string> {
 type Ev = { id: number; reported_by: string | null; reported_by_person_id: string | null };
 
 function report(client: SupabaseClient, item_id: string, who: Record<string, unknown>, kind = "damage") {
-  return client.from("asset_events").insert({ item_id, kind, note, ...who }).select("id, reported_by, reported_by_person_id").single<Ev>();
+  return client.from("asset_events").insert({ item_id, kind, note, ...who, ...(kind === "disposal" ? { disposal_route: "thrown_away" } : {}) }).select("id, reported_by, reported_by_person_id").single<Ev>();
 }
 
 // ---------------------------------------------------------------------------

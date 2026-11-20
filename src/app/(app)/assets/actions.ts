@@ -3,6 +3,7 @@
 // mark found or repaired, dispose) and when a disposal is decided. Runs on
 // the web server as the signed-in admin: the database's rules decide what is
 // allowed, including that nobody approves their own disposal.
+import { parseDisposalFields } from "@/lib/assets/disposal";
 import { redirect } from "next/navigation";
 import { friendlyAssetError, isAssetAction, parseAssetForm } from "@/lib/assets/rules";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +27,9 @@ export async function recordAssetEvent(
   if (!isAssetAction(action)) return { error: "Unknown action." };
   const parsed = parseAssetForm(getter(form), action);
   if (!parsed.ok) return { error: parsed.error };
+  // Slice P1.14: a disposal says how the item leaves.
+  const route = action === "dispose" ? parseDisposalFields(getter(form)) : null;
+  if (route && !route.ok) return { error: route.error };
   const photo = photoFrom(form);
   if (typeof photo === "string") return { error: photo };
 
@@ -39,7 +43,7 @@ export async function recordAssetEvent(
     if (!photo_path) return { error: "The photo could not be saved. Please try again, or send without a photo." };
   }
 
-  const { error } = await supabase.from("asset_events").insert({ item_id: itemId, ...parsed.values, photo_path });
+  const { error } = await supabase.from("asset_events").insert({ item_id: itemId, ...parsed.values, ...(route?.ok ? route.values : {}), photo_path });
   if (error) return { error: friendlyAssetError(error.message) };
   redirect(`/items/${itemId}?done=${action}`);
 }

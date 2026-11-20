@@ -152,7 +152,7 @@ describe("tidy-up after a test run", () => {
     const chair = await newFixedAsset("centre_admin", { location_id: building.id });
     const disposal = await admin
       .from("asset_events")
-      .insert({ item_id: chair.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer" });
+      .insert({ item_id: chair.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer", disposal_route: "thrown_away" });
     if (disposal.error) throw disposal.error;
 
     const result = await switchOffTestLeftovers(masterKeyClient(), prefix);

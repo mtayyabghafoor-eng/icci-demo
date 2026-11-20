@@ -148,6 +148,7 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   // Send for disposal: nothing changes until a different admin approves.
   await actions.getByRole("link", { name: "Dispose" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Dispose of this asset" })).toBeVisible();
+  await page.getByLabel("Recycled").check();
   await fillReport(page, "Test disposal: made-up, no longer needed");
   await s(page, "dispose", project);
   await page.getByRole("button", { name: "Send for approval" }).click();
@@ -171,6 +172,7 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await signInAs(page, second, "/assets/approvals");
   const theirs = page.getByTestId("pending-disposal").filter({ hasText: item.name });
   await expect(theirs).toContainText("sent by Test Centre Admin");
+  await expect(theirs.getByTestId("disposal-route")).toHaveText("How it leaves: Recycled");
   await s(page, "disposals-waiting", project);
   await theirs.getByRole("button", { name: "Reject" }).click();
   await expect(theirs.getByTestId("form-error")).toContainText("Write why you are rejecting it");

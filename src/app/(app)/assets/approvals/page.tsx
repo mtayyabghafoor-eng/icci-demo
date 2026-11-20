@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { describeDisposal } from "@/lib/assets/disposal";
 import { ASSET_EVENT_COLUMNS, DISPOSAL_STATUS, type AssetEventRow } from "@/lib/assets/rules";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { CONDITION_STATUS, formatDateTime, formatEuro } from "@/lib/items/rules";
@@ -94,6 +95,17 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
               </div>
               <div className="mt-2 flex gap-3">
                 <div className="min-w-0 flex-1">
+                  <p data-testid="disposal-route">
+                    <span className="font-semibold">How it leaves:</span>{" "}
+                    {describeDisposal({
+                      disposal_route: p.disposal_route ?? null,
+                      disposal_recipient: p.disposal_recipient ?? null,
+                      sale_price_cents: p.sale_price_cents ?? null,
+                      sale_buyer: p.sale_buyer ?? null,
+                      sale_date: p.sale_date ?? null,
+                      sale_money_taken_by: p.sale_money_taken_by ?? null,
+                    })}
+                  </p>
                   <p>
                     <span className="font-semibold">Note:</span> {p.note}
                   </p>

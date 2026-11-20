@@ -10,6 +10,7 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { locationOptions } from "@/lib/items/rules";
 import { allRows } from "@/lib/supabase/all-rows";
 import { createClient } from "@/lib/supabase/server";
+import { todayInDublin } from "@/lib/vetting/rules";
 import { AssetEventForm } from "../../../../assets/forms";
 import { loadLookups, type ItemRow } from "../../../data";
 import { ItemStatus } from "../../../ui";
@@ -64,7 +65,7 @@ async function Content({ params }: { params: PageProps<"/items/[id]/asset/[actio
         <ItemStatus kind={item.kind} condition={item.condition} />
       </p>
       {allowed ? (
-        <AssetEventForm itemId={item.id} action={action} places={places} people={people} myPersonId={myPersonId} />
+        <AssetEventForm itemId={item.id} action={action} places={places} people={people} myPersonId={myPersonId} today={todayInDublin()} />
       ) : (
         <p className="mt-4 rounded-xl bg-icci-green-50 px-4 py-3">
           This cannot be done to the asset as it is now. Go back to the item to see what can.

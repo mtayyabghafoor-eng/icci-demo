@@ -160,7 +160,7 @@ test("a disposal waiting for approval warns about tickets not closed", async ({ 
   const c = await apiAs(centre.email);
   const t = await c.from("maintenance_tickets").insert({ item_id: asset.id, description: "Test: drawer stuck (made up)", reported_by: "Test cleaner (fictional)" });
   if (t.error) throw t.error;
-  const d = await c.from("asset_events").insert({ item_id: asset.id, kind: "disposal", note: "Test: beyond repair", reported_by: "Test cleaner (fictional)" });
+  const d = await c.from("asset_events").insert({ item_id: asset.id, kind: "disposal", note: "Test: beyond repair", reported_by: "Test cleaner (fictional)", disposal_route: "thrown_away" });
   if (d.error) throw d.error;
 
   await signInAs(page, second, "/assets/approvals");

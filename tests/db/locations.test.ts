@@ -184,7 +184,7 @@ describe("switching a place off", () => {
     expect((await off(c, room)).error?.message).toMatch(/still holds/i);
     const d = await c
       .from("asset_events")
-      .insert({ item_id: asset.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer" })
+      .insert({ item_id: asset.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer", disposal_route: "thrown_away" })
       .select("id")
       .single();
     if (d.error) throw d.error;

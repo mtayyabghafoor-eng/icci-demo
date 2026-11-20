@@ -155,6 +155,8 @@ export function seedStock(index: number, minimumLevel: number): SeedStockPlan | 
 export type SeedAssetEvent = {
   label: string;
   kind: "move" | "damage" | "missing" | "back_in_use" | "disposal";
+  /** Slice P1.14: how a disposal leaves (and, for a sale, its made-up details). */
+  disposal?: { route: string; recipient?: string; sale?: { cents: number; buyer: string; daysAgo: number; takenBy: string } };
   note: string;
   reportedBy: string;
   toLocation?: string;
@@ -194,7 +196,16 @@ export function seedAssetEvents(items: SeedItem[] = seedItems()): SeedAssetEvent
       }
       if (item.condition === "good" && i % 31 === 8 && disposals < 2) {
         disposals++;
-        events.push({ label: item.label, kind: "disposal", note: "Test disposal: made-up, beyond repair", reportedBy });
+        events.push({
+          label: item.label,
+          kind: "disposal",
+          note: "Test disposal: made-up, beyond repair",
+          reportedBy,
+          disposal:
+            disposals === 1
+              ? { route: "sold", sale: { cents: 1500, buyer: "Test Buyer (made up)", daysAgo: 2, takenBy: "Test Treasurer (made up)" } }
+              : { route: "charity", recipient: "Test Charity Shop (made up)" },
+        });
       }
     });
   return events;

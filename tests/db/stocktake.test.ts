@@ -624,7 +624,7 @@ describe("a difference that is out of date by the time it is approved", () => {
     const d = diffs.find((x) => x.kind === "missing")!;
     const disposal = await (await asRole("super_admin"))
       .from("asset_events")
-      .insert({ item_id: notSeen.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer" });
+      .insert({ item_id: notSeen.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer", disposal_route: "thrown_away" });
     if (disposal.error) throw disposal.error;
     expect((await decide(await secondCentreAdmin(), d, "approved")).error?.message).toMatch(/disposal.*waiting/i);
     expect((await itemNow(notSeen.id)).condition).toBe("good");

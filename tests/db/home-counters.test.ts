@@ -130,7 +130,7 @@ describe("home page counters: waiting for you", () => {
     const other = await secondCentreAdmin();
     const asset = await newAsset(me);
     const [mine0, other0] = [await counters(me), await counters(other)];
-    const { error } = await me.from("asset_events").insert({ item_id: asset.id, kind: "disposal", ...note });
+    const { error } = await me.from("asset_events").insert({ item_id: asset.id, kind: "disposal", disposal_route: "thrown_away", ...note });
     if (error) throw error;
     const [mine1, other1] = [await counters(me), await counters(other)];
     expect(mine1.disposals_for_me - mine0.disposals_for_me).toBe(0);

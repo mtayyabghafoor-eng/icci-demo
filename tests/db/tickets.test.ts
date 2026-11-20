@@ -165,7 +165,7 @@ describe("what a ticket can be about", () => {
   it("refuses a disposed asset", async () => {
     const asset = await newFixedAsset();
     const first = await asRole("centre_admin");
-    const d = await first.from("asset_events").insert({ item_id: asset.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer" }).select().single();
+    const d = await first.from("asset_events").insert({ item_id: asset.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer", disposal_route: "thrown_away" }).select().single();
     if (d.error) throw d.error;
     const decided = await (await asRole("super_admin")).from("asset_events").update({ status: "approved" }).eq("id", d.data.id);
     if (decided.error) throw decided.error;

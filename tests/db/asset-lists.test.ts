@@ -22,7 +22,7 @@ const secondCentreAdmin = () => signedInClient(SEED_ADMINS.find((a) => a.email.s
 const base = { note: "Test note: made-up event", reported_by: "Test volunteer (fictional)" };
 
 async function report(client: SupabaseClient, item_id: string, kind: string, extra: Record<string, unknown> = {}) {
-  const { data, error } = await client.from("asset_events").insert({ item_id, kind, ...base, ...extra }).select().single();
+  const { data, error } = await client.from("asset_events").insert({ item_id, kind, ...base, ...(kind === "disposal" ? { disposal_route: "thrown_away" } : {}), ...extra }).select().single();
   if (error) throw error;
   return data as { id: number };
 }

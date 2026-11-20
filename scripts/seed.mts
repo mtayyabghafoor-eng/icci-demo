@@ -312,6 +312,12 @@ if (!eventCount) {
       reported_by: e.reportedBy,
       to_location_id: e.toLocation ? ids.get(e.toLocation)! : null,
       to_condition: e.toCondition ?? null,
+      disposal_route: e.disposal?.route ?? null,
+      disposal_recipient: e.disposal?.recipient ?? null,
+      sale_price_cents: e.disposal?.sale?.cents ?? null,
+      sale_buyer: e.disposal?.sale?.buyer ?? null,
+      sale_date: e.disposal?.sale ? addDays(todayInDublin(), -e.disposal.sale.daysAgo) : null,
+      sale_money_taken_by: e.disposal?.sale?.takenBy ?? null,
     });
     // An older seed set the condition directly: its report is then "already" true.
     if (error && !/already/i.test(error.message)) throw error;

@@ -2,6 +2,7 @@
 // The asset forms. Phone-first: big boxes, a one-tap camera button.
 import { startTransition, useActionState, useRef, useState, type FormEvent } from "react";
 import { FormError } from "@/app/sign-in/ui";
+import { DISPOSAL_ROUTES, ROUTE_LABEL, type DisposalRoute } from "@/lib/assets/disposal";
 import { ASSET_ACTIONS, type AssetAction } from "@/lib/assets/rules";
 import { PhotoInput } from "../items/photo-input";
 import { fieldClass } from "../items/ui";
@@ -17,7 +18,7 @@ const NOTE_HINT: Record<AssetAction, string> = {
   missing: "e.g. Not in its room at the weekly check",
   repaired: "e.g. Leg glued and tested",
   found: "e.g. Found in the store room",
-  dispose: "e.g. Beyond repair, taken to the recycling centre",
+  dispose: "e.g. Beyond repair; collected on Saturday",
 };
 
 export function AssetEventForm({
@@ -26,6 +27,7 @@ export function AssetEventForm({
   places,
   people,
   myPersonId,
+  today,
 }: {
   itemId: string;
   action: AssetAction;
@@ -34,10 +36,13 @@ export function AssetEventForm({
   people: { id: string; full_name: string }[];
   /** The signed-in admin's own person record, if their account is linked. */
   myPersonId: string | null;
+  /** Today in Dublin, the latest allowed date of a sale. */
+  today?: string;
 }) {
   const [state, send, pending] = useActionState(recordAssetEvent.bind(null, itemId, action), none);
   // Starts with you if your account is linked (owner's choice, 15 Nov 2026).
   const [who, setWho] = useState(myPersonId ?? "");
+  const [route, setRoute] = useState<DisposalRoute | "">("");
   const photo = useRef<File | null>(null);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -79,6 +84,49 @@ export function AssetEventForm({
             ))}
           </div>
         </fieldset>
+      )}
+      {action === "dispose" && (
+        <fieldset>
+          <legend className="font-semibold">How is it leaving?</legend>
+          <div className="mt-1 grid gap-2 sm:grid-cols-2">
+            {DISPOSAL_ROUTES.map((r) => (
+              <label
+                key={r}
+                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[#c9d3cf] bg-white px-3 py-2 transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
+              >
+                <input type="radio" name="disposal_route" value={r} required checked={route === r} onChange={() => setRoute(r)} />
+                {ROUTE_LABEL[r]}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {action === "dispose" && (route === "charity" || route === "returned_to_owner") && (
+        <label className="block">
+          <span className="font-semibold">{route === "charity" ? "Name of the charity" : "Owner's name"}</span>
+          <input name="disposal_recipient" required maxLength={200} className={fieldClass} dir="auto" />
+        </label>
+      )}
+      {action === "dispose" && route === "sold" && (
+        <div className="grid gap-4 sm:grid-cols-2" data-testid="sale-fields">
+          <label className="block">
+            <span className="font-semibold">Price (€)</span>
+            <input name="sale_price" required inputMode="decimal" placeholder="e.g. 25 or 12.50" className={fieldClass} />
+          </label>
+          <label className="block">
+            <span className="font-semibold">Date of sale</span>
+            <input name="sale_date" type="date" required max={today} defaultValue={today} className={fieldClass} />
+          </label>
+          <label className="block">
+            <span className="font-semibold">Buyer&apos;s name</span>
+            <input name="sale_buyer" required maxLength={200} className={fieldClass} dir="auto" />
+          </label>
+          <label className="block">
+            <span className="font-semibold">Who took the money</span>
+            <input name="sale_money_taken_by" required maxLength={200} className={fieldClass} dir="auto" />
+          </label>
+          <p className="text-sm text-icci-ink-60 sm:col-span-2">A record of the sale only. The money itself is handled as usual by the Centre.</p>
+        </div>
       )}
       <label className="block">
         <span className="font-semibold">Note</span>

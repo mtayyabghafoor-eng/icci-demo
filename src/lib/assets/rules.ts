@@ -2,6 +2,7 @@
 // repaired, disposal), kept free of the database and the browser so they
 // can be unit-tested. The database enforces the same rules itself
 // (migration 0008); these only decide what the screens offer and say.
+import { describeDisposal, type DisposalDetails } from "@/lib/assets/disposal";
 import { CONDITION_STATUS, type Condition, type Tone } from "@/lib/items/rules";
 
 export type AssetEventKind = "move" | "damage" | "missing" | "back_in_use" | "disposal";
@@ -108,10 +109,10 @@ export type AssetEventRow = {
   decision_note: string | null;
   created_by: string | null;
   created_at: string;
-};
+} & Partial<DisposalDetails>;
 
 export const ASSET_EVENT_COLUMNS =
-  "id, item_id, kind, status, from_location_id, to_location_id, from_condition, to_condition, note, reported_by, reported_by_person_id, photo_path, decided_by, decided_at, decision_note, created_by, created_at";
+  "id, item_id, kind, status, from_location_id, to_location_id, from_condition, to_condition, note, reported_by, reported_by_person_id, photo_path, decided_by, decided_at, decision_note, created_by, created_at, disposal_route, disposal_recipient, sale_price_cents, sale_buyer, sale_date, sale_money_taken_by";
 
 const word = (c: Condition | null) => (c ? CONDITION_STATUS[c].word : "unknown");
 
@@ -128,7 +129,14 @@ export function describeEvent(e: AssetEventRow, locationName: Map<string, string
     case "back_in_use":
       return `${e.from_condition === "missing" ? "Marked found" : "Marked repaired"} (now ${word(e.to_condition)})`;
     case "disposal":
-      return `Disposal (was ${word(e.from_condition)})`;
+      return `Disposal: ${describeDisposal({
+        disposal_route: e.disposal_route ?? null,
+        disposal_recipient: e.disposal_recipient ?? null,
+        sale_price_cents: e.sale_price_cents ?? null,
+        sale_buyer: e.sale_buyer ?? null,
+        sale_date: e.sale_date ?? null,
+        sale_money_taken_by: e.sale_money_taken_by ?? null,
+      })} (was ${word(e.from_condition)})`;
   }
 }
 

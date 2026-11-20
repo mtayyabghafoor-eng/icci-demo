@@ -37,7 +37,7 @@ const base = { note: "Test note: made-up event", reported_by: "Test volunteer (f
 async function report(client: SupabaseClient, item_id: string, kind: string, extra: Record<string, unknown> = {}) {
   return client
     .from("asset_events")
-    .insert({ item_id, kind, ...base, ...extra })
+    .insert({ item_id, kind, ...base, ...(kind === "disposal" ? { disposal_route: "thrown_away" } : {}), ...extra })
     .select()
     .single<AssetEvent>();
 }

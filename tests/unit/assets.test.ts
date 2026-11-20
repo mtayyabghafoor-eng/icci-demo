@@ -113,7 +113,7 @@ describe("describing an event", () => {
     [ev({ kind: "missing", to_condition: "missing", from_condition: "fair" }), "Marked missing (was Fair)"],
     [ev({ kind: "back_in_use", from_condition: "missing", to_condition: "good" }), "Marked found (now Good)"],
     [ev({ kind: "back_in_use", from_condition: "damaged", to_condition: "fair" }), "Marked repaired (now Fair)"],
-    [ev({ kind: "disposal", status: "pending", to_condition: "disposed" }), "Disposal (was Good)"],
+    [ev({ kind: "disposal", status: "pending", to_condition: "disposed" }), "Disposal: Route not recorded (was Good)"],
   ])("%#: %s", (e, text) => expect(describeEvent(e, names)).toBe(text));
 });
 
