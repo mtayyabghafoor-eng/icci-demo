@@ -6,8 +6,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Pencil, Plus, Printer } from "lucide-react";
-import { Card, CardTitle, FactGrid, LinkButton, PageHeader } from "@/components/ui";
+import { Pencil, Plus, Printer, ScanLine } from "lucide-react";
+import { Button, Card, CardTitle, FactGrid, LinkButton, PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { KIND_LABEL, type ItemKind } from "@/lib/items/rules";
 import { CHILD_KIND, KIND_WORD, placeCode } from "@/lib/places/rules";
@@ -16,6 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ItemStatus, Notice, StatusBadge } from "../../items/ui";
 import { allPlaces, childrenOf, lineOf, UUID } from "../data";
 import { SwitchPlace } from "../forms";
+import { startRoomRegister } from "./register/actions";
 import { MAY_SEE_PLACES } from "../page";
 
 export const metadata: Metadata = { title: "Place | ICCI Control Dashboard" };
@@ -134,9 +135,16 @@ async function Content({ params, searchParams }: { params: PageProps<"/places/[i
           <CardTitle
             action={
               place.active ? (
-                <LinkButton href={`/items/new?location=${id}`} icon={Plus} kind="outline">
-                  Register an item here
-                </LinkButton>
+                <div className="flex flex-wrap gap-2">
+                  <form action={startRoomRegister.bind(null, id)}>
+                    <Button type="submit" icon={ScanLine} kind="secondary">
+                      Register items in this room
+                    </Button>
+                  </form>
+                  <LinkButton href={`/items/new?location=${id}`} icon={Plus} kind="outline">
+                    Register an item here
+                  </LinkButton>
+                </div>
               ) : undefined
             }
           >

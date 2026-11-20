@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { friendlyDbError, parseEdit, parseRegister } from "@/lib/items/form";
 import { createClient } from "@/lib/supabase/server";
 import { photoFrom, savePhoto } from "./photos";
+import { insertNewItem } from "./register";
 
 export type ItemFormState = { error: string | null };
 
@@ -21,21 +22,9 @@ export async function registerItem(_state: ItemFormState, form: FormData): Promi
   const photo = photoFrom(form);
   if (typeof photo === "string") return { error: photo };
 
-  const supabase = await createClient();
-  const { data: label } = await supabase.from("labels").select("serial").eq("serial", parsed.values.label_serial).maybeSingle();
-  if (!label) return { error: "That label number is not on the list of printed labels." };
-  const { data: taken } = await supabase.from("items").select("id").eq("label_serial", parsed.values.label_serial).maybeSingle();
-  if (taken) return { error: "This label is already on another item." };
-
-  let photo_path: string | null = null;
-  if (photo) {
-    photo_path = await savePhoto(supabase, parsed.values.label_serial, photo);
-    if (!photo_path) return { error: "The photo could not be saved. Please try again, or register without a photo." };
-  }
-
-  const { data, error } = await supabase.from("items").insert({ ...parsed.values, photo_path }).select("id").single();
-  if (error || !data) return { error: friendlyDbError(error?.message) };
-  redirect(`/items/${data.id}?done=registered`);
+  const saved = await insertNewItem(await createClient(), parsed.values, photo);
+  if (saved.error !== null) return { error: saved.error };
+  redirect(`/items/${saved.id}?done=registered`);
 }
 
 export async function updateItem(id: string, _state: ItemFormState, form: FormData): Promise<ItemFormState> {

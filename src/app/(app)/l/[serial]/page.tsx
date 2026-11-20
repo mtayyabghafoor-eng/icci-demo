@@ -4,6 +4,8 @@
 //                              scan screen, if the stocktake is still open
 //   - label on a library copy → open the copy (slice P4.2)
 //   - label on an item       → open the item
+//   - "registering a room" in this browser (slice P1.13) and the label is
+//                              free → that room's screen with the number in
 //   - printed, not yet used  → "Register an item" with the number filled in
 //                              (admins; the page also offers "Add a book"),
 //                              or "Add a book" for the Library Operator
@@ -15,6 +17,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { parseLabelNumber, safeDecode } from "@/lib/items/rules";
 import { parseStocktakeId, SCANNING_COOKIE } from "@/lib/stocktake/rules";
+import { parseRoomCookie, ROOM_COOKIE } from "@/lib/places/room-register";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,6 +50,8 @@ async function Forward({ params }: { params: PageProps<"/l/[serial]">["params"] 
   if (found?.use === "book_copy" && found.copy_id) redirect(`/library/copies/${found.copy_id}`);
   if (found?.use === "free") {
     const me = await requireAdmin();
+    const room = parseRoomCookie((await cookies()).get(ROOM_COOKIE)?.value);
+    if (room && (me.roleCode === "super_admin" || me.roleCode === "centre_admin")) redirect(`/places/${room}/register?label=${serial}`);
     redirect(me.roleCode === "library_operator" ? `/library/new?label=${serial}` : `/items/new?label=${serial}`);
   }
   if (found?.use === "item") {
