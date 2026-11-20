@@ -34,9 +34,10 @@ done, and so are P4.3 (ISBN look-up from Open Library), P4.4
 (borrowers, lend and return) and P4.5 (lists, lost and withdrawn copies,
 Home cards), which completes Phase 4 (PLAN.md 5.4). After the
 Clonskeagh visit the owner chose a week of inventory work first:
-P1.12 (places and place labels) is done; next P1.13 (register a room),
-then how items leave (disposal routes, sale record, ownership claims;
-needs PLAN.md wording), label polish, and a demo refresh. Before real use: Resend as Supabase's mail sender, then switch
+P1.12 (places and place labels), P1.13 (register a room), P1.14
+(disposal routes and sale record), P1.15 (property-tag asset label) and
+P1.16 (Home and menu polish) are done (20 Nov 2026). Next: the demo
+refill (needs the owner's .env.staging), then Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -363,6 +364,12 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   off places. Two slices: P1.12 (places) and P1.13 (register a room).
 - Staging demo (19 Nov 2026): made-up data may be seeded on staging, never
   production; the site runs in Frankfurt (fra1) next to its database.
+- Disposal routes (P1.14, 20 Nov 2026, owner's answers of 19 Nov): seven
+  routes; a sale is a record only, not accounting; a different admin still
+  approves; the route and sale details can never change.
+- Tests run on a local Supabase in Docker (20 Nov 2026, owner's choice);
+  the demo database may be wiped once and refilled with demo-only names
+  (owner agreed 20 Nov 2026).
 
 ## Open questions
 
@@ -374,6 +381,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 20 Nov 2026, session 41 (overnight, P1.13-P1.16, owner asleep, asked for
+  no prompts): P1.13 register a room: "Register items in this room" on a
+  place page; each label needs only a name (kind and category copied from
+  the last item there); phone-camera scans come back while it is on (12-hour
+  cookie with only the place's number). P1.14 migration 0040: every new
+  disposal picks one of seven routes; sold needs price, buyer, date, who took
+  the money; charity/owner need a name; never changeable; old disposals say
+  "Route not recorded". P1.15 item labels are property tags. P1.16 menu:
+  Places next to Register an item, new "Disposals waiting" link; Home quick
+  actions "Register a room" and "Report a problem". Tests first throughout.
+  The demo refill waits for .env.staging (still empty).
 
 - 20 Nov 2026, session 41 (P1.12 finished; tests moved to Docker; demo
   tools): the demo database got migrations 0026-0038 (owner agreed). Cloud

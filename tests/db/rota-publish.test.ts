@@ -196,7 +196,8 @@ describe("publishing", () => {
     expect(entry.person).toBe(person.full_name);
     expect(entry.person_role).toBe("Board member");
     expect(entry.slot).toBe("Fajr");
-    expect(JSON.stringify(pub.frozen_copy)).not.toMatch(/555|phone|email/i);
+    // The whole made-up number, not just "555": a record number can be 555 (20 Nov 2026).
+    expect(JSON.stringify(pub.frozen_copy)).not.toMatch(/555 ?0199|phone|email/i);
   });
 
   it("whatever the screen sends, the database works out who, when, warnings and the copy", async () => {

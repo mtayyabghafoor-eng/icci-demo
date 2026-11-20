@@ -16,14 +16,15 @@
     "setup:test-password": "node scripts/setup-test-password.mjs",
     "setup:reminder-key": "node scripts/setup-reminder-key.mts",
     "db:push": "supabase db push --remote",
-    "db:reset": "node --env-file=.env.localdb scripts/guard-local-db.mjs && supabase db reset --yes --no-seed && npm run db:pause && npm run db:seed && npm run db:pause",
+    "db:reset": "node --env-file=.env.localdb scripts/guard-local-db.mjs && supabase db reset --yes --no-seed && npm run db:wait && npm run db:seed && npm run db:wait",
     "db:reset:cloud": "node --env-file=.env.local -e \"if(process.env.ICCI_ENVIRONMENT!=='development'){console.error('Refusing: not development');process.exit(1)}\" && supabase db reset --remote --yes --no-seed && npm run db:pause && npm run db:seed:cloud && npm run db:pause",
     "db:seed": "node --env-file=.env.local --env-file=.env.localdb scripts/seed.mts",
     "db:seed:cloud": "node --env-file=.env.local scripts/seed.mts",
     "typecheck": "next typegen && tsc --noEmit",
     "db:pause": "node -e \"setTimeout(()=>{},10000)\"",
     "db:seed:staging": "node scripts/seed-staging.mts",
-    "setup:local-db": "node scripts/setup-local-db.mts"
+    "setup:local-db": "node scripts/setup-local-db.mts",
+    "db:wait": "node --env-file=.env.localdb scripts/wait-for-db.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
