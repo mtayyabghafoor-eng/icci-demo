@@ -28,7 +28,7 @@ export async function fixedAssetFields(extra: Record<string, unknown> = {}) {
     label_serial: await newLabel(),
     kind: "fixed_asset",
     name: testName("chair"),
-    category_id: await idOf("item_categories", "Furniture"),
+    category_id: await idOf("item_categories", "Other furniture"),
     location_id: await idOf("locations", "Test Room A1"),
     condition: "good",
     ...extra,

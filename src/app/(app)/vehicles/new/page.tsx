@@ -39,7 +39,7 @@ async function Content() {
       {assets.length === 0 ? (
         <p className="mt-4 rounded-xl border border-icci-line bg-white p-5 shadow-card" data-testid="no-vehicle-assets">
           No asset in the &ldquo;Vehicles&rdquo; category is waiting for vehicle details. <Link href="/items/new">Register an item</Link> first, choosing
-          the &ldquo;Vehicles&rdquo; category.
+          a category under &ldquo;Vehicles&rdquo;, for example &ldquo;Cars and vans&rdquo;.
         </p>
       ) : (
         <VehicleForm people={people} assets={assets} />

@@ -4,9 +4,11 @@ import Link from "next/link";
 import { PackagePlus } from "lucide-react";
 import { Suspense } from "react";
 import { LinkButton, PageHeader, Pagination, Skeleton } from "@/components/ui";
+import { categoryAndInside, categoryGroups } from "@/lib/categories/rules";
 import { CONDITION_STATUS, CONDITIONS, KIND_LABEL, cleanSearch, locationAndInside, locationOptions } from "@/lib/items/rules";
 import type { StockStatus } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
+import { CategoryOptions } from "../categories/options";
 import { loadLookups, type ItemRow } from "./data";
 import { FindLabel } from "./find-label";
 import { ItemStatus } from "./ui";
@@ -54,7 +56,8 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
   const supabase = await createClient();
   // The lists for the drop-downs and the search itself are asked for at the
   // same time, so the page waits for the slower one only (keeps it fast with
-  // thousands of rows). Only a location filter needs the places first.
+  // thousands of rows). Only a location filter needs the places first, and
+  // a main category (everything inside it, P1.17) the category list.
   const lookupsReady = loadLookups(supabase);
   const searchItems = async () => {
     let query = supabase
@@ -65,7 +68,10 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
     if (q) query = query.or(`name.ilike.*${q}*,label_serial.ilike.*${q}*`);
     if (kind === "fixed_asset" || kind === "consumable") query = query.eq("kind", kind);
-    if (UUID.test(category)) query = query.eq("category_id", category);
+    if (UUID.test(category)) {
+      const { categories } = await lookupsReady;
+      query = query.in("category_id", categoryAndInside(category, categories));
+    }
     if (UUID.test(location)) {
       const { locations } = await lookupsReady;
       query = query.in("location_id", locationAndInside(location, locations));
@@ -112,11 +118,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
           <span className="font-semibold">Category</span>
           <select name="category" defaultValue={category} className={select}>
             <option value="">All categories</option>
-            {lookups.categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
+            <CategoryOptions groups={categoryGroups(lookups.categories, { pickable: true, keep: category })} withMain />
           </select>
         </label>
         <label>

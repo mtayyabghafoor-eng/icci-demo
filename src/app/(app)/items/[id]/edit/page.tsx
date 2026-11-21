@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { categoryGroups } from "@/lib/categories/rules";
 import { KIND_LABEL } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { ITEM_COLUMNS, loadLookups, type ItemRow } from "../../data";
@@ -43,7 +44,7 @@ async function Content({ params }: { params: PageProps<"/items/[id]/edit">["para
       </p>
       <EditForm
         item={item}
-        categories={categories.filter((c) => c.active || c.id === item.category_id)}
+        categoryGroups={categoryGroups(categories, { pickable: true, keep: item.category_id })}
       />
     </>
   );

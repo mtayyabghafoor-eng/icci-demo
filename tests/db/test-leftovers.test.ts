@@ -89,6 +89,7 @@ describe("tidy-up after a test run", () => {
 
     const result = await switchOffTestLeftovers(masterKeyClient(), prefix);
     expect(result).toEqual({
+      categories: 0,
       books: 1,
       borrowers: 1,
       people: 1,
@@ -159,6 +160,21 @@ describe("tidy-up after a test run", () => {
     expect(result).toMatchObject({ places: 0, placesLeftOn: 1, chairsMoved: 0 });
     const { data } = await masterKeyClient().from("items").select("location_id").eq("id", chair.id).single();
     expect(data?.location_id).toBe(building.id);
+  });
+
+  // P1.17: test categories, sub-categories first, then their main category.
+  it("switches off this run's categories, sub-categories first", async () => {
+    const prefix = `Test run tidy ${Date.now()} ${Math.random().toString(36).slice(2, 7)} `;
+    const admin = await asRole("centre_admin");
+    const main = await admin.from("item_categories").insert({ name: `${prefix}main` }).select("id").single();
+    if (main.error) throw main.error;
+    const sub = await admin.from("item_categories").insert({ name: `${prefix}sub`, parent_id: main.data.id }).select("id").single();
+    if (sub.error) throw sub.error;
+
+    const result = await switchOffTestLeftovers(masterKeyClient(), prefix);
+    expect(result.categories).toBe(2);
+    const { data } = await masterKeyClient().from("item_categories").select("active").in("id", [main.data.id, sub.data.id]);
+    expect(data?.map((c) => c.active)).toEqual([false, false]);
   });
 
   it("refuses to touch anything not named \"Test run ...\"", async () => {

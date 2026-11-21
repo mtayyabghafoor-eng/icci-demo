@@ -1,14 +1,16 @@
 // Lists every item screen needs: categories and locations (with full paths).
 // Reads as the signed-in admin, so the database's own rules apply.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { categoryPath, type CategoryRow } from "@/lib/categories/rules";
 import { locationPath, type LocationRow } from "@/lib/items/rules";
 import { allRows } from "@/lib/supabase/all-rows";
 
-export type Category = { id: string; name: string; active: boolean };
+/** A main category (parent_id null) or a sub-category inside one (P1.17). */
+export type Category = CategoryRow;
 
 export async function loadLookups(supabase: SupabaseClient) {
   const [cats, locations] = await Promise.all([
-    supabase.from("item_categories").select("id, name, active").order("name"),
+    supabase.from("item_categories").select("id, name, parent_id, active").order("name"),
     // Every place, even past the 1,000 rows one request can return.
     allRows<LocationRow>((from, to) =>
       supabase.from("locations").select("id, name, kind, parent_id, active").order("id").range(from, to),
@@ -16,10 +18,12 @@ export async function loadLookups(supabase: SupabaseClient) {
   ]);
   const categories = (cats.data ?? []) as Category[];
   const locationMap = new Map(locations.map((l) => [l.id, l]));
+  const categoryMap = new Map(categories.map((c) => [c.id, c]));
   return {
     categories,
     locations,
-    categoryName: new Map(categories.map((c) => [c.id, c.name])),
+    // "Main › Sub", so every screen shows where an item is filed.
+    categoryName: new Map(categories.map((c) => [c.id, categoryPath(c.id, categoryMap)])),
     locationName: new Map(locations.map((l) => [l.id, locationPath(l.id, locationMap)])),
   };
 }

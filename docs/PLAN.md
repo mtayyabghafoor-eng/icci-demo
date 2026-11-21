@@ -138,6 +138,43 @@ recommended answers: slices P1.14 to P1.16):
 - P1.16 Design polish of Home and the menu only (sidebar on a PC, bottom
   bar on a phone), following docs/UI-PLAN.md.
 
+Finding, counting and fixing assets (added 21 Nov 2026, owner approved:
+slices P1.17 to P1.21, one per session):
+
+- P1.17 Categories in two levels: about nine main categories, each with
+  sub-categories and an "Other ..." sub-category, plus a main category
+  "Other". Items sit in a sub-category only. Super Admins and Centre Admins
+  add, rename and switch off categories on a screen (never deleted; numbers
+  never change). Today's categories move into the new list, so no item is
+  lost. Starting list (Claude's draft, for the owner to edit):
+  Furniture and furnishings; Electronics, IT and sound; Heating, cooling
+  and water; Building systems and security; Kitchen and catering; Garden,
+  tools and cleaning equipment; Vehicles; Prayer and funeral items;
+  Supplies (used up); Other. The sub-categories are in migration 0041.
+- P1.18 "What we own": for each main category and sub-category, Total,
+  Working (Good or Fair), Not working (Damaged), Missing and With open
+  tickets, for the whole campus or one building; each number opens that
+  list. Supplies show stock lines, low and out. Search also finds
+  categories ("lawnmower" shows the Lawnmowers total first).
+- P1.19 Companies (suppliers, installers, service firms, makers: name,
+  what they do, phone, email, website, notes) and makes and models (maker,
+  model, sub-category, helpline, service company). Items gain model,
+  maker's serial number, supplied by and service company; a sub-category
+  can hold a default service company. Search covers these too.
+- P1.20 Documents: manuals, warranty cards, invoices, service reports,
+  certificates and photos of the maker's plate, on a model or an item.
+  Private, PDF or picture, 10 MB; added and viewed, never replaced or
+  deleted; a wrong one is hidden with a reason.
+- P1.21 "If this goes wrong" card on the item, ticket and report pages:
+  make, model, serial number, warranty status, who to call (the item's
+  service company, else the model's, else the sub-category's), the maker's
+  helpline, documents and past tickets. While under warranty the supplier
+  is shown "for warranty claims". New ticket step "Passed to a company"
+  (company, their job number, date, note); the assignee stays a person.
+- Not included: staff reporting problems themselves (no staff logins);
+  service contracts as dated records (renewals register as today); repair
+  costs as expenses (Phase 5).
+
 ### 5.2 People, policies, vehicles, renewals (Phase 2)
 
 - **People directory**: name, role, section, phone or email, start date, active

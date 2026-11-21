@@ -8,7 +8,9 @@ import { Button, Field, Input, Select } from "@/components/ui";
 import { BarcodeCamera, type ScanTarget } from "@/components/shell/camera-scanner";
 import { FormError } from "@/app/sign-in/ui";
 import { labelFromScan } from "@/lib/items/scan";
+import type { CategoryGroup } from "@/lib/categories/rules";
 import type { RoomDefaults } from "@/lib/places/room-register";
+import { CategoryOptions } from "../../../categories/options";
 import { PhotoInput } from "../../../items/photo-input";
 import { registerInRoom, type RoomFormState } from "./actions";
 
@@ -16,13 +18,14 @@ export function RoomForm(props: {
   placeId: string;
   label: string;
   defaults: RoomDefaults;
-  categories: { id: string; name: string }[];
+  /** Switched-on main categories with their sub-categories (P1.17). */
+  categoryGroups: CategoryGroup[];
   stockAllowed: boolean;
 }) {
   const { placeId, defaults } = props;
   const [state, action, pending] = useActionState<RoomFormState, FormData>(registerInRoom.bind(null, placeId), { error: null });
   const photo = useRef<File | null>(null);
-  const categoryName = props.categories.find((c) => c.id === defaults.category_id)?.name;
+  const categoryName = props.categoryGroups.flatMap((g) => g.subs).find((c) => c.id === defaults.category_id)?.name;
 
   // The camera inside the app: an item label comes back to this screen with its number filled in.
   const camera: ScanTarget = {
@@ -93,11 +96,7 @@ export function RoomForm(props: {
               <option value="" disabled>
                 Choose a category
               </option>
-              {props.categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
+              <CategoryOptions groups={props.categoryGroups} />
             </Select>
           </Field>
           {props.stockAllowed && (

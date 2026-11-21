@@ -38,7 +38,10 @@ P1.12 (places and place labels), P1.13 (register a room), P1.14
 (disposal routes and sale record), P1.15 (property-tag asset label) and
 P1.16 (Home and menu polish) are done (20 Nov 2026), and so is UI-9, the
 presentation polish (calmer Home, folding menu, Back button, Library
-overview and desk tabs, label emblem, demo names; 20 Nov 2026). Next:
+overview and desk tabs, label emblem, demo names; 20 Nov 2026). On 21 Nov
+2026 the owner approved slices P1.17 to P1.21 (categories in two levels,
+"What we own", companies and makes and models, documents, "If this goes
+wrong"); P1.17 is done. Next: P1.18, then the rest in order, then
 Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
@@ -380,6 +383,13 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   Left out: bell, recent activity with photos, trend arrows. The code
   freeze for the demo video was lifted; the owner agreed to one more wipe
   of the demo, refilled with realistic demo-only admin names and fleet numbers.
+- Finding, counting and fixing assets (21 Nov 2026, owner approved the
+  plan; PLAN.md 5.1, slices P1.17 to P1.21): two-level categories (about
+  nine main ones, each with an "Other" sub-category; items in a
+  sub-category only); "working" means Good or Fair; shared manuals and
+  contacts live on a make-and-model list; who to call is the item's
+  service company, else the model's, else the sub-category's; Claude
+  drafted the category list for the owner to edit.
 - Tests run on a local Supabase in Docker (20 Nov 2026, owner's choice);
   the demo database may be wiped once and refilled with demo-only names
   (owner agreed 20 Nov 2026).
@@ -394,6 +404,17 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 21 Nov 2026, session 43 (plan for finding, counting and fixing assets;
+  slice P1.17, migration 0041): owner raised that the item list is
+  overwhelming, nothing counts "how many air conditioners, how many work",
+  and nobody knows who to call when something breaks (the main gate).
+  Plan approved: P1.17 to P1.21 (PLAN.md 5.1). Built P1.17: ten main
+  categories with sub-categories and an "Other ..." each; today's 11 keep
+  their numbers as sub-categories; items only in a sub-category (database
+  rule); new Categories screen (add, rename, move, switch off); grouped
+  pickers; the Items filter takes a whole main category; 36 demo items for
+  the new sub-categories. Tests first. Next: P1.18 "What we own".
 
 - 20 Nov 2026, session 42 (UI-9 presentation polish, no migrations): the
   owner's review prompt and four ChatGPT mockups compared; mockup 4 chosen

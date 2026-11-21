@@ -47,9 +47,13 @@ export const SEED_LOCATIONS: SeedLocation[] = [
 
 // ---------------------------------------------------------------------------
 // Slice 4: 300 fictional labels and 220 fictional items.
-// Labels ICCI-000001 to ICCI-000220 are on items; 221 to 296 are left free
+// Labels ICCI-000001 to ICCI-000220 are on items; P1.17 adds 36 more
+// (221 to 256: air conditioners, lawnmowers, gates, CCTV and so on, so the
+// new sub-categories have something in them); 257 to 296 are left free
 // (297 to 299 hold the made-up vehicles, P2.7)
 // so "scan an unassigned label" can be tried by hand.
+// Categories are sub-category names from migration 0041 (P1.17): every
+// item sits in a sub-category, and names are unique across the list.
 export const SEED_LABEL_COUNT = 300;
 
 export function labelSerial(n: number): string {
@@ -71,18 +75,42 @@ export type SeedItem = {
 };
 
 const FIXED: [name: string, category: string, valueCents: number][] = [
-  ["Test folding chair", "Furniture", 2500],
-  ["Test table", "Furniture", 8000],
-  ["Test bookcase", "Furniture", 12000],
-  ["Test prayer carpet section", "Carpets", 40000],
+  ["Test folding chair", "Chairs", 2500],
+  ["Test table", "Tables", 8000],
+  ["Test bookcase", "Shelving and cupboards", 12000],
+  ["Test prayer carpet section", "Carpets and rugs", 40000],
   ["Test speaker", "Sound system", 15000],
   ["Test microphone", "Sound system", 9000],
-  ["Test projector", "Electronics", 45000],
-  ["Test laptop", "Electronics", 70000],
-  ["Test kettle", "Kitchen", 3500],
-  ["Test ladder", "Tools", 9000],
-  ["Test vacuum cleaner", "Tools", 20000],
-  ["Test Quran stand", "Prayer items", 1500],
+  ["Test projector", "Projectors", 45000],
+  ["Test laptop", "Computers and laptops", 70000],
+  ["Test kettle", "Urns and water boilers", 3500],
+  ["Test ladder", "Ladders", 9000],
+  ["Test vacuum cleaner", "Vacuum cleaners", 20000],
+  ["Test Quran stand", "Quran stands", 1500],
+];
+
+// P1.17: equipment for the new sub-categories, on labels 221 onwards (after
+// the consumables, so no earlier label changes). [name, sub-category,
+// value, how many, condition of each in turn].
+type Condition = "good" | "fair" | "damaged" | "missing";
+const EQUIPMENT: [name: string, category: string, valueCents: number, count: number, conditions: Condition[]][] = [
+  ["Test wall air conditioner", "Air conditioners", 90000, 8, ["good", "good", "fair", "damaged", "good", "good", "fair", "good"]],
+  ["Test ceiling air conditioner", "Air conditioners", 150000, 2, ["good", "damaged"]],
+  ["Test lawnmower", "Lawnmowers", 45000, 3, ["good", "damaged", "fair"]],
+  ["Test strimmer", "Strimmers and hedge cutters", 18000, 2, ["good", "good"]],
+  ["Test leaf blower", "Leaf blowers", 15000, 1, ["fair"]],
+  ["Test main entrance gate", "Automatic gates and barriers", 800000, 1, ["good"]],
+  ["Test car park barrier", "Automatic gates and barriers", 350000, 1, ["damaged"]],
+  ["Test CCTV camera", "CCTV", 25000, 4, ["good", "good", "missing", "good"]],
+  ["Test CCTV recorder", "CCTV", 60000, 1, ["good"]],
+  ["Test fire extinguisher", "Fire alarms and extinguishers", 6000, 3, ["good", "good", "good"]],
+  ["Test defibrillator", "Defibrillators and first aid", 150000, 1, ["good"]],
+  ["Test fridge", "Fridges and freezers", 70000, 2, ["good", "fair"]],
+  ["Test water heater", "Water heaters", 40000, 2, ["good", "damaged"]],
+  ["Test printer", "Printers and copiers", 30000, 1, ["good"]],
+  ["Test Wi-Fi access point", "Network and Wi-Fi", 12000, 2, ["good", "good"]],
+  ["Test prayer-time display", "Prayer-time displays", 50000, 1, ["good"]],
+  ["Test janazah bier", "Funeral (janazah and ghusl) equipment", 60000, 1, ["good"]],
 ];
 
 const CONSUMABLE: [name: string, category: string, unit: string, minimumLevel: number][] = [
@@ -91,8 +119,8 @@ const CONSUMABLE: [name: string, category: string, unit: string, minimumLevel: n
   ["Test paper towels", "Cleaning supplies", "pack", 8],
   ["Test printer paper", "Stationery", "ream", 5],
   ["Test pens", "Stationery", "box", 3],
-  ["Test tea bags", "Kitchen", "box", 4],
-  ["Test paper cups", "Kitchen", "pack", 10],
+  ["Test tea bags", "Kitchen supplies", "box", 4],
+  ["Test paper cups", "Kitchen supplies", "pack", 10],
 ];
 
 export function seedItems(): SeedItem[] {
@@ -125,6 +153,28 @@ export function seedItems(): SeedItem[] {
   for (const place of stockPlaces) {
     for (const [name, category, unit, minimumLevel] of CONSUMABLE) {
       items.push({ label: labelSerial(label++), kind: "consumable", name, category, location: place, unit, minimumLevel });
+    }
+  }
+
+  // P1.17: the equipment, spread over the rooms and buildings.
+  let spot = 0;
+  for (const [base, category, valueCents, count, conditions] of EQUIPMENT) {
+    for (let n = 1; n <= count; n++) {
+      const year = 2019 + (spot % 7);
+      const month = String((spot % 12) + 1).padStart(2, "0");
+      items.push({
+        label: labelSerial(label++),
+        kind: "fixed_asset",
+        name: `${base} ${String(n).padStart(2, "0")}`,
+        category,
+        location: fixedPlaces[(spot * 5) % fixedPlaces.length],
+        condition: conditions[(n - 1) % conditions.length],
+        valueCents,
+        purchaseDate: `${year}-${month}-10`,
+        // Most are still under a made-up warranty; some have ended.
+        warrantyEnd: spot % 3 === 2 ? undefined : `${year + (spot % 2 === 0 ? 8 : 3)}-${month}-10`,
+      });
+      spot++;
     }
   }
   return items;
@@ -469,13 +519,16 @@ export function seedSignsOff(indexInList: number): boolean {
 
 // ---------------------------------------------------------------------------
 // Phase 2, slice P2.7: three made-up vehicles on labels ICCI-000297 to 299
-// (from the free labels; 221 to 296 stay free). Registrations are obviously
+// (from the free labels; 257 to 296 stay free). P1.17: each names its
+// sub-category under the main category "Vehicles". Registrations are obviously
 // fictional. Dates are counted from the day the seed runs so the list shows
 // every status: valid, due soon, expired, not recorded, and NCT not needed.
 export type SeedRenewal = { kind: "tax" | "insurance" | "nct"; ago: number; validFor: number };
 export type SeedVehicle = {
   label: string;
   name: string;
+  /** A sub-category under "Vehicles" (migration 0041). */
+  category: "Cars and vans" | "Minibuses and buses";
   registration: string;
   makeModel: string;
   keeper: string | null;
@@ -487,6 +540,7 @@ export const SEED_VEHICLES: SeedVehicle[] = [
   {
     label: labelSerial(297),
     name: "Test minibus (made up)",
+    category: "Minibuses and buses",
     registration: "TEST-BUS-1",
     makeModel: "Sample Minibus 16-seat",
     keeper: SEED_PEOPLE[16].full_name,
@@ -501,6 +555,7 @@ export const SEED_VEHICLES: SeedVehicle[] = [
   {
     label: labelSerial(298),
     name: "Test van (made up)",
+    category: "Cars and vans",
     registration: "TEST-VAN-1",
     makeModel: "Example Van",
     keeper: SEED_PEOPLE[17].full_name,
@@ -513,6 +568,7 @@ export const SEED_VEHICLES: SeedVehicle[] = [
   {
     label: labelSerial(299),
     name: "Test car (made up)",
+    category: "Cars and vans",
     registration: "TEST-CAR-1",
     makeModel: "Placeholder Hatchback",
     keeper: null,

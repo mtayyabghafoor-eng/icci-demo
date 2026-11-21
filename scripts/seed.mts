@@ -5,7 +5,8 @@
 // Slice 2: their roles (app_users) and 15 fictional locations.
 // Slice 3: an authenticator for each account (keys kept in the git-ignored
 //          .test-authenticators.json, never printed).
-// Slice 4: 300 fictional labels and 220 fictional items.
+// Slice 4: 300 fictional labels and 220 fictional items (P1.17: 256, in
+//          the two-level categories of migration 0041).
 // Slice 5: made-up stock counts and restocks for the consumables, and two
 //          corrections waiting for approval.
 // Slice 6: made-up moves, damage and missing reports, repairs and two
@@ -212,6 +213,10 @@ if (!runCount) {
 const { data: cats, error: catError } = await admin.from("item_categories").select("id, name");
 if (catError) throw catError;
 const catIds = new Map(cats.map((c) => [c.name, c.id]));
+// P1.17: every seed item names a sub-category from migration 0041.
+for (const name of new Set(seedItems().map((i) => i.category))) {
+  if (!catIds.has(name)) throw new Error(`No "${name}" category. Has migration 0041 been applied?`);
+}
 
 const items = D(seedItems());
 const { data: existingItems, error: existingError } = await admin
@@ -623,15 +628,21 @@ if (!stocktakeCount) {
 }
 
 // 13. Vehicles (P2.7): only those not already there (matched by registration).
-// Each is first an ordinary asset in the "Vehicles" category on its label.
+// Each is first an ordinary asset on its label, in its sub-category under
+// "Vehicles" (P1.17).
 {
   const { data: existing, error } = await admin.from("vehicles").select("registration").in("registration", SEED_VEHICLES.map((v) => v.registration));
   if (error) throw error;
   const already = new Set(existing.map((v) => v.registration));
   const toAdd = SEED_VEHICLES.filter((v) => !already.has(v.registration));
   if (toAdd.length) {
-    const { data: cat, error: catErr } = await admin.from("item_categories").select("id").eq("name", "Vehicles").single();
-    if (catErr) throw new Error('No "Vehicles" category. Has migration 0025 been applied?');
+    const { data: vehicleCats, error: catErr } = await admin
+      .from("item_categories")
+      .select("id, name")
+      .in("name", [...new Set(SEED_VEHICLES.map((v) => v.category))]);
+    if (catErr) throw catErr;
+    const vehicleCat = new Map(vehicleCats.map((c) => [c.name, c.id]));
+    for (const v of toAdd) if (!vehicleCat.has(v.category)) throw new Error(`No "${v.category}" category. Has migration 0041 been applied?`);
     const { data: keepers, error: kErr } = await admin.from("people").select("id, full_name").in("full_name", SEED_PEOPLE.map((p) => p.full_name));
     if (kErr) throw kErr;
     const keeperId = new Map(keepers.map((p) => [p.full_name, p.id]));
@@ -641,7 +652,7 @@ if (!stocktakeCount) {
       if (!item) {
         const made = await admin
           .from("items")
-          .insert({ label_serial: v.label, kind: "fixed_asset", name: v.name, category_id: cat.id, location_id: ids.get(D("Test Building B"))!, condition: "good" })
+          .insert({ label_serial: v.label, kind: "fixed_asset", name: v.name, category_id: vehicleCat.get(v.category)!, location_id: ids.get(D("Test Building B"))!, condition: "good" })
           .select("id")
           .single();
         if (made.error) throw made.error;

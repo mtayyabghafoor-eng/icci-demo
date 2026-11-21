@@ -1,5 +1,5 @@
 // After a test run: switch off the made-up places, people, training types
-// (P2.4), policies (P2.5), vehicles (P2.7), renewals (P2.8), rota slot types (P3.1), rota templates (P3.4), library books (P4.2) and library borrowers (P4.4) that the tests created (names starting "Test run "), so the
+// (P2.4), policies (P2.5), vehicles (P2.7), renewals (P2.8), rota slot types (P3.1), rota templates (P3.4), library books (P4.2), library borrowers (P4.4) and categories (P1.17) that the tests created (names starting "Test run "), so the
 // development screens are not crowded with thousands of them. Nothing is
 // deleted; each switch-off is an ordinary change, recorded in the audit log
 // like any other.
@@ -23,7 +23,7 @@ const SEED_BUILDING = "Test Building A";
 const WHO = "Test run tidy-up";
 const NOTE = "Test run tidy-up: moved out of a test place so the place can be switched off.";
 
-export type TidyResult = { books: number; borrowers: number; people: number; trainingTypes: number; slotTypes: number; rotaTemplates: number; policies: number; vehicles: number; renewals: number; warrantiesCleared: number; places: number; placesLeftOn: number; chairsMoved: number; stockCounted: number };
+export type TidyResult = { categories: number; books: number; borrowers: number; people: number; trainingTypes: number; slotTypes: number; rotaTemplates: number; policies: number; vehicles: number; renewals: number; warrantiesCleared: number; places: number; placesLeftOn: number; chairsMoved: number; stockCounted: number };
 
 function inGroups<T>(all: T[], size: number): T[][] {
   const groups: T[][] = [];
@@ -174,6 +174,19 @@ export async function switchOffTestLeftovers(db: SupabaseClient, prefix = "Test 
     : { data: [], error: null };
   if (borrowers.error) throw new Error(borrowers.error.message);
 
+  // P1.17: test categories. Sub-categories first: a main category is
+  // switched off only once its sub-categories are (one at a time, so one
+  // refusal does not stop the rest).
+  const subCats = await db.from("item_categories").update({ active: false }).eq("active", true).not("parent_id", "is", null).like("name", `${prefix}%`).select("id");
+  if (subCats.error) throw new Error(subCats.error.message);
+  const testMains = await db.from("item_categories").select("id").eq("active", true).is("parent_id", null).like("name", `${prefix}%`);
+  if (testMains.error) throw new Error(testMains.error.message);
+  let categories = subCats.data?.length ?? 0;
+  for (const group of inGroups((testMains.data ?? []).map((c) => c.id as string), AT_ONCE)) {
+    const results = await Promise.all(group.map((id) => db.from("item_categories").update({ active: false }).eq("id", id).select("id")));
+    categories += results.filter((r) => !r.error && r.data?.length).length;
+  }
+
   let left = await activeTestPlaces(db, prefix);
   const emptied = await emptyPlaces(db, left.map((l) => l.id));
 
@@ -196,5 +209,5 @@ export async function switchOffTestLeftovers(db: SupabaseClient, prefix = "Test 
     left = await activeTestPlaces(db, prefix);
     if (done === 0) break;
   }
-  return { books: books.data?.length ?? 0, borrowers: borrowers.data?.length ?? 0, people: people.data?.length ?? 0, trainingTypes: trainingTypes.data?.length ?? 0, slotTypes: slotTypes.data?.length ?? 0, rotaTemplates: rotaTemplates.data?.length ?? 0, policies: policies.data?.length ?? 0, vehicles, renewals: renewals.data?.length ?? 0, warrantiesCleared: warranties.data?.length ?? 0, places, placesLeftOn: left.length, ...emptied };
+  return { categories, books: books.data?.length ?? 0, borrowers: borrowers.data?.length ?? 0, people: people.data?.length ?? 0, trainingTypes: trainingTypes.data?.length ?? 0, slotTypes: slotTypes.data?.length ?? 0, rotaTemplates: rotaTemplates.data?.length ?? 0, policies: policies.data?.length ?? 0, vehicles, renewals: renewals.data?.length ?? 0, warrantiesCleared: warranties.data?.length ?? 0, places, placesLeftOn: left.length, ...emptied };
 }

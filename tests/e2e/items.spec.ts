@@ -50,7 +50,7 @@ test("scan a new label, register, open, edit and see the history", async ({ page
   await page.getByRole("textbox", { name: "Name", exact: true }).fill(name);
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByText("Step 2 of 2")).toBeVisible();
-  await page.getByRole("combobox", { name: "Category", exact: true }).selectOption({ label: "Furniture" });
+  await page.getByRole("combobox", { name: "Category", exact: true }).selectOption({ label: "Chairs" });
   await page.getByRole("combobox", { name: "Location", exact: true }).selectOption({ label: "Test Building A › Test Room A1" });
   await page.getByTestId("photo-input").setInputFiles({ name: "test.png", mimeType: "image/png", buffer: await fakePhoto(page) });
   await expect(page.getByRole("img", { name: "Preview of the new photo" })).toBeVisible();

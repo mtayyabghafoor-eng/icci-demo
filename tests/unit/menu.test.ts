@@ -19,6 +19,8 @@ describe("menuFor: each role sees only what it can use", () => {
   it("P1.16: Places sits next to Register an item; Disposals waiting is under Assets", () => {
     const items = MENU.find((g) => g.title === "Items and stock")!.links.map((l) => l.label);
     expect(items.indexOf("Places")).toBe(items.indexOf("Register an item") + 1);
+    // P1.17: Categories comes straight after Places.
+    expect(items.indexOf("Categories")).toBe(items.indexOf("Places") + 1);
     expect(MENU.find((g) => g.title === "Assets")!.links.map((l) => l.label)).toContain("Disposals waiting");
   });
   it("an unknown role sees nothing", () => {
@@ -49,6 +51,11 @@ describe("activeLink: which link is marked as the current page", () => {
     // P1.16: Disposals waiting has its own link, so the menu marks the right one.
     ["/assets/approvals", "Disposals waiting"],
     ["/places/abc/register", "Places"],
+    // P1.17: the category list and its pages.
+    ["/categories", "Categories"],
+    ["/categories/new", "Categories"],
+    ["/categories/abc", "Categories"],
+    ["/categories/abc/edit", "Categories"],
     ["/assets/not-seen", "Not seen in 12 months"],
     ["/assets/register", "Asset register"],
     ["/people", "People"],

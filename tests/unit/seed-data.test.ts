@@ -21,7 +21,9 @@ import {
   seedLibrary,
   SEED_BORROWERS,
   seedLoans,
+  SEED_VEHICLES,
 } from "../../scripts/seed-data.mts";
+import { readFileSync } from "node:fs";
 import { normaliseIsbn } from "@/lib/library/rules";
 
 describe("seed data is obviously fictional", () => {
@@ -98,6 +100,23 @@ describe("seed items and labels", () => {
   it("no two consumables with the same name share a place", () => {
     const keys = items.filter((x) => x.kind === "consumable").map((i) => `${i.location}|${i.name}`);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  // P1.17: every seed item and vehicle names a sub-category that migration
+  // 0041 creates (the seed looks categories up by name).
+  it("every item and vehicle is in a sub-category from the starting list", () => {
+    const sql = readFileSync("supabase/migrations/0041_two_level_categories.sql", "utf8");
+    for (const name of new Set([...items.map((i) => i.category), ...SEED_VEHICLES.map((v) => v.category)])) {
+      expect(sql, name).toContain(`'${name}'`);
+    }
+  });
+
+  it("gives the new sub-categories something to count: air conditioners, lawnmowers, a gate", () => {
+    const inCat = (c: string) => items.filter((i) => i.category === c);
+    expect(inCat("Air conditioners").length).toBeGreaterThanOrEqual(8);
+    expect(inCat("Air conditioners").some((i) => i.condition === "damaged")).toBe(true);
+    expect(inCat("Lawnmowers").length).toBeGreaterThanOrEqual(2);
+    expect(inCat("Automatic gates and barriers").length).toBeGreaterThanOrEqual(1);
   });
 
   it("labelSerial pads to six digits", () => {

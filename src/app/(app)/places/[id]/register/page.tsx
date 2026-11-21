@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import { Check } from "lucide-react";
 import { Button, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
+import { categoryGroups, type CategoryRow } from "@/lib/categories/rules";
 import { parseLabelNumber } from "@/lib/items/rules";
 import { roomDefaults, roomListSince, stockAllowedIn, type LastItem } from "@/lib/places/room-register";
 import { KIND_WORD } from "@/lib/places/rules";
@@ -83,7 +84,7 @@ async function Content({
   const since = roomListSince();
 
   const [cats, last, mine, inUse] = await Promise.all([
-    supabase.from("item_categories").select("id, name").eq("active", true).order("name"),
+    supabase.from("item_categories").select("id, name, parent_id, active").order("name"),
     supabase
       .from("items")
       .select("kind, category_id, unit, minimum_level")
@@ -140,7 +141,7 @@ async function Content({
             placeId={id}
             label={used ? "" : (scanned ?? "")}
             defaults={defaults}
-            categories={cats.data ?? []}
+            categoryGroups={categoryGroups((cats.data ?? []) as CategoryRow[], { pickable: true })}
             stockAllowed={stockAllowedIn(place.kind)}
           />
         </Card>

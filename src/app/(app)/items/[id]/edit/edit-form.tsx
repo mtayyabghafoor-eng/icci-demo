@@ -3,12 +3,14 @@
 // label are not on this form: the database refuses changes to them here.
 import { useActionState, useRef, startTransition } from "react";
 import { FormError } from "@/app/sign-in/ui";
+import type { CategoryGroup } from "@/lib/categories/rules";
+import { CategoryOptions } from "../../../categories/options";
 import { updateItem, type ItemFormState } from "../../actions";
 import type { ItemRow } from "../../data";
 import { PhotoInput } from "../../photo-input";
 import { fieldClass } from "../../ui";
 
-export function EditForm({ item, categories }: { item: ItemRow; categories: { id: string; name: string }[] }) {
+export function EditForm({ item, categoryGroups }: { item: ItemRow; categoryGroups: CategoryGroup[] }) {
   const [state, action, pending] = useActionState<ItemFormState, FormData>(updateItem.bind(null, item.id), { error: null });
   const photo = useRef<File | null>(null);
 
@@ -29,11 +31,7 @@ export function EditForm({ item, categories }: { item: ItemRow; categories: { id
       <label className="block">
         <span className="font-semibold">Category</span>
         <select name="category_id" required defaultValue={item.category_id} className={fieldClass}>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
+          <CategoryOptions groups={categoryGroups} />
         </select>
       </label>
 

@@ -24,7 +24,7 @@ const master = () =>
 async function newTestAsset(project: string) {
   const db = master();
   const [cat, loc] = await Promise.all([
-    db.from("item_categories").select("id").eq("name", "Furniture").single(),
+    db.from("item_categories").select("id").eq("name", "Other furniture").single(),
     db.from("locations").select("id").eq("name", "Test Room A1").single(),
   ]);
   const name = `Test run ${Date.now()} ${project} bookcase`;

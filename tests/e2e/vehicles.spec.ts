@@ -31,7 +31,7 @@ async function newVehicleAsset(project: string) {
   const label = `ICCI-${String((run as { first_number: number }).first_number).padStart(6, "0")}`;
   const db = master();
   const [cat, place] = await Promise.all([
-    db.from("item_categories").select("id").eq("name", "Vehicles").single(),
+    db.from("item_categories").select("id").eq("name", "Cars and vans").single(),
     db.from("locations").select("id").eq("name", "Test Building B").single(),
   ]);
   const name = `Test run ${Date.now()} ${project} van`;

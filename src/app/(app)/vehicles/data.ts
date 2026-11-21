@@ -16,12 +16,19 @@ export async function keeperChoices(supabase: SupabaseClient, current?: string |
   );
 }
 
-/** Assets in the "Vehicles" category, not disposed of, with no vehicle details yet. */
+/**
+ * Assets in any sub-category of the "Vehicles" main category (Cars and vans,
+ * Minibuses and buses, ...; P1.17), not disposed of, with no vehicle
+ * details yet.
+ */
 export async function assetChoices(supabase: SupabaseClient): Promise<Choice[]> {
-  const { data: cat } = await supabase.from("item_categories").select("id").eq("name", "Vehicles").maybeSingle();
-  if (!cat) return [];
+  const { data: main } = await supabase.from("item_categories").select("id").eq("name", "Vehicles").is("parent_id", null).maybeSingle();
+  if (!main) return [];
+  const { data: subs } = await supabase.from("item_categories").select("id").eq("parent_id", main.id);
+  const inside = ((subs ?? []) as { id: string }[]).map((c) => c.id);
+  if (inside.length === 0) return [];
   const [{ data: items }, { data: taken }] = await Promise.all([
-    supabase.from("items").select("id, name, label_serial, condition").eq("category_id", cat.id).eq("kind", "fixed_asset").neq("condition", "disposed").order("name"),
+    supabase.from("items").select("id, name, label_serial, condition").in("category_id", inside).eq("kind", "fixed_asset").neq("condition", "disposed").order("name"),
     supabase.from("vehicles").select("item_id"),
   ]);
   const used = new Set(((taken ?? []) as { item_id: string }[]).map((t) => t.item_id));

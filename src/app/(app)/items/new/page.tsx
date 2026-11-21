@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { categoryGroups } from "@/lib/categories/rules";
 import { locationOptions, parseLabelNumber } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../data";
@@ -48,7 +49,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/items/new">
       </p>
       <RegisterForm
         label={label}
-        categories={categories.filter((c) => c.active)}
+        categoryGroups={categoryGroups(categories, { pickable: true })}
         allPlaces={locationOptions(locations)}
         stockPlaces={locationOptions(locations, ["store_room", "shelf"])}
         place={typeof params.location === "string" ? params.location : undefined}

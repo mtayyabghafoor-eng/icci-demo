@@ -43,7 +43,7 @@ async function newPerson(active = true) {
 }
 
 async function newVehicle(extra: Record<string, unknown> = {}) {
-  const asset = await newFixedAsset("centre_admin", { name: testName("van"), category_id: await idOf("item_categories", "Vehicles") });
+  const asset = await newFixedAsset("centre_admin", { name: testName("van"), category_id: await idOf("item_categories", "Cars and vans") });
   const { data, error } = await (await asRole("centre_admin"))
     .from("vehicles")
     .insert({ item_id: asset.id, registration: reg(), make_model: "Test Van (made up)", ...extra })

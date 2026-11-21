@@ -45,7 +45,7 @@ async function newTestRoom(project: string) {
   const shelf = await one(
     db.from("locations").insert({ name: `Test run ${stamp} top shelf`, kind: "shelf", parent_id: store }).select("id").single(),
   );
-  const furniture = await one(db.from("item_categories").select("id").eq("name", "Furniture").single());
+  const furniture = await one(db.from("item_categories").select("id").eq("name", "Other furniture").single());
   const cleaning = await one(db.from("item_categories").select("id").eq("name", "Cleaning supplies").single());
   const item = async (fields: Record<string, unknown>) => {
     const label = await newTestLabel();

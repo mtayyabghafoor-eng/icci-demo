@@ -45,7 +45,7 @@ describe("who can see the inventory", () => {
       const labels = await c.from("labels").select("serial").eq("serial", "ICCI-000001");
       expect(labels.data).toHaveLength(1);
       const cats = await c.from("item_categories").select("name");
-      expect(cats.data!.map((x) => x.name)).toEqual(expect.arrayContaining(["Furniture", "Cleaning supplies", "Other"]));
+      expect(cats.data!.map((x) => x.name)).toEqual(expect.arrayContaining(["Furniture and furnishings", "Other furniture", "Cleaning supplies", "Other", "Other items"]));
     });
   }
 });

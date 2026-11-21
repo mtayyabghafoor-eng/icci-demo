@@ -5,6 +5,8 @@
 //   Step 3, consumables only: how is it counted (unit, minimum level)
 import { useActionState, useRef, useState, startTransition } from "react";
 import { FormError } from "@/app/sign-in/ui";
+import type { CategoryGroup } from "@/lib/categories/rules";
+import { CategoryOptions } from "../../categories/options";
 import { registerItem, type ItemFormState } from "../actions";
 import { PhotoInput } from "../photo-input";
 import { fieldClass } from "../ui";
@@ -13,7 +15,8 @@ type Option = { id: string; path: string };
 
 export function RegisterForm(props: {
   label: string;
-  categories: { id: string; name: string }[];
+  /** Main categories with their sub-categories (items go in a sub-category, P1.17). */
+  categoryGroups: CategoryGroup[];
   allPlaces: Option[];
   stockPlaces: Option[];
   /** A place chosen before (from a place page, slice P1.12), filled in if it fits. */
@@ -101,11 +104,7 @@ export function RegisterForm(props: {
             <option value="" disabled>
               Choose a category
             </option>
-            {props.categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
+            <CategoryOptions groups={props.categoryGroups} />
           </select>
         </label>
         <label className="block">
