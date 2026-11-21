@@ -10,7 +10,7 @@ export type Category = CategoryRow;
 
 export async function loadLookups(supabase: SupabaseClient) {
   const [cats, locations] = await Promise.all([
-    supabase.from("item_categories").select("id, name, parent_id, active").order("name"),
+    supabase.from("item_categories").select("id, name, parent_id, active, icon").order("name"),
     // Every place, even past the 1,000 rows one request can return.
     allRows<LocationRow>((from, to) =>
       supabase.from("locations").select("id, name, kind, parent_id, active").order("id").range(from, to),

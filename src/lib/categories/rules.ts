@@ -7,7 +7,9 @@
 // items in a sub-category only, names unique across the whole list, nothing
 // switched on inside a switched-off main category.
 
-export type CategoryRow = { id: string; name: string; parent_id: string | null; active: boolean };
+import { isCategoryIcon, type CategoryIconKey } from "./icons";
+
+export type CategoryRow = { id: string; name: string; parent_id: string | null; active: boolean; icon?: string };
 
 export type CategoryGroup = { main: CategoryRow; subs: CategoryRow[] };
 
@@ -62,14 +64,20 @@ export function categoryGroups(
     .filter((g) => !options.pickable || g.subs.length > 0);
 }
 
-/** The add or rename form: a tidy name, 60 characters at most. */
+/**
+ * The add or rename form: a tidy name, 60 characters at most, and for a
+ * main category the picture chosen from the fixed list (migration 0042).
+ */
 export function parseCategoryForm(
   get: (name: string) => string,
-): { ok: true; values: { name: string } } | { ok: false; error: string } {
+): { ok: true; values: { name: string; icon?: CategoryIconKey } } | { ok: false; error: string } {
   const name = get("name").trim().replace(/\s+/g, " ");
   if (!name) return { ok: false, error: "Please give the category a name." };
   if (name.length > MAX_CATEGORY_NAME) return { ok: false, error: `Keep the name to ${MAX_CATEGORY_NAME} characters or fewer.` };
-  return { ok: true, values: { name } };
+  const icon = get("icon");
+  if (!icon) return { ok: true, values: { name } };
+  if (!isCategoryIcon(icon)) return { ok: false, error: "Choose one of the pictures." };
+  return { ok: true, values: { name, icon } };
 }
 
 /** The database's refusals in plain words. Its own messages are already plain. */

@@ -12,6 +12,7 @@ export type IconKey =
   | "labels"
   | "places"
   | "categories"
+  | "whatWeOwn"
   | "missing"
   | "disposals"
   | "notSeen"
@@ -86,6 +87,7 @@ export const MENU: MenuGroup[] = [
   {
     title: "Assets",
     links: [
+      { href: "/assets/overview", label: "What we own", icon: "whatWeOwn", roles: ADMINS },
       { href: "/assets", label: "Missing and damaged", icon: "missing", roles: ADMINS },
       { href: "/assets/approvals", label: "Disposals waiting", icon: "disposals", roles: ADMINS },
       { href: "/assets/not-seen", label: "Not seen in 12 months", icon: "notSeen", roles: ADMINS },

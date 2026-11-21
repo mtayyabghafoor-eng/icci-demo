@@ -33,17 +33,27 @@ test("the category list; add a main category and a sub-category; rename; switch 
   await signInAs(page, centre, "/categories");
   await expect(page.getByRole("heading", { level: 1, name: "Categories" })).toBeVisible();
   await expectCurrentMenuLink(page, "Categories");
-  const garden = page.getByTestId("category-group").filter({ hasText: "Garden, tools and cleaning equipment" });
-  await expect(garden).toContainText("Lawnmowers");
-  await expect(garden).toContainText("Other tools and equipment");
-  // "Other" comes last.
-  await expect(page.getByTestId("category-group").last()).toContainText("Other items");
+  // Main categories are tiles with a picture; "Other" comes last.
+  const tiles = page.getByTestId("category-tile");
+  await expect(tiles.filter({ hasText: "Garden, tools and cleaning equipment" })).toContainText(/\d+ sub-categories/);
+  await expect(tiles.last()).toContainText("Other");
+  await expect(tiles.first().locator("svg").first()).toBeVisible();
   await s(page, "categories-list", project);
+
+  // Opening a main category shows its sub-categories, with how many we have.
+  await tiles.filter({ hasText: "Garden, tools and cleaning equipment" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Garden, tools and cleaning equipment" })).toBeVisible();
+  const lawn = page.getByTestId("sub-categories").getByTestId("category-tile").filter({ hasText: "Lawnmowers" });
+  await expect(lawn).toContainText(/\d+ assets · \d+ working/);
+  await expect(page.getByTestId("sub-categories").getByTestId("category-tile").last()).toContainText("Other tools and equipment");
+  await s(page, "main-category-page", project);
+  await page.goto("/categories");
 
   // A new main category.
   await page.getByRole("link", { name: "Add a main category" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Add a Main Category" })).toBeVisible();
   await page.getByLabel("Name", { exact: true }).filter({ visible: true }).fill(`${stamp} main`);
+  await page.getByLabel("Garden").check();
   await s(page, "add-main-category", project);
   await page.getByRole("button", { name: "Add main category" }).click();
   await expect(page.getByRole("heading", { level: 1, name: `${stamp} main` })).toBeVisible();

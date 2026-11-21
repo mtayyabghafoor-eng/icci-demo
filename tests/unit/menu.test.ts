@@ -57,6 +57,8 @@ describe("activeLink: which link is marked as the current page", () => {
     ["/categories/abc", "Categories"],
     ["/categories/abc/edit", "Categories"],
     ["/assets/not-seen", "Not seen in 12 months"],
+    // P1.18
+    ["/assets/overview", "What we own"],
     ["/assets/register", "Asset register"],
     ["/people", "People"],
     ["/people/7/vetting", "People"],

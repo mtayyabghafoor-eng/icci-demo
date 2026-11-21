@@ -28,6 +28,7 @@ import {
   Printer,
   QrCode,
   ScanLine,
+  Shapes,
   ShieldCheck,
   TriangleAlert,
   Wrench,
@@ -218,6 +219,7 @@ async function HomeContent() {
                 <ChevronDown aria-hidden size={18} className="transition-transform duration-200 group-open:rotate-180" />
               </summary>
               <div className="-mx-1 mt-1 flex flex-col">
+                <QuickAction href="/assets/overview" icon={Shapes} label="What we own" hint="How many of each, and how many work" />
                 <QuickAction href="/stock/count" icon={ClipboardCheck} label="Weekly count" hint="Count a store room's shelves" />
                 <QuickAction href="/stocktake" icon={ScanLine} label="Stocktake" hint="Check a room against the records" />
                 <QuickAction href="/people/vetting" icon={ShieldCheck} label="Garda vetting" hint="Who is due, expired or missing" />

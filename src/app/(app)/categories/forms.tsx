@@ -6,9 +6,11 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { buttonClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
+import { CATEGORY_ICON_KEYS, CATEGORY_ICON_WORDS } from "@/lib/categories/icons";
 import { MAX_CATEGORY_NAME } from "@/lib/categories/rules";
 import { fieldClass } from "../items/ui";
 import { addCategory, saveCategory, setCategoryActive, type CategoryFormState } from "./actions";
+import { CategoryIcon } from "./icon";
 
 const box = "mt-4 space-y-5 rounded-2xl border border-icci-line bg-white p-5 shadow-card";
 
@@ -22,7 +24,7 @@ export function CategoryForm({
   /** Adding: the main category it goes inside (null for a new main category). */
   parentId?: string | null;
   /** Renaming: the category as it is now. */
-  category?: { id: string; name: string; parent_id: string | null };
+  category?: { id: string; name: string; parent_id: string | null; icon?: string };
   /** Renaming a sub-category: the main categories it may move to. */
   mains?: { id: string; name: string }[];
   isSub: boolean;
@@ -53,6 +55,24 @@ export function CategoryForm({
           className={fieldClass}
         />
       </div>
+      {!isSub && (
+        <fieldset>
+          <legend className="font-semibold">Picture</legend>
+          <p className="text-sm">Shown on the category&apos;s tile, always with its name.</p>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {CATEGORY_ICON_KEYS.map((key) => (
+              <label
+                key={key}
+                className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border border-[#c9d3cf] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50"
+              >
+                <input type="radio" name="icon" value={key} defaultChecked={(category?.icon ?? "other") === key} className="accent-icci-green-dark" />
+                <CategoryIcon icon={key} size={20} className="text-icci-green-dark" />
+                <span className="text-sm">{CATEGORY_ICON_WORDS[key]}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
       {category && isSub && mains && (
         <div>
           <label htmlFor="parent_id" className="font-semibold">

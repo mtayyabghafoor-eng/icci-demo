@@ -1,16 +1,17 @@
-// Categories (slice P1.17): every main category with its sub-categories,
-// "Other" always last. Super Admins and Centre Admins add, rename, move and
-// switch off categories from here; nothing is ever deleted.
+// Categories (slice P1.17, tiles added at the owner's request): the main
+// categories as tiles with a picture; opening one shows its sub-categories.
+// Super Admins and Centre Admins add, rename, move and switch off categories
+// from here; nothing is ever deleted.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FolderTree, Plus } from "lucide-react";
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { EmptyState, LinkButton, PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { categoryGroups } from "@/lib/categories/rules";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge } from "../items/ui";
 import { allCategories, MAY_SEE_CATEGORIES } from "./data";
+import { CategoryTile } from "./tile";
 
 export const metadata: Metadata = { title: "Categories | ICCI Control Dashboard" };
 
@@ -31,7 +32,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/categories"
   const header = (
     <PageHeader
       title="Categories"
-      subtitle="What kind of thing each item is: a main category, then a sub-category inside it. Every item sits in a sub-category."
+      subtitle="What kind of thing each item is. Open a main category to see its sub-categories. Every item sits in a sub-category."
       actions={allowed ? <LinkButton href="/categories/new" icon={Plus}>Add a main category</LinkButton> : undefined}
     />
   );
@@ -49,53 +50,31 @@ async function Content({ searchParams }: { searchParams: PageProps<"/categories"
   return (
     <>
       {header}
-      {offCount > 0 && (
-        <p className="mb-4 text-sm">
-          {showOff ? (
+      <p className="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+        <Link href="/assets/overview">See how many of each we have</Link>
+        {offCount > 0 &&
+          (showOff ? (
             <Link href="/categories">Hide switched-off categories</Link>
           ) : (
             <Link href="/categories?off=1">
               Show {offCount} switched-off {offCount === 1 ? "category" : "categories"}
             </Link>
-          )}
-        </p>
-      )}
+          ))}
+      </p>
       {groups.length === 0 ? (
         <EmptyState icon={FolderTree} title="No categories yet">
           Start by adding a main category.
         </EmptyState>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2" data-testid="categories-tree">
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="categories-tree" aria-label="Main categories">
           {groups.map(({ main, subs }) => (
-            <div key={main.id} data-testid="category-group">
-            <Card className="h-full">
-              <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <Link href={`/categories/${main.id}`} className="text-lg font-bold">
-                  {main.name}
-                </Link>
-                {!main.active && <StatusBadge word="Switched off" tone="grey" />}
-              </p>
-              {subs.length === 0 ? (
-                <p className="mt-2 text-sm text-icci-ink-60">No sub-categories yet.</p>
-              ) : (
-                <ul className="mt-3 flex flex-wrap gap-2" aria-label={`Sub-categories of ${main.name}`}>
-                  {subs.map((s) => (
-                    <li key={s.id}>
-                      <Link
-                        href={`/categories/${s.id}`}
-                        className="inline-flex min-h-9 items-center gap-2 rounded-full border border-icci-line bg-icci-panel px-3 py-1 text-sm font-semibold text-icci-green no-underline hover:border-icci-green/60"
-                      >
-                        {s.name}
-                        {!s.active && <span className="font-normal text-icci-ink-60">(switched off)</span>}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-            </div>
+            <li key={main.id}>
+              <CategoryTile href={`/categories/${main.id}`} icon={main.icon} name={main.name} active={main.active}>
+                {subs.length === 0 ? "No sub-categories yet" : `${subs.length} sub-categor${subs.length === 1 ? "y" : "ies"}`}
+              </CategoryTile>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </>
   );

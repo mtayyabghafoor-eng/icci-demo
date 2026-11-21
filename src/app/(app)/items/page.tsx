@@ -4,11 +4,15 @@ import Link from "next/link";
 import { PackagePlus } from "lucide-react";
 import { Suspense } from "react";
 import { LinkButton, PageHeader, Pagination, Skeleton } from "@/components/ui";
+import { matchCategories, NO_COUNT } from "@/lib/categories/counts";
 import { categoryAndInside, categoryGroups } from "@/lib/categories/rules";
 import { CONDITION_STATUS, CONDITIONS, KIND_LABEL, cleanSearch, locationAndInside, locationOptions } from "@/lib/items/rules";
 import type { StockStatus } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
 import { CategoryOptions } from "../categories/options";
+import { categoryCounts } from "../categories/data";
+import { CategoryTile, CountLine } from "../categories/tile";
+import { itemsWithOpenTickets, searchFilter, WORKING } from "./search";
 import { loadLookups, type ItemRow } from "./data";
 import { FindLabel } from "./find-label";
 import { ItemStatus } from "./ui";
@@ -51,6 +55,8 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
   const category = one(params.category);
   const location = one(params.location);
   const condition = one(params.condition);
+  // P1.18: "with a maintenance ticket not yet closed" (from What we own).
+  const tickets = one(params.tickets) === "open" ? "open" : "";
   const page = Math.max(1, Number.parseInt(one(params.page) || "1", 10) || 1);
 
   const supabase = await createClient();
@@ -66,7 +72,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       .order("name")
       .order("label_serial")
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-    if (q) query = query.or(`name.ilike.*${q}*,label_serial.ilike.*${q}*`);
+    if (q) query = query.or(await searchFilter(supabase, q, (await lookupsReady).categories));
     if (kind === "fixed_asset" || kind === "consumable") query = query.eq("kind", kind);
     if (UUID.test(category)) {
       const { categories } = await lookupsReady;
@@ -76,7 +82,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       const { locations } = await lookupsReady;
       query = query.in("location_id", locationAndInside(location, locations));
     }
-    if ((CONDITIONS as string[]).includes(condition)) query = query.eq("condition", condition);
+    if (condition === "working") query = query.in("condition", WORKING);
+    else if ((CONDITIONS as string[]).includes(condition)) query = query.eq("condition", condition);
+    if (tickets) query = query.in("id", await itemsWithOpenTickets(supabase));
     return query;
   };
   const [lookups, { data, count }] = await Promise.all([lookupsReady, searchItems()]);
@@ -88,11 +96,14 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
   const stockOf = new Map(((levels ?? []) as { item_id: string; status: StockStatus }[]).map((l) => [l.item_id, l.status]));
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const filtered = Boolean(q || kind || category || location || condition);
+  const filtered = Boolean(q || kind || category || location || condition || tickets);
+  // P1.18: "lawnmower" also shows the Lawnmowers total first.
+  const matched = q ? matchCategories(q, lookups.categories).slice(0, 4) : [];
+  const matchedCounts = matched.length ? await categoryCounts(supabase, categoryGroups(lookups.categories, { showOff: true })) : null;
 
-  const pageLink = (n: number) => {
+  const pageLink = (n: number, overrides: Record<string, string> = {}) => {
     const p = new URLSearchParams();
-    for (const [k, v] of Object.entries({ q, kind, category, location, condition })) if (v) p.set(k, v);
+    for (const [k, v] of Object.entries({ q, kind, category, location, condition, tickets, ...overrides })) if (v) p.set(k, v);
     if (n > 1) p.set("page", String(n));
     const s = p.toString();
     return s ? `/items?${s}` : "/items";
@@ -104,7 +115,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="search" aria-label="Search items">
         <label className="lg:col-span-2">
           <span className="font-semibold">Search</span>
-          <input name="q" defaultValue={q} placeholder="Name or label number" className={select} />
+          <input name="q" defaultValue={q} placeholder="Name, label or kind of thing" className={select} />
         </label>
         <label>
           <span className="font-semibold">Kind</span>
@@ -136,6 +147,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
           <span className="font-semibold">Condition</span>
           <select name="condition" defaultValue={condition} className={select}>
             <option value="">Any condition</option>
+            <option value="working">Working (good or fair)</option>
             {CONDITIONS.map((c) => (
               <option key={c} value={c}>
                 {CONDITION_STATUS[c].word}
@@ -153,8 +165,31 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
             </Link>
           )}
         </div>
+        {tickets && <input type="hidden" name="tickets" value={tickets} />}
         <FilterFold />
       </form>
+
+      {tickets && (
+        <p className="mt-3 text-sm" data-testid="open-tickets-filter">
+          Only items with a maintenance ticket not yet closed.{" "}
+          <Link href={pageLink(1, { tickets: "" })}>Show all</Link>
+        </p>
+      )}
+
+      {matched.length > 0 && matchedCounts && (
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2" data-testid="matching-categories" aria-label="Matching categories">
+          {matched.map((c) => {
+            const main = c.parent_id ? lookups.categories.find((m) => m.id === c.parent_id) : c;
+            return (
+              <li key={c.id}>
+                <CategoryTile href={`/items?category=${c.id}`} icon={main?.icon} name={lookups.categoryName.get(c.id) ?? c.name}>
+                  <CountLine count={matchedCounts.get(c.id) ?? NO_COUNT} />
+                </CategoryTile>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <p className="list-count" data-testid="item-count">
         {total === 0 ? "No items match." : `${total} item${total === 1 ? "" : "s"}${pages > 1 ? ` · page ${page} of ${pages}` : ""}`}
