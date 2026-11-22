@@ -411,6 +411,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 22 Nov 2026, session 44 (continued): online demo made realistic (owner's
+  decisions): real Dublin firms and the real FAAC 391 and Mitsubishi MSZ-AP
+  manuals (git-ignored demo-files/; the Honda manual is 16 MB, over the
+  10 MB limit, so it is not stored), male Arabic admin names, people's
+  phones in the unused 01 000 range, no emails, about 80 items, no Demo
+  banner, label tag or "made up" note. Demo wiped (third time, owner's yes)
+  and refilled with migrations 0041-0046. The first push failed on Vercel:
+  categories/icon.tsx is a special Next.js file name; renamed, and npm test
+  now ends with the production build. New npm run test:speed: all 33 main
+  pages under 0.5 s on PC and phone, no browser errors. Full run: 1,778
+  unit and database tests, 303 browser tests, build: all passed.
+
 - 22 Nov 2026, session 44 (P1.18 to P1.21, migrations 0042 to 0046; owner
   asked for all of it in one go): category pictures and tiles; "What we
   own" (Total, Working, Not working, Missing, open tickets, per place;
