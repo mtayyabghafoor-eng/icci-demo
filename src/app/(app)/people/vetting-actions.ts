@@ -5,21 +5,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyVettingError, parseVettingForm, parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type VettingFormState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 export async function recordVetting(personId: string, _state: VettingFormState, form: FormData): Promise<VettingFormState> {
   if (!UUID.test(personId)) return { error: "This person could not be found." };
-  const parsed = parseVettingForm(getter(form), todayInDublin());
+  const parsed = parseVettingForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { error } = await supabase.from("vetting_records").insert({ person_id: personId, ...parsed.values });
@@ -29,7 +21,7 @@ export async function recordVetting(personId: string, _state: VettingFormState, 
 
 export async function withdrawVetting(personId: string, recordId: number, form: FormData): Promise<void> {
   if (!UUID.test(personId) || !Number.isSafeInteger(recordId)) redirect("/people");
-  const reason = parseWithdrawReason(getter(form)("reason"));
+  const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/people/${personId}?done=withdraw-reason`);
   const supabase = await createClient();
   const { data, error } = await supabase

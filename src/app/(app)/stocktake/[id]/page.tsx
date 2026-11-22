@@ -26,7 +26,7 @@ import { Notice, PrimaryLink, StatusBadge } from "../../items/ui";
 import { adminNames } from "../../stock/data";
 import { carryOn, stopScanning } from "../actions";
 import { type Difference, loadItems, loadScans, loadStocktake } from "../data";
-import { DecideDifferenceForm, LabelBox } from "../forms";
+import { DecideDifferenceForm, LabelBox, StocktakeCamera } from "../forms";
 import { BackLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Stocktake | ICCI Control Dashboard" };
@@ -141,6 +141,7 @@ async function Content({
               </form>
             )}
           </div>
+          <StocktakeCamera stocktakeId={props.id} />
           <LabelBox stocktakeId={props.id} />
         </section>
 

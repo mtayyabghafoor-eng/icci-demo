@@ -24,10 +24,9 @@ import { BackLink } from "@/components/ui";
 import { allCompanies, allModels } from "../../companies/data";
 import { ContactCard } from "../../companies/contact-card";
 import { DocumentsCard } from "../../documents/documents-card";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Item | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function ItemPage(props: PageProps<"/items/[id]">) {
   return (

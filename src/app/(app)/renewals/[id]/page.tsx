@@ -15,10 +15,9 @@ import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui"
 import { setRenewalActive, withdrawDueDate } from "../actions";
 import { CannotSeeRenewals } from "../cannot-see";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Renewal | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const DONE: Record<string, string> = {
   added: "Renewal added. It is now in the register.",

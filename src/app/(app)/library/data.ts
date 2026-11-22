@@ -19,7 +19,9 @@ export type Book = {
 };
 export type Copy = { id: string; book_id: string; label_serial: string; copy_note: string | null; created_at: string };
 
-export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID } from "@/lib/forms";
+
+export { UUID };
 
 export async function loadBook(supabase: SupabaseClient, id: string): Promise<Book | null> {
   if (!UUID.test(id)) return null;

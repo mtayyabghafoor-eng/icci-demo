@@ -7,6 +7,7 @@
 // already has people on it.
 import { isTime, SLOT_GROUP_LABEL, type SlotGroup } from "./rules";
 import { timeText } from "./week";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -48,8 +49,6 @@ export const KIND_TEXT: Record<TemplateKind, string> = {
   week: "Whole week",
   day: "One day (Eid)",
 };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type NewTemplateSlot = {
   slot_type_id: string;

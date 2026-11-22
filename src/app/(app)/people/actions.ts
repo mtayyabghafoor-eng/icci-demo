@@ -4,23 +4,15 @@
 import { redirect } from "next/navigation";
 import { friendlyPeopleError, parsePersonForm, sameNameAs } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type SameName = { id: string; full_name: string; active: boolean };
 export type PersonFormState = { error: string | null; sameName?: SameName[] };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 /** Adds a person (id null) or saves changes to one. */
 export async function savePerson(id: string | null, _state: PersonFormState, form: FormData): Promise<PersonFormState> {
   if (id !== null && !UUID.test(id)) return { error: "This person could not be found." };
-  const parsed = parsePersonForm(getter(form));
+  const parsed = parsePersonForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
 

@@ -10,10 +10,9 @@ import { CannotSeeVehicles } from "../../cannot-see";
 import { keeperChoices } from "../../data";
 import { VehicleForm } from "../../forms";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Change vehicle | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function EditVehiclePage(props: PageProps<"/vehicles/[id]/edit">) {
   return (

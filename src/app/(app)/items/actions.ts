@@ -7,18 +7,12 @@ import { friendlyDbError, parseEdit, parseRegister } from "@/lib/items/form";
 import { createClient } from "@/lib/supabase/server";
 import { photoFrom, savePhoto } from "./photos";
 import { insertNewItem } from "./register";
+import { formGetter } from "@/lib/forms";
 
 export type ItemFormState = { error: string | null };
 
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 export async function registerItem(_state: ItemFormState, form: FormData): Promise<ItemFormState> {
-  const parsed = parseRegister(getter(form));
+  const parsed = parseRegister(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const photo = photoFrom(form);
   if (typeof photo === "string") return { error: photo };
@@ -33,7 +27,7 @@ export async function updateItem(id: string, _state: ItemFormState, form: FormDa
   const { data: item } = await supabase.from("items").select("id, kind, label_serial").eq("id", id).maybeSingle();
   if (!item) return { error: "This item could not be found." };
 
-  const parsed = parseEdit(getter(form), item.kind);
+  const parsed = parseEdit(formGetter(form), item.kind);
   if (!parsed.ok) return { error: parsed.error };
   const photo = photoFrom(form);
   if (typeof photo === "string") return { error: photo };

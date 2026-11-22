@@ -16,12 +16,11 @@ import { companyFilter, itemsWithOpenTickets, searchFilter, WORKING } from "./se
 import { loadLookups, type ItemRow } from "./data";
 import { FindLabel } from "./find-label";
 import { ItemStatus } from "./ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Items | ICCI Control Dashboard" };
 
 const PAGE_SIZE = 50;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export default function ItemsPage(props: PageProps<"/items">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">

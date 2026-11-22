@@ -5,6 +5,7 @@
 import { describeDisposal, type DisposalDetails } from "@/lib/assets/disposal";
 import { CONDITION_STATUS, type Condition, type Tone } from "@/lib/items/rules";
 import { whoName } from "@/lib/ui/text";
+import { UUID } from "@/lib/forms";
 
 export type AssetEventKind = "move" | "damage" | "missing" | "back_in_use" | "disposal";
 
@@ -47,8 +48,6 @@ type FormValues = {
   to_location_id?: string;
   to_condition?: "good" | "fair";
 };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function text(raw: string, max: number, missing: string, tooLong: string): Parsed<string> {
   const value = raw.trim();

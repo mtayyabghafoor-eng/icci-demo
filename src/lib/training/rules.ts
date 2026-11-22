@@ -7,6 +7,7 @@
 import { csvCell } from "@/lib/assets/lists";
 import { formatDate, type Tone } from "@/lib/items/rules";
 import { addYears, daysBetween, isDate, todayInDublin } from "@/lib/vetting/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -79,8 +80,6 @@ export function usualLengthText(usualYears: number | null): string {
 // Forms
 
 export type TrainingValues = { training_type_id: string; completed_on: string; expires_on: string | null };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** An empty expiry means "no expiry" (the screen fills it in from the type's usual length). */
 export function parseTrainingForm(get: Get, today: string): Result<TrainingValues> {

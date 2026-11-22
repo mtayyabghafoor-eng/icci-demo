@@ -1,11 +1,11 @@
 // Checks what an admin typed into the register and edit forms, and turns it
 // into database values. The database checks the same rules again.
 import { parseEuro, parseLabelNumber, type ItemKind } from "./rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function text(get: Get, name: string, max = 200): string {

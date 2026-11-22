@@ -17,7 +17,9 @@ export type Place = {
 
 export const PLACE_COLUMNS = "id, name, kind, parent_id, active, code, notes";
 
-export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID } from "@/lib/forms";
+
+export { UUID };
 
 /**
  * Every place, by name. Read page by page: one request returns at most 1,000

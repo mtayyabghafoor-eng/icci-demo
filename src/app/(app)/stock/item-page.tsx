@@ -8,8 +8,7 @@ import { loadLookups } from "../items/data";
 import { StatusBadge } from "../items/ui";
 import { stockLevelOf, type StockLevel } from "./data";
 import { BackLink } from "@/components/ui";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID } from "@/lib/forms";
 
 export async function loadConsumable(id: string) {
   if (!UUID.test(id)) notFound();

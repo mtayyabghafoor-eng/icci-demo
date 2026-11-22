@@ -6,21 +6,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CHILD_KIND, friendlyPlaceError, isPlaceKind, parsePlaceForm } from "@/lib/places/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type PlaceFormState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 /** Adds a building (no parent) or the next kind of place inside a parent. */
 export async function addPlace(parentId: string | null, _state: PlaceFormState, form: FormData): Promise<PlaceFormState> {
-  const parsed = parsePlaceForm(getter(form));
+  const parsed = parsePlaceForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   let kind = "building";
@@ -42,7 +34,7 @@ export async function addPlace(parentId: string | null, _state: PlaceFormState, 
 
 export async function savePlace(placeId: string, _state: PlaceFormState, form: FormData): Promise<PlaceFormState> {
   if (!UUID.test(placeId)) return { error: "This place could not be found." };
-  const parsed = parsePlaceForm(getter(form));
+  const parsed = parsePlaceForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("locations").update(parsed.values).eq("id", placeId).select("id");

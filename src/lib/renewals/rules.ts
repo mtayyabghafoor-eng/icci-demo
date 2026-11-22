@@ -6,6 +6,7 @@
 // overdue; training dates are left out; Super Admin and Centre Admin only.
 import type { Tone } from "@/lib/items/rules";
 import { addYears, isDate } from "@/lib/vetting/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -125,7 +126,6 @@ export function statusesFor(show: RegisterFilter["show"]): RegisterStatus[] {
 // ---------------------------------------------------------------------------
 // Forms
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const tidy = (s: string) => s.trim().replace(/\s+/g, " ");
 
 export type RenewalValues = {

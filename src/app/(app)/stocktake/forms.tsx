@@ -1,7 +1,9 @@
 "use client";
 // The stocktake forms. Scanning screens are phone-first: big buttons, one tap
 // for "Seen here", a number keypad for shelves.
+import { BarcodeCamera } from "@/components/shell/camera-scanner";
 import { Stepper } from "@/components/ui/stepper";
+import { labelFromScan } from "@/lib/items/scan";
 import { startTransition, useActionState, type FormEvent } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { fieldClass } from "../items/ui";
@@ -53,6 +55,28 @@ export function StartForm({ rooms }: { rooms: { id: string; path: string; busy: 
         {pending ? "Starting…" : "Start the stocktake"}
       </button>
     </form>
+  );
+}
+
+/**
+ * The camera inside the app (owner's report 21 Nov 2026: during a stocktake
+ * the camera did not open). Each label it reads opens straight in this
+ * stocktake, like a typed number. Shown where the browser can read codes
+ * (Chrome on Android); elsewhere the phone's own Camera app still works.
+ */
+export function StocktakeCamera({ stocktakeId }: { stocktakeId: number }) {
+  return (
+    <BarcodeCamera
+      target={{
+        formats: ["qr_code"],
+        accept: labelFromScan,
+        hrefFor: (label) => `/stocktake/${stocktakeId}/scan?label=${label}`,
+        title: "Scan the next label",
+        hint: "Point the camera at the square code on the item's or shelf's label.",
+        wrongCode: "That code is not an ICCI item label. Point the camera at the square code on an item label.",
+        testId: "stocktake-camera",
+      }}
+    />
   );
 }
 

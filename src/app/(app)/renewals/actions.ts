@@ -7,20 +7,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyRenewalError, parseDueDate, parseRenewalDetails, parseRenewedForm } from "@/lib/renewals/rules";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type RenewalFormState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 export async function addRenewal(_state: RenewalFormState, form: FormData): Promise<RenewalFormState> {
-  const get = getter(form);
+  const get = formGetter(form);
   const parsed = parseRenewalDetails(get);
   if (!parsed.ok) return { error: parsed.error };
   const due = parseDueDate(get("due_on"), todayInDublin());
@@ -41,7 +33,7 @@ export async function addRenewal(_state: RenewalFormState, form: FormData): Prom
 
 export async function saveRenewal(renewalId: string, _state: RenewalFormState, form: FormData): Promise<RenewalFormState> {
   if (!UUID.test(renewalId)) return { error: "This renewal could not be found." };
-  const parsed = parseRenewalDetails(getter(form));
+  const parsed = parseRenewalDetails(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("renewals").update(parsed.values).eq("id", renewalId).select("id");
@@ -60,7 +52,7 @@ export async function setRenewalActive(renewalId: string, active: boolean): Prom
 
 export async function markRenewed(renewalId: string, _state: RenewalFormState, form: FormData): Promise<RenewalFormState> {
   if (!UUID.test(renewalId)) return { error: "This renewal could not be found." };
-  const parsed = parseRenewedForm(getter(form), todayInDublin());
+  const parsed = parseRenewedForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { error } = await supabase.from("renewal_dates").insert({ renewal_id: renewalId, ...parsed.values });
@@ -70,7 +62,7 @@ export async function markRenewed(renewalId: string, _state: RenewalFormState, f
 
 export async function withdrawDueDate(renewalId: string, entryId: number, form: FormData): Promise<void> {
   if (!UUID.test(renewalId) || !Number.isSafeInteger(entryId)) redirect("/renewals");
-  const reason = parseWithdrawReason(getter(form)("reason"));
+  const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/renewals/${renewalId}?done=withdraw-reason`);
   const supabase = await createClient();
   const { data, error } = await supabase

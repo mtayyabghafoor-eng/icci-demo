@@ -13,10 +13,10 @@ const TONE_CLASS: Record<Tone, string> = {
 };
 
 /** A colour with a word beside it, always (PLAN.md section 4). Same look as StatusPill. */
-export function StatusBadge({ word, tone }: { word: string; tone: Tone }) {
+export function StatusBadge({ word, tone, testId = "status" }: { word: string; tone: Tone; testId?: string }) {
   return (
     <span
-      data-testid="status"
+      data-testid={testId}
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[13px] leading-none font-semibold ${TONE_CLASS[tone]}`}
     >
       <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-current" />

@@ -7,22 +7,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyVehicleError, parseRenewalForm, parseVehicleForm } from "@/lib/vehicles/rules";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type VehicleFormState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 export async function addVehicle(_state: VehicleFormState, form: FormData): Promise<VehicleFormState> {
-  const itemId = getter(form)("item_id").trim();
+  const itemId = formGetter(form)("item_id").trim();
   if (!UUID.test(itemId)) return { error: "Please pick the asset this vehicle is." };
-  const parsed = parseVehicleForm(getter(form));
+  const parsed = parseVehicleForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("vehicles").insert({ item_id: itemId, ...parsed.values }).select("id").single();
@@ -32,7 +24,7 @@ export async function addVehicle(_state: VehicleFormState, form: FormData): Prom
 
 export async function saveVehicle(vehicleId: string, _state: VehicleFormState, form: FormData): Promise<VehicleFormState> {
   if (!UUID.test(vehicleId)) return { error: "This vehicle could not be found." };
-  const parsed = parseVehicleForm(getter(form));
+  const parsed = parseVehicleForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("vehicles").update(parsed.values).eq("id", vehicleId).select("id");
@@ -51,7 +43,7 @@ export async function setVehicleActive(vehicleId: string, active: boolean): Prom
 
 export async function recordRenewal(vehicleId: string, _state: VehicleFormState, form: FormData): Promise<VehicleFormState> {
   if (!UUID.test(vehicleId)) return { error: "This vehicle could not be found." };
-  const parsed = parseRenewalForm(getter(form), todayInDublin());
+  const parsed = parseRenewalForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { error } = await supabase.from("vehicle_renewals").insert({ vehicle_id: vehicleId, ...parsed.values });
@@ -61,7 +53,7 @@ export async function recordRenewal(vehicleId: string, _state: VehicleFormState,
 
 export async function withdrawRenewal(vehicleId: string, renewalId: number, form: FormData): Promise<void> {
   if (!UUID.test(vehicleId) || !Number.isSafeInteger(renewalId)) redirect("/vehicles");
-  const reason = parseWithdrawReason(getter(form)("reason"));
+  const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/vehicles/${vehicleId}?done=withdraw-reason`);
   const supabase = await createClient();
   const { data, error } = await supabase

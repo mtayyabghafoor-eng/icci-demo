@@ -8,6 +8,7 @@
 import type { Tone } from "@/lib/items/rules";
 import { addDays, isDate } from "@/lib/vetting/rules";
 import { fullDayLabel, isTime, shortTime, SLOT_GROUP_LABEL, TIME_LABEL, type SlotGroup, type TimeKey } from "./rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -122,8 +123,6 @@ export type NewSlot = {
   end_time: string | null;
   note: string | null;
 };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** `groupOf` maps each switched-on slot type to its group. */
 export function parseAddSlotForm(get: Get, monday: string, groupOf: Map<string, SlotGroup>): Result<NewSlot> {

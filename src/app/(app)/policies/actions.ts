@@ -15,17 +15,9 @@ import {
   policyFilePath,
 } from "@/lib/policies/rules";
 import { todayInDublin } from "@/lib/vetting/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type PolicyFormState = { error: string | null };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -52,7 +44,7 @@ async function setRequiredRoles(supabase: Supabase, policyId: string, wanted: st
 }
 
 export async function addPolicy(_state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
-  const parsed = parsePolicyForm(getter(form));
+  const parsed = parsePolicyForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const roles = pickedRoles(form.getAll("roles").map(String), await knownRoles(supabase));
@@ -65,7 +57,7 @@ export async function addPolicy(_state: PolicyFormState, form: FormData): Promis
 
 export async function savePolicy(policyId: string, _state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
   if (!UUID.test(policyId)) return { error: "This policy could not be found." };
-  const parsed = parsePolicyForm(getter(form));
+  const parsed = parsePolicyForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("policies").update(parsed.values).eq("id", policyId).select("id");
@@ -99,7 +91,7 @@ async function savePdf(supabase: Supabase, policyId: string, pdf: File): Promise
 
 export async function uploadVersion(policyId: string, _state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
   if (!UUID.test(policyId)) return { error: "This policy could not be found." };
-  const parsed = parseVersionForm(getter(form), todayInDublin());
+  const parsed = parseVersionForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
   const pdf = await pdfFrom(form);
   if (typeof pdf === "string") return { error: pdf };
@@ -114,7 +106,7 @@ export async function uploadVersion(policyId: string, _state: PolicyFormState, f
 
 export async function saveDraft(policyId: string, versionId: string, _state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
   if (!UUID.test(policyId) || !UUID.test(versionId)) return { error: "This version could not be found." };
-  const parsed = parseVersionForm(getter(form), todayInDublin());
+  const parsed = parseVersionForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
   const pdf = await pdfFrom(form);
   if (typeof pdf === "string") return { error: pdf };

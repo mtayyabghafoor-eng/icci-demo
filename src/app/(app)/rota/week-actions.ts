@@ -9,10 +9,10 @@ import { SLOT_GROUPS, type SlotGroup } from "@/lib/rota/rules";
 import { publishProblem } from "@/lib/rota/publish";
 import { friendlyWeekError, parseAddSlotForm } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
+import { UUID } from "@/lib/forms";
 
 export type AddSlotState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Which short message the slot page shows after a refusal. */

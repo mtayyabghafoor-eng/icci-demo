@@ -94,7 +94,11 @@ export async function ContactCard({ itemId }: { itemId: string }) {
       <CardTitle>If this goes wrong</CardTitle>
       <div className="space-y-3" data-testid="contact-card">
         <p className="flex flex-wrap items-center gap-2">
-          <StatusBadge word={warranty.state === "under" ? `${warranty.word} until ${formatDate(item.warranty_end)}` : warranty.word} tone={warranty.tone} />
+          <StatusBadge
+            word={warranty.state === "under" ? `${warranty.word} until ${formatDate(item.warranty_end)}` : warranty.word}
+            tone={warranty.tone}
+            testId="warranty-status"
+          />
           <span className="text-sm">
             {model ? (
               <>

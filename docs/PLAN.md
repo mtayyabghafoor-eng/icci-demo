@@ -171,6 +171,12 @@ slices P1.17 to P1.21, one per session):
   helpline, documents and past tickets. While under warranty the supplier
   is shown "for warranty claims". New ticket step "Passed to a company"
   (company, their job number, date, note); the assignee stays a person.
+- Added 21 Nov 2026 (owner): each main category has a picture and the
+  Categories and "What we own" screens show tiles that open into their
+  sub-categories. Staff cannot log in, so each category names a contact
+  person from the People list (a sub-category without one uses its main
+  category's), and a printable A4 "If something breaks, phone…" call
+  sheet lists them with the usual service company, for the staff room.
 - Not included: staff reporting problems themselves (no staff logins);
   service contracts as dated records (renewals register as today); repair
   costs as expenses (Phase 5).

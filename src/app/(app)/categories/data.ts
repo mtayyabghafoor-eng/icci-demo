@@ -8,7 +8,9 @@ import { allRows } from "@/lib/supabase/all-rows";
 
 export const MAY_SEE_CATEGORIES = ["super_admin", "centre_admin"];
 
-export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID } from "@/lib/forms";
+
+export { UUID };
 
 /** Every category, main and sub, switched off ones too. */
 export async function allCategories(supabase: SupabaseClient): Promise<CategoryRow[]> {

@@ -16,21 +16,14 @@ import {
   type DayTimes,
   type PrayerDay,
 } from "@/lib/rota/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 /** On a refusal the typed values come back, so a month of typing is never lost. */
 export type MonthFormState = { error: string | null; values: Record<string, string> | null };
 export type SlotFormState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 const SLOTS = "/rota/slot-types";
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
 
 function typed(form: FormData): Record<string, string> {
   const out: Record<string, string> = {};
@@ -50,7 +43,7 @@ export async function savePrayerMonth(month: string, _state: MonthFormState, for
   if (readError) return { error: friendlyRotaError(readError.message), values: typed(form) };
   const existing = new Map(((data ?? []) as PrayerDay[]).map((r) => [r.prayer_date, toDayTimes(r) as DayTimes]));
 
-  const parsed = parsePrayerMonth(month, getter(form), existing);
+  const parsed = parsePrayerMonth(month, formGetter(form), existing);
   if (!parsed.ok) return { error: parsed.error, values: typed(form) };
   const { data: result, error } = await supabase.rpc("save_prayer_month", { p_month: `${month}-01`, p_days: parsed.values });
   if (error) return { error: friendlyRotaError(error.message), values: typed(form) };
@@ -59,7 +52,7 @@ export async function savePrayerMonth(month: string, _state: MonthFormState, for
 }
 
 export async function addSlotType(_state: SlotFormState, form: FormData): Promise<SlotFormState> {
-  const parsed = parseSlotTypeForm(getter(form), "add");
+  const parsed = parseSlotTypeForm(formGetter(form), "add");
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("rota_slot_types").insert(parsed.values).select("id");
@@ -70,7 +63,7 @@ export async function addSlotType(_state: SlotFormState, form: FormData): Promis
 
 export async function saveSlotType(id: string, _state: SlotFormState, form: FormData): Promise<SlotFormState> {
   if (!UUID.test(id)) return { error: "This slot type could not be found." };
-  const parsed = parseSlotTypeForm(getter(form), "edit");
+  const parsed = parseSlotTypeForm(formGetter(form), "edit");
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
   const { data, error } = await supabase.from("rota_slot_types").update(parsed.values).eq("id", id).select("id");

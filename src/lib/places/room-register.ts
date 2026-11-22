@@ -7,11 +7,10 @@
 // the kind of item are filled in from the last item registered there, so
 // each new item needs only its name.
 import type { PlaceKind } from "./rules";
+import { UUID } from "@/lib/forms";
 
 export const ROOM_COOKIE = "icci_room_register";
 export const ROOM_COOKIE_HOURS = 12;
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The cookie's value as a place record number, or null. */
 export function parseRoomCookie(raw: string | null | undefined): string | null {

@@ -7,19 +7,13 @@ import { redirect } from "next/navigation";
 import { friendlyCategoryError, parseCategoryForm } from "@/lib/categories/rules";
 import { createClient } from "@/lib/supabase/server";
 import { UUID } from "./data";
+import { formGetter } from "@/lib/forms";
 
 export type CategoryFormState = { error: string | null };
 
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 /** Adds a main category (no parent) or a sub-category inside a main one. */
 export async function addCategory(parentId: string | null, _state: CategoryFormState, form: FormData): Promise<CategoryFormState> {
-  const parsed = parseCategoryForm(getter(form));
+  const parsed = parseCategoryForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   if (parentId && !UUID.test(parentId)) return { error: "The main category to add it inside could not be found." };
   const supabase = await createClient();
@@ -35,7 +29,7 @@ export async function addCategory(parentId: string | null, _state: CategoryFormS
 /** Renames a category; a sub-category may also move to another main category. */
 export async function saveCategory(categoryId: string, _state: CategoryFormState, form: FormData): Promise<CategoryFormState> {
   if (!UUID.test(categoryId)) return { error: "This category could not be found." };
-  const get = getter(form);
+  const get = formGetter(form);
   const parsed = parseCategoryForm(get);
   if (!parsed.ok) return { error: parsed.error };
   const values: { name: string; icon?: string; parent_id?: string; service_company_id?: string | null; contact_person_id?: string | null } = parsed.values;

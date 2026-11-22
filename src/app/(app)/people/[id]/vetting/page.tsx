@@ -11,10 +11,9 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePeople } from "../../cannot-see";
 import { VettingForm } from "./vetting-form";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Record vetting | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function RecordVettingPage(props: PageProps<"/people/[id]/vetting">) {
   return (

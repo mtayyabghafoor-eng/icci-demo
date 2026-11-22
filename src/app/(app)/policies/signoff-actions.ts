@@ -7,17 +7,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlySignoffError, parseSignoffForm, SCAN_BUCKET, scanFrom, scanPath } from "@/lib/policies/signoffs";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
+import { UUID, formGetter } from "@/lib/forms";
 
 export type SignoffFormState = { error: string | null };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
 
 /** One signed sheet: the same date (and scan) for every person ticked, saved together or not at all. */
 export async function recordSignoffs(policyId: string, versionId: string, _state: SignoffFormState, form: FormData): Promise<SignoffFormState> {
@@ -25,7 +17,7 @@ export async function recordSignoffs(policyId: string, versionId: string, _state
   const supabase = await createClient();
   const { data: version } = await supabase.from("policy_versions").select("approved_on").eq("id", versionId).eq("policy_id", policyId).maybeSingle();
   if (!version) return { error: "This version could not be found." };
-  const parsed = parseSignoffForm(getter(form), form.getAll("people").map(String), todayInDublin(), version.approved_on);
+  const parsed = parseSignoffForm(formGetter(form), form.getAll("people").map(String), todayInDublin(), version.approved_on);
   if (!parsed.ok) return { error: parsed.error };
   const scan = scanFrom(form);
   if (typeof scan === "string") return { error: scan };
@@ -46,7 +38,7 @@ export async function recordSignoffs(policyId: string, versionId: string, _state
 
 export async function withdrawSignoff(policyId: string, signoffId: number, form: FormData): Promise<void> {
   if (!UUID.test(policyId) || !Number.isSafeInteger(signoffId)) redirect("/policies");
-  const reason = parseWithdrawReason(getter(form)("reason"));
+  const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/policies/${policyId}?done=withdraw-reason`);
   const supabase = await createClient();
   const { data, error } = await supabase.from("policy_signoffs").update({ withdrawn_reason: reason.values }).eq("id", signoffId).select("id");

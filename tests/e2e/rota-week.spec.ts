@@ -41,7 +41,7 @@ async function newTestPerson(project: string) {
     db.from("sections").select("id").eq("name", "Volunteers").single(),
   ]);
   const full_name = `Test run ${Date.now()} ${project} Rotaperson`;
-  const { data, error } = await db.from("people").insert({ full_name, person_role_id: role.data!.id, section_id: section.data!.id }).select("id").single();
+  const { error } = await db.from("people").insert({ full_name, person_role_id: role.data!.id, section_id: section.data!.id });
   if (error) throw error;
   return full_name;
 }

@@ -5,6 +5,7 @@
 // publishing; scans optional; nobody records their own sign-off.
 import type { Tone } from "@/lib/items/rules";
 import { isDate } from "@/lib/vetting/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -118,8 +119,6 @@ export function filterSquares(squares: Square[], f: GridFilter): Square[] {
 
 // ---------------------------------------------------------------------------
 // The Record sign-off form
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type SignoffValues = { people: string[]; signed_on: string };
 

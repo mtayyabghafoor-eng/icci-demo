@@ -2,6 +2,7 @@
 // form accepts, the same-name warning, and status words. The database
 // enforces the same rules itself (migration 0017).
 import type { Tone } from "@/lib/items/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -14,8 +15,6 @@ export type PersonValues = {
   email: string | null;
   start_date: string | null;
 };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** 6 to 20 digits; + only at the start; spaces, brackets and dashes allowed. */
 export function isPhone(raw: string): boolean {

@@ -38,10 +38,9 @@ import { CannotSeePolicies } from "../cannot-see";
 import { withdrawSignoff } from "../signoff-actions";
 import { roleChoices } from "../data";
 import { RoleBoxes } from "../forms";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Policy | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const DONE: Record<string, string> = {
   added: "Policy added. Now upload its first version.",

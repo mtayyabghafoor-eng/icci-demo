@@ -5,6 +5,7 @@
 // allowed; the keeper is any switched-on person, or nobody.
 import type { Tone } from "@/lib/items/rules";
 import { addYears, isDate } from "@/lib/vetting/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -92,8 +93,6 @@ export const suggestedUntil = (renewedOn: string) => (isDate(renewedOn) ? addYea
 
 // ---------------------------------------------------------------------------
 // Forms
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** "ab 12-c 3" → "AB 12-C 3": capitals, single spaces. */
 export function tidyRegistration(raw: string): string {

@@ -12,10 +12,9 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePeople } from "../../cannot-see";
 import { TrainingForm } from "./training-form";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Record training | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function RecordTrainingPage(props: PageProps<"/people/[id]/training">) {
   return (

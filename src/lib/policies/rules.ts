@@ -6,6 +6,7 @@
 // required and suggested as one year after approval.
 import type { Tone } from "@/lib/items/rules";
 import { addYears, isDate } from "@/lib/vetting/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
@@ -98,8 +99,6 @@ export function policyFilePath(policyId: string, fileId: string = crypto.randomU
 
 // ---------------------------------------------------------------------------
 // Forms
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type PolicyValues = { title: string; owner_person_id: string };
 

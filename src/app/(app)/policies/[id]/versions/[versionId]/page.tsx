@@ -11,10 +11,10 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePolicies } from "../../../cannot-see";
 import { VersionForm } from "../../../forms";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Change draft | ICCI Control Dashboard" };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const note = "mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3";
 
 export default function ChangeDraftPage(props: PageProps<"/policies/[id]/versions/[versionId]">) {

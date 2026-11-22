@@ -3,11 +3,10 @@
 // so they can be unit-tested. The database enforces the same rules itself
 // (migration 0044).
 import { isEmail, isPhone, tidyName } from "@/lib/people/rules";
+import { UUID } from "@/lib/forms";
 
 type Get = (name: string) => string;
 type Result<T> = { ok: true; values: T } | { ok: false; error: string };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const COMPANY_KINDS = {
   supplier: "Supplier",

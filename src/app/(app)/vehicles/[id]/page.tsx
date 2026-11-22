@@ -24,10 +24,9 @@ import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui"
 import { setVehicleActive, withdrawRenewal } from "../actions";
 import { CannotSeeVehicles } from "../cannot-see";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Vehicle | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const DONE: Record<string, string> = {
   added: "Vehicle registered. Now record its motor tax, insurance and NCT.",

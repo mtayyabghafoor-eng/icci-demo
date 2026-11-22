@@ -14,10 +14,9 @@ import { AssetEventForm } from "../../../../assets/forms";
 import { loadLookups, type ItemRow } from "../../../data";
 import { ItemStatus } from "../../../ui";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Asset | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function AssetActionPage(props: PageProps<"/items/[id]/asset/[action]">) {
   return (

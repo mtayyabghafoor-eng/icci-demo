@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { parseLabelNumber } from "@/lib/items/rules";
 import { friendlyLibraryError, parseBookForm, parseCopyNote } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
+import { UUID, formGetter } from "@/lib/forms";
 
 /**
  * After a refusal the form is drawn again with what was typed (values), so
@@ -20,22 +21,13 @@ function refused(form: FormData, state: LibraryFormState, error: string): Librar
   return { error, values, attempt: (state.attempt ?? 0) + 1 };
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 function labelFrom(get: (name: string) => string): string | null {
   return parseLabelNumber(get("label"));
 }
 
 /** Add a book: a new book record and its first copy, saved together. */
 export async function addBook(state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
-  const get = getter(form);
+  const get = formGetter(form);
   const label = labelFrom(get);
   if (!label) return refused(form, state, "Please scan the book's label, or type the number printed on it (for example ICCI-000123).");
   const book = parseBookForm(get);
@@ -62,7 +54,7 @@ export async function addBook(state: LibraryFormState, form: FormData): Promise<
 /** Another copy of a book we have: one more copy, with its own label. */
 export async function addCopy(bookId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
   if (!UUID.test(bookId)) return refused(form, state, "This book could not be found.");
-  const get = getter(form);
+  const get = formGetter(form);
   const label = labelFrom(get);
   if (!label) return refused(form, state, "Please scan the new copy's label, or type the number printed on it (for example ICCI-000123).");
   const note = parseCopyNote(get("copy_note"));
@@ -76,7 +68,7 @@ export async function addCopy(bookId: string, state: LibraryFormState, form: For
 /** Correct a book's details. The audit log keeps what it said before. */
 export async function saveBook(bookId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
   if (!UUID.test(bookId)) return refused(form, state, "This book could not be found.");
-  const book = parseBookForm(getter(form));
+  const book = parseBookForm(formGetter(form));
   if (!book.ok) return refused(form, state, book.error);
   const supabase = await createClient();
   const { data, error } = await supabase.from("library_books").update(book.values).eq("id", bookId).select("id");
@@ -88,7 +80,7 @@ export async function saveBook(bookId: string, state: LibraryFormState, form: Fo
 /** Change a copy's short note (the only thing about a copy that can change). */
 export async function saveCopyNote(copyId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
   if (!UUID.test(copyId)) return refused(form, state, "This copy could not be found.");
-  const note = parseCopyNote(getter(form)("copy_note"));
+  const note = parseCopyNote(formGetter(form)("copy_note"));
   if (!note.ok) return refused(form, state, note.error);
   const supabase = await createClient();
   const { data, error } = await supabase.from("library_copies").update({ copy_note: note.values }).eq("id", copyId).select("id");

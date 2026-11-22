@@ -41,8 +41,9 @@ presentation polish (calmer Home, folding menu, Back button, Library
 overview and desk tabs, label emblem, demo names; 20 Nov 2026). On 21 Nov
 2026 the owner approved slices P1.17 to P1.21 (categories in two levels,
 "What we own", companies and makes and models, documents, "If this goes
-wrong"); P1.17 is done. Next: P1.18, then the rest in order, then
-Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
+wrong"); all five are done (22 Nov 2026), with category pictures, the
+staff call sheet and the in-app camera on the stocktake screen. Next:
+the owner tries them on the demo, then Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -390,6 +391,11 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   contacts live on a make-and-model list; who to call is the item's
   service company, else the model's, else the sub-category's; Claude
   drafted the category list for the owner to edit.
+- P1.18 to P1.21 (21 Nov 2026, owner): pictures on main categories with
+  tiles that open into sub-categories; staff cannot log in, so each
+  category has a contact person and there is a printed call sheet (option
+  chosen over phone numbers on labels or a signed-out report form); the
+  stocktake screen gets the in-app camera (it had none).
 - Tests run on a local Supabase in Docker (20 Nov 2026, owner's choice);
   the demo database may be wiped once and refilled with demo-only names
   (owner agreed 20 Nov 2026).
@@ -404,6 +410,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 22 Nov 2026, session 44 (P1.18 to P1.21, migrations 0042 to 0046; owner
+  asked for all of it in one go): category pictures and tiles; "What we
+  own" (Total, Working, Not working, Missing, open tickets, per place;
+  category_counts); search also finds categories, makes, models, serial
+  numbers and companies; companies and makes and models; item fields
+  (model, maker's serial, supplier, service company); category service
+  company and contact person; documents (asset-documents store, hide with
+  a reason); "If this goes wrong" card on item, ticket and report pages;
+  "Passed to a company" ticket step; staff call sheet; stocktake camera
+  fix. Clean-up: one shared form reader and ID check instead of 14 and 52
+  copies; one page frame (PageShell). Tests first throughout.
 
 - 21 Nov 2026, session 43 (plan for finding, counting and fixing assets;
   slice P1.17, migration 0041): owner raised that the item list is

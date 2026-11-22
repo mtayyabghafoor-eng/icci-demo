@@ -16,10 +16,9 @@ import { CannotSeeRota } from "../../cannot-see";
 import { loadPlaces, loadSlotTypes } from "../../week-data";
 import { setTemplateSlotActive } from "../actions";
 import { AddTemplateSlotForm } from "./forms";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Rota template | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function TemplatePage(props: PageProps<"/rota/templates/[id]">) {
   return (

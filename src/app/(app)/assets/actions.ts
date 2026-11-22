@@ -8,15 +8,9 @@ import { redirect } from "next/navigation";
 import { friendlyAssetError, isAssetAction, parseAssetForm } from "@/lib/assets/rules";
 import { createClient } from "@/lib/supabase/server";
 import { photoFrom, savePhoto } from "../items/photos";
+import { formGetter } from "@/lib/forms";
 
 export type AssetFormState = { error: string | null };
-
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
 
 export async function recordAssetEvent(
   itemId: string,
@@ -25,10 +19,10 @@ export async function recordAssetEvent(
   form: FormData,
 ): Promise<AssetFormState> {
   if (!isAssetAction(action)) return { error: "Unknown action." };
-  const parsed = parseAssetForm(getter(form), action);
+  const parsed = parseAssetForm(formGetter(form), action);
   if (!parsed.ok) return { error: parsed.error };
   // Slice P1.14: a disposal says how the item leaves.
-  const route = action === "dispose" ? parseDisposalFields(getter(form)) : null;
+  const route = action === "dispose" ? parseDisposalFields(formGetter(form)) : null;
   if (route && !route.ok) return { error: route.error };
   const photo = photoFrom(form);
   if (typeof photo === "string") return { error: photo };
@@ -50,9 +44,9 @@ export async function recordAssetEvent(
 
 /** Approve or reject a disposal. The database refuses if it is your own. */
 export async function decideDisposal(eventId: number, _state: AssetFormState, form: FormData): Promise<AssetFormState> {
-  const decision = getter(form)("decision");
+  const decision = formGetter(form)("decision");
   if (decision !== "approved" && decision !== "rejected") return { error: "Choose Approve or Reject." };
-  const note = getter(form)("note").trim();
+  const note = formGetter(form)("note").trim();
   if (decision === "rejected" && !note) return { error: "Write why you are rejecting it." };
   const supabase = await createClient();
   const { data, error } = await supabase

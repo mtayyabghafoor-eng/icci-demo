@@ -8,11 +8,11 @@ import { redirect } from "next/navigation";
 import { SLOT_GROUPS, type SlotGroup } from "@/lib/rota/rules";
 import { friendlyTemplateError, parseTemplateSlotForm, type TemplateKind } from "@/lib/rota/templates";
 import { createClient } from "@/lib/supabase/server";
+import { UUID } from "@/lib/forms";
 
 export type TemplateSlotState = { error: string | null };
 export type UseTemplateState = { error: string | null };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function addTemplateSlot(templateId: string, _state: TemplateSlotState, form: FormData): Promise<TemplateSlotState> {

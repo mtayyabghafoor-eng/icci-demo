@@ -10,10 +10,10 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeeRenewals } from "../../cannot-see";
 import { RenewedForm } from "../../forms";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Mark renewed | ICCI Control Dashboard" };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const note = "mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3";
 
 export default function RenewedPage(props: PageProps<"/renewals/[id]/renewed">) {

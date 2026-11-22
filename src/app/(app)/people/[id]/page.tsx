@@ -39,10 +39,9 @@ import { withdrawTraining } from "../training-actions";
 import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists, PERSON_COLUMNS, type PersonRow } from "../data";
 import { BackLink } from "@/components/ui";
+import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Person | ICCI Control Dashboard" };
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const DONE: Record<string, string> = {
   added: "Person added.",

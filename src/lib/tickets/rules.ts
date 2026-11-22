@@ -4,6 +4,7 @@
 // offer, how lists are ordered and what they say.
 import { toCsv } from "@/lib/assets/lists";
 import { parseEuro, type Tone } from "@/lib/items/rules";
+import { UUID } from "@/lib/forms";
 
 export type TicketStatus = "open" | "in_progress" | "waiting" | "closed";
 export type TicketPriority = "low" | "normal" | "urgent";
@@ -134,8 +135,6 @@ export function describeTicketEvent(e: TicketEventRow, personName: Map<string, s
 
 // ---------------------------------------------------------------------------
 // The "Report a problem" form
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type TicketFormValues = {
   description: string;

@@ -10,8 +10,7 @@ import { friendlyLoanError, parseBorrowerForm, parseDueDate } from "@/lib/librar
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import type { LibraryFormState } from "./actions";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID, formGetter } from "@/lib/forms";
 
 function refused(form: FormData, state: LibraryFormState, error: string): LibraryFormState {
   const values: Record<string, string> = {};
@@ -19,16 +18,9 @@ function refused(form: FormData, state: LibraryFormState, error: string): Librar
   return { error, values, attempt: (state.attempt ?? 0) + 1 };
 }
 
-function getter(form: FormData) {
-  return (name: string) => {
-    const v = form.get(name);
-    return typeof v === "string" ? v : "";
-  };
-}
-
 /** Lend or Return, with a typed label number: find the copy it is on. */
 export async function findCopy(purpose: "lend" | "return", state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
-  const label = parseLabelNumber(getter(form)("label"));
+  const label = parseLabelNumber(formGetter(form)("label"));
   if (!label) return refused(form, state, "Please type the number printed on the book's label, for example ICCI-000123.");
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("label_use", { p_serial: label });
@@ -44,7 +36,7 @@ export async function findCopy(purpose: "lend" | "return", state: LibraryFormSta
 
 /** Add a borrower on their own (not while lending). */
 export async function addBorrower(state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
-  const b = parseBorrowerForm(getter(form));
+  const b = parseBorrowerForm(formGetter(form));
   if (!b.ok) return refused(form, state, b.error);
   const supabase = await createClient();
   const { data, error } = await supabase.from("library_borrowers").insert(b.values).select("id").single();
@@ -55,7 +47,7 @@ export async function addBorrower(state: LibraryFormState, form: FormData): Prom
 /** Correct a borrower's name or contact. The audit log keeps the old values. */
 export async function saveBorrower(borrowerId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
   if (!UUID.test(borrowerId)) return refused(form, state, "This borrower could not be found.");
-  const b = parseBorrowerForm(getter(form));
+  const b = parseBorrowerForm(formGetter(form));
   if (!b.ok) return refused(form, state, b.error);
   const supabase = await createClient();
   const { data, error } = await supabase.from("library_borrowers").update(b.values).eq("id", borrowerId).select("id");
@@ -75,7 +67,7 @@ export async function setBorrowerActive(borrowerId: string, active: boolean, sta
 }
 
 function dueFrom(form: FormData) {
-  return parseDueDate(getter(form)("due_on"), todayInDublin());
+  return parseDueDate(formGetter(form)("due_on"), todayInDublin());
 }
 
 /** Lend a copy to a borrower we have. */
@@ -92,7 +84,7 @@ export async function lendToBorrower(copyId: string, borrowerId: string, state: 
 /** Lend a copy to someone new: the borrower and the loan are saved together. */
 export async function lendToNewBorrower(copyId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
   if (!UUID.test(copyId)) return refused(form, state, "This book could not be found.");
-  const b = parseBorrowerForm(getter(form));
+  const b = parseBorrowerForm(formGetter(form));
   if (!b.ok) return refused(form, state, b.error);
   const due = dueFrom(form);
   if (!due.ok) return refused(form, state, due.error);

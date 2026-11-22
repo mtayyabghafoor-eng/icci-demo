@@ -100,3 +100,32 @@ test("the in-app scanner opens a label, and refuses a code that is not an ICCI l
   );
   expect(stillOn).toBe(false);
 });
+
+// Owner's report, 21 Nov 2026: "when I was going through stocktake to scan,
+// the camera doesn't open". The stocktake screen now has the in-app camera;
+// a label it reads opens in the stocktake, ready to record.
+test("the stocktake screen has the in-app camera, and a scanned label opens in the stocktake", async ({ page }, info) => {
+  const { apiAs } = await import("./helpers");
+  const admin = await apiAs(centre.email);
+  const { data: building } = await admin.from("locations").select("id").eq("name", "Test Building A").single();
+  const room = await admin
+    .from("locations")
+    .insert({ name: `Test run ${Date.now().toString(36)} ${info.project.name} camera room`, kind: "room", parent_id: building!.id })
+    .select("id")
+    .single();
+  if (room.error) throw room.error;
+  const st = await admin.from("stocktakes").insert({ location_id: room.data.id }).select("id").single();
+  if (st.error) throw st.error;
+
+  await fakeCameraAndReader(page);
+  await signIn(page, `/stocktake/${st.data.id}`);
+  const camera = page.getByTestId("stocktake-camera");
+  await expect(camera).toBeVisible();
+  await camera.getByRole("button", { name: "Start the camera" }).click();
+  await expect(camera.getByRole("button", { name: "Stop the camera" })).toBeVisible();
+  await shot(page, "stocktake-camera", info.project.name, "p1-21");
+  await page.evaluate(() => {
+    (window as unknown as { __code: string }).__code = "https://anything.test/l/ICCI-000001";
+  });
+  await expect(page).toHaveURL(new RegExp(`/stocktake/${st.data.id}/scan[?]label=ICCI-000001$`));
+});
