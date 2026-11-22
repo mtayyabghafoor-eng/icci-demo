@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import type { CategoryCount } from "@/lib/categories/counts";
 import { StatusBadge } from "../items/ui";
-import { CategoryBadge } from "./icon";
+import { CategoryBadge } from "./category-icon";
 
 export function CategoryTile({
   href,

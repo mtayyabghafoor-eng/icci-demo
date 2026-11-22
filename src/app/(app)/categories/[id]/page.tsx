@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Notice, StatusBadge } from "../../items/ui";
 import { allCategories, categoryCounts, MAY_SEE_CATEGORIES, UUID } from "../data";
 import { SwitchCategory } from "../forms";
-import { CategoryBadge } from "../icon";
+import { CategoryBadge } from "../category-icon";
 import { CountLinks } from "../count-links";
 import { CategoryTile, CountLine } from "../tile";
 

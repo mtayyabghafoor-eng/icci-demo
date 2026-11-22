@@ -16,7 +16,7 @@ import { allCompanies } from "../../companies/data";
 import { loadLookups } from "../../items/data";
 import { personNames } from "../../tickets/data";
 import { allCategories, MAY_SEE_CATEGORIES } from "../data";
-import { CategoryIcon } from "../icon";
+import { CategoryIcon } from "../category-icon";
 import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = { title: "Call sheet | ICCI Control Dashboard" };

@@ -61,7 +61,9 @@ Run from the project folder. Database commands need `.env.local` (copied from
 
 - Install: `npm install` then `npx playwright install chromium`
 - Run locally: `npm run dev` then open http://localhost:3000
-- Run tests: `npm test` (type check, lint, unit, database, browser)
+- Run tests: `npm test` (type check, lint, unit, database, browser, then the
+  production build that Vercel runs)
+- Speed check of every main page on a production build: `npm run test:speed`
 - Run the permissions tests only: `npm run test:permissions`
 - Apply migrations: `npm run db:push`
 - Tests use the LOCAL Supabase database in Docker by default (Docker Desktop

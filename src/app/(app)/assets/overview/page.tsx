@@ -14,7 +14,7 @@ import { locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { CountLinks } from "../../categories/count-links";
 import { allCategories, categoryCounts, MAY_SEE_CATEGORIES, UUID } from "../../categories/data";
-import { CategoryBadge } from "../../categories/icon";
+import { CategoryBadge } from "../../categories/category-icon";
 import { CategoryTile, CountLine } from "../../categories/tile";
 import { loadLookups } from "../../items/data";
 import { fieldClass } from "../../items/ui";

@@ -10,7 +10,7 @@ import { CATEGORY_ICON_KEYS, CATEGORY_ICON_WORDS } from "@/lib/categories/icons"
 import { MAX_CATEGORY_NAME } from "@/lib/categories/rules";
 import { fieldClass } from "../items/ui";
 import { addCategory, saveCategory, setCategoryActive, type CategoryFormState } from "./actions";
-import { CategoryIcon } from "./icon";
+import { CategoryIcon } from "./category-icon";
 
 const box = "mt-4 space-y-5 rounded-2xl border border-icci-line bg-white p-5 shadow-card";
 
