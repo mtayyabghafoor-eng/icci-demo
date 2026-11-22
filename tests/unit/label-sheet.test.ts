@@ -124,7 +124,8 @@ describe("the Print labels screen", () => {
   it("UI-9: the printed tag is red TEST LABEL in development, a quiet DEMO on the demo, nothing in production", () => {
     expect(labelTag("development")).toBe("TEST LABEL");
     expect(labelTag(undefined)).toBe("TEST LABEL");
-    expect(labelTag("staging")).toBe("DEMO");
+    // 22 Nov 2026: no demo mark on the online demo.
+    expect(labelTag("staging")).toBeNull();
     expect(labelTag("production")).toBeNull();
   });
 

@@ -458,21 +458,6 @@ a.list-card:hover {
   font-size: 2.3mm;
   font-weight: 700;
 }
-/* UI-9: the quiet tag on the online demo (staging), instead of the red one. */
-.label-demo {
-  align-self: flex-start;
-  margin-top: 0.8mm;
-  padding: 0.2mm 0.9mm;
-  border: 0.25mm solid #8a8a8a;
-  border-radius: 0.6mm;
-  color: #6b6b6b;
-  font-size: 1.9mm;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-.place-label-top .label-demo {
-  margin-top: 0;
-}
 /* UI-9: the black dome emblem in the label's top-right corner. */
 .label-emblem {
   position: absolute;

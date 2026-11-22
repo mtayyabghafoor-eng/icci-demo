@@ -23,6 +23,13 @@ from screenshots and plain-language summaries, not from code.
 
 - Made-up data only. Never real names, phone numbers, receipts or documents.
   Seed data must be obviously fictional.
+  One exception (owner's decision, 22 Nov 2026): the online demo (ICCI
+  Staging) may name real Irish suppliers with their published business
+  details and hold real manufacturers' published manuals (scripts/demo-data.mts,
+  files in the git-ignored demo-files/). People in the demo stay invented
+  (male Arabic names for the administration), never real ICCI staff, and
+  their phone numbers use the unused Dublin 01 000 range. Development and
+  test data stay obviously fictional.
 - Never print, log or commit secrets. Keys live in `.env.local`, which is
   git-ignored. Never read or display `.env*` files.
 - Every table has row-level security enabled and a test that proves each role,

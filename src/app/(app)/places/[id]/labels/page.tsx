@@ -113,9 +113,9 @@ async function Content({
           <strong>Before printing:</strong> in the print window choose <strong>A4</strong>, scale <strong>Actual size / 100%</strong> and{" "}
           <strong>no margins</strong>, and turn off headers and footers. These labels need the wider sheets of 14, not the item sheets of 21.
         </p>
-        {test && (
+        {test && tag && (
           <p className="mt-3 text-sm">
-            These are <strong>{tag === "DEMO" ? "demo labels" : "test labels"}</strong>: the app has only its temporary web address. Real labels are printed once ICCI has a permanent
+            These are <strong>test labels</strong>: the app has only its temporary web address. Real labels are printed once ICCI has a permanent
             address.
           </p>
         )}
@@ -155,7 +155,7 @@ function nameSize(name: string): string {
   return "3.4mm";
 }
 
-function PlaceLabel({ cell, link, tag }: { cell: Cell; link: string; tag: "TEST LABEL" | "DEMO" | null }) {
+function PlaceLabel({ cell, link, tag }: { cell: Cell; link: string; tag: "TEST LABEL" | null }) {
   const matrix = qrMatrix(link);
   const size = matrix.length + QR_MARGIN * 2;
   const code = placeCode(cell.place.code);
@@ -168,7 +168,7 @@ function PlaceLabel({ cell, link, tag }: { cell: Cell; link: string; tag: "TEST 
       <div className="place-label-text">
         <div className="place-label-top">
           <span className="place-label-kind">{KIND_WORD[cell.place.kind]}</span>
-          {tag && <span className={tag === "DEMO" ? "label-demo" : "label-test"}>{tag}</span>}
+          {tag && <span className="label-test">{tag}</span>}
           {/* eslint-disable-next-line @next/next/no-img-element -- printed at a fixed size; the whole round logo, never cropped */}
           <img src="/brand/icci-logo-160.png" alt="" className="place-label-logo" />
         </div>

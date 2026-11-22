@@ -24,16 +24,22 @@ describe("demo names (staging demo only)", () => {
     expect(demoText("Test bin bags")).toBe("Bin bags");
   });
 
-  it("keeps people clearly fictional: surname Demo", () => {
-    expect(demoText("Test Amina Sample")).toBe("Amina S. Demo");
-    expect(demoText("Test Aisha Pageturner")).toBe("Aisha Pageturner");
+  it("22 Nov 2026: people get invented male Arabic names; borrowers Arabic family names; no Demo", () => {
+    expect(demoText("Test Amina Sample")).toBe("Abdullah Haddad");
+    expect(demoText("Test Yusuf Placeholder")).toBe("Yusuf Siddiqui");
+    expect(demoText("Test Aisha Pageturner")).toBe("Aisha Qureshi");
+    expect(JSON.stringify(dressForDemo(SEED_PEOPLE))).not.toMatch(/Demo|Example|Sample|Placeholder|Madeup/);
+  });
+
+  it("22 Nov 2026: test phone numbers become Dublin numbers that cannot exist (01 000 …)", () => {
+    expect(demoText("+353 00 000 0101")).toBe("01 000 0101");
   });
 
   it("UI-9: gives the demo admins (and their linked person records) realistic made-up names", () => {
-    expect(demoText("Test Centre Admin")).toBe("Tariq A. Demo");
-    expect(demoText("Test Second Admin")).toBe("Layla M. Demo");
+    expect(demoText("Test Centre Admin")).toBe("Tariq Abdelrahman");
+    expect(demoText("Test Second Admin")).toBe("Luqman Al-Masri");
     const names = dressForDemo(SEED_ADMINS.map((a) => a.displayName));
-    expect(names.every((n) => / Demo$/.test(n))).toBe(true);
+    expect(names.some((n) => /Demo|Test/.test(n))).toBe(false);
     expect(new Set(names).size).toBe(names.length);
   });
 
@@ -57,12 +63,12 @@ describe("demo names (staging demo only)", () => {
     expect(demoText("Test correction: the delivery note said two more")).toBe("Correction: the delivery note said two more");
     expect(demoText("Test policy: Health and safety")).toBe("Health and safety policy");
     expect(demoText("The Little River (made up)")).toBe("The Little River");
-    expect(demoText("Test Author C Example")).toBe("Celine C. Example");
+    expect(demoText("Test Author C Example")).toBe("Dawud Sabri");
     expect(demoText("حديقة القصص (تجريبي)")).toBe("حديقة القصص");
   });
 
   it("leaves everything else alone: emails, labels, categories, roles", () => {
-    for (const s of ["centre.admin@icci-prototype.test", "ICCI-000123", "Furniture", "Imam", "fixed_asset", "+353 00 000 0101"]) {
+    for (const s of ["centre.admin@icci-prototype.test", "ICCI-000123", "Furniture", "Imam", "fixed_asset"]) {
       expect(demoText(s)).toBe(s);
     }
   });

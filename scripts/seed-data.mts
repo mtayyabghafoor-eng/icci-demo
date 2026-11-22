@@ -123,14 +123,21 @@ const CONSUMABLE: [name: string, category: string, unit: string, minimumLevel: n
   ["Test paper cups", "Kitchen supplies", "pack", 10],
 ];
 
-export function seedItems(): SeedItem[] {
+/**
+ * The made-up items. `small` (the online demo, owner's choice 22 Nov 2026):
+ * about 70 instead of 256, so lists look like a real Centre, not a test run.
+ * Label numbers still run on from 1, so tickets on labels 10, 20 and 30
+ * still find their item.
+ */
+export function seedItems(options: { small?: boolean } = {}): SeedItem[] {
+  const small = options.small === true;
   const items: SeedItem[] = [];
   let label = 1;
   const fixedPlaces = SEED_LOCATIONS.filter((l) => l.kind !== "shelf").map((l) => l.name);
   const stockPlaces = SEED_LOCATIONS.filter((l) => l.kind === "store_room" || l.kind === "shelf").map((l) => l.name);
   const counters = new Map<string, number>();
 
-  for (let i = 0; i < 150; i++) {
+  for (let i = 0; i < (small ? 36 : 150); i++) {
     const [base, category, valueCents] = FIXED[i % FIXED.length];
     const count = (counters.get(base) ?? 0) + 1;
     counters.set(base, count);
@@ -150,8 +157,8 @@ export function seedItems(): SeedItem[] {
     });
   }
 
-  for (const place of stockPlaces) {
-    for (const [name, category, unit, minimumLevel] of CONSUMABLE) {
+  for (const place of small ? stockPlaces.filter((_, k) => k % 2 === 0) : stockPlaces) {
+    for (const [name, category, unit, minimumLevel] of small ? CONSUMABLE.slice(0, 4) : CONSUMABLE) {
       items.push({ label: labelSerial(label++), kind: "consumable", name, category, location: place, unit, minimumLevel });
     }
   }
@@ -159,7 +166,7 @@ export function seedItems(): SeedItem[] {
   // P1.17: the equipment, spread over the rooms and buildings.
   let spot = 0;
   for (const [base, category, valueCents, count, conditions] of EQUIPMENT) {
-    for (let n = 1; n <= count; n++) {
+    for (let n = 1; n <= (small ? Math.ceil(count / 2) : count); n++) {
       const year = 2019 + (spot % 7);
       const month = String((spot % 12) + 1).padStart(2, "0");
       items.push({
@@ -985,7 +992,7 @@ export const SEED_COMPANIES: SeedCompany[] = [
   { name: "Example Gate Motors", kinds: ["maker"], phone: "+353 00 000 0208", email: "info@gatemotors.example", website: "https://gatemotors.example", notes: null },
 ];
 
-export type SeedModel = { maker: string; model: string; category: string; service: string | null; warrantyMonths: number | null; manual: boolean };
+export type SeedModel = { maker: string; model: string; category: string; service: string | null; warrantyMonths: number | null; manual: boolean; notes?: string };
 
 export const SEED_MODELS: SeedModel[] = [
   { maker: "Example AirMakers", model: "AirMax WX-200", category: "Air conditioners", service: "Example Cool Air Services Ltd", warrantyMonths: 24, manual: true },

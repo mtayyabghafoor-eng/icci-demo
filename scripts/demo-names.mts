@@ -1,10 +1,12 @@
-// Demo-only names for the ICCI Staging demo (owner's choice, 19 Nov 2026).
+// Demo-only names for the ICCI Staging demo (owner's choice, 19 Nov 2026;
+// made realistic 22 Nov 2026: male Arabic names for the administration, no
+// "Demo" or "Example" anywhere, phone numbers that look Irish).
 //
 // The development database and every test keep the plain "Test ..." names.
-// Only "npm run db:seed:staging" swaps them for realistic, still clearly
-// fictional names: real-style rooms and equipment of a Centre like
-// Clonskeagh, people with the surname "Demo", no "(made up)" tags. The demo
-// site shows a "Demo: all names and records are made up" banner instead.
+// Only "npm run db:seed:staging" swaps them for realistic names: real-style
+// rooms and equipment of a Centre like Clonskeagh, invented people (never
+// real ICCI staff), no "(made up)" tags. Phone numbers become Dublin numbers
+// in the unused 01 000 range, so they can never ring a real person.
 //
 // demoText() is applied to every text in the seed data. It only changes
 // texts that start with "Test" or carry a "(made up)" tag, and running it
@@ -59,13 +61,14 @@ const ITEMS: Record<string, string> = {
  * and the made-up disposal notes and names. Checked first.
  */
 const EXACT: Record<string, string> = {
-  "Test Super Admin": "Yusuf K. Demo",
-  "Test Centre Admin": "Tariq A. Demo",
-  "Test Second Admin": "Layla M. Demo",
-  "Test Finance Officer": "Omar S. Demo",
-  "Test Library Operator": "Maryam H. Demo",
-  "Test Deactivated Admin": "Idris N. Demo",
-  "Test Former Library Operator": "Huda R. Demo",
+  // The mosque's administration is all men (owner, 22 Nov 2026).
+  "Test Super Admin": "Yusuf Al-Karimi",
+  "Test Centre Admin": "Tariq Abdelrahman",
+  "Test Second Admin": "Luqman Al-Masri",
+  "Test Finance Officer": "Omar Salim",
+  "Test Library Operator": "Mahmoud Haddad",
+  "Test Deactivated Admin": "Idris Nasser",
+  "Test Former Library Operator": "Hassan Rahimi",
   "TEST-BUS-1": "ICCI-BUS-01",
   "TEST-VAN-1": "ICCI-VAN-01",
   "TEST-CAR-1": "ICCI-CAR-01",
@@ -76,16 +79,41 @@ const EXACT: Record<string, string> = {
   "Example Van": "Panel van",
   "Placeholder Hatchback": "Five-door hatchback",
   "Test disposal: made-up, beyond repair": "Damaged beyond economical repair during Hall refurbishment",
-  "Test Buyer (made up)": "Hamza J. Demo",
+  "Test Buyer (made up)": "Hamza Jaber",
   "Test Treasurer (made up)": "Treasurer",
   "Test Charity Shop (made up)": "Local charity shop",
+  // 22 Nov 2026: notes that still said "made-up".
+  "Test move: needed for a made-up event": "Moved for the Friday community event",
+  "Test report: made-up damage found at the weekly check": "Damage found at the weekly check",
+  "Test report: made-up scratch on the top": "Scratch on the top, noticed after an event",
+  "Test note: made-up address": "Renewed through the registrar's account",
+  "دار تجريبية للنشر": "دار النور للنشر",
 };
 
-/** People in the directory: first name, the old surname's initial, surname "Demo". */
+/** People in the directory: an invented male Arabic first name and family name. */
 const PERSON = /^Test ([A-Z][a-z]+) (Sample|Example|Placeholder|Madeup)$/;
+const MALE_FIRST: Record<string, string> = {
+  Amina: "Abdullah",
+  Yusuf: "Yusuf",
+  Mariam: "Ibrahim",
+  Omar: "Omar",
+  Fatima: "Khalid",
+  Bilal: "Bilal",
+  Khadija: "Mustafa",
+  Hamza: "Hamza",
+  Zainab: "Zakariya",
+  Idris: "Idris",
+};
+const FAMILY: Record<string, string> = { Sample: "Haddad", Example: "Mansour", Placeholder: "Siddiqui", Madeup: "Al-Amin" };
+/** Library borrowers: the community, men and women. */
+const BORROWER = /^Test ([A-Z][a-z]+) (Pageturner|Bookend)$/;
+const BORROWER_FAMILY: Record<string, string> = { Pageturner: "Qureshi", Bookend: "Farouk" };
 /** Made-up book authors. */
 const AUTHOR = /^Test Author ([A-Z])(2?) Example$/;
-const AUTHOR_FIRST = ["Amal", "Bashir", "Celine", "Dawud", "Elif", "Faris", "Ghada", "Harun", "Iman", "Jamal", "Kawthar", "Luqman", "Muna"];
+const AUTHOR_FIRST = ["Amal", "Bashir", "Dawud", "Faris", "Ghassan", "Harun", "Iman", "Jamal", "Kamal", "Luqman", "Muna", "Nabil", "Rashid"];
+const AUTHOR_FAMILY = ["Al-Hashimi", "Nadwi", "Sabri", "Ghazali", "Rifai", "Tahir"];
+/** A test phone number becomes a Dublin number in the unused 01 000 range. */
+const PHONE = /^\+353 00 000 (\d{4})$/;
 
 function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -100,16 +128,22 @@ export function demoText(text: string): string {
   if (ITEMS[text]) return ITEMS[text];
 
   const person = PERSON.exec(text);
-  if (person) return `${person[1]} ${person[2][0]}. Demo`;
+  if (person) return `${MALE_FIRST[person[1]] ?? person[1]} ${FAMILY[person[2]]}`;
+  const borrower = BORROWER.exec(text);
+  if (borrower) return `${borrower[1]} ${BORROWER_FAMILY[borrower[2]]}`;
+  const phone = PHONE.exec(text);
+  if (phone) return `01 000 ${phone[1]}`;
   const author = AUTHOR.exec(text);
   if (author) {
     const i = author[1].charCodeAt(0) - 65;
-    return `${AUTHOR_FIRST[i % AUTHOR_FIRST.length]} ${author[1]}.${author[2] ? " II" : ""} Example`;
+    return `${AUTHOR_FIRST[i % AUTHOR_FIRST.length]} ${AUTHOR_FAMILY[(i + (author[2] ? 3 : 0)) % AUTHOR_FAMILY.length]}`;
   }
   const other = /^Test Author Other (\d+)$/.exec(text);
-  if (other) return `Translator ${other[1]} Example`;
+  if (other) return `${AUTHOR_FIRST[(Number(other[1]) + 5) % AUTHOR_FIRST.length]} ${AUTHOR_FAMILY[Number(other[1]) % AUTHOR_FAMILY.length]}`;
 
   let t = text
+    // Arabic authors: "المثال" ("the example") becomes a family name.
+    .replace(/ المثال$/, " الهاشمي")
     .replace(/\s*\(made[ -]up\)/gi, "")
     .replace(/\s*\(تجريبي\)/g, "")
     .replace(/^تجريبي\s+/, "");

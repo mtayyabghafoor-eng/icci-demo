@@ -34,6 +34,7 @@
 // P4.4:    25 made-up borrowers and 31 loans in every state
 //          (one more printed run of labels).
 
+import { existsSync, readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import {
   labelSerial,
@@ -68,6 +69,8 @@ import {
   seedTraining,
   seedVetting,
 } from "./seed-data.mts";
+import type { SeedModel } from "./seed-data.mts";
+import { DEMO_CATEGORY_CONTACTS, DEMO_COMPANIES, DEMO_FILES_DIR, DEMO_ITEM_LINKS, DEMO_MODELS, DEMO_REFERRAL } from "./demo-data.mts";
 import { dressForDemo, dressListInPlace } from "./demo-names.mts";
 import { storeReminderKey } from "./reminder-key.mts";
 import { readTestAuthenticators, writeTestAuthenticators } from "./test-authenticators.mts";
@@ -106,6 +109,14 @@ if (environment === "staging") {
   for (const list of [SEED_ADMINS, SEED_LOCATIONS, SEED_PEOPLE, SEED_POLICIES, SEED_VEHICLES, SEED_TYPED_RENEWALS, SEED_TICKETS, SEED_BORROWERS] as unknown[][]) {
     dressListInPlace(list);
   }
+  // The demo shows no made-up email addresses: borrowers who had one get a
+  // phone number in the unused Dublin 01 000 range instead.
+  SEED_BORROWERS.forEach((b, i) => {
+    if (b.contact_kind === "email") {
+      b.contact_kind = "phone";
+      b.contact = `01 000 03${String(i + 1).padStart(2, "0")}`;
+    }
+  });
 }
 
 const admin = createClient(need("NEXT_PUBLIC_SUPABASE_URL"), need("SUPABASE_SECRET_KEY"), {
@@ -220,11 +231,13 @@ const { data: cats, error: catError } = await admin.from("item_categories").sele
 if (catError) throw catError;
 const catIds = new Map(cats.map((c) => [c.name, c.id]));
 // P1.17: every seed item names a sub-category from migration 0041.
-for (const name of new Set(seedItems().map((i) => i.category))) {
+// The online demo has fewer items (owner's choice, 22 Nov 2026).
+const SMALL = environment === "staging";
+for (const name of new Set(seedItems({ small: SMALL }).map((i) => i.category))) {
   if (!catIds.has(name)) throw new Error(`No "${name}" category. Has migration 0041 been applied?`);
 }
 
-const items = D(seedItems());
+const items = D(seedItems({ small: SMALL }));
 const { data: existingItems, error: existingError } = await admin
   .from("items")
   .select("label_serial")
@@ -423,7 +436,8 @@ if (!stocktakeCount) {
     person_role_id: roleId.get(p.role),
     section_id: sectionId.get(p.section),
     phone: p.phone,
-    email: p.email,
+    // The demo shows no email addresses for people: a realistic one could belong to someone real.
+    email: environment === "staging" ? null : p.email,
     start_date: p.start_date,
     active: p.active,
   }));
@@ -1056,10 +1070,21 @@ if (process.env.CRON_SECRET?.trim()) {
 // contact person per category, placeholder manuals (P1.20), and one ticket
 // passed to a company (P1.21). Only what is not already there.
 {
+  // The online demo uses real Irish firms, real makers and their published
+  // manuals (owner's decision, 22 Nov 2026; scripts/demo-data.mts). Everywhere
+  // else the obviously fictional "Example ..." companies.
+  const demo = environment === "staging";
+  const companiesData = demo ? DEMO_COMPANIES : SEED_COMPANIES;
+  const modelsData: (SeedModel & { manualFile?: string; manualTitle?: string })[] = demo ? DEMO_MODELS : SEED_MODELS;
+  const linksData = demo ? DEMO_ITEM_LINKS : SEED_ITEM_LINKS;
+  const contactsData = demo ? DEMO_CATEGORY_CONTACTS : SEED_CATEGORY_CONTACTS;
+  const referral = demo ? DEMO_REFERRAL : D(SEED_REFERRAL);
   const { data: have, error } = await admin.from("companies").select("id, name");
   if (error) throw error;
   const companyId = new Map(have.map((c) => [c.name, c.id]));
-  const newCompanies = SEED_COMPANIES.filter((c) => !companyId.has(c.name));
+  const newCompanies = companiesData
+    .filter((c) => !companyId.has(c.name))
+    .map((c) => ({ ...c, phone: c.phone || null, email: c.email || null, website: c.website || null }));
   if (newCompanies.length) {
     const { data, error: e } = await admin.from("companies").insert(newCompanies).select("id, name");
     if (e) throw e;
@@ -1073,7 +1098,7 @@ if (process.env.CRON_SECRET?.trim()) {
   if (me) throw me;
   const modelId = new Map(haveModels.map((m) => [m.model_name, m.id]));
   let manuals = 0;
-  for (const m of SEED_MODELS.filter((x) => !modelId.has(x.model))) {
+  for (const m of modelsData.filter((x) => !modelId.has(x.model))) {
     const { data, error: e } = await admin
       .from("product_models")
       .insert({
@@ -1082,16 +1107,21 @@ if (process.env.CRON_SECRET?.trim()) {
         category_id: catId.get(m.category),
         service_company_id: m.service ? companyId.get(m.service) : null,
         warranty_months: m.warrantyMonths,
+        notes: m.notes ?? null,
       })
       .select("id")
       .single();
     if (e) throw e;
     modelId.set(m.model, data.id);
-    if (m.manual) {
+    // A real manual from demo-files/ on the demo (skipped if the file is not there); a placeholder elsewhere.
+    const realFile = demo && m.manualFile ? `${DEMO_FILES_DIR}/${m.manualFile}` : null;
+    if (m.manual && (!realFile || existsSync(realFile))) {
       const path = `models/${data.id}/${crypto.randomUUID()}.pdf`;
-      const up = await admin.storage.from("asset-documents").upload(path, sampleManualPdf(m.model), { contentType: "application/pdf" });
+      const bytes = realFile ? readFileSync(realFile) : sampleManualPdf(m.model);
+      const up = await admin.storage.from("asset-documents").upload(path, bytes, { contentType: "application/pdf" });
       if (up.error) throw up.error;
-      const doc = await admin.from("asset_documents").insert({ model_id: data.id, kind: "manual", title: `${m.model} user manual (sample)`, file_path: path });
+      const title = m.manualTitle ?? `${m.model} user manual (sample)`;
+      const doc = await admin.from("asset_documents").insert({ model_id: data.id, kind: "manual", title, file_path: path });
       if (doc.error) throw doc.error;
       manuals++;
     }
@@ -1099,7 +1129,7 @@ if (process.env.CRON_SECRET?.trim()) {
 
   // Items: only those with nothing recorded yet.
   let linked = 0;
-  for (const link of SEED_ITEM_LINKS) {
+  for (const link of linksData) {
     const changes = {
       ...(link.model ? { model_id: modelId.get(link.model) } : {}),
       ...(link.supplier ? { supplier_company_id: companyId.get(link.supplier) } : {}),
@@ -1116,7 +1146,8 @@ if (process.env.CRON_SECRET?.trim()) {
     if (e) throw e;
     for (const it of data) {
       if (link.model) {
-        const s = await admin.from("items").update({ maker_serial: `DEMO-SN-${it.label_serial.slice(-4)}` }).eq("id", it.id);
+        const serial = demo ? `SN${(48213 + Number(it.label_serial.slice(-4)) * 37).toString().padStart(7, "0")}` : `DEMO-SN-${it.label_serial.slice(-4)}`;
+        const s = await admin.from("items").update({ maker_serial: serial }).eq("id", it.id);
         if (s.error) throw s.error;
       }
     }
@@ -1128,7 +1159,7 @@ if (process.env.CRON_SECRET?.trim()) {
   const { data: contacts, error: pe } = await admin.from("people").select("id, full_name").in("full_name", [roleOf("Caretaker"), roleOf("Gardener")]);
   if (pe) throw pe;
   const personId = new Map(contacts.map((p) => [p.full_name, p.id]));
-  for (const c of SEED_CATEGORY_CONTACTS) {
+  for (const c of contactsData) {
     const { error: e } = await admin
       .from("item_categories")
       .update({
@@ -1142,7 +1173,7 @@ if (process.env.CRON_SECRET?.trim()) {
   }
 
   // The ticket passed to a company.
-  const ref = D(SEED_REFERRAL);
+  const ref = referral;
   const { data: there } = await admin.from("maintenance_tickets").select("id").eq("description", ref.description).maybeSingle();
   if (!there) {
     const { data: mower } = await admin.from("items").select("id").eq("name", ref.assetName).single();

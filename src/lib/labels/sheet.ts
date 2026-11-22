@@ -120,13 +120,12 @@ export function labelsAreTest(environment: string | undefined): boolean {
 }
 
 /**
- * UI-9: the small tag printed on each label. Development keeps the red
- * "TEST LABEL"; the online demo (staging) shows a quiet grey "DEMO";
- * production prints none.
+ * The small tag printed on each label. Development keeps the red
+ * "TEST LABEL"; the online demo (staging) and production print none (owner,
+ * 22 Nov 2026: no demo marks on the demo).
  */
-export function labelTag(environment: string | undefined): "TEST LABEL" | "DEMO" | null {
-  if (environment === "production") return null;
-  return environment === "staging" ? "DEMO" : "TEST LABEL";
+export function labelTag(environment: string | undefined): "TEST LABEL" | null {
+  return environment === "production" || environment === "staging" ? null : "TEST LABEL";
 }
 
 /** Database messages in plain words. */

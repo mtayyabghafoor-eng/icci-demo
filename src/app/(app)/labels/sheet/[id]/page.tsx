@@ -114,9 +114,9 @@ async function Sheet({
           <strong>Actual size / 100%</strong> and <strong>no margins</strong>, and turn off headers and footers. Check
           the first sheet on plain paper held against a label sheet.
         </p>
-        {test && (
+        {test && tag && (
           <p className="mt-3 text-sm">
-            These are <strong>{tag === "DEMO" ? "demo labels" : "test labels"}</strong>: the app has only its temporary web address. Real labels are printed
+            These are <strong>test labels</strong>: the app has only its temporary web address. Real labels are printed
             once ICCI has a permanent address.
           </p>
         )}
@@ -148,7 +148,7 @@ async function Sheet({
   );
 }
 
-function Label({ serial, link, tag }: { serial: string; link: string; tag: "TEST LABEL" | "DEMO" | null }) {
+function Label({ serial, link, tag }: { serial: string; link: string; tag: "TEST LABEL" | null }) {
   const matrix = qrMatrix(link);
   const size = matrix.length + QR_MARGIN * 2;
   return (
@@ -174,7 +174,7 @@ function Label({ serial, link, tag }: { serial: string; link: string; tag: "TEST
         </span>
         <span className="label-keep">Do not remove</span>
         <span className="label-centre">Islamic Cultural Centre of Ireland</span>
-        {tag && <span className={tag === "DEMO" ? "label-demo" : "label-test"}>{tag}</span>}
+        {tag && <span className="label-test">{tag}</span>}
       </div>
       {/* UI-9: a small black dome emblem in the top-right corner. */}
       <DomeEmblem className="label-emblem" />

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertDevelopment, assertSeedable, assertStagingTarget, requireEnv, showDemoBanner } from "@/lib/env";
+import { assertDevelopment, assertSeedable, assertStagingTarget, requireEnv } from "@/lib/env";
 
 describe("requireEnv", () => {
   it("returns a value that is set", () => {
@@ -51,15 +51,5 @@ describe("assertStagingTarget", () => {
     undefined,
   ])("refuses any other database: %s", (url) => {
     expect(() => assertStagingTarget("staging", url)).toThrow(/not the ICCI Staging project/);
-  });
-});
-
-describe("showDemoBanner", () => {
-  it("shows on the online demo", () => {
-    expect(showDemoBanner("staging")).toBe(true);
-  });
-
-  it.each(["development", "production", "", undefined])("does not show on %s", (value) => {
-    expect(showDemoBanner(value)).toBe(false);
   });
 });

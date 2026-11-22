@@ -55,3 +55,6 @@ supabase/.branches/
 # fictional test accounts' authenticator keys (slice 3)
 /.test-authenticators.json
 /.test-authenticators.local.json
+
+# Real manufacturers' manuals for the online demo only (owner, 22 Nov 2026). Never committed.
+/demo-files/

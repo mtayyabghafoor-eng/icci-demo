@@ -55,7 +55,3 @@ export function assertStagingTarget(environment: string | undefined, url: string
   }
 }
 
-/** The "Demo: all names and records are made up" strip shows on the online demo only. */
-export function showDemoBanner(environment: string | undefined): boolean {
-  return environment === "staging";
-}
