@@ -36,7 +36,9 @@ export default function SignInLayout({ children }: LayoutProps<"/sign-in">) {
         <div className="flex flex-1 flex-col justify-center px-5 py-8 md:px-14 md:py-12">
           <div className="mx-auto w-full max-w-sm">{children}</div>
           <p className="mx-auto mt-10 max-w-sm text-center text-[13px] text-icci-ink-60">
-            For ICCI administrators and the library volunteer only. All data in this prototype is made up.
+            For ICCI administrators and the library volunteer only.
+            {/* Owner, 22 Nov 2026: no "made up" note on the online demo; it stays on development. */}
+            {process.env.ICCI_ENVIRONMENT === "development" ? " All data in this prototype is made up." : ""}
           </p>
         </div>
       </div>
