@@ -10,7 +10,36 @@ import type { ItemRow } from "../../data";
 import { PhotoInput } from "../../photo-input";
 import { fieldClass } from "../../ui";
 
-export function EditForm({ item, categoryGroups }: { item: ItemRow; categoryGroups: CategoryGroup[] }) {
+type Choice = { id: string; name: string };
+
+function Pick({ name, label, choices, value, empty, wide = false }: { name: string; label: string; choices: Choice[]; value: string | null; empty: string; wide?: boolean }) {
+  return (
+    <label className={wide ? "block sm:col-span-2" : "block"}>
+      <span className="font-semibold">{label}</span>
+      <select name={name} defaultValue={value ?? ""} className={fieldClass}>
+        <option value="">{empty}</option>
+        {choices.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export function EditForm({
+  item,
+  categoryGroups,
+  models,
+  companies,
+}: {
+  item: ItemRow;
+  categoryGroups: CategoryGroup[];
+  /** P1.19: "Maker · Model" choices and company choices. */
+  models: Choice[];
+  companies: Choice[];
+}) {
   const [state, action, pending] = useActionState<ItemFormState, FormData>(updateItem.bind(null, item.id), { error: null });
   const photo = useRef<File | null>(null);
 
@@ -75,6 +104,22 @@ export function EditForm({ item, categoryGroups }: { item: ItemRow; categoryGrou
             />
           </label>
         </>
+      )}
+
+      {/* P1.19: make, model and who looks after it. */}
+      <p className="sm:col-span-2 mt-2 border-t border-icci-line pt-4 font-bold text-icci-green-dark">Make, model and who looks after it</p>
+      {item.kind === "fixed_asset" && (
+        <>
+          <Pick name="model_id" label="Make and model" choices={models} value={item.model_id} empty="Not recorded" />
+          <label className="block">
+            <span className="font-semibold">Maker&apos;s serial number</span>
+            <input name="maker_serial" maxLength={80} defaultValue={item.maker_serial ?? ""} className={fieldClass} placeholder="From the maker's plate" />
+          </label>
+        </>
+      )}
+      <Pick name="supplier_company_id" label="Supplied by" choices={companies} value={item.supplier_company_id} empty="Not recorded" />
+      {item.kind === "fixed_asset" && (
+        <Pick name="service_company_id" label="Serviced by (this item only)" choices={companies} value={item.service_company_id} empty="Use the model's or category's" />
       )}
 
       <label className="block sm:col-span-2">

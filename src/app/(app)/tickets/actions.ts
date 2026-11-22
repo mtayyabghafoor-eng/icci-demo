@@ -92,7 +92,9 @@ export async function recordTicketStep(ticketId: number, step: string, _state: T
             ? { kind: "priority", new_priority: v.priority, note: v.note }
             : v.step === "note"
               ? { kind: "note", note: v.note, photo_path }
-              : { kind: "reopened", note: v.note };
+              : v.step === "refer"
+                ? { kind: "referred", company_id: v.company, company_job_ref: v.jobRef, note: v.note }
+                : { kind: "reopened", note: v.note };
     ({ error } = await supabase.from("maintenance_ticket_events").insert({ ticket_id: ticketId, ...row }));
   }
   if (error) return { error: friendlyTicketError(error.message) };

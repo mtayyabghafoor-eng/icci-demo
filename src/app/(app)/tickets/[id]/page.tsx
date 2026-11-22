@@ -28,6 +28,8 @@ import { CannotSeeTickets } from "../cannot-see";
 import { personNames, TICKET_PHOTO_BUCKET } from "../data";
 import { TicketActions } from "../forms";
 import { BackLink } from "@/components/ui";
+import { allCompanies, companyChoices } from "../../companies/data";
+import { ContactCard, contactContext } from "../../companies/contact-card";
 
 export const metadata: Metadata = { title: "Ticket | ICCI Control Dashboard" };
 
@@ -69,6 +71,10 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
   const events = (eventsRes.data ?? []) as TicketEventRow[];
   const people = await personNames(supabase, [t.reported_by_person_id, t.assigned_person_id, ...events.map((e) => e.new_assignee_person_id)]);
   const item = (itemRes?.data ?? null) as { id: string; name: string; label_serial: string } | null;
+  // P1.21: who to call about the asset, offered first in "Passed to a company".
+  const contact = item ? await contactContext(supabase, item.id) : null;
+  const companyRows = contact?.companies ?? (await allCompanies(supabase));
+  const companyName = new Map(companyRows.map((c) => [c.id, c.name]));
 
   // Photos: the one sent with the report, then any added later.
   const paths = [t.photo_path, ...events.map((e) => e.photo_path)].filter((p): p is string => Boolean(p));
@@ -155,6 +161,8 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
               priority={t.priority}
               assignedPersonId={t.assigned_person_id}
               people={activePeople}
+              companies={companyChoices(companyRows)}
+              suggestedCompany={contact?.call?.companyId ?? null}
             />
           </div>
         </section>
@@ -170,6 +178,12 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
         </section>
       </div>
 
+      {item && (
+        <div className="mt-6">
+          <ContactCard itemId={item.id} />
+        </div>
+      )}
+
       <section className="mt-8" aria-labelledby="history-title">
         <h2 id="history-title" className="text-lg font-bold text-icci-green-dark">
           History
@@ -183,7 +197,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold" dir="auto">
-                      {describeTicketEvent(e, people)}
+                      {describeTicketEvent(e, people, companyName)}
                     </span>
                     {e.kind === "closed" && e.cost_cents != null && <span className="text-sm">Cost {formatEuro(e.cost_cents)}</span>}
                   </p>

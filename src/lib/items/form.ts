@@ -58,6 +58,10 @@ export type EditValues = {
   name: string;
   category_id: string;
   notes: string | null;
+  supplier_company_id: string | null;
+  model_id?: string | null;
+  maker_serial?: string | null;
+  service_company_id?: string | null;
   value_cents?: number | null;
   purchase_date?: string | null;
   warranty_end?: string | null;
@@ -71,12 +75,26 @@ export function parseEdit(get: Get, kind: ItemKind): Result<EditValues> {
   const category_id = get("category_id");
   if (!UUID.test(category_id)) return { ok: false, error: "Choose a category." };
   const notes = text(get, "notes", 2000) || null;
+  // P1.19: who supplied it (any item), and for a fixed asset its make and
+  // model, the maker's serial number and who services it. All optional.
+  const picked = (field: string): string | null | undefined => {
+    const v = get(field);
+    return !v ? null : UUID.test(v) ? v : undefined;
+  };
+  const supplier_company_id = picked("supplier_company_id");
+  if (supplier_company_id === undefined) return { ok: false, error: "Choose the supplier from the list." };
 
   if (kind === "consumable") {
     const stock = stockFields(get);
     if (!stock.ok) return stock;
-    return { ok: true, values: { name, category_id, notes, ...stock.values } };
+    return { ok: true, values: { name, category_id, notes, supplier_company_id, ...stock.values } };
   }
+
+  const model_id = picked("model_id");
+  const service_company_id = picked("service_company_id");
+  if (model_id === undefined || service_company_id === undefined) return { ok: false, error: "Choose from the lists." };
+  const maker_serial = text(get, "maker_serial", 81) || null;
+  if (maker_serial && maker_serial.length > 80) return { ok: false, error: "Keep the maker's serial number to 80 characters or fewer." };
 
   const value_cents = parseEuro(get("value"));
   if (value_cents === undefined) return { ok: false, error: "Enter the value in euros, for example 125.50, or leave it empty." };
@@ -88,7 +106,10 @@ export function parseEdit(get: Get, kind: ItemKind): Result<EditValues> {
   if (purchase_date && warranty_end && warranty_end < purchase_date) {
     return { ok: false, error: "The warranty cannot end before the purchase date." };
   }
-  return { ok: true, values: { name, category_id, notes, value_cents, purchase_date, warranty_end } };
+  return {
+    ok: true,
+    values: { name, category_id, notes, value_cents, purchase_date, warranty_end, supplier_company_id, model_id, maker_serial, service_company_id },
+  };
 }
 
 /** Plain-English messages for the database's refusals. */

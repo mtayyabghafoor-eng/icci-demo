@@ -118,8 +118,30 @@ describe("edit form", () => {
     const r = parseEdit(form({ ...base, value: "99.90", purchase_date: "2026-01-01", warranty_end: "2027-01-01", notes: "" }), "fixed_asset");
     expect(r).toEqual({
       ok: true,
-      values: { name: "Test chair", category_id: CAT, notes: null, value_cents: 9990, purchase_date: "2026-01-01", warranty_end: "2027-01-01" },
+      values: {
+        name: "Test chair",
+        category_id: CAT,
+        notes: null,
+        value_cents: 9990,
+        purchase_date: "2026-01-01",
+        warranty_end: "2027-01-01",
+        // P1.19: none chosen
+        supplier_company_id: null,
+        model_id: null,
+        maker_serial: null,
+        service_company_id: null,
+      },
     });
+  });
+
+  it("P1.19: reads the make and model, maker's serial number and companies; refuses anything not from the lists", () => {
+    const r = parseEdit(form({ ...base, model_id: LOC, maker_serial: " SN-1 ", supplier_company_id: CAT, service_company_id: CAT }), "fixed_asset");
+    expect(r.ok && r.values).toMatchObject({ model_id: LOC, maker_serial: "SN-1", supplier_company_id: CAT, service_company_id: CAT });
+    expect(parseEdit(form({ ...base, model_id: "nope" }), "fixed_asset").ok).toBe(false);
+    // A consumable keeps only its supplier.
+    const c = parseEdit(form({ ...base, unit: "box", minimum_level: "2", supplier_company_id: CAT, model_id: LOC }), "consumable");
+    expect(c.ok && c.values).toMatchObject({ supplier_company_id: CAT });
+    expect(c.ok && "model_id" in c.values).toBe(false);
   });
 
   it("refuses a warranty ending before the purchase", () => {

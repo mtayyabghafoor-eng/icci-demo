@@ -13,7 +13,7 @@ export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 /** Every category, main and sub, switched off ones too. */
 export async function allCategories(supabase: SupabaseClient): Promise<CategoryRow[]> {
   return allRows<CategoryRow>((from, to) =>
-    supabase.from("item_categories").select("id, name, parent_id, active, icon").order("id").range(from, to),
+    supabase.from("item_categories").select("id, name, parent_id, active, icon, service_company_id, contact_person_id").order("id").range(from, to),
   );
 }
 

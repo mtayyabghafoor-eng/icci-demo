@@ -7,7 +7,7 @@ import { parseEuro, type Tone } from "@/lib/items/rules";
 
 export type TicketStatus = "open" | "in_progress" | "waiting" | "closed";
 export type TicketPriority = "low" | "normal" | "urgent";
-export type TicketEventKind = "opened" | "assigned" | "status" | "priority" | "note" | "closed" | "reopened";
+export type TicketEventKind = "opened" | "assigned" | "status" | "priority" | "note" | "closed" | "reopened" | "referred";
 
 /** Who may see tickets (the database refuses everyone else anyway). */
 export const MAY_SEE_TICKETS = ["super_admin", "centre_admin"];
@@ -68,12 +68,15 @@ export type TicketEventRow = {
   /** P3.6: the "mark repaired" asset entry saved with a closing entry. */
   asset_event_id: number | null;
   cost_cents: number | null;
+  /** P1.21: "passed to a company": which company, and their job number. */
+  company_id?: string | null;
+  company_job_ref?: string | null;
   created_by: string | null;
   created_at: string;
 };
 
 export const TICKET_EVENT_COLUMNS =
-  "id, ticket_id, kind, note, photo_path, new_status, new_assignee_person_id, new_priority, asset_event_id, cost_cents, created_by, created_at";
+  "id, ticket_id, kind, note, photo_path, new_status, new_assignee_person_id, new_priority, asset_event_id, cost_cents, company_id, company_job_ref, created_by, created_at";
 
 /** "T-0042": short enough to say on the phone. */
 export function ticketNumber(id: number): string {
@@ -108,7 +111,7 @@ export function listOrder(a: TicketRow, b: TicketRow): number {
 }
 
 /** One line saying what a history entry did. */
-export function describeTicketEvent(e: TicketEventRow, personName: Map<string, string>): string {
+export function describeTicketEvent(e: TicketEventRow, personName: Map<string, string>, companyName: Map<string, string> = new Map()): string {
   switch (e.kind) {
     case "opened":
       return "Reported";
@@ -124,6 +127,8 @@ export function describeTicketEvent(e: TicketEventRow, personName: Map<string, s
       return "Closed";
     case "reopened":
       return "Reopened";
+    case "referred":
+      return `Passed to ${e.company_id ? (companyName.get(e.company_id) ?? "a company") : "a company"}${e.company_job_ref ? ` (their job number ${e.company_job_ref})` : ""}`;
   }
 }
 
@@ -180,8 +185,8 @@ export function parseTicketForm(
 // ---------------------------------------------------------------------------
 // The steps on a ticket's page (P3.6)
 
-export type TicketStep = "assign" | "status" | "priority" | "note" | "close" | "reopen";
-export const TICKET_STEPS: TicketStep[] = ["assign", "status", "priority", "note", "close", "reopen"];
+export type TicketStep = "assign" | "status" | "priority" | "note" | "close" | "reopen" | "refer";
+export const TICKET_STEPS: TicketStep[] = ["assign", "status", "priority", "note", "close", "reopen", "refer"];
 export const isTicketStep = (v: string): v is TicketStep => (TICKET_STEPS as string[]).includes(v);
 
 /** What the page says once a step is saved (?done=…). */
@@ -192,6 +197,7 @@ export const STEP_DONE: Record<TicketStep, string> = {
   note: "Note added.",
   close: "Ticket closed.",
   reopen: "Ticket reopened.",
+  refer: "Recorded as passed to the company.",
 };
 
 /** Which status buttons an open ticket shows: every status it is not in now (closing has its own button). */
@@ -213,7 +219,8 @@ export type StepValues =
   | { step: "priority"; priority: TicketPriority; note: string | null }
   | { step: "note"; note: string }
   | { step: "close"; note: string; costCents: number | null; repaired: "good" | "fair" | null }
-  | { step: "reopen"; note: string };
+  | { step: "reopen"; note: string }
+  | { step: "refer"; company: string; jobRef: string | null; note: string | null };
 
 /** Checks what was sent with one step on a ticket's page. */
 export function parseStepForm(step: TicketStep, get: (name: string) => string): { ok: true; values: StepValues } | { ok: false; error: string } {
@@ -251,6 +258,13 @@ export function parseStepForm(step: TicketStep, get: (name: string) => string): 
     case "reopen":
       if (!note) return { ok: false, error: "Write the reason for reopening." };
       return { ok: true, values: { step, note } };
+    case "refer": {
+      const company = get("company").trim();
+      if (!UUID.test(company)) return { ok: false, error: "Pick the company it was passed to." };
+      const jobRef = get("job_ref").trim();
+      if (jobRef.length > 60) return { ok: false, error: "Keep their job number to 60 characters or fewer." };
+      return { ok: true, values: { step, company, jobRef: jobRef || null, note: optional } };
+    }
   }
 }
 
@@ -273,6 +287,8 @@ export type TicketFilters = {
   place: string;
   /** A person's id, "nobody", or "" for anyone. */
   assigned: string;
+  /** P1.21: tickets passed to one company (its id), or "" for any. */
+  company: string;
 };
 
 export function readFilters(params: Record<string, string | string[] | undefined>): TicketFilters {
@@ -284,11 +300,13 @@ export function readFilters(params: Record<string, string | string[] | undefined
   const p = one("priority");
   const place = one("place");
   const assigned = one("assigned");
+  const company = one("company");
   return {
     status: s === "all" || isStatus(s) ? s : "not_closed",
     priority: isPriority(p) ? p : "",
     place: UUID.test(place) ? place : "",
     assigned: assigned === "nobody" || UUID.test(assigned) ? assigned : "",
+    company: UUID.test(company) ? company : "",
   };
 }
 
@@ -299,6 +317,7 @@ export function filtersQuery(f: TicketFilters): string {
   if (f.priority) q.set("priority", f.priority);
   if (f.place) q.set("place", f.place);
   if (f.assigned) q.set("assigned", f.assigned);
+  if (f.company) q.set("company", f.company);
   const s = q.toString();
   return s ? `?${s}` : "";
 }

@@ -12,3 +12,4 @@ export { DataTable, Pagination, type Column } from "./table";
 export { Logo } from "./logo";
 export { Toast } from "./toast";
 export { BackLink } from "./back-link";
+export { PageShell } from "./page-shell";

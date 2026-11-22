@@ -56,6 +56,12 @@ describe("activeLink: which link is marked as the current page", () => {
     ["/categories/new", "Categories"],
     ["/categories/abc", "Categories"],
     ["/categories/abc/edit", "Categories"],
+    ["/categories/call-sheet", "Categories"],
+    // P1.19
+    ["/companies", "Companies"],
+    ["/companies/abc", "Companies"],
+    ["/models", "Companies"],
+    ["/models/abc/edit", "Companies"],
     ["/assets/not-seen", "Not seen in 12 months"],
     // P1.18
     ["/assets/overview", "What we own"],

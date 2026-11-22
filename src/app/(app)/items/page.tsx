@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CategoryOptions } from "../categories/options";
 import { categoryCounts } from "../categories/data";
 import { CategoryTile, CountLine } from "../categories/tile";
-import { itemsWithOpenTickets, searchFilter, WORKING } from "./search";
+import { companyFilter, itemsWithOpenTickets, searchFilter, WORKING } from "./search";
 import { loadLookups, type ItemRow } from "./data";
 import { FindLabel } from "./find-label";
 import { ItemStatus } from "./ui";
@@ -57,6 +57,8 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
   const condition = one(params.condition);
   // P1.18: "with a maintenance ticket not yet closed" (from What we own).
   const tickets = one(params.tickets) === "open" ? "open" : "";
+  // P1.19: everything one company made, supplied or services (from a company page).
+  const company = UUID.test(one(params.company)) ? one(params.company) : "";
   const page = Math.max(1, Number.parseInt(one(params.page) || "1", 10) || 1);
 
   const supabase = await createClient();
@@ -85,6 +87,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
     if (condition === "working") query = query.in("condition", WORKING);
     else if ((CONDITIONS as string[]).includes(condition)) query = query.eq("condition", condition);
     if (tickets) query = query.in("id", await itemsWithOpenTickets(supabase));
+    if (company) query = query.or(await companyFilter(supabase, company));
     return query;
   };
   const [lookups, { data, count }] = await Promise.all([lookupsReady, searchItems()]);
@@ -96,14 +99,14 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
   const stockOf = new Map(((levels ?? []) as { item_id: string; status: StockStatus }[]).map((l) => [l.item_id, l.status]));
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const filtered = Boolean(q || kind || category || location || condition || tickets);
+  const filtered = Boolean(q || kind || category || location || condition || tickets || company);
   // P1.18: "lawnmower" also shows the Lawnmowers total first.
   const matched = q ? matchCategories(q, lookups.categories).slice(0, 4) : [];
   const matchedCounts = matched.length ? await categoryCounts(supabase, categoryGroups(lookups.categories, { showOff: true })) : null;
 
   const pageLink = (n: number, overrides: Record<string, string> = {}) => {
     const p = new URLSearchParams();
-    for (const [k, v] of Object.entries({ q, kind, category, location, condition, tickets, ...overrides })) if (v) p.set(k, v);
+    for (const [k, v] of Object.entries({ q, kind, category, location, condition, tickets, company, ...overrides })) if (v) p.set(k, v);
     if (n > 1) p.set("page", String(n));
     const s = p.toString();
     return s ? `/items?${s}` : "/items";
@@ -115,7 +118,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="search" aria-label="Search items">
         <label className="lg:col-span-2">
           <span className="font-semibold">Search</span>
-          <input name="q" defaultValue={q} placeholder="Name, label or kind of thing" className={select} />
+          <input name="q" defaultValue={q} placeholder="Name, label, kind, make, model or company" className={select} />
         </label>
         <label>
           <span className="font-semibold">Kind</span>
@@ -166,6 +169,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
           )}
         </div>
         {tickets && <input type="hidden" name="tickets" value={tickets} />}
+        {company && <input type="hidden" name="company" value={company} />}
         <FilterFold />
       </form>
 
@@ -173,6 +177,12 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
         <p className="mt-3 text-sm" data-testid="open-tickets-filter">
           Only items with a maintenance ticket not yet closed.{" "}
           <Link href={pageLink(1, { tickets: "" })}>Show all</Link>
+        </p>
+      )}
+
+      {company && (
+        <p className="mt-3 text-sm" data-testid="company-filter">
+          Only what one company made, supplied or services. <Link href={pageLink(1, { company: "" })}>Show all</Link>
         </p>
       )}
 

@@ -108,6 +108,19 @@ async function List({ searchParams }: { searchParams: PageProps<"/tickets">["sea
             ))}
           </select>
         </label>
+        {choices.companies.length > 0 && (
+          <label className="min-w-44 flex-1">
+            <span className="font-semibold">Passed to</span>
+            <select name="company" defaultValue={f.company} className={field}>
+              <option value="">Any company or none</option>
+              {choices.companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button
           type="submit"
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark px-4 py-2 font-semibold text-white! no-underline shadow-sm transition-colors duration-150 hover:bg-icci-green-900"

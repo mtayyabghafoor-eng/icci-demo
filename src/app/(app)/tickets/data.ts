@@ -34,6 +34,18 @@ export async function assetNames(supabase: SupabaseClient, ids: (string | null)[
 export async function loadTickets(supabase: SupabaseClient, f: TicketFilters) {
   const lookups = await loadLookups(supabase);
   const places = f.place ? locationAndInside(f.place, lookups.locations) : null;
+  // P1.21: tickets passed to one company (a "referred" entry naming it).
+  const referred = f.company
+    ? [
+        ...new Set(
+          (
+            await allRows<{ ticket_id: number }>((from, to) =>
+              supabase.from("maintenance_ticket_events").select("ticket_id").eq("kind", "referred").eq("company_id", f.company).order("id").range(from, to),
+            )
+          ).map((e) => e.ticket_id),
+        ),
+      ]
+    : null;
 
   const rows = await allRows<TicketRow>((from, to) => {
     let q = supabase.from("maintenance_tickets").select(TICKET_COLUMNS).order("id").range(from, to);
@@ -41,6 +53,7 @@ export async function loadTickets(supabase: SupabaseClient, f: TicketFilters) {
     else if (f.status !== "all") q = q.eq("status", f.status);
     if (f.priority) q = q.eq("priority", f.priority);
     if (places) q = q.in("location_id", places);
+    if (referred) q = q.in("id", referred.length ? referred : [0]);
     if (f.assigned === "nobody") q = q.is("assigned_person_id", null);
     else if (f.assigned) q = q.eq("assigned_person_id", f.assigned);
     return q;
@@ -69,7 +82,14 @@ export async function filterChoices(supabase: SupabaseClient, lookups: Awaited<R
   );
   const names = await personNames(supabase, assigned.map((a) => a.assigned_person_id));
   const people = [...names].map(([id, full_name]) => ({ id, full_name })).sort((a, b) => a.full_name.localeCompare(b.full_name));
-  return { places, people };
+  // P1.21: every company a ticket has been passed to.
+  const refs = await allRows<{ id: number; company_id: string }>((from, to) =>
+    supabase.from("maintenance_ticket_events").select("id, company_id").eq("kind", "referred").order("id").range(from, to),
+  );
+  const ids = [...new Set(refs.map((r) => r.company_id))];
+  const { data: named } = ids.length ? await supabase.from("companies").select("id, name").in("id", ids) : { data: [] };
+  const companies = ((named ?? []) as { id: string; name: string }[]).sort((a, b) => a.name.localeCompare(b.name));
+  return { places, people, companies };
 }
 
 /** Places a problem can be reported at: switched-on buildings, rooms and store rooms. */

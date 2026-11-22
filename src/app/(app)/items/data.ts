@@ -29,7 +29,7 @@ export async function loadLookups(supabase: SupabaseClient) {
 }
 
 export const ITEM_COLUMNS =
-  "id, label_serial, kind, name, category_id, location_id, condition, value_cents, purchase_date, warranty_end, unit, minimum_level, photo_path, notes, created_at, updated_at";
+  "id, label_serial, kind, name, category_id, location_id, condition, value_cents, purchase_date, warranty_end, unit, minimum_level, photo_path, notes, model_id, maker_serial, supplier_company_id, service_company_id, created_at, updated_at";
 
 export type ItemRow = {
   id: string;
@@ -46,6 +46,11 @@ export type ItemRow = {
   minimum_level: number | null;
   photo_path: string | null;
   notes: string | null;
+  /** P1.19: make and model, the maker's serial number, who supplied and who services it. */
+  model_id: string | null;
+  maker_serial: string | null;
+  supplier_company_id: string | null;
+  service_company_id: string | null;
   created_at: string;
   updated_at: string;
 };

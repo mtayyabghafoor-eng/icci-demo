@@ -18,15 +18,20 @@ export function CategoryForm({
   parentId,
   category,
   mains,
+  companies,
+  people,
   isSub,
   cancelHref,
 }: {
   /** Adding: the main category it goes inside (null for a new main category). */
   parentId?: string | null;
   /** Renaming: the category as it is now. */
-  category?: { id: string; name: string; parent_id: string | null; icon?: string };
+  category?: { id: string; name: string; parent_id: string | null; icon?: string; service_company_id?: string | null; contact_person_id?: string | null };
   /** Renaming a sub-category: the main categories it may move to. */
   mains?: { id: string; name: string }[];
+  /** Renaming (P1.19): companies and switched-on people to choose from. */
+  companies?: { id: string; name: string }[];
+  people?: { id: string; name: string }[];
   isSub: boolean;
   cancelHref: string;
 }) {
@@ -89,6 +94,44 @@ export function CategoryForm({
             ))}
           </select>
         </div>
+      )}
+      {category && companies && people && (
+        <>
+          <div>
+            <label htmlFor="service_company_id" className="font-semibold">
+              Usual service company
+            </label>
+            <p id="service_hint" className="text-sm">
+              Who to call when something {isSub ? "here" : "in this main category"} breaks, unless the item or its model names another.
+              {isSub ? " Left empty, the main category's is used." : ""}
+            </p>
+            <select id="service_company_id" name="service_company_id" defaultValue={category.service_company_id ?? ""} aria-describedby="service_hint" className={fieldClass}>
+              <option value="">{isSub ? "Use the main category's" : "Nobody set"}</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="contact_person_id" className="font-semibold">
+              Contact person
+            </label>
+            <p id="contact_hint" className="text-sm">
+              The person staff phone when something here breaks (for example the caretaker). Shown on the printed call sheet.
+              {isSub ? " Left empty, the main category's is used." : ""}
+            </p>
+            <select id="contact_person_id" name="contact_person_id" defaultValue={category.contact_person_id ?? ""} aria-describedby="contact_hint" className={fieldClass}>
+              <option value="">{isSub ? "Use the main category's" : "Nobody set"}</option>
+              {people.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
       )}
       <FormError message={state.error} />
       <div className="flex flex-wrap gap-3">

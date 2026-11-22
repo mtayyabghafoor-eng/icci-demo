@@ -191,6 +191,8 @@ export function TicketActions({
   priority,
   assignedPersonId,
   people,
+  companies = [],
+  suggestedCompany = null,
 }: {
   ticketId: number;
   status: TicketStatus;
@@ -198,6 +200,9 @@ export function TicketActions({
   assignedPersonId: string | null;
   /** Switched-on people, in name order. */
   people: { id: string; full_name: string; role: string }[];
+  /** P1.21: switched-on companies, and the one "If this goes wrong" says to call. */
+  companies?: { id: string; name: string }[];
+  suggestedCompany?: string | null;
 }) {
   const notePhoto = useRef<File | null>(null);
   const noteFold = (
@@ -267,6 +272,29 @@ export function TicketActions({
             </div>
           </fieldset>
           <NoteBox label="Note (optional)" hint="e.g. Water is reaching the carpet" />
+        </StepForm>
+      </Fold>
+      <Fold title="Passed to a company" testId="fold-refer">
+        <StepForm ticketId={ticketId} step="refer" button="Record it" testId="form-refer">
+          <p className="text-sm">When the problem is handed to an outside company. The assignee stays the person following it up.</p>
+          <label className="block">
+            <span className="font-semibold">Company</span>
+            <select name="company" required defaultValue={suggestedCompany ?? ""} className={fieldClass}>
+              <option value="" disabled>
+                Pick a company
+              </option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="font-semibold">Their job number (optional)</span>
+            <input name="job_ref" maxLength={60} className={fieldClass} placeholder="e.g. the number they gave on the phone" />
+          </label>
+          <NoteBox label="Note (optional)" hint="e.g. Engineer coming Thursday morning" />
         </StepForm>
       </Fold>
       {noteFold}

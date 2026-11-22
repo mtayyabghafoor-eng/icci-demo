@@ -52,6 +52,8 @@ async function Content({ searchParams }: { searchParams: PageProps<"/categories"
       {header}
       <p className="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
         <Link href="/assets/overview">See how many of each we have</Link>
+        <Link href="/categories/call-sheet">Print the staff call sheet</Link>
+        <Link href="/companies">Companies, makes and models</Link>
         {offCount > 0 &&
           (showOff ? (
             <Link href="/categories">Hide switched-off categories</Link>

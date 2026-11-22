@@ -9,6 +9,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { compareCategoryNames } from "@/lib/categories/rules";
 import { createClient } from "@/lib/supabase/server";
 import { allCategories, MAY_SEE_CATEGORIES, UUID } from "../../data";
+import { allCompanies, companyChoices } from "../../../companies/data";
+import { keeperChoices } from "../../../vehicles/data";
 import { CategoryForm } from "../../forms";
 
 export const metadata: Metadata = { title: "Rename a category | ICCI Control Dashboard" };
@@ -27,7 +29,8 @@ async function Content({ params }: { params: PageProps<"/categories/[id]/edit">[
   const me = await requireAdmin();
   const { id } = await params;
   if (!MAY_SEE_CATEGORIES.includes(me.roleCode) || !UUID.test(id)) notFound();
-  const all = await allCategories(await createClient());
+  const supabase = await createClient();
+  const all = await allCategories(supabase);
   const category = all.find((c) => c.id === id);
   if (!category) notFound();
   const main = category.parent_id ? all.find((c) => c.id === category.parent_id) : undefined;
@@ -44,10 +47,17 @@ async function Content({ params }: { params: PageProps<"/categories/[id]/edit">[
           ...(main ? [{ href: `/categories/${main.id}`, label: main.name }] : []),
           { href: `/categories/${id}`, label: category.name },
         ]}
-        title={isSub ? "Rename This Sub-category" : "Rename This Main Category"}
+        title={isSub ? "Change This Sub-category" : "Change This Main Category"}
         subtitle="Items keep their category: only the name they are filed under changes."
       />
-      <CategoryForm category={category} isSub={isSub} mains={isSub ? mains : undefined} cancelHref={`/categories/${id}`} />
+      <CategoryForm
+        category={category}
+        isSub={isSub}
+        mains={isSub ? mains : undefined}
+        companies={companyChoices(await allCompanies(supabase), category.service_company_id)}
+        people={await keeperChoices(supabase, category.contact_person_id)}
+        cancelHref={`/categories/${id}`}
+      />
     </>
   );
 }

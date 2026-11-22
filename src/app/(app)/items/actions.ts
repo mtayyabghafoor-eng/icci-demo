@@ -2,6 +2,7 @@
 // What happens when the register and edit forms are sent. Runs on the web
 // server, as the signed-in admin: the database's rules decide what is allowed.
 import { redirect } from "next/navigation";
+import { warrantyEndFrom } from "@/lib/companies/rules";
 import { friendlyDbError, parseEdit, parseRegister } from "@/lib/items/form";
 import { createClient } from "@/lib/supabase/server";
 import { photoFrom, savePhoto } from "./photos";
@@ -38,6 +39,11 @@ export async function updateItem(id: string, _state: ItemFormState, form: FormDa
   if (typeof photo === "string") return { error: photo };
 
   const changes: Record<string, unknown> = { ...parsed.values };
+  // P1.19: a make and model with a usual warranty fills in an empty warranty end date.
+  if (parsed.values.model_id && parsed.values.purchase_date && !parsed.values.warranty_end) {
+    const { data: model } = await supabase.from("product_models").select("warranty_months").eq("id", parsed.values.model_id).maybeSingle();
+    if (model?.warranty_months) changes.warranty_end = warrantyEndFrom(parsed.values.purchase_date, model.warranty_months);
+  }
   if (photo) {
     const path = await savePhoto(supabase, item.label_serial, photo);
     if (!path) return { error: "The photo could not be saved. Please try again." };

@@ -12,7 +12,7 @@ export type HistoryRow = {
   new_values: Record<string, unknown>;
 };
 
-export type Lookups = { categories: Map<string, string>; locations: Map<string, string> };
+export type Lookups = { categories: Map<string, string>; locations: Map<string, string>; companies?: Map<string, string>; models?: Map<string, string> };
 
 const FIELDS: [key: string, label: string][] = [
   ["name", "Name"],
@@ -25,6 +25,11 @@ const FIELDS: [key: string, label: string][] = [
   ["unit", "Unit"],
   ["minimum_level", "Minimum level"],
   ["notes", "Notes"],
+  // P1.19
+  ["model_id", "Make and model"],
+  ["maker_serial", "Maker's serial number"],
+  ["supplier_company_id", "Supplied by"],
+  ["service_company_id", "Serviced by"],
 ];
 
 function show(key: string, value: unknown, lookups: Lookups): string {
@@ -34,6 +39,11 @@ function show(key: string, value: unknown, lookups: Lookups): string {
       return lookups.categories.get(String(value)) ?? "an old category";
     case "location_id":
       return lookups.locations.get(String(value)) ?? "an old location";
+    case "model_id":
+      return lookups.models?.get(String(value)) ?? "a make and model";
+    case "supplier_company_id":
+    case "service_company_id":
+      return lookups.companies?.get(String(value)) ?? "a company";
     case "condition":
       return CONDITION_STATUS[value as Condition]?.word ?? String(value);
     case "value_cents":

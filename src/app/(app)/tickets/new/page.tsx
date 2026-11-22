@@ -11,6 +11,7 @@ import { loadLookups } from "../../items/data";
 import { ItemStatus } from "../../items/ui";
 import { CannotSeeTickets } from "../cannot-see";
 import { reportPlaces } from "../data";
+import { ContactCard } from "../../companies/contact-card";
 import { ReportProblemForm } from "../forms";
 import { BackLink } from "@/components/ui";
 
@@ -88,6 +89,12 @@ async function Content({ searchParams }: { searchParams: PageProps<"/tickets/new
             <p className="mt-4 rounded-xl border border-icci-line bg-white px-4 py-3" data-testid="from-damage">
               This ticket will be linked to the damage report just made.
             </p>
+          )}
+          {/* P1.21: who to call, the warranty and the manuals, before the report is even sent. */}
+          {canReportItem && (
+            <div className="mt-4">
+              <ContactCard itemId={item.id} />
+            </div>
           )}
           <ReportProblemForm
             itemId={canReportItem ? item.id : null}

@@ -55,6 +55,12 @@ import {
   seedSignsOff,
   seedAssetEvents,
   seedItems,
+  SEED_CATEGORY_CONTACTS,
+  SEED_COMPANIES,
+  SEED_ITEM_LINKS,
+  SEED_MODELS,
+  SEED_REFERRAL,
+  sampleManualPdf,
   seedPrayerDay,
   seedPrayerMonths,
   seedRotaPlan,
@@ -1044,6 +1050,110 @@ if (process.env.CRON_SECRET?.trim()) {
     }
   }
   console.log(`Library lost and withdrawn: ${made} entries created.`);
+}
+
+// 22. Companies, makes and models (P1.19), who services what and the staff
+// contact person per category, placeholder manuals (P1.20), and one ticket
+// passed to a company (P1.21). Only what is not already there.
+{
+  const { data: have, error } = await admin.from("companies").select("id, name");
+  if (error) throw error;
+  const companyId = new Map(have.map((c) => [c.name, c.id]));
+  const newCompanies = SEED_COMPANIES.filter((c) => !companyId.has(c.name));
+  if (newCompanies.length) {
+    const { data, error: e } = await admin.from("companies").insert(newCompanies).select("id, name");
+    if (e) throw e;
+    for (const c of data) companyId.set(c.name, c.id);
+  }
+  const { data: cats, error: ce } = await admin.from("item_categories").select("id, name");
+  if (ce) throw ce;
+  const catId = new Map(cats.map((c) => [c.name, c.id]));
+
+  const { data: haveModels, error: me } = await admin.from("product_models").select("id, model_name");
+  if (me) throw me;
+  const modelId = new Map(haveModels.map((m) => [m.model_name, m.id]));
+  let manuals = 0;
+  for (const m of SEED_MODELS.filter((x) => !modelId.has(x.model))) {
+    const { data, error: e } = await admin
+      .from("product_models")
+      .insert({
+        maker_company_id: companyId.get(m.maker),
+        model_name: m.model,
+        category_id: catId.get(m.category),
+        service_company_id: m.service ? companyId.get(m.service) : null,
+        warranty_months: m.warrantyMonths,
+      })
+      .select("id")
+      .single();
+    if (e) throw e;
+    modelId.set(m.model, data.id);
+    if (m.manual) {
+      const path = `models/${data.id}/${crypto.randomUUID()}.pdf`;
+      const up = await admin.storage.from("asset-documents").upload(path, sampleManualPdf(m.model), { contentType: "application/pdf" });
+      if (up.error) throw up.error;
+      const doc = await admin.from("asset_documents").insert({ model_id: data.id, kind: "manual", title: `${m.model} user manual (sample)`, file_path: path });
+      if (doc.error) throw doc.error;
+      manuals++;
+    }
+  }
+
+  // Items: only those with nothing recorded yet.
+  let linked = 0;
+  for (const link of SEED_ITEM_LINKS) {
+    const changes = {
+      ...(link.model ? { model_id: modelId.get(link.model) } : {}),
+      ...(link.supplier ? { supplier_company_id: companyId.get(link.supplier) } : {}),
+      ...(link.service ? { service_company_id: companyId.get(link.service) } : {}),
+    };
+    const { data, error: e } = await admin
+      .from("items")
+      .update(changes)
+      .like("name", `${D(link.namePrefix)}%`)
+      .is("model_id", null)
+      .is("supplier_company_id", null)
+      .is("service_company_id", null)
+      .select("id, label_serial");
+    if (e) throw e;
+    for (const it of data) {
+      if (link.model) {
+        const s = await admin.from("items").update({ maker_serial: `DEMO-SN-${it.label_serial.slice(-4)}` }).eq("id", it.id);
+        if (s.error) throw s.error;
+      }
+    }
+    linked += data.length;
+  }
+
+  // Category defaults: only where nothing is set yet.
+  const roleOf = (role: string) => D(SEED_PEOPLE.find((p) => p.role === role && p.active)!.full_name);
+  const { data: contacts, error: pe } = await admin.from("people").select("id, full_name").in("full_name", [roleOf("Caretaker"), roleOf("Gardener")]);
+  if (pe) throw pe;
+  const personId = new Map(contacts.map((p) => [p.full_name, p.id]));
+  for (const c of SEED_CATEGORY_CONTACTS) {
+    const { error: e } = await admin
+      .from("item_categories")
+      .update({
+        service_company_id: c.service ? companyId.get(c.service) : null,
+        contact_person_id: c.contactRole ? personId.get(roleOf(c.contactRole)) : null,
+      })
+      .eq("name", c.category)
+      .is("service_company_id", null)
+      .is("contact_person_id", null);
+    if (e) throw e;
+  }
+
+  // The ticket passed to a company.
+  const ref = D(SEED_REFERRAL);
+  const { data: there } = await admin.from("maintenance_tickets").select("id").eq("description", ref.description).maybeSingle();
+  if (!there) {
+    const { data: mower } = await admin.from("items").select("id").eq("name", ref.assetName).single();
+    const t = await admin.from("maintenance_tickets").insert({ description: ref.description, priority: "normal", reported_by: ref.reportedBy, item_id: mower!.id }).select("id").single();
+    if (t.error) throw t.error;
+    const step = await admin
+      .from("maintenance_ticket_events")
+      .insert({ ticket_id: t.data.id, kind: "referred", company_id: companyId.get(ref.company), company_job_ref: ref.jobRef, note: ref.note });
+    if (step.error) throw step.error;
+  }
+  console.log(`Companies: ${newCompanies.length} added; makes and models with ${manuals} sample manuals; ${linked} items linked; category contacts set.`);
 }
 
 // 21. On the staging demo, nobody keeps the seed's authenticator keys: they are

@@ -38,7 +38,14 @@ export async function saveCategory(categoryId: string, _state: CategoryFormState
   const get = getter(form);
   const parsed = parseCategoryForm(get);
   if (!parsed.ok) return { error: parsed.error };
-  const values: { name: string; parent_id?: string } = parsed.values;
+  const values: { name: string; icon?: string; parent_id?: string; service_company_id?: string | null; contact_person_id?: string | null } = parsed.values;
+  // P1.19: the usual service company and the person staff phone (both optional).
+  for (const field of ["service_company_id", "contact_person_id"] as const) {
+    if (!form.has(field)) continue;
+    const v = get(field);
+    if (v && !UUID.test(v)) return { error: "Choose from the list." };
+    values[field] = v || null;
+  }
   const parent = get("parent_id");
   if (parent) {
     if (!UUID.test(parent)) return { error: "Choose a main category from the list." };

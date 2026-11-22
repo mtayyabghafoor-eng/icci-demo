@@ -485,8 +485,13 @@ export const SEED_POLICIES: SeedPolicy[] = [
 
 /** A one-page PDF that says it is a made-up sample (plain text, no real content). */
 export function samplePolicyPdf(title: string, version: string): Uint8Array {
+  return samplePdf([`${title} (${version})`, "SAMPLE - fictional document for testing only.", "Not a real ICCI policy."]);
+}
+
+/** A one-page PDF with these lines of plain text (P1.20 shares it for placeholder manuals). */
+export function samplePdf(raw: string[]): Uint8Array {
   const safe = (s: string) => s.replace(/[^A-Za-z0-9 :.,-]/g, "");
-  const lines = [`${safe(title)} (${safe(version)})`, "SAMPLE - fictional document for testing only.", "Not a real ICCI policy."];
+  const lines = raw.map(safe);
   const text = lines.map((l, i) => `BT /F1 ${i === 0 ? 18 : 12} Tf 72 ${720 - i * 28} Td (${l}) Tj ET`).join("\n");
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
@@ -960,3 +965,67 @@ export function seedLoans(): SeedLoan[] {
   for (let i = 0; i < 4; i++) loans.push({ borrower: b(i), label: next(), lent: -120 + i, due: -99 + i, then: [{ kind: "returned", on: -100 }] });
   return loans;
 }
+
+// ---------------------------------------------------------------------------
+// P1.19 to P1.21: made-up companies, makes and models, who services what, the
+// staff contact person per category, a placeholder manual, and one ticket
+// passed to a company. Company names say "Example", phone numbers are
+// +353 00 000 02.., and every address uses the reserved ".example" domain,
+// which can never be a real business.
+export type SeedCompany = { name: string; kinds: ("supplier" | "installer" | "service" | "maker" | "other")[]; phone: string; email: string; website: string; notes: string | null };
+
+export const SEED_COMPANIES: SeedCompany[] = [
+  { name: "Example Gates and Barriers Ltd", kinds: ["installer", "service"], phone: "+353 00 000 0201", email: "service@gates.example", website: "https://gates.example", notes: "Made up. Ask for the callout desk." },
+  { name: "Example Cool Air Services Ltd", kinds: ["supplier", "installer", "service"], phone: "+353 00 000 0202", email: "jobs@coolair.example", website: "https://coolair.example", notes: null },
+  { name: "Example Garden Machines Ltd", kinds: ["supplier", "service"], phone: "+353 00 000 0203", email: "repairs@gardenmachines.example", website: "https://gardenmachines.example", notes: null },
+  { name: "Example Fire Safety Ltd", kinds: ["service"], phone: "+353 00 000 0204", email: "office@firesafety.example", website: "https://firesafety.example", notes: null },
+  { name: "Example Security Systems Ltd", kinds: ["installer", "service"], phone: "+353 00 000 0205", email: "help@security.example", website: "https://security.example", notes: null },
+  { name: "Example AirMakers", kinds: ["maker"], phone: "+353 00 000 0206", email: "support@airmakers.example", website: "https://airmakers.example", notes: "Maker's helpline (made up)." },
+  { name: "Example Mower Works", kinds: ["maker"], phone: "+353 00 000 0207", email: "help@mowerworks.example", website: "https://mowerworks.example", notes: null },
+  { name: "Example Gate Motors", kinds: ["maker"], phone: "+353 00 000 0208", email: "info@gatemotors.example", website: "https://gatemotors.example", notes: null },
+];
+
+export type SeedModel = { maker: string; model: string; category: string; service: string | null; warrantyMonths: number | null; manual: boolean };
+
+export const SEED_MODELS: SeedModel[] = [
+  { maker: "Example AirMakers", model: "AirMax WX-200", category: "Air conditioners", service: "Example Cool Air Services Ltd", warrantyMonths: 24, manual: true },
+  { maker: "Example AirMakers", model: "AirMax CX-500", category: "Air conditioners", service: "Example Cool Air Services Ltd", warrantyMonths: 36, manual: false },
+  { maker: "Example Mower Works", model: "Mow 46", category: "Lawnmowers", service: "Example Garden Machines Ltd", warrantyMonths: 24, manual: true },
+  { maker: "Example Gate Motors", model: "Swing 300", category: "Automatic gates and barriers", service: null, warrantyMonths: 12, manual: true },
+];
+
+/** Which demo items get which model, supplier and own service company (by the start of their name). */
+export const SEED_ITEM_LINKS: { namePrefix: string; model?: string; supplier?: string; service?: string }[] = [
+  { namePrefix: "Test wall air conditioner", model: "AirMax WX-200", supplier: "Example Cool Air Services Ltd" },
+  { namePrefix: "Test ceiling air conditioner", model: "AirMax CX-500", supplier: "Example Cool Air Services Ltd" },
+  { namePrefix: "Test lawnmower", model: "Mow 46", supplier: "Example Garden Machines Ltd" },
+  { namePrefix: "Test main entrance gate", model: "Swing 300" },
+  { namePrefix: "Test car park barrier", service: "Example Gates and Barriers Ltd" },
+];
+
+/** Category defaults: the usual service company and the staff contact person (by role). */
+export const SEED_CATEGORY_CONTACTS: { category: string; service: string | null; contactRole: "Caretaker" | "Gardener" | null }[] = [
+  { category: "Garden, tools and cleaning equipment", service: "Example Garden Machines Ltd", contactRole: "Gardener" },
+  { category: "Heating, cooling and water", service: "Example Cool Air Services Ltd", contactRole: "Caretaker" },
+  { category: "Building systems and security", service: null, contactRole: "Caretaker" },
+  { category: "Automatic gates and barriers", service: "Example Gates and Barriers Ltd", contactRole: null },
+  { category: "CCTV", service: "Example Security Systems Ltd", contactRole: null },
+  { category: "Fire alarms and extinguishers", service: "Example Fire Safety Ltd", contactRole: null },
+  { category: "Kitchen and catering", service: null, contactRole: "Caretaker" },
+  { category: "Furniture and furnishings", service: null, contactRole: "Caretaker" },
+];
+
+/** A one-page placeholder manual: says plainly that it is made up. */
+export function sampleManualPdf(model: string): Uint8Array {
+  return samplePdf([`${model} - user manual`, "SAMPLE - fictional manual for testing only.", "Not a real product."]);
+}
+
+/** The made-up ticket passed to a company (P1.21), about the broken demo lawnmower. */
+export const SEED_REFERRAL = {
+  description: "Lawnmower will not start after the winter (made up)",
+  assetName: "Test lawnmower 02",
+  reportedBy: "Test gardener",
+  company: "Example Garden Machines Ltd",
+  jobRef: "DEMO-123",
+  note: "Test: engineer to call on Thursday (made up)",
+};

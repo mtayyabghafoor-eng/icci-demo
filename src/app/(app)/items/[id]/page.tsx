@@ -21,6 +21,9 @@ import { adminNames, MOVEMENT_COLUMNS, stockLevelOf, type Movement } from "../..
 import { ITEM_COLUMNS, loadLookups, PHOTO_BUCKET, type ItemRow } from "../data";
 import { ItemStatus, Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../ui";
 import { BackLink } from "@/components/ui";
+import { allCompanies, allModels } from "../../companies/data";
+import { ContactCard } from "../../companies/contact-card";
+import { DocumentsCard } from "../../documents/documents-card";
 
 export const metadata: Metadata = { title: "Item | ICCI Control Dashboard" };
 
@@ -47,7 +50,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
   const item = data as ItemRow;
 
   const consumable = item.kind === "consumable";
-  const [lookups, history, photo, level, moves, nameOf, events, vehicleRes] = await Promise.all([
+  const [lookups, history, photo, level, moves, nameOf, events, vehicleRes, companies, models] = await Promise.all([
     loadLookups(supabase),
     supabase.rpc("item_history", { p_item_id: id }),
     item.photo_path ? supabase.storage.from(PHOTO_BUCKET).createSignedUrl(item.photo_path, 600) : null,
@@ -61,7 +64,12 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       : supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).limit(200),
     // P2.7: vehicle details, if this asset is a vehicle.
     consumable ? null : supabase.from("vehicles").select("id, registration").eq("item_id", id).maybeSingle(),
+    // P1.19: company and make-and-model names for the details and the history.
+    allCompanies(supabase),
+    allModels(supabase),
   ]);
+  const companyName = new Map(companies.map((c) => [c.id, c.name]));
+  const modelName = new Map(models.map((m) => [m.id, `${companyName.get(m.maker_company_id) ?? ""} ${m.model_name}`.trim()]));
   // P3.5: this asset's maintenance tickets, not yet closed first.
   const ticketsRes = consumable
     ? null
@@ -88,6 +96,8 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
   const lines = describeHistory((history.data ?? []) as HistoryRow[], {
     categories: lookups.categoryName,
     locations: lookups.locationName,
+    companies: companyName,
+    models: modelName,
   }).reverse();
 
   const fields: [string, string][] = [
@@ -100,6 +110,10 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
           ["Value", formatEuro(item.value_cents)],
           ["Purchase date", formatDate(item.purchase_date)],
           ["Warranty end", formatDate(item.warranty_end)],
+          ["Make and model", item.model_id ? (modelName.get(item.model_id) ?? "") : "Not recorded"],
+          ["Maker's serial number", item.maker_serial ?? "Not recorded"],
+          ["Supplied by", item.supplier_company_id ? (companyName.get(item.supplier_company_id) ?? "") : "Not recorded"],
+          ["Serviced by", item.service_company_id ? (companyName.get(item.service_company_id) ?? "") : "The model's or category's company"],
         ] as [string, string][])
       : ([
           ["Counted in", item.unit ?? ""],
@@ -107,6 +121,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
           ["Quantity now", level?.quantity == null ? "Not counted yet" : `${level.quantity} ${item.unit}`],
           ["Last counted", level?.last_counted_at ? formatDateTime(level.last_counted_at) : "Never"],
           ["Usage", describeUsage(level?.usage_since_previous_count ?? null, item.unit ?? "")],
+          ["Supplied by", item.supplier_company_id ? (companyName.get(item.supplier_company_id) ?? "") : "Not recorded"],
         ] as [string, string][])),
     ["Notes", item.notes || "None"],
   ];
@@ -123,6 +138,8 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       {done === "counted" && <Notice floating>Count saved.</Notice>}
       {done === "restocked" && <Notice floating>Stock added.</Notice>}
       {done === "correction" && <Notice floating>Correction sent. It counts once a different admin approves it.</Notice>}
+      {done === "document-added" && <Notice floating>Document added.</Notice>}
+      {done === "document-hidden" && <Notice floating>Document hidden. It stays in the record.</Notice>}
       {typeof done === "string" && isAssetAction(done) && (
         // A damage report offers "Open a ticket for this": that link must stay on the page.
         <Notice floating={!(done === "damage" && latestDamage && !tickets.some((t) => t.asset_event_id === latestDamage.id))}>
@@ -203,6 +220,14 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
           )}
         </section>
       </div>
+
+      {/* P1.20 and P1.21: who to call, warranty, manuals and this item's own documents. */}
+      {!consumable && item.condition !== "disposed" && (
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <ContactCard itemId={id} />
+          <DocumentsCard owner={{ item_id: id }} returnTo={`/items/${id}`} />
+        </div>
+      )}
 
       {consumable && (
         <section className="mt-8" aria-labelledby="stock-title">

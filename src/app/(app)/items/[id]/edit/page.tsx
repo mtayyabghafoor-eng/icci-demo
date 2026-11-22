@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { categoryGroups } from "@/lib/categories/rules";
 import { KIND_LABEL } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
+import { allCompanies, allModels, companyChoices, modelChoices } from "../../../companies/data";
 import { ITEM_COLUMNS, loadLookups, type ItemRow } from "../../data";
 import { EditForm } from "./edit-form";
 import { BackLink } from "@/components/ui";
@@ -29,7 +30,7 @@ async function Content({ params }: { params: PageProps<"/items/[id]/edit">["para
   const { data } = await supabase.from("items").select(ITEM_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
   const item = data as ItemRow;
-  const { categories, locationName } = await loadLookups(supabase);
+  const [{ categories, locationName }, companies, models] = await Promise.all([loadLookups(supabase), allCompanies(supabase), allModels(supabase)]);
 
   return (
     <>
@@ -45,6 +46,8 @@ async function Content({ params }: { params: PageProps<"/items/[id]/edit">["para
       <EditForm
         item={item}
         categoryGroups={categoryGroups(categories, { pickable: true, keep: item.category_id })}
+        models={modelChoices(models, companies, item.model_id)}
+        companies={companyChoices(companies, item.supplier_company_id, item.service_company_id)}
       />
     </>
   );

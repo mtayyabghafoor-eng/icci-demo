@@ -13,6 +13,7 @@ export type IconKey =
   | "places"
   | "categories"
   | "whatWeOwn"
+  | "companies"
   | "missing"
   | "disposals"
   | "notSeen"
@@ -79,6 +80,7 @@ export const MENU: MenuGroup[] = [
       // P1.16: next to "Register an item", as a whole room is registered from its place.
       { href: "/places", label: "Places", icon: "places", roles: ADMINS, also: ["/p"] },
       { href: "/categories", label: "Categories", icon: "categories", roles: ADMINS },
+      { href: "/companies", label: "Companies", icon: "companies", roles: ADMINS, also: ["/models"] },
       { href: "/stock", label: "Stock", icon: "stock", roles: ADMINS },
       { href: "/stocktake", label: "Stocktake", icon: "stocktake", roles: ADMINS },
       { href: "/labels", label: "Print labels", icon: "labels", roles: ADMINS },

@@ -93,14 +93,15 @@ describe("tickets list", () => {
   });
 
   it("filters come from the address, with anything odd ignored", () => {
-    expect(readFilters({})).toEqual({ status: "not_closed", priority: "", place: "", assigned: "" });
-    expect(readFilters({ status: "closed", priority: "urgent", place: PLACE, assigned: "nobody" })).toEqual({
+    expect(readFilters({})).toEqual({ status: "not_closed", priority: "", place: "", assigned: "", company: "" });
+    expect(readFilters({ status: "closed", priority: "urgent", place: PLACE, assigned: "nobody", company: PERSON })).toEqual({
       status: "closed",
       priority: "urgent",
       place: PLACE,
       assigned: "nobody",
+      company: PERSON,
     });
-    expect(readFilters({ status: "drop table", priority: "x", place: "y", assigned: "z" })).toEqual(readFilters({}));
+    expect(readFilters({ status: "drop table", priority: "x", place: "y", assigned: "z", company: "w" })).toEqual(readFilters({}));
     expect(filtersQuery(readFilters({}))).toBe("");
     expect(filtersQuery(readFilters({ status: "all", assigned: PERSON }))).toBe(`?status=all&assigned=${PERSON}`);
   });

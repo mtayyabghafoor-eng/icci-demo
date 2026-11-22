@@ -9,7 +9,16 @@
 
 import { isCategoryIcon, type CategoryIconKey } from "./icons";
 
-export type CategoryRow = { id: string; name: string; parent_id: string | null; active: boolean; icon?: string };
+export type CategoryRow = {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  active: boolean;
+  icon?: string;
+  /** P1.19: the usual service company, and the person staff phone. */
+  service_company_id?: string | null;
+  contact_person_id?: string | null;
+};
 
 export type CategoryGroup = { main: CategoryRow; subs: CategoryRow[] };
 
