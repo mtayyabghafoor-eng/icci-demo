@@ -7,7 +7,7 @@ import { useActionState, useRef, startTransition } from "react";
 import { Button, Field, Input, Select } from "@/components/ui";
 import { BarcodeCamera, type ScanTarget } from "@/components/shell/camera-scanner";
 import { FormError } from "@/app/sign-in/ui";
-import { labelFromScan } from "@/lib/items/scan";
+import { codeFromScan } from "@/lib/items/scan";
 import type { CategoryGroup } from "@/lib/categories/rules";
 import type { RoomDefaults } from "@/lib/places/room-register";
 import { CategoryOptions } from "../../../categories/options";
@@ -27,14 +27,18 @@ export function RoomForm(props: {
   const photo = useRef<File | null>(null);
   const categoryName = props.categoryGroups.flatMap((g) => g.subs).find((c) => c.id === defaults.category_id)?.name;
 
-  // The camera inside the app: an item label comes back to this screen with its number filled in.
+  // The camera inside the app: an item label comes back to this screen with
+  // its number filled in. A2: the next room's door label opens that room's
+  // page, where "Register a room" starts registering there (it also tells
+  // the phone's own Camera app which room the next labels belong to).
   const camera: ScanTarget = {
     formats: ["qr_code"],
-    accept: labelFromScan,
-    hrefFor: (label) => `/places/${placeId}/register?label=${label}`,
+    accept: codeFromScan,
+    hrefFor: (path) =>
+      path.startsWith("/p/") ? path : `/places/${placeId}/register?label=${path.replace(/^\/l\//, "")}`,
     title: "Scan the next label",
-    hint: "Point the camera at the square code on the item's label.",
-    wrongCode: "That code is not an ICCI item label. Point the camera at the square code on an item label.",
+    hint: "Point the camera at the square code on the item's label, or on the next room's door label.",
+    wrongCode: "That code is not an ICCI label. Point the camera at the square code on an item or door label.",
     testId: "room-camera",
   };
 

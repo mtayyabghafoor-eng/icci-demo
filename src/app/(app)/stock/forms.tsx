@@ -1,6 +1,6 @@
 "use client";
 // The stock forms. Phone-first: big boxes, a number keypad, three fields or fewer.
-import { startTransition, useActionState, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useRef, type FormEvent } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { decideCorrection, recordOne, recordWeeklyCount, requestCorrection, type StockFormState } from "./actions";
 import { Stepper } from "@/components/ui/stepper";
@@ -108,8 +108,22 @@ export type CountRow = { itemId: string; name: string; label: string; place: str
 /** The weekly count: one box per shelf item. Empty boxes are skipped. */
 export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountRow[] }) {
   const [state, action, pending] = useActionState(recordWeeklyCount.bind(null, roomId), none);
+  const form = useRef<HTMLFormElement>(null);
+  const sending = useRef(false);
+  // A refused count comes back to this form: it is unsaved again.
+  useEffect(() => {
+    sending.current = false;
+  }, [state]);
+  useLeaveWarning(form, sending);
   return (
-    <form onSubmit={keep(action)} className="mt-4">
+    <form
+      ref={form}
+      onSubmit={(e) => {
+        sending.current = true;
+        keep(action)(e);
+      }}
+      className="mt-4"
+    >
       <ol className="space-y-2">
         {rows.map((r) => {
           const problem = state.fieldErrors?.[r.itemId];
@@ -140,7 +154,7 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
           );
         })}
       </ol>
-      <div className="sticky bottom-0 mt-4 space-y-2 border-t-2 border-icci-gold bg-icci-page py-3">
+      <div className="sticky-actions mt-4 space-y-2 border-t-2 border-icci-gold bg-icci-page py-3">
         <FormError message={state.error} />
         <button type="submit" disabled={pending} className={primary}>
           {pending ? "Saving…" : "Save count"}
@@ -148,4 +162,40 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
       </div>
     </form>
   );
+}
+
+/**
+ * A2: counts typed but not saved are not lost by a stray tap. Leaving by a
+ * link (the menu, Back, the bottom bar) asks first; closing or reloading the
+ * page gets the browser's own "Leave site?" question. Saving never asks.
+ */
+function useLeaveWarning(form: React.RefObject<HTMLFormElement | null>, sending: React.RefObject<boolean>) {
+  useEffect(() => {
+    const counted = () =>
+      Array.from(form.current?.querySelectorAll<HTMLInputElement>('input[name^="qty:"]') ?? []).filter((i) => i.value.trim() !== "").length;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (sending.current || counted() === 0) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    const onClick = (e: MouseEvent) => {
+      if (sending.current || e.defaultPrevented) return;
+      const link = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || form.current?.contains(link)) return;
+      const n = counted();
+      if (n === 0) return;
+      const what = n === 1 ? "1 shelf" : `${n} shelves`;
+      if (!window.confirm(`You have counted ${what} but not saved. Leave without saving?`)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    // Capture: asked before the app's own link handling starts the move.
+    document.addEventListener("click", onClick, true);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("click", onClick, true);
+    };
+  }, [form, sending]);
 }

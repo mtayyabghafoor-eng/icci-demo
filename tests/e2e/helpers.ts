@@ -163,6 +163,10 @@ export async function showFilters(page: Page) {
   // Only phones fold the filters away (below 768 pixels wide, "md").
   const width = page.viewportSize()?.width ?? 1280;
   if (width >= 768) return;
+  // A2: a list with drop-downs only (no search box) shows them straight away.
+  const form = page.locator("form.list-filters").first();
+  await expect(form).toBeVisible();
+  if ((await form.locator('input:not([type]), input[type="search"], input[type="text"]').count()) === 0) return;
   // Wait for the button, and click again if the first click came before the
   // page was ready to respond (seen once in a full run, session 32).
   const fold = page.getByRole("button", { name: /^(More|Fewer) filters/ });

@@ -79,14 +79,16 @@ export function IdleWatcher({ serverNow }: { serverNow: number }) {
         <div
           role="status"
           data-testid="idle-warning"
-          className="fixed inset-x-3 bottom-[5.5rem] z-40 mx-auto flex max-w-xl items-center gap-3 rounded-2xl border border-[var(--icci-warn-text)]/30 bg-[var(--icci-warn-fill)] px-4 py-3 text-[15px] shadow-raised md:bottom-6 md:left-[96px] lg:left-[288px] print:hidden"
+          className="fixed inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-xl items-center gap-3 rounded-2xl border border-[var(--icci-warn-text)]/30 bg-[var(--icci-warn-fill)] px-4 py-3 text-[15px] shadow-raised md:bottom-6 md:left-[96px] lg:left-[288px] print:hidden"
         >
           <Clock aria-hidden size={20} className="shrink-0 text-[var(--icci-warn-text)]" />
           <p>
             <span className="font-bold text-[var(--icci-warn-text)]">
               Signing out in {minutes} minute{minutes === 1 ? "" : "s"}.
             </span>{" "}
-            Move the mouse or press a key to stay signed in.
+            {/* A2: a phone has no mouse or keys. */}
+            <span className="md:hidden">Tap the screen to stay signed in.</span>
+            <span className="max-md:hidden">Move the mouse or press a key to stay signed in.</span>
           </p>
         </div>
       )}

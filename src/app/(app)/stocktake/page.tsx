@@ -99,7 +99,28 @@ async function Content() {
         {sent.length === 0 ? (
           <p className="mt-3">None yet.</p>
         ) : (
-          <div className="list-table-wrap">
+          <>
+          {/* A2: on a phone, cards instead of a wide table. */}
+          <ul className="mt-3 space-y-2 md:hidden">
+            {sent.map((s) => {
+              const statuses = statusesOf.get(s.id) ?? [];
+              const waiting = statuses.some((x) => x === "pending");
+              return (
+                <li key={s.id} className="list-card" data-testid="sent-stocktake-card">
+                  <span className="flex items-start justify-between gap-2">
+                    <Link href={`/stocktake/${s.id}`} className="font-semibold">
+                      {lookups.locationName.get(s.location_id)}
+                    </Link>
+                    <StatusBadge word={decisionSummary(statuses)} tone={waiting ? "amber" : STOCKTAKE_STATUS.submitted.tone} />
+                  </span>
+                  <span className="block text-sm">
+                    Sent {s.submitted_at ? formatDateTime(s.submitted_at) : ""} by {nameOf(s.submitted_by)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="list-table-wrap max-md:hidden">
             <table className="list-table min-w-[36rem]">
               <thead>
                 <tr>
@@ -132,6 +153,7 @@ async function Content() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </section>
     </>

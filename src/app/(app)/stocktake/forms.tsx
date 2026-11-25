@@ -137,7 +137,7 @@ export function ScanForm(props: {
 export function SendForm({ stocktakeId, differences }: { stocktakeId: number; differences: number }) {
   const [state, action, pending] = useActionState(submitStocktake.bind(null, stocktakeId), none);
   return (
-    <form action={action} className="sticky bottom-0 mt-6 space-y-2 border-t-2 border-icci-gold bg-icci-page py-3">
+    <form action={action} className="sticky-actions mt-6 space-y-2 border-t-2 border-icci-gold bg-icci-page py-3">
       <p>
         {differences === 0
           ? "No differences: sending closes the stocktake. Nothing changes."

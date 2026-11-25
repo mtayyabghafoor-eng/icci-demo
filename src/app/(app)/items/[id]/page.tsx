@@ -156,8 +156,9 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       )}
 
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_280px]">
-        <section className="rounded-2xl border border-icci-line bg-white shadow-card p-5" aria-label="Details">
-          <dl className="grid gap-x-4 gap-y-2 sm:grid-cols-[160px_1fr]">
+        {/* A2: on a phone the buttons come first (after a scan the job is to act), then the details. */}
+        <section className="flex flex-col rounded-2xl border border-icci-line bg-white shadow-card p-5 max-md:[&>*:nth-child(2)]:mt-0" aria-label="Details">
+          <dl className="grid gap-x-4 gap-y-2 sm:grid-cols-[160px_1fr] max-md:order-last max-md:mt-5 max-md:border-t max-md:border-icci-line max-md:pt-4">
             {fields.map(([k, v]) => (
               <div key={k} className="contents">
                 <dt className="text-sm font-semibold text-icci-ink-60">{k}</dt>

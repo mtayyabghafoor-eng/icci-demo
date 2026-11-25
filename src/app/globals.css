@@ -150,10 +150,31 @@ a {
 .list-filters :is(input, select):focus {
   border-color: var(--icci-green);
 }
-/* Phone: drop-down filters fold behind "More filters" (filter-fold.tsx). */
+/*
+  Phone: drop-down filters fold behind "More filters" (filter-fold.tsx), but
+  only on a list that has a search box to show instead (A2). A list with
+  drop-downs only shows them straight away, never an empty box.
+*/
 @media (width < 48rem) {
-  .list-filters[data-folded="true"] label:has(> select) {
+  .list-filters[data-folded="true"]:has(input:not([type]), input[type="search"], input[type="text"]) label:has(> select) {
     display: none;
+  }
+}
+
+/*
+  A2: a Save or Finish bar that stays in view while a long list scrolls. On
+  a phone it sits just above the bottom bar (4 rem tall, with the raised
+  Scan circle 1.25 rem above it, plus the iPhone's home-bar space), never
+  behind it. On a PC there is no bottom bar.
+*/
+.sticky-actions {
+  position: sticky;
+  bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  z-index: 20;
+}
+@media (width >= 48rem) {
+  .sticky-actions {
+    bottom: 0;
   }
 }
 .list-count {

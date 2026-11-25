@@ -411,6 +411,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 25 Nov 2026, session 45 (slice A2, phone fixes; owner away, said to do as
+  much as possible): Save/Finish bars sit above the bottom bar
+  (.sticky-actions); drop-down-only lists show their filters on phones and
+  hide "More filters"; idle warning says "Tap the screen" and clears the
+  iPhone home bar; item page shows buttons before details on phones; room
+  camera opens the next room's door label (then "Register a room");
+  leaving a weekly count with unsaved numbers asks first; DataTable and the
+  stocktake list are cards on phones. Full suite: 1778 unit/db passed;
+  browser 314 passed, 1 failed (test clicked the now-hidden button), fixed
+  and re-run green. Not pushed. Next: A3 needs the owner's OK for the
+  staging database (migration 0047).
+
 - 25 Nov 2026, session 45 (slice A1, messages and "Are you sure?"; owner
   said go as recommended: Switch off gets the red button, no sheet): refusals
   red and staying (one list, src/lib/ui/messages.ts); "cannot see" notes

@@ -173,7 +173,7 @@ async function Content({
           </ul>
         </section>
 
-        <div className="sticky bottom-0 mt-6 border-t-2 border-icci-gold bg-icci-page py-3">
+        <div className="sticky-actions mt-6 border-t-2 border-icci-gold bg-icci-page py-3">
           <PrimaryLink href={`/stocktake/${props.id}/finish`}>Check and finish</PrimaryLink>
           <p className="mt-1 text-sm">Shows what is missing before anything is sent. You can come back and keep scanning.</p>
         </div>

@@ -10,13 +10,40 @@ export type Column<Row> = {
   header: string;
   cell: (row: Row) => ReactNode;
   align?: "left" | "right";
-  /** Hidden on narrow screens; put the same detail under the name instead. */
+  /** Hidden in the table below PC width (A2: a phone shows cards instead, with every column as a line). */
   wideOnly?: boolean;
 };
 
 export function DataTable<Row>({ columns, rows, rowKey, caption }: { columns: Column<Row>[]; rows: Row[]; rowKey: (r: Row) => string; caption?: string }) {
+  const [first, ...rest] = columns;
   return (
-    <div className="overflow-x-auto rounded-2xl border border-icci-line bg-white shadow-card">
+    <>
+      {/* A2: on a phone each row is a card: the first column as its title, the others as short lines under it. */}
+      <ul className="space-y-2 md:hidden" aria-label={caption}>
+        {rows.map((r) => (
+          <li key={rowKey(r)} className="rounded-2xl border border-icci-line bg-white p-4 shadow-card">
+            <div className="font-semibold">{first?.cell(r)}</div>
+            {rest.length > 0 && (
+              <dl className="mt-1.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[15px]">
+                {rest.map((c) => (
+                  <div key={c.key} className="contents">
+                    <dt className="text-sm text-icci-ink-60">{c.header}</dt>
+                    <dd className="min-w-0">{c.cell(r)}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </li>
+        ))}
+      </ul>
+      <DataTableWide columns={columns} rows={rows} rowKey={rowKey} caption={caption} />
+    </>
+  );
+}
+
+function DataTableWide<Row>({ columns, rows, rowKey, caption }: { columns: Column<Row>[]; rows: Row[]; rowKey: (r: Row) => string; caption?: string }) {
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-icci-line bg-white shadow-card max-md:hidden">
       <table className="w-full border-collapse text-left text-[15px]">
         {caption && <caption className="sr-only">{caption}</caption>}
         <thead>
