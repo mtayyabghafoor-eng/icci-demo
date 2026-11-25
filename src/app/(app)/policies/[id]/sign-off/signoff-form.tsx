@@ -16,23 +16,30 @@ export function SignoffForm({
   approvedOn,
   today,
   candidates,
+  ticked = null,
+  grid = null,
 }: {
   policyId: string;
   versionId: string;
   approvedOn: string;
   today: string;
   candidates: Candidate[];
+  /** A7: the person whose grid square was clicked starts ticked. */
+  ticked?: string | null;
+  /** A7: the grid's filter when opened from the grid ("" = no filter); Save and Cancel go back there. */
+  grid?: string | null;
 }) {
   const [state, action, pending] = useActionState<SignoffFormState, FormData>(recordSignoffs.bind(null, policyId, versionId), { error: null });
   return (
     <form action={action} className="mt-4 space-y-5 rounded-2xl border border-icci-line bg-white p-5 shadow-card" aria-label="Record sign-off">
+      {grid !== null && <input type="hidden" name="grid" value={grid} />}
       <fieldset>
         <legend className="font-semibold">Who signed</legend>
         <p className="text-sm">Tick everyone whose signature is on this sheet.</p>
         <div className="mt-2 grid gap-1 sm:grid-cols-2" data-testid="signoff-people">
           {candidates.map((c) => (
             <label key={c.id} className={`flex min-h-11 items-center gap-3 ${c.isMe ? "opacity-60" : ""}`}>
-              <input type="checkbox" name="people" value={c.id} disabled={c.isMe} className="h-5 w-5" />
+              <input type="checkbox" name="people" value={c.id} disabled={c.isMe} defaultChecked={c.id === ticked} className="h-5 w-5" />
               <span dir="auto">
                 {c.name}
                 {c.note && <span className="block text-sm">{c.note}</span>}
@@ -71,7 +78,7 @@ export function SignoffForm({
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : "Save"}
         </button>
-        <Link href={`/policies/${policyId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
+        <Link href={grid !== null ? `/policies/grid${grid ? `?${grid}` : ""}` : `/policies/${policyId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
           Cancel
         </Link>
       </div>

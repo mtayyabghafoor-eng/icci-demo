@@ -60,6 +60,7 @@ export function ListMemory() {
 export function BackLink({ href, children }: { href: string; children: ReactNode }) {
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const [remembered, setRemembered] = useState<string | null>(null);
+  const here = usePathname();
   useEffect(() => {
     // The top bar is drawn by the layout, before the page; find its slot once running.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -70,7 +71,7 @@ export function BackLink({ href, children }: { href: string; children: ReactNode
     return () => setSlot(null);
   }, []);
   if (!slot) return null;
-  const target = backTarget({ href, name: plainText(children) }, remembered);
+  const target = backTarget({ href, name: plainText(children) }, remembered, here);
   const name = backName(target.name);
   return createPortal(
     <Link

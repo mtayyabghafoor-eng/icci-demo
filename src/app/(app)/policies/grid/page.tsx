@@ -9,12 +9,12 @@ import { BackLink, buttonClass } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_POLICIES } from "@/lib/policies/rules";
-import { filterSquares, OVERDUE_DAYS, readGridFilter, SIGNOFF_STATUS, SQUARE_COLUMNS, SQUARE_ORDER, type Square } from "@/lib/policies/signoffs";
+import { filterSquares, gridQuery, OVERDUE_DAYS, readGridFilter, SIGNOFF_STATUS, SQUARE_ORDER } from "@/lib/policies/signoffs";
 import { createClient } from "@/lib/supabase/server";
-import { must } from "@/lib/supabase/must";
-import { SecondaryLink } from "../../items/ui";
+import { Notice, SecondaryLink } from "../../items/ui";
 import { loadPeopleLists } from "../../people/data";
 import { CannotSeePolicies } from "../cannot-see";
+import { loadGridSquares } from "./data";
 import { GridTable } from "./grid-table";
 
 export const metadata: Metadata = { title: "Policy grid | ICCI Control Dashboard" };
@@ -40,20 +40,24 @@ async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid"
   if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
   const params = await searchParams;
   const supabase = await createClient();
-  const [lists, { data, error: gridError }] = await Promise.all([loadPeopleLists(supabase), supabase.from("policy_grid").select(SQUARE_COLUMNS)]);
+  const [lists, all] = await Promise.all([loadPeopleLists(supabase), loadGridSquares(supabase)]);
   const filter = readGridFilter(params, new Set(lists.sectionName.keys()), new Set(lists.roleName.keys()));
-  const squares = filterSquares((must({ data, error: gridError }).data ?? []) as Square[], filter);
+  const squares = filterSquares(all, filter);
   const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
-  const filterParams = new URLSearchParams({
-    ...(filter.section && { section: filter.section }),
-    ...(filter.role && { role: filter.role }),
-    ...(filter.status && { status: filter.status }),
-  }).toString();
+  const filterParams = gridQuery(filter);
+  const signed = params.done === "signed" ? Number(params.n) || 0 : 0;
   const filtered = filterParams !== "";
   const counts = SQUARE_ORDER.map((s) => `${squares.filter((q) => q.status === s).length} ${SIGNOFF_STATUS[s].word.toLowerCase()}`).join(", ");
 
   return (
     <>
+      {signed > 0 && (
+        <div className="mb-4">
+          <Notice>
+            Sign-off recorded for {signed} {signed === 1 ? "person" : "people"}.
+          </Notice>
+        </div>
+      )}
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-3" aria-label="Filter the policy grid">
         <label>
           <span className="font-semibold">Section</span>
@@ -108,7 +112,7 @@ async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid"
         </p>
         <SecondaryLink href={`/policies/grid/print${filterParams ? `?${filterParams}` : ""}`}>Print view</SecondaryLink>
       </div>
-      <GridTable squares={squares} roleName={lists.roleName} sectionName={lists.sectionName} />
+      <GridTable squares={squares} roleName={lists.roleName} sectionName={lists.sectionName} gridQuery={filterParams} />
       <p className="mt-4 text-sm">Switched-off people and policies are left out. Policies with nothing published yet have no squares.</p>
     </>
   );

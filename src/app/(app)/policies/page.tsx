@@ -12,6 +12,7 @@ import { MAY_SEE_POLICIES, POLICY_ROW_COLUMNS, REVIEW_DUE_DAYS, REVIEW_STATUS, w
 import { createClient } from "@/lib/supabase/server";
 import { PrimaryLink, SecondaryLink, StatusBadge } from "../items/ui";
 import { CannotSeePolicies } from "./cannot-see";
+import { loadGridSquares } from "./grid/data";
 
 export const metadata: Metadata = { title: "Policies | ICCI Control Dashboard" };
 
@@ -48,15 +49,16 @@ async function List() {
   const supabase = await createClient();
   // Switched-on policies in full; only the most recently changed switched-off
   // ones (there can be many), with a count of them all.
-  const [{ data }, { data: offData, count: offCount }, { data: squares }] = await Promise.all([
+  const [{ data }, { data: offData, count: offCount }, squares] = await Promise.all([
     supabase.from("policies_overview").select(POLICY_ROW_COLUMNS).eq("active", true),
     supabase.from("policies_overview").select(POLICY_ROW_COLUMNS, { count: "exact" }).eq("active", false).order("title").limit(OFF_SHOWN),
-    supabase.from("policy_grid").select("policy_id, status").limit(100000),
+    // A7: every square, page by page (one request returns at most 1,000).
+    loadGridSquares(supabase),
   ]);
   const ownerIds = [...new Set([...((data ?? []) as PolicyRow[]), ...((offData ?? []) as PolicyRow[])].map((p) => p.owner_person_id))];
   const { data: people } = ownerIds.length ? await supabase.from("people").select("id, full_name").in("id", ownerIds) : { data: [] };
   const counts: Counts = new Map();
-  for (const q of (squares ?? []) as { policy_id: string; status: string }[]) {
+  for (const q of squares) {
     const c = counts.get(q.policy_id) ?? { signed: 0, total: 0 };
     c.total += 1;
     if (q.status === "signed") c.signed += 1;

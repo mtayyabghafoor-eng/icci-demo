@@ -108,6 +108,24 @@ export function readGridFilter(params: Record<string, string | string[] | undefi
   };
 }
 
+/** The grid's filter as an address part ("section=…&status=…"); empty when nothing is chosen. */
+export function gridQuery(f: GridFilter): string {
+  return new URLSearchParams(Object.entries(f).filter(([, v]) => v) as [string, string][]).toString();
+}
+
+/**
+ * A7: the grid's filter carried through a sign-off (`?grid=…`), read back
+ * safely: only the three filter names, each a plain word or id.
+ */
+export function readGridBack(raw: string | string[] | undefined): string | null {
+  if (typeof raw !== "string") return null;
+  const kept = new URLSearchParams();
+  for (const [k, v] of new URLSearchParams(raw)) {
+    if ((k === "section" || k === "role" || k === "status") && /^[\w-]{1,64}$/.test(v)) kept.set(k, v);
+  }
+  return kept.toString();
+}
+
 /** Squares for the chosen section and role; "status" keeps only people with at least one square of that status. */
 export function filterSquares(squares: Square[], f: GridFilter): Square[] {
   let out = squares.filter((s) => (!f.section || s.section_id === f.section) && (!f.role || s.person_role_id === f.role));

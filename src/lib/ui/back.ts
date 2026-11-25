@@ -70,8 +70,9 @@ export function memoryAction(pathname: string, menuPages: readonly string[]): "r
  * `remembered` is the list kept for this tab. The page's own list with a
  * remembered search keeps the page's own name.
  */
-export function backTarget(own: { href: string; name: string }, remembered: string | null): { href: string; name: string } {
+export function backTarget(own: { href: string; name: string }, remembered: string | null, here = ""): { href: string; name: string } {
   const hit = listAddress(remembered);
-  if (!hit || !STAND_INS[own.href]?.includes(hit.path)) return own;
+  // Never back to the page you are on (a list page with a Back of its own, e.g. the policy grid).
+  if (!hit || hit.path === here || !STAND_INS[own.href]?.includes(hit.path)) return own;
   return { href: hit.address, name: hit.path === own.href ? own.name : BACK_LISTS[hit.path] };
 }

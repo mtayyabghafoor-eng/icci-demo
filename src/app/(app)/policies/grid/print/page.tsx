@@ -6,7 +6,8 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
 import { MAY_SEE_POLICIES } from "@/lib/policies/rules";
-import { filterSquares, OVERDUE_DAYS, readGridFilter, SIGNOFF_STATUS, SQUARE_COLUMNS, type Square } from "@/lib/policies/signoffs";
+import { filterSquares, gridQuery, OVERDUE_DAYS, readGridFilter, SIGNOFF_STATUS } from "@/lib/policies/signoffs";
+import { loadGridSquares } from "../data";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { PrintNowButton } from "../../../labels/forms";
@@ -32,10 +33,10 @@ async function Content({ searchParams }: { searchParams: PageProps<"/policies/gr
   if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
   const params = await searchParams;
   const supabase = await createClient();
-  const [lists, { data }] = await Promise.all([loadPeopleLists(supabase), supabase.from("policy_grid").select(SQUARE_COLUMNS)]);
+  const [lists, all] = await Promise.all([loadPeopleLists(supabase), loadGridSquares(supabase)]);
   const filter = readGridFilter(params, new Set(lists.sectionName.keys()), new Set(lists.roleName.keys()));
-  const squares = filterSquares((data ?? []) as Square[], filter);
-  const back = new URLSearchParams(Object.entries(filter).filter(([, v]) => v) as [string, string][]).toString();
+  const squares = filterSquares(all, filter);
+  const back = gridQuery(filter);
   const chosen = [
     filter.section && `Section: ${lists.sectionName.get(filter.section)}`,
     filter.role && `Role: ${lists.roleName.get(filter.role)}`,

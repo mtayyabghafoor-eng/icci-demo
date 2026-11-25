@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BackLink, Logo, Notice } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { personText, printRows, PUBLICATION_COLUMNS, publishedAtText, removedText, type FrozenEntry, type Publication } from "@/lib/rota/publish";
+import { changesSentence, personText, printRows, PUBLICATION_COLUMNS, publishedAtText, removedText, type FrozenEntry, type Publication } from "@/lib/rota/publish";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
 import { timeText, weekDays, weekTitle } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
@@ -17,6 +17,8 @@ import { cx } from "@/lib/ui/text";
 import { PrintNowButton } from "../../../labels/forms";
 import { adminNames } from "../../../stock/data";
 import { CannotSeeRota } from "../../cannot-see";
+import { loadPublishState } from "../../week-data";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Rota (print) | ICCI Control Dashboard" };
 
@@ -61,6 +63,9 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/prin
   const latest = order[order.length - 1] === pub.id;
   const groups = printRows(copy, days);
   const changed = copy.entries.filter((e) => e.changed).length;
+  // A7: the week was changed after this was published: say so before anyone prints it.
+  const since = latest ? await loadPublishState(supabase, pub.week_id) : null;
+  const notYetPublished = since ? since.changed.size + since.removed : 0;
 
   return (
     <div className="rota-print-page">
@@ -70,6 +75,17 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/prin
           <div className="mt-3">
             <Notice tone="success" floating testId="notice">
               Published. This is the one-page rota to print or save as a PDF.
+            </Notice>
+          </div>
+        )}
+        {notYetPublished > 0 && (
+          <div className="mt-3" data-testid="unpublished-changes">
+            <Notice tone="warning" title="The week has changes that are not published yet.">
+              {changesSentence(since!.changed.size, since!.removed)} This page prints the rota as it was published.{" "}
+              <Link href={`/rota/publish?week=${monday}`} className="font-semibold">
+                Publish again
+              </Link>{" "}
+              to print the changes.
             </Notice>
           </div>
         )}

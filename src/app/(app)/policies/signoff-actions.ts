@@ -5,7 +5,7 @@
 // before approval, withdraw with a reason, never delete).
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { friendlySignoffError, parseSignoffForm, SCAN_BUCKET, scanFrom, scanPath } from "@/lib/policies/signoffs";
+import { friendlySignoffError, parseSignoffForm, readGridBack, SCAN_BUCKET, scanFrom, scanPath } from "@/lib/policies/signoffs";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
 import { UUID, formGetter } from "@/lib/forms";
 
@@ -33,6 +33,9 @@ export async function recordSignoffs(policyId: string, versionId: string, _state
     .insert(parsed.values.people.map((person_id) => ({ person_id, policy_version_id: versionId, signed_on: parsed.values.signed_on, scan_path })));
   if (error) return { error: friendlySignoffError(error.message) };
   const n = parsed.values.people.length;
+  // A7: opened from the policy grid: back to the grid, with its filter.
+  const grid = readGridBack(form.get("grid")?.toString());
+  if (grid !== null) redirect(`/policies/grid?${grid ? `${grid}&` : ""}done=signed&n=${n}`);
   redirect(`/policies/${policyId}?done=signed&n=${n}`);
 }
 

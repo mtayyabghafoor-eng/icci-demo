@@ -3,6 +3,8 @@
 // on that day (green, grey or red) and what else they are on that day.
 // "Put on this slot", "Take off" and "Remove this slot" each add an entry
 // (nothing is typed over). Read-only once the week has ended.
+// A7: with someone on it, "Also put them on" ticks the same slot on the
+// other days of the week that are still empty.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,7 +12,7 @@ import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
 import { buttonClass, Card, CardTitle, FactGrid, Notice, PageHeader, ConfirmSubmit } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { fullDayLabel, MAY_SEE_ROTA, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
+import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
 import {
   timeText,
   VETTING_ON_DAY,
@@ -29,7 +31,7 @@ import { todayInDublin } from "@/lib/vetting/rules";
 import { fieldClass, StatusBadge } from "../../../items/ui";
 import { CannotSeeRota } from "../../cannot-see";
 import { ENTRY_COLUMNS, loadPlaces, loadSlotTypes, peopleNames, type RotaEntry } from "../../week-data";
-import { assignPerson, removeSlot } from "../../week-actions";
+import { assignMore, assignPerson, removeSlot } from "../../week-actions";
 
 export const metadata: Metadata = { title: "Rota slot | ICCI Control Dashboard" };
 
@@ -103,12 +105,15 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
   const today = todayInDublin();
   const locked = weekEnded(monday, today);
   const day = row.assignment_date;
-  const [{ data: entryData }, { data: warnData }, types] = await Promise.all([
+  const [{ data: entryData }, { data: warnData }, types, { data: sameSlotData }] = await Promise.all([
     supabase.from("rota_entries").select(ENTRY_COLUMNS).eq("id", id).single(),
     supabase.from("rota_warnings").select(WARNING_COLUMNS).eq("assignment_id", id),
     loadSlotTypes(supabase),
+    supabase.from("rota_entries").select(ENTRY_COLUMNS).eq("week_id", row.week_id).eq("slot_type_id", row.slot_type_id).neq("id", id).order("assignment_date").order("id"),
   ]);
   const entry = entryData as RotaEntry;
+  const emptyElsewhere = ((sameSlotData ?? []) as RotaEntry[]).filter((e) => !e.person_id);
+  const justAssigned = sp.done === "assigned";
   const typeOf = new Map(types.map((t) => [t.id, t]));
   const type = typeOf.get(row.slot_type_id)!;
   const warnings = (warnData ?? []) as RotaWarning[];
@@ -148,6 +153,13 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
         crumbs={crumbs}
         status={personName ? <StatusBadge word={`On it: ${personName}`} tone="green" /> : <StatusBadge word="Not filled yet" tone="amber" />}
       />
+      {justAssigned && personName && (
+        <div className="mb-4">
+          <Notice tone="success" floating testId="notice">
+            Saved. {personName} is on the slot.
+          </Notice>
+        </div>
+      )}
       {problem && (
         <div className="mb-4">
           <Notice tone="error" testId="problem">
@@ -208,6 +220,35 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
         )}
       </Card>
 
+      {!locked && row.person_id && emptyElsewhere.length > 0 && (
+        <div className="mt-6">
+          <Card>
+            <CardTitle>Also put {personName ?? "them"} on</CardTitle>
+            <p className="-mt-2 mb-3 text-[15px]">
+              {type.name} on other days this week that nobody is on yet. Tick the days, then save. Warnings show on the week afterwards.
+            </p>
+            <form action={assignMore.bind(null, monday, row.person_id)} aria-label="Also put this person on">
+              <div className="flex flex-wrap gap-2" data-testid="more-days">
+                {emptyElsewhere.map((e) => (
+                  <label
+                    key={e.id}
+                    className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-icci-line bg-white px-3 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50"
+                  >
+                    <input type="checkbox" name="slots" value={e.id} className="h-5 w-5" />
+                    <span>
+                      <span className="font-semibold">{shortDayLabel(e.assignment_date)}</span>
+                      <span className="ml-1.5 text-sm text-icci-ink-60">{timeText(e.slot_group, e.starts_at, e.ends_at)}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <button type="submit" className={cx(buttonClass("primary"), "mt-4")}>
+                Put {personName ?? "them"} on the ticked days
+              </button>
+            </form>
+          </Card>
+        </div>
+      )}
       {!locked && (
         <div className="mt-6">
           <Card>

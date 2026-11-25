@@ -1,13 +1,15 @@
 // Record sign-off for a policy's current version (slice P2.6). Lists the
 // people who must sign and have not yet; your own name is shown but cannot be
 // ticked (the database refuses it too). Several people at once for one sheet.
+// A7: opened from a square of the policy grid (?person=…&grid=…), that person
+// starts ticked, and Back, Cancel and Save return to the grid with its filter.
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
 import { MAY_SEE_POLICIES, POLICY_ROW_COLUMNS, type PolicyRow } from "@/lib/policies/rules";
-import { SIGNOFF_STATUS, SQUARE_COLUMNS, type Square } from "@/lib/policies/signoffs";
+import { readGridBack, SIGNOFF_STATUS, SQUARE_COLUMNS, type Square } from "@/lib/policies/signoffs";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeePolicies } from "../../cannot-see";
@@ -23,17 +25,21 @@ export default function RecordSignoffPage(props: PageProps<"/policies/[id]/sign-
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
       <Suspense fallback={<p>Loading…</p>}>
-        <Content params={props.params} />
+        <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
   );
 }
 
-async function Content({ params }: { params: PageProps<"/policies/[id]/sign-off">["params"] }) {
+async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]/sign-off">, "params" | "searchParams">) {
   const me = await requireAdmin();
   if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
+  const sp = await searchParams;
+  const grid = readGridBack(sp.grid);
+  const ticked = typeof sp.person === "string" && UUID.test(sp.person) ? sp.person : null;
+  const gridHref = grid === null ? null : `/policies/grid${grid ? `?${grid}` : ""}`;
   const supabase = await createClient();
   const { data } = await supabase.from("policies_overview").select(POLICY_ROW_COLUMNS).eq("id", id).maybeSingle();
   if (!data) notFound();
@@ -53,7 +59,7 @@ async function Content({ params }: { params: PageProps<"/policies/[id]/sign-off"
 
   return (
     <>
-      <BackLink href={`/policies/${p.id}`}>Back to {p.title}</BackLink>
+      {gridHref ? <BackLink href={gridHref}>Policy grid</BackLink> : <BackLink href={`/policies/${p.id}`}>Back to {p.title}</BackLink>}
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Record Sign-off</h1>
       <p className="mt-1 font-semibold" dir="auto">
         {p.title}
@@ -76,7 +82,15 @@ async function Content({ params }: { params: PageProps<"/policies/[id]/sign-off"
           <p className="mt-2 text-sm">
             For version {p.current_label}, approved {formatDate(p.approved_on)}. Only people who must sign and have not yet are listed.
           </p>
-          <SignoffForm policyId={p.id} versionId={p.current_version_id} approvedOn={p.approved_on!} today={todayInDublin()} candidates={candidates} />
+          <SignoffForm
+            policyId={p.id}
+            versionId={p.current_version_id}
+            approvedOn={p.approved_on!}
+            today={todayInDublin()}
+            candidates={candidates}
+            ticked={candidates.some((c) => c.id === ticked && !c.isMe) ? ticked : null}
+            grid={grid}
+          />
         </>
       )}
     </>

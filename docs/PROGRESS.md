@@ -419,6 +419,21 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 25 Nov 2026, session 45 (slice A7, policy grid and rota; owner said go).
+  No database change. Policy grid reads every square page by page (also
+  the policies list), so nobody is hidden past 1,000. An Unsigned or
+  Overdue square opens Record sign-off with that person ticked; Back,
+  Cancel and Save return to the grid with its filter, with "Sign-off
+  recorded for N people". Header row and names column stay in view while
+  scrolling. Rota: a note says why "Use a template" is not offered once
+  someone is on the week; the print page warns when the week has changes
+  not published yet; Today's rota shows the same warnings as the week;
+  "No prayer time" has an "Enter prayer times" link; after putting someone
+  on a slot whose kind is empty on other days, the slot page offers "Also
+  put them on" those days (each saved by the usual rule; the week says how
+  many were saved). Also fixed: Back on the policy grid no longer points to
+  the grid itself (A5 memory). Round A is complete.
+
 - 25 Nov 2026, session 45 (slice A5, Home and finding your way; owner
   said go). No database change. Home's Needs attention is red first, then
   amber, each in the owner's order (vetting, sign-offs, renewals, tickets,

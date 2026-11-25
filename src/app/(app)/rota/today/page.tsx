@@ -4,18 +4,21 @@
 // Slice P3.4: who is on funeral call today, with their phone number, at the
 // top (owner's choice, 18 Nov 2026). The phone number is shown here, to
 // admins only; it is never on the printed rota.
+// A7: the same warnings as the week (double-booking, Garda vetting, no prayer
+// time), beside each slot in words, with a link to Prayer times.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
-import { CalendarDays, Phone } from "lucide-react";
+import { CalendarDays, CircleAlert, Phone, TriangleAlert } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, SLOT_GROUP_LABEL, SLOT_GROUPS } from "@/lib/rota/rules";
-import { timeText } from "@/lib/rota/week";
+import { timeText, WARNING_COLUMNS, warningText, warningTone, type RotaWarning } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { CannotSeeRota } from "../cannot-see";
+import { RotaNotes } from "../notes";
 import { ENTRY_COLUMNS, loadPlaces, loadSlotTypes, peopleNames, type RotaEntry } from "../week-data";
 
 export const metadata: Metadata = { title: "Today's rota | ICCI Control Dashboard" };
@@ -44,6 +47,10 @@ async function Content() {
   const supabase = await createClient();
   const { data } = await supabase.from("rota_entries").select(ENTRY_COLUMNS).eq("assignment_date", today).order("start_min", { nullsFirst: false }).order("id");
   const entries = (data ?? []) as RotaEntry[];
+  const { data: warnData } = await supabase.from("rota_warnings").select(WARNING_COLUMNS).eq("assignment_date", today);
+  const warnings = (warnData ?? []) as RotaWarning[];
+  const warningsOf = (id: number) => warnings.filter((w) => w.assignment_id === id);
+  const byId = new Map(entries.map((e) => [e.id, e]));
   const [types, names, places] = await Promise.all([
     loadSlotTypes(supabase),
     peopleNames(supabase, entries.flatMap((e) => (e.person_id ? [e.person_id] : []))),
@@ -120,7 +127,9 @@ async function Content() {
       )}
       <p className="mb-4 text-[15px] text-icci-ink-60" data-testid="today-summary">
         {entries.length - unfilled} of {entries.length} slots filled{unfilled > 0 && ` · ${unfilled} not filled yet`}
+        {warnings.length > 0 && ` · ${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"} (shown beside each slot; they do not stop anything)`}
       </p>
+      <RotaNotes warnings={warnings} />
       <div className="space-y-4">
         {SLOT_GROUPS.map((g) => {
           const inGroup = entries.filter((e) => e.slot_group === g);
@@ -144,6 +153,21 @@ async function Content() {
                         <span className={cx("font-semibold", !person && "text-[var(--icci-warn-text)]")} dir="auto">
                           {person ?? "Not filled yet"}
                         </span>
+                        {warningsOf(e.id).map((w, i) => {
+                          const red = warningTone(w.kind) === "red";
+                          const Icon = red ? CircleAlert : TriangleAlert;
+                          const other = w.other_assignment_id ? byId.get(w.other_assignment_id) : undefined;
+                          return (
+                            <span
+                              key={i}
+                              data-testid="slot-warning"
+                              className={cx("flex basis-full items-start gap-1 text-[14px] font-semibold", red ? "text-icci-error" : "text-[var(--icci-warn-text)]")}
+                            >
+                              <Icon aria-hidden size={15} className="mt-0.5 shrink-0" />
+                              {warningText(w, other ? `${typeName.get(other.slot_type_id) ?? "another slot"} at ${timeText(other.slot_group, other.starts_at, other.ends_at)}` : undefined)}
+                            </span>
+                          );
+                        })}
                       </Link>
                     </li>
                   );

@@ -22,6 +22,7 @@ import { CannotSeeRota } from "./cannot-see";
 import { adminNames } from "../stock/data";
 import { changesSentence, publishedAtText } from "@/lib/rota/publish";
 import { loadPlaces, loadPublishState, loadSlotTypes, loadWeek, peopleNames, type PublishState, type RotaEntry } from "./week-data";
+import { RotaNotes } from "./notes";
 import { startWeek } from "./week-actions";
 
 export const metadata: Metadata = { title: "Rota week | ICCI Control Dashboard" };
@@ -76,7 +77,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
   const nameOf = publishing?.latest ? await adminNames(supabase) : null;
   const added = typeof params.count === "string" && /^\d+$/.test(params.count) ? Number(params.count) : null;
   const done =
-    params.done === "template"
+    params.done === "assigned-more"
+      ? assignedMoreNotice(added ?? 0, typeof params.failed === "string" && /^\d+$/.test(params.failed) ? Number(params.failed) : 0)
+      : params.done === "template"
       ? { text: `Template used: ${added ?? "the"} empty ${added === 1 ? "slot" : "slots"} added. Click each slot to put a person on it.`, tone: "success" as const }
       : typeof params.done === "string"
         ? DONE[params.done]
@@ -201,6 +204,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
         {filled} of {entries.length} slots filled · {warnings.length === 0 ? "no warnings" : `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`}
         {warnings.length > 0 && " (shown beside each slot; they do not stop anything)"}
       </p>
+      <RotaNotes warnings={warnings} showTemplateNote={!ended && !nobodyOn} />
       {publishing?.latest && nameOf && (
         <p className="-mt-2 mb-4 text-[15px] text-icci-ink-60" data-testid="published-line">
           Published {publishedAtText(publishing.latest.published_at)} by {nameOf(publishing.latest.published_by)}
@@ -296,6 +300,13 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
       </div>
     </>
   );
+}
+
+/** A7: after "Also put this person on" other days. */
+function assignedMoreNotice(saved: number, failed: number): { text: string; tone: "success" | "error" } {
+  const days = (n: number) => `${n} more ${n === 1 ? "day" : "days"}`;
+  if (failed === 0) return { text: `Saved. The person is on ${days(saved)} too.`, tone: "success" };
+  return { text: `Put on ${days(saved)}; ${failed} could not be saved (the slot changed or the week ended). Check those days.`, tone: "error" };
 }
 
 function describe(e: RotaEntry | undefined, ctx: Ctx): string | undefined {

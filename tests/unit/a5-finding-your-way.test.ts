@@ -125,6 +125,10 @@ describe("A5: Back returns to the list you came from", () => {
     expect(backTarget(people, "/people/vetting?status=attention")).toEqual({ href: "/people/vetting?status=attention", name: "Garda vetting" });
     expect(backTarget(items, "/assets/register?place=x")).toEqual({ href: "/assets/register?place=x", name: "Asset register" });
   });
+  it("never goes back to the page you are on", () => {
+    const policies = { href: "/policies", name: "Policies" };
+    expect(backTarget(policies, "/policies/grid?status=attention", "/policies/grid")).toEqual(policies);
+  });
   it("ignores a list that does not lead to this page", () => {
     expect(backTarget(items, "/people/vetting")).toEqual(items);
     expect(backTarget(people, "/tickets")).toEqual(people);
