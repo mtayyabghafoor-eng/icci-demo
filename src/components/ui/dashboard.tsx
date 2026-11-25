@@ -114,24 +114,21 @@ export function HeadlineCard({
   count,
   tone,
   testId,
+  links,
 }: {
-  href: string;
+  /** A5: without an address the card is not a link (e.g. nothing to approve). */
+  href?: string;
   icon: LucideIcon;
   label: string;
   count: number;
   tone: HeadlineTone;
   testId?: string;
+  /** A5: several places to go (e.g. two approval queues): listed in the card instead. */
+  links?: { href: string; label: string }[];
 }) {
   const t = HEADLINE[tone];
-  return (
-    <Link
-      href={href}
-      data-testid={testId}
-      className={cx(
-        "group flex h-full flex-col items-start gap-3 rounded-2xl border p-4 text-icci-text! no-underline shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised sm:flex-row sm:items-center sm:gap-4 md:p-5",
-        t.card,
-      )}
-    >
+  const body = (
+    <>
       <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm sm:h-12 sm:w-12", t.badge)}>
         <Icon aria-hidden size={24} strokeWidth={1.9} />
       </span>
@@ -140,7 +137,30 @@ export function HeadlineCard({
           {count}
         </span>
         <span className="mt-1.5 block text-[15px] font-semibold leading-snug">{label}</span>
+        {links && links.length > 0 && (
+          <span className="mt-2 flex flex-col gap-1" data-testid="headline-links">
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} className="inline-flex min-h-8 items-center gap-1 text-sm font-semibold">
+                {l.label}
+                <ArrowRight aria-hidden size={14} />
+              </Link>
+            ))}
+          </span>
+        )}
       </span>
+    </>
+  );
+  const shape = "flex h-full flex-col items-start gap-3 rounded-2xl border p-4 text-icci-text! no-underline shadow-card sm:flex-row sm:items-center sm:gap-4 md:p-5";
+  if (!href) {
+    return (
+      <div data-testid={testId} className={cx(shape, links && links.length > 0 && "sm:items-start", t.card)}>
+        {body}
+      </div>
+    );
+  }
+  return (
+    <Link href={href} data-testid={testId} className={cx(shape, "group transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised", t.card)}>
+      {body}
       <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/80 text-icci-green-dark transition-transform duration-200 group-hover:translate-x-0.5 sm:flex xl:hidden 2xl:flex">
         <ArrowRight aria-hidden size={17} />
       </span>
@@ -178,6 +198,7 @@ export function AttentionRow({
     <Link
       href={href}
       data-testid={testId}
+      data-tone={tone}
       className="group flex min-h-16 items-center gap-3 px-4 py-3 text-icci-text! no-underline transition-colors duration-150 hover:bg-icci-green-50 md:gap-4 md:px-5"
     >
       <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", t.badge)}>

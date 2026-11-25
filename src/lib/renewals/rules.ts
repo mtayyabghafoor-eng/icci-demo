@@ -103,20 +103,23 @@ export function dueLine(dueOn: string | null, status: RegisterStatus, daysLeft: 
   return `Due in ${days(daysLeft)}.`;
 }
 
-export type RegisterFilter = { show: "attention" | "ok" | "ended" | "all"; from: SourceGroup | "" };
+/** A5: "soon" is what Home counts: overdue, or due within 30 days. */
+export const SOON_DAYS = 30;
+export type RegisterFilter = { show: "attention" | "soon" | "ok" | "ended" | "all"; from: SourceGroup | "" };
 
 export function readRegisterFilter(params: Record<string, string | string[] | undefined>): RegisterFilter {
   const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
   const show = one(params.show);
   const from = one(params.from);
   return {
-    show: show === "ok" || show === "ended" || show === "all" ? show : "attention",
+    show: show === "soon" || show === "ok" || show === "ended" || show === "all" ? show : "attention",
     from: SOURCE_GROUPS.some((g) => g.id === from) ? (from as SourceGroup) : "",
   };
 }
 
 /** The statuses a "Show" choice lists. */
 export function statusesFor(show: RegisterFilter["show"]): RegisterStatus[] {
+  if (show === "soon") return ["overdue", "due"];
   if (show === "ok") return ["ok"];
   if (show === "ended") return ["ended"];
   if (show === "all") return ["overdue", "none", "due", "ok", "ended"];

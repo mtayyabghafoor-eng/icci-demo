@@ -16,6 +16,8 @@ export type IconKey =
   | "companies"
   | "missing"
   | "disposals"
+  | "corrections"
+  | "reminders"
   | "notSeen"
   | "assetRegister"
   | "people"
@@ -70,6 +72,8 @@ export const MENU: MenuGroup[] = [
     links: [
       { href: "/", label: "Home", icon: "home", roles: EVERYONE },
       { href: "/renewals", label: "Renewals", icon: "renewals", roles: ADMINS },
+      // A5 (owner, 25 Nov 2026): the email reminders get their own menu line.
+      { href: "/reminders", label: "Reminders", icon: "reminders", roles: ADMINS },
     ],
   },
   {
@@ -82,6 +86,8 @@ export const MENU: MenuGroup[] = [
       { href: "/categories", label: "Categories", icon: "categories", roles: ADMINS },
       { href: "/companies", label: "Companies", icon: "companies", roles: ADMINS, also: ["/models"] },
       { href: "/stock", label: "Stock", icon: "stock", roles: ADMINS },
+      // A5: the stock queue, like "Disposals waiting" for assets.
+      { href: "/stock/approvals", label: "Stock corrections waiting", icon: "corrections", roles: ADMINS },
       { href: "/stocktake", label: "Stocktake", icon: "stocktake", roles: ADMINS },
       { href: "/labels", label: "Print labels", icon: "labels", roles: ADMINS },
     ],
@@ -192,10 +198,13 @@ export function mayScan(roleCode: string): boolean {
 /** Pages that are not in the menu but still need a name in the top bar. */
 const OTHER_PAGES: Record<string, string> = { "/scan": "Open a label", "/style": "Style sample" };
 
-/** What the top bar calls this page: "Items and stock › Stock". */
-export function whereAmI(pathname: string): { group?: string; page: string } | null {
+/**
+ * What the top bar calls this page: "Items and stock › Stock". A5: with a
+ * role, by that role's own menu (an admin's /library/on-loan is "Library desk").
+ */
+export function whereAmI(pathname: string, roleCode?: string): { group?: string; page: string } | null {
   if (OTHER_PAGES[pathname]) return { page: OTHER_PAGES[pathname] };
-  const hit = activeLink(pathname);
+  const hit = activeLink(pathname, roleCode) ?? activeLink(pathname);
   if (!hit) return null;
   if (hit.link.href === "/") return { page: "Home" };
   // "People › People" says nothing twice: show the page alone.

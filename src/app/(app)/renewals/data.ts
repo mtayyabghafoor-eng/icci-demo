@@ -2,7 +2,8 @@
 // database's own rules apply.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { allRows } from "@/lib/supabase/all-rows";
-import { REGISTER_COLUMNS, SOURCE_GROUPS, statusesFor, worstFirst, type RegisterFilter, type RegisterRow } from "@/lib/renewals/rules";
+import { addDays, todayInDublin } from "@/lib/vetting/rules";
+import { REGISTER_COLUMNS, SOON_DAYS, SOURCE_GROUPS, statusesFor, worstFirst, type RegisterFilter, type RegisterRow } from "@/lib/renewals/rules";
 
 export { keeperChoices as ownerChoices } from "../vehicles/data";
 
@@ -19,6 +20,8 @@ export async function loadRegister(supabase: SupabaseClient, f: RegisterFilter):
       .order("title")
       .range(from, to);
     if (sources) q = q.in("source", sources);
+    // A5: Home's "due in 30 days" (an overdue date is always before then).
+    if (f.show === "soon") q = q.lte("due_on", addDays(todayInDublin(), SOON_DAYS));
     return q;
   });
   return worstFirst(rows);

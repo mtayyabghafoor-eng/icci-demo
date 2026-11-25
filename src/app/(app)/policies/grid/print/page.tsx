@@ -39,7 +39,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/policies/gr
   const chosen = [
     filter.section && `Section: ${lists.sectionName.get(filter.section)}`,
     filter.role && `Role: ${lists.roleName.get(filter.role)}`,
-    filter.status && `People with: ${SIGNOFF_STATUS[filter.status].word}`,
+    filter.status && `People with: ${filter.status === "attention" ? "Overdue or not signed" : SIGNOFF_STATUS[filter.status].word}`,
   ].filter(Boolean);
 
   return (

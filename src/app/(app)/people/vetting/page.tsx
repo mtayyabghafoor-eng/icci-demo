@@ -70,6 +70,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/vetting
           <span className="font-semibold">Status</span>
           <select name="status" defaultValue={filter.status} className={field}>
             <option value="">All that need vetting</option>
+            <option value="attention">Expired, not vetted or due</option>
             {STATUS_ORDER.map((s) => (
               <option key={s} value={s}>
                 {VETTING_STATUS[s].word}

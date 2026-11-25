@@ -165,7 +165,8 @@ test("the vetting list, worst first, with a CSV; the People list chip; the home 
   await expect(counter.getByTestId("count")).toHaveText(/^[1-9]\d*$/);
   await s(page, "home", project);
   await counter.click();
-  await expect(page).toHaveURL(/\/people\/vetting$/);
+  // A5: Home opens the list showing only the people it counted.
+  await expect(page).toHaveURL(/\/people\/vetting\?status=attention$/);
 });
 
 test("finance sees a note instead of vetting, and gets no CSV", async ({ page }, info) => {

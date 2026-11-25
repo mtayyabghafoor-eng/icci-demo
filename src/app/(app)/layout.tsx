@@ -3,8 +3,9 @@ import { AccountBlock } from "@/components/shell/account";
 import { BottomBar } from "@/components/shell/bottom-bar";
 import { Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
+import { ListMemory } from "@/components/ui/back-link";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { menuFor } from "@/lib/ui/menu";
+import { mayScan } from "@/lib/ui/menu";
 import { signOut } from "../sign-in/actions";
 import { IdleWatcher } from "./idle-watcher";
 
@@ -23,7 +24,8 @@ export default function SignedInLayout({ children }: LayoutProps<"/">) {
 async function SignedInShell({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
   const out = signOut.bind(null, "signed-out");
-  const canOpenLabels = menuFor(admin.roleCode).some((g) => g.links.some((l) => l.href === "/items"));
+  // A5: the Library Operator opens book labels with the box too.
+  const canOpenLabels = mayScan(admin.roleCode);
   const account = (testIds: boolean, compact: boolean) => (
     <AccountBlock name={admin.displayName} role={admin.roleLabel} signOut={out} compact={compact} testIds={testIds} />
   );
@@ -37,13 +39,17 @@ async function SignedInShell({ children }: { children: React.ReactNode }) {
         Skip to the page
       </a>
       <Sidebar roleCode={admin.roleCode} account={account(true, true)} />
-      <TopBar canOpenLabels={canOpenLabels} signOut={out} />
+      <TopBar canOpenLabels={canOpenLabels} roleCode={admin.roleCode} signOut={out} />
       {/* Room at the bottom on a phone so the bottom bar never covers a button. */}
       <div id="content" tabIndex={-1} className="flex flex-1 flex-col pb-24 outline-none md:pb-0 print:pb-0">
         {children}
       </div>
       <BottomBar roleCode={admin.roleCode} account={account(false, false)} />
       <IdleWatcher serverNow={admin.serverNow} />
+      {/* A5: Back remembers the list you came from (this browser tab only). */}
+      <Suspense fallback={null}>
+        <ListMemory />
+      </Suspense>
     </div>
   );
 }

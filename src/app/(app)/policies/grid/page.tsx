@@ -81,6 +81,7 @@ async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid"
           <span className="font-semibold">Show people with</span>
           <select name="status" defaultValue={filter.status} className={field}>
             <option value="">Any status</option>
+            <option value="attention">Overdue or not signed</option>
             {SQUARE_ORDER.map((s) => (
               <option key={s} value={s}>
                 {SIGNOFF_STATUS[s].word}

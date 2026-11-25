@@ -419,6 +419,24 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 25 Nov 2026, session 45 (slice A5, Home and finding your way; owner
+  said go). No database change. Home's Needs attention is red first, then
+  amber, each in the owner's order (vetting, sign-offs, renewals, tickets,
+  rota, library, then stock, assets, approvals); Low stock is one red.
+  Home lines open filtered lists: vetting ?status=attention, policy grid
+  ?status=attention (overdue or not signed), renewals ?show=soon (overdue or
+  due in 30 days, new choice), stocktake differences open the one stocktake
+  waiting (the stocktake list puts waiting ones first). "For you to
+  approve": one queue opens it, several are listed in the card, none is not
+  a link. Back remembers the last list in this browser tab (with filters)
+  and says its name from tablet width up; Home, Scan and menu pages forget
+  it (src/lib/ui/back.ts). Open label box takes PL- room codes and the
+  Library Operator has it. Menu: "Stock corrections waiting" (Items and
+  stock, after Stock) and "Reminders" (Overview). Tablet rail has thin lines
+  between groups; top bar names pages by the role's own menu. Library: copy
+  page desk tabs, phone numbers and emails are tap links, "See all" under
+  due in 3 days opens /library/on-loan?due=3.
+
 - 25 Nov 2026, session 45 (slice A4, one "Report a problem"; owner said go,
   demo included): migration 0048 report_problem() (tests first) records the
   ticket and, if "It is broken or damaged" is ticked, the damage entry in

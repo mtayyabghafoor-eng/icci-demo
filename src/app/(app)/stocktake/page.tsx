@@ -64,7 +64,9 @@ async function Content() {
     lookups.locations.filter((l) => l.active !== false),
     ["room"],
   ).map((r) => ({ ...r, busy: busy.has(r.id) }));
-  const sent = stocktakes.filter((s) => s.status === "submitted");
+  // A5: the ones still waiting for a decision come first (Home's link opens this list when several wait).
+  const waiting = (id: number) => (statusesOf.get(id) ?? []).includes("pending");
+  const sent = stocktakes.filter((s) => s.status === "submitted").sort((a, b) => Number(waiting(b.id)) - Number(waiting(a.id)) || b.id - a.id);
 
   return (
     <>

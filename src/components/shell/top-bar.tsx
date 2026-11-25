@@ -11,8 +11,8 @@ import { Logo } from "@/components/ui";
 import { BACK_SLOT_ID } from "@/components/ui/back-link";
 import { whereAmI } from "@/lib/ui/menu";
 
-export function TopBar({ canOpenLabels, signOut }: { canOpenLabels: boolean; signOut: () => Promise<void> }) {
-  const here = whereAmI(usePathname());
+export function TopBar({ canOpenLabels, roleCode, signOut }: { canOpenLabels: boolean; roleCode: string; signOut: () => Promise<void> }) {
+  const here = whereAmI(usePathname(), roleCode);
   return (
     <header className="sticky top-0 z-20 border-b border-icci-line bg-white/92 backdrop-blur print:hidden">
       <div className="flex min-h-14 items-center gap-3 px-4 md:min-h-16 md:px-8">

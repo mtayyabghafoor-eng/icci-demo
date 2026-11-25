@@ -62,8 +62,34 @@ export function approvalsTotal(c: Pick<HomeCounters, "corrections_for_me" | "dis
   return c.corrections_for_me + c.disposals_for_me + c.stocktake_diffs_for_me;
 }
 
-/** `notCounted`: consumables never counted (UI-9), named on the Low stock card. */
-export function counterCards(c: HomeCounters, notCounted = 0): CounterCard[] {
+/**
+ * A5: where "For you to approve" goes. One queue waiting: straight to it.
+ * Several: each queue is listed in the card. None: not a link at all.
+ */
+export function approvalLinks(
+  c: Pick<HomeCounters, "corrections_for_me" | "disposals_for_me" | "stocktake_diffs_for_me">,
+  stocktakeHref = "/stocktake",
+): { href?: string; links: { href: string; label: string }[] } {
+  const queues = [
+    { n: c.corrections_for_me, href: "/stock/approvals", label: plural(c.corrections_for_me, "stock correction", "stock corrections") },
+    { n: c.disposals_for_me, href: "/assets/approvals", label: plural(c.disposals_for_me, "disposal", "disposals") },
+    { n: c.stocktake_diffs_for_me, href: stocktakeHref, label: plural(c.stocktake_diffs_for_me, "stocktake difference", "stocktake differences") },
+  ].filter((q) => q.n > 0);
+  if (queues.length === 0) return { links: [] };
+  if (queues.length === 1) return { href: queues[0].href, links: [] };
+  return { links: queues.map((q) => ({ href: q.href, label: q.label })) };
+}
+
+/** A5: the stocktakes waiting for this admin, newest first: open the one, or the list (waiting ones come first there). */
+export function stocktakeLink(waitingIds: number[]): string {
+  return waitingIds.length === 1 ? `/stocktake/${waitingIds[0]}` : "/stocktake";
+}
+
+/**
+ * `notCounted`: consumables never counted (UI-9), named on the Low stock card.
+ * A5: `stocktakeHref` opens the stocktake waiting for this admin (worked out by the page).
+ */
+export function counterCards(c: HomeCounters, notCounted = 0, stocktakeHref = "/stocktake"): CounterCard[] {
   const tone = (n: number): Tone => (n > 0 ? "red" : "green");
   return [
     {
@@ -109,7 +135,7 @@ export function counterCards(c: HomeCounters, notCounted = 0): CounterCard[] {
         c.stocktake_diffs_for_me === 0
           ? "All clear. Nothing waiting for you."
           : "From stocktakes you took no part in.",
-      href: "/stocktake",
+      href: stocktakeHref,
       tone: tone(c.stocktake_diffs_for_me),
     },
     vettingCard(c),
@@ -148,7 +174,7 @@ function vettingCard(c: HomeCounters): CounterCard {
       count === 0
         ? "All clear. Everyone who needs vetting is vetted."
         : `${c.vetting_expired} expired, ${c.vetting_none} not vetted, ${c.vetting_due} due within 60 days.`,
-    href: "/people/vetting",
+    href: count > 0 ? "/people/vetting?status=attention" : "/people/vetting",
     tone: c.vetting_expired + c.vetting_none > 0 ? "red" : c.vetting_due > 0 ? "amber" : "green",
   };
 }
@@ -164,7 +190,7 @@ function signoffCard(c: HomeCounters): CounterCard {
       count === 0
         ? "All clear. Everyone has signed the current version of each policy."
         : `${c.signoffs_overdue} overdue, ${c.signoffs_unsigned} not signed yet.`,
-    href: "/policies/grid",
+    href: count > 0 ? "/policies/grid?status=attention" : "/policies/grid",
     tone: c.signoffs_overdue > 0 ? "red" : c.signoffs_unsigned > 0 ? "amber" : "green",
   };
 }
@@ -177,7 +203,7 @@ function renewalsCard(c: HomeCounters): CounterCard {
     title: "Renewals overdue or due in 30 days",
     count,
     detail: count === 0 ? "All clear. Nothing overdue or due within 30 days." : `${c.renewals_overdue} overdue, ${c.renewals_due_30} due within 30 days.`,
-    href: "/renewals",
+    href: count > 0 ? "/renewals?show=soon" : "/renewals",
     tone: c.renewals_overdue > 0 ? "red" : c.renewals_due_30 > 0 ? "amber" : "green",
   };
 }
@@ -201,14 +227,36 @@ function rotaTodayCard(c: HomeCounters): CounterCard {
 }
 
 /**
+ * A5 (owner, 25 Nov 2026): people and safety first, then stock and assets,
+ * then the approval queues. Cards not named here keep their place at the end.
+ */
+export const ATTENTION_ORDER = [
+  "vetting",
+  "signoffs",
+  "renewals",
+  "tickets",
+  "rota-today",
+  "library-overdue",
+  "low-stock",
+  "missing-damaged",
+  "corrections-for-me",
+  "disposals-for-me",
+  "stocktake-for-me",
+];
+
+/**
  * UI-4: the home page shows cards that need attention first (red, then
- * amber), and the all-clear (green) cards in a quieter row below. The order
- * within each group stays as above.
+ * amber), and the all-clear (green) cards in a quieter row below. Within a
+ * colour, A5's fixed order.
  */
 export function splitCards(cards: CounterCard[]): { attention: CounterCard[]; clear: CounterCard[] } {
   const rank: Record<string, number> = { red: 0, amber: 1 };
+  const place = (id: string) => {
+    const i = ATTENTION_ORDER.indexOf(id);
+    return i < 0 ? ATTENTION_ORDER.length : i;
+  };
   const attention = cards.filter((c) => c.tone === "red" || c.tone === "amber");
-  attention.sort((a, b) => rank[a.tone] - rank[b.tone]);
+  attention.sort((a, b) => rank[a.tone] - rank[b.tone] || place(a.id) - place(b.id));
   return { attention, clear: cards.filter((c) => !attention.includes(c)) };
 }
 

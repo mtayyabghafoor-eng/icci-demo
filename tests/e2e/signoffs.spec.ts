@@ -179,7 +179,8 @@ test("the home page counts unsigned sign-offs and opens the grid", async ({ page
   await expect(card).toContainText("Policy sign-offs overdue or unsigned");
   expect(Number(await card.getByTestId("count").textContent())).toBeGreaterThan(0);
   await card.click();
-  await expect(page).toHaveURL(/\/policies\/grid$/);
+  // A5: Home opens the grid showing only people with something to sign.
+  await expect(page).toHaveURL(/\/policies\/grid\?status=attention$/);
   await s(page, "home-signoffs", info.project.name);
 });
 

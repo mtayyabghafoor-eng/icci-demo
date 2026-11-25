@@ -38,6 +38,7 @@ import { Suspense } from "react";
 import { ActionTile, AttentionRow, Card, CardTitle, ClearChip, CounterCard, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
 import { requireAdmin, type CurrentAdmin } from "@/lib/auth/current-admin";
 import {
+  approvalLinks,
   approvalsTotal,
   attentionSentence,
   counterCards,
@@ -45,6 +46,7 @@ import {
   longDate,
   MAY_SEE_COUNTERS,
   splitCards,
+  stocktakeLink,
   type CounterCard as Counter,
   type HomeCounters,
 } from "@/lib/home/counters";
@@ -123,10 +125,11 @@ async function HomeContent() {
     supabase.from("items").select("id", { count: "exact", head: true }).or("condition.is.null,condition.neq.disposed"),
     supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
   ]);
-  const cards = [...counterCards(data, notCounted ?? 0), ...(lib ? libraryCards(lib) : [])];
+  const stocktakeHref = stocktakeLink(data.stocktake_diffs_for_me > 0 ? await stocktakesWaitingFor(me.id) : []);
+  const cards = [...counterCards(data, notCounted ?? 0, stocktakeHref), ...(lib ? libraryCards(lib) : [])];
   const { attention, clear } = splitCards(cards);
   const approvals = approvalsTotal(data);
-  const approvalQueues = cards.filter((c) => c.id.endsWith("-for-me") && c.count > 0);
+  const toApprove = approvalLinks(data, stocktakeHref);
   const missing = data.damaged + data.missing;
   return (
     <>
@@ -142,7 +145,8 @@ async function HomeContent() {
             icon={TriangleAlert}
             label="Low stock"
             count={data.low_stock}
-            tone={data.out_of_stock > 0 ? "red" : data.low_stock > 0 ? "amber" : "neutral"}
+            // A5: one colour for Low stock, the same red as its Needs attention line.
+            tone={data.low_stock > 0 ? "red" : "neutral"}
             testId="headline-low-stock"
           />
         </li>
@@ -151,7 +155,8 @@ async function HomeContent() {
         </li>
         <li>
           <HeadlineCard
-            href={approvalQueues.length === 1 ? approvalQueues[0].href : "#attention-title"}
+            href={toApprove.href}
+            links={toApprove.links}
             icon={ClipboardCheck}
             label="For you to approve"
             count={approvals}
@@ -249,6 +254,28 @@ async function HomeContent() {
       </div>
     </>
   );
+}
+
+/**
+ * A5: the sent stocktakes with a difference waiting for this admin, by the
+ * same rule as the Home counter: they did not start, send or scan it, and
+ * did not record the difference. Newest first.
+ */
+async function stocktakesWaitingFor(me: string): Promise<number[]> {
+  const supabase = await createClient();
+  const { data: diffs } = await supabase.from("stocktake_differences").select("stocktake_id, created_by").eq("status", "pending");
+  const rows = (diffs ?? []) as { stocktake_id: number; created_by: string | null }[];
+  const ids = [...new Set(rows.filter((d) => d.created_by !== me).map((d) => d.stocktake_id))];
+  if (ids.length === 0) return [];
+  const [{ data: sts }, { data: scans }] = await Promise.all([
+    supabase.from("stocktakes").select("id, created_by, submitted_by").in("id", ids),
+    supabase.from("stocktake_scans").select("stocktake_id").in("stocktake_id", ids).eq("created_by", me),
+  ]);
+  const scanned = new Set(((scans ?? []) as { stocktake_id: number }[]).map((x) => x.stocktake_id));
+  return ((sts ?? []) as { id: number; created_by: string | null; submitted_by: string | null }[])
+    .filter((st) => st.created_by !== me && st.submitted_by !== me && !scanned.has(st.id))
+    .map((st) => st.id)
+    .sort((a, b) => b - a);
 }
 
 /** UI-9: short names for the all-clear chips. */

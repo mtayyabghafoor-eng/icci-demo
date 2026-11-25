@@ -21,6 +21,19 @@ export function CsvButton({ href }: { href: string }) {
   );
 }
 
+/** A5: a phone number opens the phone's dialler; an email address opens a new email. */
+export function ContactLink({ b }: { b: Pick<Borrower, "contact" | "contact_kind"> }) {
+  return b.contact_kind === "phone" ? (
+    <a href={`tel:${b.contact.replace(/[^0-9+]/g, "")}`} data-testid="contact-link" dir="ltr">
+      {b.contact}
+    </a>
+  ) : (
+    <a href={`mailto:${b.contact}`} data-testid="contact-link">
+      {b.contact}
+    </a>
+  );
+}
+
 /** Copies out on loan: title, borrower (with contact when asked), due date and status. */
 export function LoanTable({ rows, borrowers, showContact }: { rows: CopyRow[]; borrowers: Map<string, Borrower>; showContact: boolean }) {
   return (
@@ -53,7 +66,7 @@ export function LoanTable({ rows, borrowers, showContact }: { rows: CopyRow[]; b
                   </td>
                   {showContact && (
                     <td className="px-3 py-2" dir="auto">
-                      {b?.contact ?? ""}
+                      {b ? <ContactLink b={b} /> : ""}
                     </td>
                   )}
                   <td className="px-3 py-2 whitespace-nowrap">{formatDate(r.due_on)}</td>
@@ -81,13 +94,18 @@ export function LoanTable({ rows, borrowers, showContact }: { rows: CopyRow[]; b
                 </span>
                 <span className="mt-1 block text-sm" dir="auto">
                   {b?.full_name ?? "Borrower not found"}
-                  {showContact && b ? `, ${b.contact}` : ""}
                 </span>
                 <span className="mt-1 block text-sm">
                   Due {formatDate(r.due_on)}
                   {r.days_overdue > 0 ? ` (${days(r.days_overdue)} late)` : ""}
                 </span>
               </Link>
+              {/* A5: the number sits outside the card's link, so a tap on it calls. */}
+              {showContact && b && (
+                <p className="mt-1 px-4 text-sm">
+                  Call or write: <ContactLink b={b} />
+                </p>
+              )}
             </li>
           );
         })}

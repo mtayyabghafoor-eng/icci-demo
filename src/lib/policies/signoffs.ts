@@ -93,7 +93,8 @@ export function arrangeGrid(squares: Square[]): { policies: GridPolicy[]; people
   };
 }
 
-export type GridFilter = { section: string; role: string; status: SquareStatus | "" };
+/** A5: "attention" is what Home counts: people with any square overdue or not signed. */
+export type GridFilter = { section: string; role: string; status: SquareStatus | "attention" | "" };
 
 export function readGridFilter(params: Record<string, string | string[] | undefined>, sections: Set<string>, roles: Set<string>): GridFilter {
   const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
@@ -103,7 +104,7 @@ export function readGridFilter(params: Record<string, string | string[] | undefi
   return {
     section: sections.has(section) ? section : "",
     role: roles.has(role) ? role : "",
-    status: (SQUARE_ORDER as string[]).includes(status) ? (status as SquareStatus) : "",
+    status: status === "attention" ? "attention" : (SQUARE_ORDER as string[]).includes(status) ? (status as SquareStatus) : "",
   };
 }
 
@@ -111,7 +112,8 @@ export function readGridFilter(params: Record<string, string | string[] | undefi
 export function filterSquares(squares: Square[], f: GridFilter): Square[] {
   let out = squares.filter((s) => (!f.section || s.section_id === f.section) && (!f.role || s.person_role_id === f.role));
   if (f.status) {
-    const keep = new Set(out.filter((s) => s.status === f.status).map((s) => s.person_id));
+    const hit = (s: Square) => (f.status === "attention" ? s.status === "overdue" || s.status === "unsigned" : s.status === f.status);
+    const keep = new Set(out.filter(hit).map((s) => s.person_id));
     out = out.filter((s) => keep.has(s.person_id));
   }
   return out;

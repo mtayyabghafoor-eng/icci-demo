@@ -1,6 +1,8 @@
 // Which Lucide icon each menu link uses (docs/UI-PLAN.md 3.6).
 import {
   Inbox,
+  BellRing,
+  ClipboardCheck,
   CalendarClock,
   CalendarDays,
   Car,
@@ -81,4 +83,6 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   mostBorrowed: TrendingUp,
   lostBooks: BookX,
   libraryOverview: LayoutDashboard,
+  corrections: ClipboardCheck,
+  reminders: BellRing,
 };

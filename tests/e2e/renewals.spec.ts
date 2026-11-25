@@ -130,7 +130,8 @@ test("the home page counts renewals overdue or due in 30 days", async ({ page },
   await expect(card).toBeVisible();
   await expect(card).toContainText(/overdue/);
   await card.click();
-  await expect(page).toHaveURL(/\/renewals$/);
+  // A5: Home opens the register showing what it counted.
+  await expect(page).toHaveURL(/\/renewals\?show=soon$/);
   await s(page, "home-renewals-counter", info.project.name);
 });
 

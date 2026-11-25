@@ -62,12 +62,17 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
   const word = compact ? "sr-only lg:not-sr-only" : "";
   return (
     <div className={cx("flex flex-col", folds ? "gap-1.5" : "gap-5")}>
-      {menuFor(roleCode).map((group) => {
+      {menuFor(roleCode).map((group, i) => {
         const foldable = folds && group.title !== FIXED_GROUP;
         const isOpen = !foldable || open.includes(group.title);
         const bodyId = `menu-group-${group.title.toLowerCase().replace(/\W+/g, "-")}${compact ? "-rail" : ""}`;
         return (
-          <div key={group.title} className={cx(foldable && "pt-1")}>
+          <div
+            key={group.title}
+            data-testid={compact && i > 0 ? "rail-divider" : undefined}
+            // A5: on the tablet rail (icons only) a thin line between groups keeps the icons grouped.
+            className={cx(foldable && "pt-1", compact && i > 0 && "max-lg:mt-1 max-lg:border-t max-lg:border-white/15 max-lg:pt-2")}
+          >
             {foldable ? (
               <button
                 type="button"

@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Notice, SecondaryLink, StatusBadge } from "../../../items/ui";
 import { CannotSeeLibrary } from "../../cannot-see";
 import { loadBorrower, loadCopyTitles, loadLoansOfBorrower } from "../../data";
+import { ContactLink } from "../../list-parts";
 import { SwitchBorrowerForm } from "../../loan-forms";
 import { BackLink } from "@/components/ui";
 
@@ -82,7 +83,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/borrow
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
         <dt className="text-sm font-semibold text-icci-ink-60">{CONTACT_KIND_LABEL[b.contact_kind]}</dt>
         <dd data-testid="borrower-contact">
-          {b.contact_kind === "phone" ? <a href={`tel:${b.contact.replace(/[^0-9+]/g, "")}`}>{b.contact}</a> : <a href={`mailto:${b.contact}`}>{b.contact}</a>}
+          <ContactLink b={b} />
         </dd>
         <dt className="text-sm font-semibold text-icci-ink-60">Books out</dt>
         <dd data-testid="borrower-out">

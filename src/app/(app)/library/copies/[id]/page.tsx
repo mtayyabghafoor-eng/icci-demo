@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { DeskTabs } from "../../desk-tabs";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
 import { days, loanOutcome, returnedMessage } from "@/lib/library/loans";
@@ -35,6 +36,8 @@ const DONE: Record<string, string> = {
 export default function CopyPage(props: PageProps<"/library/copies/[id]">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      {/* A5: the desk tabs, as on every other library desk page. */}
+      <DeskTabs />
       <BackLink href="/library">Library</BackLink>
       <Suspense fallback={<p className="mt-6">Loading…</p>}>
         <Content params={props.params} searchParams={props.searchParams} />

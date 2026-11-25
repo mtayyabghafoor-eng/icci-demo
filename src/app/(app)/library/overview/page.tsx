@@ -88,7 +88,7 @@ async function Content() {
         title="Due back in the next 3 days"
         empty="Nothing is due back in the next 3 days."
         total={dueSoon.length}
-        seeAll="/library/on-loan"
+        seeAll="/library/on-loan?due=3"
         testId="overview-due-soon"
       >
         <LoanTable rows={dueSoon.slice(0, SHOWN)} borrowers={borrowers} showContact={true} />

@@ -32,6 +32,7 @@ export const metadata: Metadata = { title: "Renewals | ICCI Control Dashboard" }
 
 const SHOW_LABEL: Record<RegisterFilter["show"], string> = {
   attention: "Needs attention (overdue or due soon)",
+  soon: "Overdue or due in 30 days",
   ok: "Up to date",
   ended: "Warranties that have ended",
   all: "Everything",
@@ -105,7 +106,7 @@ async function List({ searchParams }: Pick<PageProps<"/renewals">, "searchParams
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[15px] text-icci-ink-60" data-testid="renewal-count">
           {rows.length === 0
-            ? filter.show === "attention"
+            ? filter.show === "attention" || filter.show === "soon"
               ? "Nothing is overdue or due soon."
               : "Nothing matches."
             : `${rows.length} ${rows.length === 1 ? "renewal" : "renewals"}`}
