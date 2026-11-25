@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { formatDateTime } from "@/lib/items/rules";
 import { STOCK_STATUS } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
+import { must } from "@/lib/supabase/must";
 import { loadLookups } from "../items/data";
 import { PrimaryLink, SecondaryLink, StatusBadge } from "../items/ui";
 import type { StockLevel } from "./data";
@@ -46,7 +47,7 @@ async function List() {
     supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
     loadLookups(supabase),
   ]);
-  const rows = (low.data ?? []) as StockLevel[];
+  const rows = (must(low).data ?? []) as StockLevel[];
   const place = (id: string) => lookups.locationName.get(id) ?? "";
 
   return (

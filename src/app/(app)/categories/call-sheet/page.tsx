@@ -21,11 +21,13 @@ import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = { title: "Call sheet | ICCI Control Dashboard" };
 
-type Who = { person: string | null; company: CompanyRow | undefined };
+// A6: the person is kept by their record, not their name, so two contacts
+// with the same name each show their own phone number.
+type Who = { person: { name: string; phone: string } | null; company: CompanyRow | undefined };
 
-function WhoLine({ who, phones }: { who: Who; phones: Map<string, string> }) {
+function WhoLine({ who }: { who: Who }) {
   const parts: string[] = [];
-  if (who.person) parts.push(`${who.person}${phones.get(who.person) ? `, ${phones.get(who.person)}` : ""}`);
+  if (who.person) parts.push(`${who.person.name}${who.person.phone ? `, ${who.person.phone}` : ""}`);
   if (who.company) parts.push(`${who.company.name}${who.company.phone ? `, ${who.company.phone}` : ""}`);
   return <>{parts.length ? parts.join(" · then ") : "Phone the office"}</>;
 }
@@ -40,11 +42,12 @@ async function Content({ searchParams }: PageProps<"/categories/call-sheet">) {
   const ids = all.map((c) => c.contact_person_id ?? null);
   const names = await personNames(supabase, ids);
   const { data: phoneRows } = await supabase.from("people").select("id, phone").in("id", [...names.keys()]);
-  const phoneOf = new Map(((phoneRows ?? []) as { id: string; phone: string | null }[]).map((p) => [names.get(p.id) ?? "", p.phone ?? ""]));
+  const phoneOf = new Map(((phoneRows ?? []) as { id: string; phone: string | null }[]).map((p) => [p.id, p.phone ?? ""]));
   const who = (sub: CategoryRow | null, main: CategoryRow): Who => {
     const person = contactPerson(sub, main);
     const companyId = sub?.service_company_id ?? main.service_company_id;
-    return { person: person ? (names.get(person) ?? null) : null, company: companyId ? company.get(companyId) : undefined };
+    const name = person ? names.get(person) : undefined;
+    return { person: person && name ? { name, phone: phoneOf.get(person) ?? "" } : null, company: companyId ? company.get(companyId) : undefined };
   };
   const placeName = typeof place === "string" && UUID.test(place) ? lookups.locationName.get(place) : undefined;
   const groups = categoryGroups(all);
@@ -55,7 +58,7 @@ async function Content({ searchParams }: PageProps<"/categories/call-sheet">) {
         <p className="text-sm">Print this sheet and put it up where staff will see it. It lists no item details, only who to phone.</p>
         <PrintButton />
       </div>
-      <article className="rounded-2xl border border-icci-line bg-white p-6 shadow-card print:border-0 print:p-0 print:shadow-none" data-testid="call-sheet">
+      <article className="call-sheet-page rounded-2xl border border-icci-line bg-white p-6 shadow-card print:border-0 print:p-0 print:shadow-none" data-testid="call-sheet">
         <h1 className="page-title text-[28px]">If Something Breaks, Phone…</h1>
         <p className="mt-1 text-icci-ink-60">
           Islamic Cultural Centre of Ireland{placeName ? ` · ${placeName}` : ""}. Tell them what it is and its label number (ICCI-…).
@@ -83,7 +86,7 @@ async function Content({ searchParams }: PageProps<"/categories/call-sheet">) {
                     </span>
                   </th>
                   <td className="py-2.5">
-                    <WhoLine who={who(null, main)} phones={phoneOf} />
+                    <WhoLine who={who(null, main)} />
                   </td>
                 </tr>,
                 ...own.map((s) => (
@@ -92,7 +95,7 @@ async function Content({ searchParams }: PageProps<"/categories/call-sheet">) {
                       {s.name}
                     </th>
                     <td className="py-2">
-                      <WhoLine who={who(s, main)} phones={phoneOf} />
+                      <WhoLine who={who(s, main)} />
                     </td>
                   </tr>
                 )),

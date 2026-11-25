@@ -1,13 +1,15 @@
 // The missing and damaged list (PLAN.md 5.1 screens), with search and filters.
 // Designed for a PC first; one card per asset on a phone.
+import { PackageCheck } from "lucide-react";
 import type { Metadata } from "next";
-import { Pagination } from "@/components/ui";
+import { Pagination, EmptyState, LinkButton } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ASSET_EVENT_COLUMNS, reporterOf, type AssetEventRow } from "@/lib/assets/rules";
 import { cleanSearch, formatDate, formatEuro, locationAndInside, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
+import { must } from "@/lib/supabase/must";
 import { lastPage, PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { loadLookups, type ItemRow } from "../items/data";
 import { ItemStatus } from "../items/ui";
@@ -60,14 +62,14 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets">["sear
     search("id", { count: "exact", head: true }).eq("condition", "damaged"),
     supabase.from("asset_events").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
-  const total = all.count ?? 0;
+  const total = must(all).count ?? 0;
   const page = lastPage(readPage(params.page), total, PAGE_SIZE);
   const { data } = total
-    ? await search("id, label_serial, kind, name, location_id, condition, value_cents", { count: "exact" })
+    ? must(await search("id, label_serial, kind, name, location_id, condition, value_cents", { count: "exact" })
         .order("condition")
         .order("name")
         .order("id")
-        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
+        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1))
     : { data: [] };
   const rows = (data ?? []) as unknown as Row[];
   const pageLink = (n: number) => {
@@ -153,7 +155,19 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets">["sear
         {total === 0 ? "Nothing is damaged or missing here." : `${damaged} damaged · ${missing} missing`}
       </p>
 
-      <div className="list-table-wrap">
+      {/* A6: an empty list says so in one calm card, with a way out of the filters. */}
+      {total === 0 && (
+        <div className="mt-4" data-testid="empty-list">
+          <EmptyState
+            icon={PackageCheck}
+            title="Nothing damaged or missing here"
+            action={filtered ? <LinkButton href="/assets" kind="outline">Clear filters</LinkButton> : undefined}
+          >
+            {filtered ? "Nothing matches these filters." : "When an asset is reported damaged or missing, it appears in this list."}
+          </EmptyState>
+        </div>
+      )}
+      <div className={total === 0 ? "hidden" : "list-table-wrap"}>
       <table className="list-table hidden md:table">
         <thead>
           <tr>

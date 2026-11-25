@@ -293,6 +293,16 @@ Then `docs/AFTERCARE.md` section 12, in its order.
 
 ## 6. Questions for the owner
 
+**Owner's answers (25 November 2026): every recommended answer.** 1: (A)
+Round A, then Phase 5, then Round C. 2: (A) one "Report a problem" with a
+"broken or damaged" tick. 3: (A) people and safety first. 4: (A) Switch off
+gets the red button, no sheet. 5: (A) Home lines open their list filtered.
+6: (A) add only "Stock corrections waiting" and "Reminders". 7: (A) several
+rota days at once, in A7. 8: (A) yes. 9: (A) no rota policy warning. 10:
+(A) yes, the add-on is named and asked about before installing. A3 approved
+all the way: local test database, then the ICCI Staging database, then push
+to GitHub (A1, A2, A3 and A6 together).
+
 1. **Order.** (A) Round A now, then Phase 5, then Round C *(recommended)*;
    (B) all of Rounds A and C now, then Phase 5; (C) Phase 5 first.
 2. **Reporting.** (A) One "Report a problem" with a "broken or damaged" tick

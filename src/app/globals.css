@@ -662,6 +662,15 @@ a.list-card:hover {
   font-style: italic;
 }
 @media print {
+  /* A6: the staff call sheet keeps a 15 mm margin; the label sheets' zero
+     margin above is only for the Avery label positions. */
+  @page callsheet {
+    size: A4;
+    margin: 15mm;
+  }
+  .call-sheet-page {
+    page: callsheet;
+  }
   @page rota {
     size: A4 landscape;
     margin: 8mm;

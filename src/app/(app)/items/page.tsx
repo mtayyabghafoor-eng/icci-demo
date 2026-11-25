@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
-import { PackagePlus } from "lucide-react";
+import { PackagePlus, PackageSearch } from "lucide-react";
 import { Suspense } from "react";
-import { LinkButton, PageHeader, Pagination, Skeleton } from "@/components/ui";
+import { LinkButton, PageHeader, Pagination, Skeleton, EmptyState } from "@/components/ui";
 import { matchCategories, NO_COUNT } from "@/lib/categories/counts";
 import { categoryAndInside, categoryGroups } from "@/lib/categories/rules";
 import { CONDITION_STATUS, CONDITIONS, KIND_LABEL, cleanSearch, locationAndInside, locationOptions } from "@/lib/items/rules";
 import type { StockStatus } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
+import { must } from "@/lib/supabase/must";
 import { CategoryOptions } from "../categories/options";
 import { categoryCounts } from "../categories/data";
 import { CategoryTile, CountLine } from "../categories/tile";
@@ -87,7 +88,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
     else if ((CONDITIONS as string[]).includes(condition)) query = query.eq("condition", condition);
     if (tickets) query = query.in("id", await itemsWithOpenTickets(supabase));
     if (company) query = query.or(await companyFilter(supabase, company));
-    return query;
+    return must(await query);
   };
   const [lookups, { data, count }] = await Promise.all([lookupsReady, searchItems()]);
   const items = (data ?? []) as Pick<ItemRow, "id" | "label_serial" | "kind" | "name" | "category_id" | "location_id" | "condition">[];
@@ -205,7 +206,19 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       </p>
 
       {/* PC: a table. Phone: one card per item. */}
-      <div className="list-table-wrap">
+      {/* A6: an empty list says so in one calm card, with a way out of the filters. */}
+      {total === 0 && (
+        <div className="mt-4" data-testid="empty-list">
+          <EmptyState
+            icon={PackageSearch}
+            title="No items match"
+            action={filtered ? <LinkButton href="/items" kind="outline">Clear filters</LinkButton> : undefined}
+          >
+            {filtered ? "Nothing matches these filters." : "Try other words, or clear the filters to see every item."}
+          </EmptyState>
+        </div>
+      )}
+      <div className={total === 0 ? "hidden" : "list-table-wrap"}>
       <table className="list-table hidden md:table">
         <thead>
           <tr>

@@ -8,6 +8,7 @@ import { ASSET_EVENT_COLUMNS, DISPOSAL_STATUS, type AssetEventRow } from "@/lib/
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { CONDITION_STATUS, formatDateTime, formatEuro } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
+import { must } from "@/lib/supabase/must";
 import { loadLookups, PHOTO_BUCKET } from "../../items/data";
 import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames } from "../../stock/data";
@@ -38,7 +39,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
   const { done } = await searchParams;
   const me = await requireAdmin();
   const supabase = await createClient();
-  const { data } = await supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("status", "pending").order("id");
+  const { data } = must(await supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("status", "pending").order("id"));
   const pending = (data ?? []) as AssetEventRow[];
 
   const itemIds = [...new Set(pending.map((p) => p.item_id))];

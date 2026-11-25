@@ -1,8 +1,9 @@
 // The people directory (PLAN.md 5.2; slice P2.1): search, and filter by
 // role, section, active and (P2.3) vetting status. Designed for a PC first; one card per person on
 // a phone. Super Admin and Centre Admin only.
+import { UserSearch } from "lucide-react";
 import type { Metadata } from "next";
-import { Pagination } from "@/components/ui";
+import { Pagination, EmptyState, LinkButton } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -157,7 +158,19 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
         {shown.total === 0 ? "No people match." : `${shown.total} ${shown.total === 1 ? "person" : "people"}`}
       </p>
 
-      <div className="list-table-wrap">
+      {/* A6: an empty list says so in one calm card, with a way out of the filters. */}
+      {shown.total === 0 && (
+        <div className="mt-4" data-testid="empty-list">
+          <EmptyState
+            icon={UserSearch}
+            title="Nobody matches"
+            action={filtered ? <LinkButton href="/people" kind="outline">Clear filters</LinkButton> : undefined}
+          >
+            {filtered ? "Nothing matches these filters." : "Try other words, or clear the filters to see everyone."}
+          </EmptyState>
+        </div>
+      )}
+      <div className={shown.total === 0 ? "hidden" : "list-table-wrap"}>
       <table className="list-table hidden md:table">
         <thead>
           <tr>

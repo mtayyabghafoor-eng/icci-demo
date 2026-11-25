@@ -88,6 +88,14 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - The database starts insisting on two-factor sign-in in slice 3, when
   two-factor is built (14 Nov 2026).
 - Nobody can change their own role or switch off their own account.
+- Improvement plan (25 Nov 2026, docs/IMPROVEMENT-PLAN.md section 6): the
+  owner chose every recommended answer: Round A, then Phase 5, then Round
+  C; one "Report a problem" with a "broken or damaged" tick; Home puts
+  people and safety first and each line opens its list filtered; menu adds
+  only "Stock corrections waiting" and "Reminders"; several rota days at
+  once (A7); no rota policy warning; Switch off red, no sheet; database
+  types and an iPhone camera add-on (named and asked first) in Round C.
+  A3's migration approved for local, then ICCI Staging, then main.
 - New look (15 Nov 2026, docs/UI-PLAN.md): left sidebar on a PC, bottom bar
   with a Scan button on a phone; round logo allowed on dark green; Title
   Case titles; fonts Cormorant Garamond, Plus Jakarta Sans, JetBrains Mono
@@ -410,6 +418,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 25 Nov 2026, session 45 (slices A6 and A3; owner chose every recommended
+  answer and approved A3 for local, staging and main). A6: ICCI not-found
+  and "Try again" pages (app/ and (app)/), must() makes six lists and the
+  policy grid stop on a failed read instead of saying "nothing", a
+  database hiccup at sign-in retries then shows "Try again" (no sign-out),
+  empty-list cards with Clear filters, call sheet 15 mm print margin and
+  phones by record. A3: migration 0047 (tests first: 4 failed before, pass
+  after): stale shelf shortfall refused after a newer count, rejected
+  disposal no longer blocks, loan "lost" only via the copy, undone return
+  re-checks 3 books and borrower on; scan note corrected. Full suite all
+  green (1785 + 319, build). Next: 0047 to ICCI Staging, push, then A4.
 
 - 25 Nov 2026, session 45 (slice A2, phone fixes; owner away, said to do as
   much as possible): Save/Finish bars sit above the bottom bar

@@ -8,6 +8,7 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDateTime } from "@/lib/items/rules";
 import { ADJUSTMENT_STATUS, MOVEMENT_LABEL } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
+import { must } from "@/lib/supabase/must";
 import { loadLookups } from "../../items/data";
 import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames, MOVEMENT_COLUMNS, type Movement } from "../data";
@@ -36,11 +37,11 @@ async function List({ searchParams }: { searchParams: PageProps<"/stock/approval
   const { done } = await searchParams;
   const me = await requireAdmin();
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = must(await supabase
     .from("stock_movements")
     .select(MOVEMENT_COLUMNS)
     .eq("status", "pending")
-    .order("id");
+    .order("id"));
   const pending = (data ?? []) as Movement[];
 
   const originalIds = pending.map((p) => p.corrects_id!).filter(Boolean);

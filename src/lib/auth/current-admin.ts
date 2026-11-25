@@ -26,12 +26,18 @@ export async function requireAdmin(): Promise<CurrentAdmin> {
   // (Library Operator) goes on to the database check below.
   if (assuranceOf(claims.claims) === "aal1") redirect("/sign-in/code");
 
-  const { data } = await supabase
-    .from("app_users")
-    .select("id, display_name, role, roles(label)")
-    .eq("id", id)
-    .maybeSingle();
-  // The sign-in is still valid, so it must be ended before showing sign-in.
+  const ownAccount = () => supabase.from("app_users").select("id, display_name, role, roles(label)").eq("id", id).maybeSingle();
+  let { data, error } = await ownAccount();
+  // A6: the database did not answer (a moment's hiccup, not a refusal). Ask
+  // once more; if it still does not answer, show "Try again" (error.tsx)
+  // instead of signing the admin out.
+  if (error) {
+    await new Promise((r) => setTimeout(r, 300));
+    ({ data, error } = await ownAccount());
+    if (error) throw new Error("The sign-in could not be checked: the database did not answer.");
+  }
+  // The database answered but will not show this account: no access. The
+  // sign-in is still valid, so it must be ended before showing sign-in.
   if (!data) redirect("/sign-out?reason=no-access");
 
   const role = data.roles as unknown as { label: string } | null;

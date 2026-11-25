@@ -2,10 +2,11 @@
 // top. Filter by status, priority, place (and what is inside it) and who it
 // is assigned to; download what is shown as a CSV file. Designed for a PC
 // first; one card per ticket on a phone. Super Admin and Centre Admin only.
+import { ClipboardCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Pagination } from "@/components/ui";
+import { Pagination, EmptyState, LinkButton } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
@@ -152,6 +153,18 @@ async function List({ searchParams }: { searchParams: PageProps<"/tickets">["sea
         </div>
       </div>
 
+      {/* A6: an empty list says so in one calm card, with a way out of the filters. */}
+      {total === 0 && (
+        <div className="mt-4" data-testid="empty-list">
+          <EmptyState
+            icon={ClipboardCheck}
+            title="No tickets match"
+            action={filtered ? <LinkButton href="/tickets" kind="outline">Clear filters</LinkButton> : undefined}
+          >
+            {filtered ? "Nothing matches these filters." : "When a problem is reported, its ticket appears here."}
+          </EmptyState>
+        </div>
+      )}
       {rows.length > 0 && <Rows rows={rows} />}
       {total > PAGE_SIZE && <Pagination page={page} size={PAGE_SIZE} total={total} hrefFor={pageLink} />}
     </>

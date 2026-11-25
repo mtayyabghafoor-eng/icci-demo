@@ -1,6 +1,7 @@
 // What the library screens read (slice P4.2). Reads as the signed-in person,
 // so the database's own rules apply.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { must } from "@/lib/supabase/must";
 import { LOAN_COLUMNS, type ContactKind, type LoanStatus } from "@/lib/library/loans";
 import { COPY_COLUMNS, type CopyRow } from "@/lib/library/lists";
 import type { Language } from "@/lib/library/rules";
@@ -104,6 +105,6 @@ export async function loadCopyList(
 ): Promise<CopyRow[]> {
   let q = supabase.from("library_copy_list").select(COPY_COLUMNS).in("status", statuses);
   for (const o of order) q = q.order(o.column, { ascending: o.ascending });
-  const { data } = await q.limit(1000);
+  const { data } = must(await q.limit(1000));
   return (data ?? []) as CopyRow[];
 }

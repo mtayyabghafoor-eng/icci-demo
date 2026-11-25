@@ -11,6 +11,7 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_POLICIES } from "@/lib/policies/rules";
 import { filterSquares, OVERDUE_DAYS, readGridFilter, SIGNOFF_STATUS, SQUARE_COLUMNS, SQUARE_ORDER, type Square } from "@/lib/policies/signoffs";
 import { createClient } from "@/lib/supabase/server";
+import { must } from "@/lib/supabase/must";
 import { SecondaryLink } from "../../items/ui";
 import { loadPeopleLists } from "../../people/data";
 import { CannotSeePolicies } from "../cannot-see";
@@ -39,9 +40,9 @@ async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid"
   if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
   const params = await searchParams;
   const supabase = await createClient();
-  const [lists, { data }] = await Promise.all([loadPeopleLists(supabase), supabase.from("policy_grid").select(SQUARE_COLUMNS)]);
+  const [lists, { data, error: gridError }] = await Promise.all([loadPeopleLists(supabase), supabase.from("policy_grid").select(SQUARE_COLUMNS)]);
   const filter = readGridFilter(params, new Set(lists.sectionName.keys()), new Set(lists.roleName.keys()));
-  const squares = filterSquares((data ?? []) as Square[], filter);
+  const squares = filterSquares((must({ data, error: gridError }).data ?? []) as Square[], filter);
   const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const filterParams = new URLSearchParams({
     ...(filter.section && { section: filter.section }),
