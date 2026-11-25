@@ -8,7 +8,7 @@ export function FindLabel() {
           name="number"
           required
           placeholder="Label number, e.g. ICCI-000123"
-          className="block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+          className="block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
         />
       </label>
       <button

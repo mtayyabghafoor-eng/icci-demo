@@ -171,7 +171,7 @@ export function DecideDifferenceForm({
           </legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {(["good", "fair"] as const).map((c) => (
-              <label key={c} className="flex min-h-11 items-center gap-2 px-4 rounded-xl border border-[#c9d3cf] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold">
+              <label key={c} className="flex min-h-11 items-center gap-2 px-4 rounded-xl border border-[#87948f] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold">
                 <input type="radio" name="found_condition" value={c} />
                 {c === "good" ? "Good" : "Fair"}
               </label>

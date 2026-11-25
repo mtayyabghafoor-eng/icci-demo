@@ -152,7 +152,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/copies
             dir="auto"
             autoComplete="off"
             placeholder="Borrower's name"
-            className="block min-h-12 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 text-lg focus:border-icci-green"
+            className="block min-h-12 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 text-lg focus:border-icci-green"
           />
         </label>
         <button type="submit" className={buttonClass("outline", "lg")}>

@@ -37,7 +37,8 @@ test("print a new sheet of 21 labels, skip spaces, and print it again", async ({
   // Create and print 21 (the default: one sheet).
   await expect(page.getByLabel("How many labels?")).toHaveValue("21");
   await page.getByRole("button", { name: "Create and print" }).click();
-  await expect(page).toHaveURL(/\/labels\/sheet\/\d+\?new=1$/);
+  // A1: a saved message shown in the page tidies "?new=1" out of the address.
+  await expect(page).toHaveURL(/\/labels\/sheet\/\d+(\?new=1)?$/);
   const sheetUrl = page.url().replace(/\?.*$/, "");
   await expect(page.getByText("21 new label numbers created.")).toBeVisible();
   await expect(page.getByTestId("sheet-range")).toHaveText(`${next} to ${serialOf(numberOf(next) + 20)}`);

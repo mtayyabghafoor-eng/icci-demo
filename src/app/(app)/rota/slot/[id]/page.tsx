@@ -8,7 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, Card, CardTitle, FactGrid, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, Card, CardTitle, FactGrid, Notice, PageHeader, ConfirmSubmit } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
 import {
@@ -199,9 +199,10 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
               </form>
             )}
             <form action={removeSlot.bind(null, id, monday)}>
-              <button type="submit" className={buttonClass("outline")}>
-                Remove this slot from the week
-              </button>
+              <ConfirmSubmit label="Remove this slot from the week" title="Remove this slot from the week?" confirmLabel="Yes, remove it">
+                {row.person_id ? `${personName ?? "The person on it"} comes off it too. ` : ""}It stays in the rota&rsquo;s history, but it
+                cannot be put back: add a new slot instead.
+              </ConfirmSubmit>
             </form>
           </div>
         )}

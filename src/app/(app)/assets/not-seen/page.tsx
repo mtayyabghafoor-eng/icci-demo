@@ -70,7 +70,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/not-see
   }));
 
   const filtered = Boolean(q || location);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const seenText = (r: Seen) => `${formatDate(r.last_seen_at)} · ${SEEN_HOW_LABEL[r.last_seen_how] ?? r.last_seen_how}`;
 
   return (

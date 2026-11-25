@@ -99,7 +99,7 @@ describe("the screenshot helper tries again when Windows briefly locks the file"
     expect(result).toBe("saved");
     expect(tries).toBe(3);
   });
-  it("gives up after three tries, with the real error", async () => {
+  it("gives up after eight tries, with the real error", async () => {
     let tries = 0;
     await expect(
       withFileLockRetry(async () => {
@@ -107,7 +107,7 @@ describe("the screenshot helper tries again when Windows briefly locks the file"
         throw lock;
       }, 0),
     ).rejects.toThrow(/UNKNOWN/);
-    expect(tries).toBe(3);
+    expect(tries).toBe(8);
   });
   it("does not retry other errors", async () => {
     let tries = 0;

@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import { expect, test } from "@playwright/test";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, newTestLabel, shot, signInWithEmailCode } from "./helpers";
+import { completeSignIn, newTestLabel, shot, signInWithEmailCode, confirmSheet } from "./helpers";
 
 const operator = seedAdmin("library_operator");
 const admin = seedAdmin("centre_admin");
@@ -88,6 +88,7 @@ test("the Library Operator marks copies lost, found and withdrawn", async ({ pag
   await page.goto(`/library/copies/${gone.copy}`);
   await page.getByText("Lost or no longer wanted?").click();
   await page.getByRole("button", { name: "Withdraw this copy for good" }).click();
+  await confirmSheet(page);
   await expect(page.getByTestId("copy-status")).toHaveText("Withdrawn");
   await expect(page.getByTestId("copy-flag")).toHaveText(/cannot be undone/);
   await expect(page.getByRole("button", { name: /found/ })).toHaveCount(0);

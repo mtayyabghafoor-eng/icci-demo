@@ -1,6 +1,7 @@
 // One vehicle (slice P2.7): registration, make and model, keeper, the asset
 // it belongs to, and motor tax, insurance and NCT with their status and full
 // history. "Record a renewal"; a wrong entry is withdrawn with a reason.
+import { messageTone } from "@/lib/ui/messages";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,7 +24,7 @@ import { todayInDublin, daysBetween } from "@/lib/vetting/rules";
 import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui";
 import { setVehicleActive, withdrawRenewal } from "../actions";
 import { CannotSeeVehicles } from "../cannot-see";
-import { BackLink } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Vehicle | ICCI Control Dashboard" };
@@ -90,7 +91,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
         {v.condition === "disposed" && <StatusBadge word="Disposed of" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">{DONE[done]}</Notice>
+        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
@@ -121,7 +122,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
         {v.condition !== "disposed" && (
           <form action={setVehicleActive.bind(null, v.id, !v.active)}>
             {v.active ? (
-              <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+              <button type="submit" className={buttonClass("danger")}>
                 Switch off
               </button>
             ) : (
@@ -187,10 +188,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
                           name="reason"
                           required
                           maxLength={500}
-                          className="mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+                          className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
                         />
                       </label>
-                      <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                      <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                         Withdraw
                       </button>
                     </form>

@@ -10,6 +10,7 @@ export { ActionTile, AttentionRow, Avatar, ClearChip, CounterCard, HeadlineCard,
 export { Timeline, type TimelineEntry } from "./timeline";
 export { DataTable, Pagination, type Column } from "./table";
 export { Logo } from "./logo";
-export { Toast } from "./toast";
+export { ForgetDone, Toast } from "./toast";
 export { BackLink } from "./back-link";
+export { ConfirmSubmit } from "./confirm";
 export { PageShell } from "./page-shell";

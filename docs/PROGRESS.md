@@ -411,6 +411,43 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 25 Nov 2026, session 45 (slice A1, messages and "Are you sure?"; owner
+  said go as recommended: Switch off gets the red button, no sheet): refusals
+  red and staying (one list, src/lib/ui/messages.ts); "cannot see" notes
+  grey; ConfirmSubmit sheet (UI-PLAN 5.5) on publish policy, withdraw copy,
+  approve disposal, remove rota slot, unlink account; every Switch off the
+  red outline button; form borders #87948f (3:1); lining numbers; message
+  settings tidied from the address. Full suite: 1778 unit/db passed; browser
+  302 passed, 5 failed (test expectations, Windows file locks), fixed and
+  re-run green. Screenshot retry now 8 tries. Next: A2 (phone fixes).
+
+- 25 Nov 2026, session 45 (continued, no code changed): checked Gemini
+  Carbon's two reports. Added to docs/IMPROVEMENT-PLAN.md: lining numbers in
+  titles, unsaved-count warning (A2), stocktake approve link (A5), call sheet
+  same-name phones (A6), failed reminder emails retried and smaller security
+  items (Round C). Found UI-PLAN 5.5 already agreed a confirmation sheet for
+  dangerous actions that was never built; A1 builds it. Question 4 reworded
+  (sheet on "Switch off" or not). Next: owner says go on A1.
+
+- 24 Nov 2026, session 45 (continued, no code changed): checked three more
+  Gemini reviews (code, security, screens). New confirmed bugs: a stocktake
+  shortfall applied on top of a newer shelf count, a rejected disposal still
+  blocking a stocktake difference, a library loan closed as lost without the
+  copy, the policy grid cut off at 1,000 squares, sign-out on a database
+  hiccup. Wrote docs/IMPROVEMENT-PLAN.md: Round A (7 fix slices) before
+  Phase 5, Round C (4 slices) before launch, 10 questions for the owner.
+  Next: owner answers the questions; then slice A1.
+
+- 23 Nov 2026, session 45 (review only, no code changed): checked Gemini's
+  UI audit against the code. Confirmed: refusals shown in green and fading
+  after 8 s, phone save bars hidden behind the bottom bar, empty phone
+  filter boxes on 5 lists, stale "Mark found" note on the stocktake scan,
+  Low stock amber/red mismatch on Home, damage note not copied into the
+  ticket, no "are you sure?" on permanent actions. Overstated: "two design
+  systems" (looks the same), "Loading…" (a shared placeholder exists). Some
+  ideas go beyond PLAN.md (rota policy warnings, iPhone scanner add-on).
+  Next: owner picks which batch of fixes to plan first.
+
 - 22 Nov 2026, session 44 (continued): online demo made realistic (owner's
   decisions): real Dublin firms and the real FAAC 391 and Mitsubishi MSZ-AP
   manuals (git-ignored demo-files/; the Honda manual is 16 MB, over the

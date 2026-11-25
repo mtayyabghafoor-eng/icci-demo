@@ -8,7 +8,7 @@ import { useRef, type ComponentProps } from "react";
 import { cx } from "@/lib/ui/text";
 
 const BUTTON =
-  "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#c9d3cf] bg-white text-icci-green-dark transition-colors duration-150 hover:border-icci-green hover:bg-icci-green-50 active:bg-icci-panel";
+  "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#87948f] bg-white text-icci-green-dark transition-colors duration-150 hover:border-icci-green hover:bg-icci-green-50 active:bg-icci-panel";
 
 export function Stepper({
   min = 0,
@@ -41,7 +41,7 @@ export function Stepper({
         min={min}
         step={1}
         className={cx(
-          "order-2 h-12 w-24 rounded-xl border border-[#c9d3cf] bg-white px-2 text-center font-mono text-2xl font-semibold transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green",
+          "order-2 h-12 w-24 rounded-xl border border-[#87948f] bg-white px-2 text-center font-mono text-2xl font-semibold transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green",
           className,
         )}
         {...input}

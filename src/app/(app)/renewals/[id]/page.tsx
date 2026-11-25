@@ -2,6 +2,7 @@
 // needed, notes, its current due date with status, and the full history of
 // due dates. "Mark renewed" adds a new entry; a wrong one is withdrawn with a
 // reason. Switched off, never deleted.
+import { messageTone } from "@/lib/ui/messages";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,7 +15,7 @@ import { daysBetween, todayInDublin } from "@/lib/vetting/rules";
 import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui";
 import { setRenewalActive, withdrawDueDate } from "../actions";
 import { CannotSeeRenewals } from "../cannot-see";
-import { BackLink } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Renewal | ICCI Control Dashboard" };
@@ -105,7 +106,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
         {!r.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">{DONE[done]}</Notice>
+        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
       )}
 
       {current && (
@@ -149,7 +150,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
         <SecondaryLink href={`/renewals/${r.id}/edit`}>Change details</SecondaryLink>
         <form action={setRenewalActive.bind(null, r.id, !r.active)}>
           {r.active ? (
-            <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+            <button type="submit" className={buttonClass("danger")}>
               Switch off
             </button>
           ) : (
@@ -191,10 +192,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
                           name="reason"
                           required
                           maxLength={500}
-                          className="mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+                          className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
                         />
                       </label>
-                      <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                      <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                         Withdraw
                       </button>
                     </form>

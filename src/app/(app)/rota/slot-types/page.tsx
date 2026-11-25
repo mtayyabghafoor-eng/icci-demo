@@ -6,7 +6,7 @@
 import type { Metadata } from "next";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Suspense } from "react";
-import { Card, CardTitle, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_ROTA, SLOT_GROUP_LABEL, SLOT_GROUPS, SLOT_TYPE_COLUMNS, timeTakenText, type SlotType } from "@/lib/rota/rules";
 import { createClient } from "@/lib/supabase/server";
@@ -101,7 +101,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/slot-t
 
 function SlotCard({ t, first, last }: { t: SlotType; first: boolean; last: boolean }) {
   const button = "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[10px] border px-3 py-2 font-semibold transition-colors duration-150";
-  const quiet = `${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[#c9d3cf] disabled:hover:bg-white`;
+  const quiet = `${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[#87948f] disabled:hover:bg-white`;
   return (
     <li
       id={`slot-${t.id}`}
@@ -136,7 +136,7 @@ function SlotCard({ t, first, last }: { t: SlotType; first: boolean; last: boole
           )}
           <form action={setSlotTypeActive.bind(null, t.id, !t.active)}>
             {t.active ? (
-              <button type="submit" className={quiet}>
+              <button type="submit" className={buttonClass("danger")}>
                 Switch off
               </button>
             ) : (

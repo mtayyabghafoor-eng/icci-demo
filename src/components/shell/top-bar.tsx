@@ -40,7 +40,7 @@ export function TopBar({ canOpenLabels, signOut }: { canOpenLabels: boolean; sig
               name="number"
               required
               placeholder="Open label ICCI-000123"
-              className="h-10 w-56 rounded-l-xl border border-r-0 border-[#c9d3cf] bg-white px-3 font-mono text-sm placeholder:font-sans placeholder:text-icci-ink-60/70 focus:border-icci-green"
+              className="h-10 w-56 rounded-l-xl border border-r-0 border-[#87948f] bg-white px-3 font-mono text-sm placeholder:font-sans placeholder:text-icci-ink-60/70 focus:border-icci-green"
             />
             <button
               type="submit"

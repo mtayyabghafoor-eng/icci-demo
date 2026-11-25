@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -178,6 +178,7 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await expect(theirs.getByTestId("form-error")).toContainText("Write why you are rejecting it");
   await theirs.screenshot({ path: `docs/screens/slice-06-disposal-one-${project}.png`, caret: "initial" });
   await theirs.getByRole("button", { name: "Approve disposal" }).click();
+  await confirmSheet(page);
   await expect(page.getByRole("status").filter({ hasText: "Disposal approved." })).toBeVisible();
   await expect(page.getByTestId("pending-disposal").filter({ hasText: item.name })).toHaveCount(0);
 

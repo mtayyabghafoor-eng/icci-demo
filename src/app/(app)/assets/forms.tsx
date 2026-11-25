@@ -1,6 +1,7 @@
 "use client";
 // The asset forms. Phone-first: big boxes, a one-tap camera button.
 import { startTransition, useActionState, useRef, useState, type FormEvent } from "react";
+import { ConfirmSubmit } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { DISPOSAL_ROUTES, ROUTE_LABEL, type DisposalRoute } from "@/lib/assets/disposal";
 import { ASSET_ACTIONS, type AssetAction } from "@/lib/assets/rules";
@@ -76,7 +77,7 @@ export function AssetEventForm({
             {(["good", "fair"] as const).map((c) => (
               <label
                 key={c}
-                className="flex min-h-11 flex-1 cursor-pointer items-center gap-2 px-3 rounded-xl border border-[#c9d3cf] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
+                className="flex min-h-11 flex-1 cursor-pointer items-center gap-2 px-3 rounded-xl border border-[#87948f] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
               >
                 <input type="radio" name="to_condition" value={c} required defaultChecked={c === "good"} />
                 {c === "good" ? "Good" : "Fair"}
@@ -92,7 +93,7 @@ export function AssetEventForm({
             {DISPOSAL_ROUTES.map((r) => (
               <label
                 key={r}
-                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[#c9d3cf] bg-white px-3 py-2 transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
+                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[#87948f] bg-white px-3 py-2 transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
               >
                 <input type="radio" name="disposal_route" value={r} required checked={route === r} onChange={() => setRoute(r)} />
                 {ROUTE_LABEL[r]}
@@ -186,15 +187,17 @@ export function DecideDisposalForm({ eventId }: { eventId: number }) {
       </label>
       <FormError message={state.error} />
       <div className="flex flex-wrap gap-2">
-        <button
-          type="submit"
+        <ConfirmSubmit
+          kind="primary"
           name="decision"
           value="approved"
           disabled={pending}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 px-5"
+          label="Approve disposal"
+          title="Approve this disposal?"
+          confirmLabel="Yes, approve"
         >
-          Approve disposal
-        </button>
+          The asset is marked disposed for good. Its record and history are kept, but it can never be put back in use.
+        </ConfirmSubmit>
         <button
           type="submit"
           name="decision"

@@ -4,7 +4,7 @@
 // changeable. Names are shown as typed, Arabic included (dir="auto").
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, ConfirmSubmit } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import type { MarkKind } from "@/lib/library/lists";
 import { CONTACT_KIND_LABEL, type ContactKind } from "@/lib/library/loans";
@@ -80,7 +80,7 @@ function BorrowerFields({ borrower, typed }: { borrower?: BorrowerDetails; typed
           {(Object.keys(CONTACT_KIND_LABEL) as ContactKind[]).map((k) => (
             <label
               key={k}
-              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#c9d3cf] bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
+              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#87948f] bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
             >
               <input type="radio" name="contact_kind" value={k} required defaultChecked={kind === k} className="h-4 w-4" />
               {CONTACT_KIND_LABEL[k]}
@@ -152,7 +152,7 @@ export function SwitchBorrowerForm({ borrowerId, active }: { borrowerId: string;
   const [state, action, pending] = useActionState<LibraryFormState, FormData>(setBorrowerActive.bind(null, borrowerId, !active), { error: null });
   return (
     <form action={action} className="space-y-2">
-      <button type="submit" disabled={pending} className={buttonClass("outline")}>
+      <button type="submit" disabled={pending} className={buttonClass(active ? "danger" : "outline")}>
         {pending ? "Saving…" : active ? "Switch off" : "Switch back on"}
       </button>
       <FormError message={state.error} />
@@ -241,9 +241,21 @@ export function MarkCopyForm({ copyId, kind }: { copyId: string; kind: MarkKind 
   const b = MARK_BUTTON[kind];
   return (
     <form action={action} className="space-y-2" aria-label={b.idle}>
-      <button type="submit" disabled={pending} className={buttonClass(b.variant, kind === "found" ? "lg" : undefined, kind === "found" ? "w-full" : undefined)}>
-        {pending ? b.busy : b.idle}
-      </button>
+      {kind === "withdrawn" ? (
+        // A1: withdrawing is for good, so it asks once more.
+        <ConfirmSubmit
+          disabled={pending}
+          label={pending ? b.busy : b.idle}
+          title="Withdraw this copy for good?"
+          confirmLabel="Yes, withdraw it"
+        >
+          It leaves the library for good and can never be lent again. Its record and past loans stay in the history.
+        </ConfirmSubmit>
+      ) : (
+        <button type="submit" disabled={pending} className={buttonClass(b.variant, kind === "found" ? "lg" : undefined, kind === "found" ? "w-full" : undefined)}>
+          {pending ? b.busy : b.idle}
+        </button>
+      )}
       <FormError message={state.error} />
     </form>
   );

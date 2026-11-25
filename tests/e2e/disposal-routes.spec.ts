@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -75,6 +75,7 @@ test("a sale: price, buyer, date and who took the money; the approver sees it; h
   await expect(theirs.getByTestId("disposal-route")).toContainText("money taken by Test Treasurer (fictional)");
   await theirs.screenshot({ path: `docs/screens/slice-p1-14-approval-sale-${project}.png`, caret: "initial" });
   await theirs.getByRole("button", { name: "Approve disposal" }).click();
+  await confirmSheet(page);
   await expect(page.getByRole("status").filter({ hasText: "Disposal approved." })).toBeVisible();
 
   await page.goto(`/items/${item.id}`);

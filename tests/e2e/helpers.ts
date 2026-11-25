@@ -191,3 +191,14 @@ export async function signInWithEmailCode(page: Page, email: string) {
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL((u) => !u.pathname.startsWith("/sign-in"));
 }
+
+/**
+ * Slice A1: a permanent action asks once more in a small sheet. Checks the
+ * sheet is open and presses its "Yes, …" button.
+ */
+export async function confirmSheet(page: Page) {
+  const sheet = page.locator("dialog[open]");
+  await expect(sheet).toBeVisible();
+  await sheet.getByTestId("confirm-yes").click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+}

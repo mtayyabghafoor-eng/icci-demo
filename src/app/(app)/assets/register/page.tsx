@@ -42,7 +42,7 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
   const groups = groupByPlace(rows);
   const total = groups.reduce((sum, g) => sum + g.total_cents, 0);
   const withoutValue = groups.reduce((sum, g) => sum + g.without_value, 0);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const csvHref = `/assets/register/csv${place ? `?place=${encodeURIComponent(place)}` : ""}`;
 
   return (

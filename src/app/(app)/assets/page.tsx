@@ -95,7 +95,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets">["sear
   const damaged = damagedCount.count ?? 0;
   const missing = total - damaged;
   const filtered = Boolean(q || location || show);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const since = (r: Row) => {
     const e = latest.get(r.id);
     return e ? `${formatDate(e.created_at)} · reported by ${reporterOf(e, reporters).name}` : "No report recorded";

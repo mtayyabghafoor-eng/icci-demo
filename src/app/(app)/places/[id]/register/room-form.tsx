@@ -83,7 +83,7 @@ export function RoomForm(props: {
               )
                 .filter(([value]) => value === "fixed_asset" || props.stockAllowed)
                 .map(([value, title]) => (
-                  <label key={value} className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-[#c9d3cf] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50">
+                  <label key={value} className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-[#87948f] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50">
                     <input type="radio" name="kind" value={value} defaultChecked={defaults.kind === value} className="accent-icci-green-dark" />
                     <span className="font-semibold">{title}</span>
                   </label>

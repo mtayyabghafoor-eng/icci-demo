@@ -42,7 +42,7 @@ export default function TicketsPage(props: PageProps<"/tickets">) {
 }
 
 const field =
-  "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
 
 async function List({ searchParams }: { searchParams: PageProps<"/tickets">["searchParams"] }) {
   const me = await requireAdmin();

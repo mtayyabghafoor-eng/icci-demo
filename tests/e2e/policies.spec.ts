@@ -8,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { SEED_ADMINS, seedAdmin, samplePolicyPdf } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { addDays, addYears, todayInDublin } from "../../src/lib/vetting/rules";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, confirmSheet } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -91,7 +91,17 @@ test("add a policy, upload a draft, and a different admin publishes it", async (
   await expectSignInPage(page);
   await signInAs(page, second, new URL(policyUrl).pathname);
   await s(page, "policy-draft-other-admin", project);
+  // Slice A1: publishing asks once more; Cancel changes nothing.
   await page.getByRole("button", { name: "Publish" }).click();
+  const sheet = page.locator("dialog[open]");
+  await expect(sheet.getByRole("heading", { name: "Publish v1?" })).toBeVisible();
+  await expect(sheet).toContainText("can never be changed");
+  await shot(page, "confirm-publish", project, "a1");
+  await sheet.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(versions.first().getByTestId("status")).toHaveText("Draft");
+  await page.getByRole("button", { name: "Publish" }).click();
+  await confirmSheet(page);
   await expect(page.getByTestId("notice")).toHaveText(/Published/);
   await expect(page.getByTestId("current-version")).toHaveText("v1");
   await expect(page.getByTestId("review-status")).toHaveText("Up to date");
@@ -108,6 +118,7 @@ test("add a policy, upload a draft, and a different admin publishes it", async (
   await expectSignInPage(page);
   await signInAs(page, centre, new URL(policyUrl).pathname);
   await page.getByRole("button", { name: "Publish" }).click();
+  await confirmSheet(page);
   await expect(page.getByTestId("current-version")).toHaveText("v2");
   await expect(versions).toHaveCount(2);
   await expect(versions.nth(0).getByTestId("status")).toHaveText("Current");

@@ -93,7 +93,7 @@ function BookFields({ book, typed }: { book?: BookDetails; typed?: Typed }) {
           {(Object.keys(LANGUAGE_LABEL) as Language[]).map((code) => (
             <label
               key={code}
-              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#c9d3cf] bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
+              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#87948f] bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
             >
               <input type="radio" name="language" value={code} required defaultChecked={v("language", book?.language) === code} className="h-4 w-4" />
               {LANGUAGE_LABEL[code]}

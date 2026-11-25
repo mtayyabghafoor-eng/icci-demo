@@ -58,7 +58,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/library">["sea
               defaultValue={q}
               dir="auto"
               placeholder="Title, author or ISBN"
-              className="block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+              className="block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
             />
           </label>
           <button type="submit" className="inline-flex min-h-11 items-center rounded-[10px] border border-icci-green/40 bg-white px-4 font-semibold text-icci-green hover:bg-icci-green-50">

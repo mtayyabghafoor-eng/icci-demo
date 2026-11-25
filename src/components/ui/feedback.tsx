@@ -36,21 +36,23 @@ export function Notice({
 }) {
   const t: NoticeTone = tone ?? (floating ? "success" : "info");
   const n = NOTICE[t];
+  // A1: only a success or info floats away; a warning or error stays in the page, without the close button's space.
+  const toast = floating && (t === "success" || t === "info");
   const Icon = n.icon;
   const box = (
     <div
       role={role ?? n.role}
       data-testid={testId}
-      className={cx("flex gap-3 rounded-xl border px-4 py-3", n.box, floating && "pr-12 shadow-raised")}
+      className={cx("flex gap-3 rounded-xl border px-4 py-3", n.box, toast && "pr-12 shadow-raised")}
     >
-      <Icon aria-hidden size={floating ? 22 : 20} className="mt-0.5 shrink-0" />
+      <Icon aria-hidden size={toast ? 22 : 20} className="mt-0.5 shrink-0" />
       <div className="text-[15px] leading-relaxed">
         {title && <p className="font-bold">{title}</p>}
         {children && <div className={cx(title && "mt-0.5", "text-icci-text")}>{children}</div>}
       </div>
     </div>
   );
-  return floating && (t === "success" || t === "info") ? <Toast>{box}</Toast> : box;
+  return toast ? <Toast>{box}</Toast> : box;
 }
 
 export function EmptyState({ icon: Icon, title, children, action }: { icon: LucideIcon; title: string; children?: ReactNode; action?: ReactNode }) {

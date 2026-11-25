@@ -145,7 +145,8 @@ test("run a stocktake of a room, and a different admin decides on each differenc
   await expect(page.getByText(`${room.unknownLabel}. Register their items afterwards.`)).toBeVisible();
   await s(page, "stocktake-finish", project);
   await page.getByRole("button", { name: "Send for approval" }).click();
-  await expect(page).toHaveURL(new RegExp(`${stocktakeUrl}\\?done=sent$`));
+  // A1: a saved message shown in the page tidies "?done=" out of the address.
+  await expect(page).toHaveURL(new RegExp(`${stocktakeUrl}(\\?done=sent)?$`));
   await expect(page.getByTestId("difference")).toHaveCount(3);
   // Whoever ran it cannot decide on it.
   await expect(page.getByTestId("took-part")).toBeVisible();

@@ -2,7 +2,7 @@
 // UI-9: a saved message that floats over the page instead of pushing it
 // down: top right on a PC, just above the bottom bar on a phone. It stays 8
 // seconds (longer while the mouse or keyboard is on it), then slides away.
-// Closing it also takes "?done=" out of the address, so reloading the page
+// Closing it also takes "?done=" (and the numbers that go with it) out of the address, so reloading the page
 // does not show it again. Screen readers hear it once, politely.
 import { X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -10,15 +10,28 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 const SHOW_MS = 8000;
 const LEAVE_MS = 200;
 
-function forgetDone() {
+// A1: every part of the address that only carries a "done" message, so a
+// reload never shows an old message again (not only "?done=").
+const MESSAGE_PARAMS = ["done", "n", "count", "late", "saved", "new"];
+
+export function forgetDone() {
   try {
     const url = new URL(window.location.href);
-    if (!url.searchParams.has("done")) return;
-    url.searchParams.delete("done");
+    const found = MESSAGE_PARAMS.filter((p) => url.searchParams.has(p));
+    if (found.length === 0) return;
+    for (const p of found) url.searchParams.delete(p);
     window.history.replaceState(window.history.state, "", url);
   } catch {
     // Nothing to tidy.
   }
+}
+
+/** A1: for a saved message shown in the page (not floating): tidy the address once it is shown. */
+export function ForgetDone() {
+  useEffect(() => {
+    forgetDone();
+  }, []);
+  return null;
 }
 
 export function Toast({ children }: { children: ReactNode }) {

@@ -43,7 +43,7 @@ export function FormError({ message }: { message: string | null }) {
 }
 
 export const fieldClass =
-  "mt-1.5 block min-h-12 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 text-base transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  "mt-1.5 block min-h-12 w-full rounded-xl border border-[#87948f] bg-white px-3.5 text-base transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
 
 /**
  * The 6-digit code as six boxes (owner's concept). Underneath it is one
@@ -83,7 +83,7 @@ export function CodeInput({ label }: { label: string }) {
                 data-testid="code-box"
                 className={cx(
                   "flex h-14 items-center justify-center rounded-xl border bg-white font-mono text-2xl font-semibold text-icci-green-dark transition-colors duration-150 sm:h-16",
-                  isNext ? "border-icci-green outline-3 outline-offset-2 outline-icci-focus" : digits[i] ? "border-icci-green/50" : "border-[#c9d3cf]",
+                  isNext ? "border-icci-green outline-3 outline-offset-2 outline-icci-focus" : digits[i] ? "border-icci-green/50" : "border-[#87948f]",
                 )}
               >
                 {digits[i] ?? ""}

@@ -37,7 +37,7 @@ export function CompanyForm({ company, cancelHref }: { company?: CompanyRow; can
         <legend className="text-[15px] font-semibold">What they do for us</legend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {Object.entries(COMPANY_KINDS).map(([key, word]) => (
-            <label key={key} className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-[#c9d3cf] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50">
+            <label key={key} className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-[#87948f] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50">
               <input type="checkbox" name="kinds" value={key} defaultChecked={company?.kinds.includes(key as never)} className="accent-icci-green-dark" />
               <span className="text-sm">{word}</span>
             </label>

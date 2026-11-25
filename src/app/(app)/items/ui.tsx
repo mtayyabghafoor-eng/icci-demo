@@ -1,7 +1,6 @@
 // Small building blocks shared by the item screens.
 import Link from "next/link";
-import { buttonClass, Toast } from "@/components/ui";
-import { cx } from "@/lib/ui/text";
+import { buttonClass, ForgetDone, Notice as SharedNotice } from "@/components/ui";
 import { CONDITION_STATUS, type Condition, type Tone } from "@/lib/items/rules";
 import { STOCK_STATUS, type StockStatus } from "@/lib/stock/rules";
 
@@ -35,7 +34,7 @@ export function ItemStatus({ kind, condition, stock }: { kind: string; condition
 }
 
 export const fieldClass =
-  "mt-1.5 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
 
 export function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -53,19 +52,35 @@ export function SecondaryLink({ href, children }: { href: string; children: Reac
   );
 }
 
-export function Notice({ children, floating = false, testId }: { children: React.ReactNode; floating?: boolean; testId?: string }) {
+/**
+ * The old item-screen message box, now the shared one (slice A1): green and
+ * fading for a success, red and staying for a refusal. Pass the tone from
+ * messageTone() when the words come from a "?done=" list.
+ */
+export function Notice({
+  children,
+  floating = false,
+  testId,
+  tone = "success",
+}: {
+  children: React.ReactNode;
+  floating?: boolean;
+  testId?: string;
+  tone?: "success" | "error";
+}) {
   const box = (
-    <p
-      role="status"
-      data-testid={testId}
-      className={cx(
-        "rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3",
-        floating ? "pr-12 shadow-raised" : "mt-4",
-      )}
-    >
+    <SharedNotice tone={tone} floating={floating} testId={testId}>
       {children}
-    </p>
+    </SharedNotice>
   );
-  // UI-9: "saved" messages float over the page for a few seconds.
-  return floating ? <Toast>{box}</Toast> : box;
+  if (floating && tone === "success") return box;
+  // A message in the page (not floating, or a refusal that stays) keeps its gap
+  // above. A saved message in the page also tidies the address, so a reload
+  // does not show it again.
+  return (
+    <div className="mt-4">
+      {box}
+      {tone === "success" && <ForgetDone />}
+    </div>
+  );
 }

@@ -43,11 +43,11 @@ async function Content({ params }: { params: PageProps<"/people/[id]/vetting">["
         {p.full_name}
       </p>
       {p.app_user_id === me.id ? (
-        <p className="mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3" data-testid="own-vetting">
+        <p className="mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(--icci-none-fill)] px-4 py-3" data-testid="own-vetting">
           This is you. Nobody can record their own Garda vetting. Ask another admin.
         </p>
       ) : !p.active ? (
-        <p className="mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3" data-testid="switched-off">
+        <p className="mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(--icci-none-fill)] px-4 py-3" data-testid="switched-off">
           This person is switched off. Switch them back on to record vetting.
         </p>
       ) : (

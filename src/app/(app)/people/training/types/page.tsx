@@ -2,6 +2,7 @@
 // Super Admin and Centre Admin can add one, change its name or usual length,
 // and switch it off (never delete). A switched-off type keeps its old
 // entries but cannot be picked for new ones. Designed for a PC first.
+import { messageTone } from "@/lib/ui/messages";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -13,7 +14,7 @@ import { CannotSeePeople } from "../../cannot-see";
 import { setTrainingTypeActive } from "../../training-actions";
 import { loadTrainingTypes } from "../data";
 import { AddTypeForm, EditTypeForm } from "./type-forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, buttonClass } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Training types | ICCI Control Dashboard" };
 
@@ -53,7 +54,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/people/trai
   return (
     <>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">{DONE[done]}</Notice>
+        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
       )}
       <p id="years-hint" className="sr-only">
         A whole number of years from 1 to {MAX_YEARS}, or empty for no expiry.
@@ -101,7 +102,7 @@ function TypeCard({ t }: { t: TrainingType }) {
           <StatusBadge {...(t.active ? { word: "In use", tone: "green" as const } : { word: "Switched off", tone: "grey" as const })} />
           <form action={setTrainingTypeActive.bind(null, t.id, !t.active)}>
             {t.active ? (
-              <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+              <button type="submit" className={buttonClass("danger")}>
                 Switch off
               </button>
             ) : (

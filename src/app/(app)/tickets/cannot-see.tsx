@@ -2,7 +2,7 @@
 // The database refuses them anyway; this just says so plainly.
 export function CannotSeeTickets() {
   return (
-    <p className="mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3" data-testid="cannot-see-tickets">
+    <p className="mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(--icci-none-fill)] px-4 py-3" data-testid="cannot-see-tickets">
       Your account cannot see maintenance tickets. Only a Super Admin or Centre Admin can.
     </p>
   );

@@ -1,6 +1,7 @@
 // Email reminders (slice P2.9, PLAN.md 5.2): how they are set up, the Super
 // Admin's two buttons, and what was sent, when and to whom. Super Admin and
 // Centre Admin can see it; only a Super Admin can press the buttons.
+import { messageTone } from "@/lib/ui/messages";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BackLink, buttonClass } from "@/components/ui";
@@ -48,7 +49,7 @@ async function Content({ searchParams }: Pick<PageProps<"/reminders">, "searchPa
   const me = await requireAdmin();
   if (!MAY_SEE_REMINDERS.includes(me.roleCode)) {
     return (
-      <p className="mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3" data-testid="cannot-see-reminders">
+      <p className="mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(--icci-none-fill)] px-4 py-3" data-testid="cannot-see-reminders">
         Your account cannot see the email reminders. Only a Super Admin or Centre Admin can.
       </p>
     );
@@ -76,7 +77,7 @@ async function Content({ searchParams }: Pick<PageProps<"/reminders">, "searchPa
   return (
     <>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">
+        <Notice floating tone={messageTone(done)} testId="notice">
             {DONE[done]}
             {done === "ran" && typeof n === "string" ? ` ${n} ${n === "1" ? "renewal" : "renewals"} reminded.` : ""}
           </Notice>

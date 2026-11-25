@@ -17,7 +17,7 @@ import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Record sign-off | ICCI Control Dashboard" };
 
-const note = "mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3";
+const note = "mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(--icci-none-fill)] px-4 py-3";
 
 export default function RecordSignoffPage(props: PageProps<"/policies/[id]/sign-off">) {
   return (

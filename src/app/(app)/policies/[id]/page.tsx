@@ -3,11 +3,12 @@
 // Publish. A different admin publishes: whoever uploaded or last changed the
 // draft sees a note instead of the button (the database refuses it too).
 // Sign-offs come in slice P2.6.
+import { messageTone } from "@/lib/ui/messages";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { BackLink, buttonClass } from "@/components/ui";
+import { BackLink, buttonClass, ConfirmSubmit } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatDateTime } from "@/lib/items/rules";
 import {
@@ -139,7 +140,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
         {!p.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</Notice>
+        <Notice floating tone={messageTone(done)} testId="notice">{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</Notice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[11rem_1fr]">
@@ -168,7 +169,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
         <SecondaryLink href={`/policies/${p.id}/edit`}>Change title or owner</SecondaryLink>
         <form action={setPolicyActive.bind(null, p.id, !p.active)}>
           {p.active ? (
-            <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+            <button type="submit" className={buttonClass("danger")}>
               Switch off
             </button>
           ) : (
@@ -213,9 +214,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
                       <SecondaryLink href={`/policies/${p.id}/versions/${v.id}`}>Change this draft</SecondaryLink>
                       {!p.active ? null : mayPublish(v, me.id) ? (
                         <form action={publishVersion.bind(null, p.id, v.id)}>
-                          <button type="submit" className={buttonClass("primary")}>
-                            Publish
-                          </button>
+                          <ConfirmSubmit kind="primary" label="Publish" title={`Publish ${v.version_label}?`} confirmLabel="Yes, publish">
+                            It becomes the current version straight away and can never be changed. Everyone who must sign this
+                            policy will be asked to sign this version.
+                          </ConfirmSubmit>
                         </form>
                       ) : (
                         <p className="text-sm" data-testid="own-draft">
@@ -301,10 +303,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
                             name="reason"
                             required
                             maxLength={500}
-                            className="mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+                            className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
                           />
                         </label>
-                        <button type="submit" className={`${button} border-[#c9d3cf] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                        <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                           Withdraw
                         </button>
                       </form>

@@ -22,7 +22,7 @@ const none: TicketFormState = { error: null };
 const primary =
   "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark px-6 text-lg font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 sm:w-auto";
 const choice =
-  "flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 px-3 rounded-xl border border-[#c9d3cf] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold";
+  "flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 px-3 rounded-xl border border-[#87948f] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold";
 
 export function ReportProblemForm({
   itemId,

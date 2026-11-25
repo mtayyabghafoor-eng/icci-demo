@@ -68,7 +68,7 @@ export function CategoryForm({
             {CATEGORY_ICON_KEYS.map((key) => (
               <label
                 key={key}
-                className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border border-[#c9d3cf] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50"
+                className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border border-[#87948f] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50"
               >
                 <input type="radio" name="icon" value={key} defaultChecked={(category?.icon ?? "other") === key} className="accent-icci-green-dark" />
                 <CategoryIcon icon={key} size={20} className="text-icci-green-dark" />

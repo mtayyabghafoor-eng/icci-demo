@@ -16,7 +16,7 @@ import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Upload a new version | ICCI Control Dashboard" };
 
-const note = "mt-4 rounded-xl border border-[var(--icci-ok-text)]/30 bg-[var(--icci-ok-fill)] px-4 py-3";
+const note = "mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(--icci-none-fill)] px-4 py-3";
 
 export default function UploadVersionPage(props: PageProps<"/policies/[id]/upload">) {
   return (

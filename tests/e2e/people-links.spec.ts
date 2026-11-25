@@ -8,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const superAdmin = seedAdmin("super_admin");
@@ -74,7 +74,8 @@ test("report damage picked from the directory, linked in the history and on the 
   await expect(page.getByLabel("Their name")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Report damage" }).click();
-  await expect(page).toHaveURL(new RegExp(`/items/${item.id}\\?done=`));
+  // A1: a saved message shown in the page tidies "?done=" out of the address.
+  await expect(page).toHaveURL(new RegExp(`/items/${item.id}(\\?done=.*)?$`));
   const history = page.getByTestId("asset-events");
   await expect(history.getByRole("link", { name: "Test Centre Admin" })).toBeVisible();
   await s(page, "item-history-person-link", project);
@@ -110,6 +111,7 @@ test("a Super Admin links an admin account to a person, and removes it; never th
   await s(page, "person-linked", project);
 
   await box.getByRole("button", { name: "Remove the link" }).click();
+  await confirmSheet(page);
   await expect(page.getByTestId("notice")).toHaveText(/removed/i);
   await expect(box).toContainText("Not linked to an admin account");
 });

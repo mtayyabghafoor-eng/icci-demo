@@ -4,7 +4,7 @@
 // change is "switch off, add the new one". Super Admin and Centre Admin only.
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Card, CardTitle, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_ROTA, SLOT_GROUPS, type SlotType } from "@/lib/rota/rules";
 import { dayName, DAY_NAMES, KIND_TEXT, TEMPLATE_COLUMNS, TEMPLATE_SLOT_COLUMNS, templateSlotText, type RotaTemplate, type TemplateSlot } from "@/lib/rota/templates";
@@ -160,7 +160,7 @@ function SlotRow({ x, type, place, showDay = false }: { x: TemplateSlot; type: S
           <button
             type="submit"
             aria-label={`${x.active ? "Switch off" : "Switch back on"}: ${x.day_of_week ? `${dayName(x.day_of_week)}, ` : ""}${label}`}
-            className="inline-flex min-h-11 items-center rounded-[10px] border border-[#c9d3cf] bg-white px-3 py-2 text-[15px] font-semibold hover:border-icci-green hover:bg-icci-green-50"
+            className={buttonClass(x.active ? "danger" : "outline")}
           >
             {x.active ? "Switch off" : "Switch back on"}
           </button>

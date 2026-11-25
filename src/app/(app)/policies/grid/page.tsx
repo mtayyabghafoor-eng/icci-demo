@@ -42,7 +42,7 @@ async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid"
   const [lists, { data }] = await Promise.all([loadPeopleLists(supabase), supabase.from("policy_grid").select(SQUARE_COLUMNS)]);
   const filter = readGridFilter(params, new Set(lists.sectionName.keys()), new Set(lists.roleName.keys()));
   const squares = filterSquares((data ?? []) as Square[], filter);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const filterParams = new URLSearchParams({
     ...(filter.section && { section: filter.section }),
     ...(filter.role && { role: filter.role }),

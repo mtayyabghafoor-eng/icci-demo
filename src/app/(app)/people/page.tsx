@@ -85,7 +85,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
   };
 
   const filtered = Boolean(q || role || section || show || vetting);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const status = (p: PersonRow) => (p.active ? PERSON_STATUS.active : PERSON_STATUS.off);
   const contact = (p: PersonRow) => [p.phone, p.email].filter(Boolean).join(" · ") || "No contact recorded";
 

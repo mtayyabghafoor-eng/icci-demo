@@ -47,7 +47,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
   const shown = pageOf(await loadTrainingList(supabase, filter), readPage(params.page), PAGE_SIZE);
   const rows = shown.rows;
   const today = todayInDublin();
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#c9d3cf] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const filtered = Boolean(filter.status || filter.type || filter.section);
   const filterParams = {
     ...(filter.type && { type: filter.type }),
