@@ -276,3 +276,38 @@ describe("the lists and the Home counters", () => {
     expect(none.data ?? []).toHaveLength(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+describe("A3: a loan and its copy always agree", () => {
+  it("a loan cannot be closed as lost by itself: marking the copy lost does both", async () => {
+    const c = await op();
+    const copy = await newCopy();
+    const { data: loan, error } = await lend(c, copy, await newBorrower());
+    if (error) throw error;
+    const alone = await c.from("library_loan_entries").insert({ loan_id: loan, kind: "lost" });
+    expect(alone.error?.message).toMatch(/mark the copy lost/i);
+    expect(await statusOf(copy)).toBe("on_loan");
+    expect((await c.rpc("mark_copy", { p_copy_id: copy, p_kind: "lost" })).error).toBeNull();
+    expect(await statusOf(copy)).toBe("lost");
+  });
+
+  it("'returned by mistake' re-checks the 3-book limit and that the borrower is switched on", async () => {
+    const c = await op();
+    const borrower = await newBorrower();
+    const first = await newCopy();
+    const { data: loan } = await lend(c, first, borrower);
+    expect((await c.rpc("return_copy", { p_copy_id: first })).error).toBeNull();
+    // Meanwhile the borrower takes 3 other books: undoing the return would make 4.
+    for (let i = 0; i < 3; i++) expect((await lend(c, await newCopy(), borrower)).error).toBeNull();
+    const undo = await c.rpc("undo_return", { p_loan_id: loan });
+    expect(undo.error?.message).toMatch(/3 books out/);
+
+    // A switched-off borrower cannot have a return undone either.
+    const other = await newBorrower();
+    const second = await newCopy();
+    const { data: loan2 } = await lend(c, second, other);
+    expect((await c.rpc("return_copy", { p_copy_id: second })).error).toBeNull();
+    expect((await c.from("library_borrowers").update({ active: false }).eq("id", other).select()).error).toBeNull();
+    expect((await c.rpc("undo_return", { p_loan_id: loan2 })).error?.message).toMatch(/switched off/);
+  });
+});

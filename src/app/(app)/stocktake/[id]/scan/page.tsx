@@ -92,7 +92,8 @@ async function Content({
           )}
           {item.condition === "missing" && (
             <p className="mt-2 rounded-xl border border-[var(--icci-warn-text)]/30 bg-[var(--icci-warn-fill)] px-4 py-3">
-              This asset is marked missing. After the stocktake, open it and press <strong>Mark found</strong>.
+              This asset is marked missing. Press <strong>Seen here</strong>: when a different admin approves the
+              stocktake, it is put back in use. Do not mark it found yourself in the meantime.
             </p>
           )}
           {item.kind === "consumable" && !inRoom ? (

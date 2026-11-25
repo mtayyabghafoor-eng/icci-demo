@@ -630,6 +630,24 @@ describe("a difference that is out of date by the time it is approved", () => {
     expect((await itemNow(notSeen.id)).condition).toBe("good");
   });
 
+  it("A3: a disposal that was rejected no longer blocks the difference", async () => {
+    const { diffs, notSeen } = await submittedStocktake();
+    const d = diffs.find((x) => x.kind === "missing")!;
+    const { data: disposal, error } = await (await asRole("super_admin"))
+      .from("asset_events")
+      .insert({ item_id: notSeen.id, kind: "disposal", note: "Test: broken", reported_by: "Test volunteer", disposal_route: "thrown_away" })
+      .select("id")
+      .single();
+    if (error) throw error;
+    const approver = await secondCentreAdmin();
+    expect((await decide(approver, d, "approved")).error?.message).toMatch(/disposal.*waiting/i);
+    // The screen said "decide the disposal first": it is rejected, so the asset never changed.
+    const rejected = await approver.from("asset_events").update({ status: "rejected", decision_note: "Test: it can be repaired" }).eq("id", disposal.id).select();
+    expect(rejected.error).toBeNull();
+    expect((await decide(approver, d, "approved")).error).toBeNull();
+    expect((await itemNow(notSeen.id)).condition).toBe("missing");
+  });
+
   it("'found' is refused if the asset was already found another way", async () => {
     const { room } = await newRoom();
     const lost = await newAsset(room);
@@ -690,12 +708,25 @@ describe("stock arithmetic for approved differences", () => {
     expect(await stockNow(item.id)).toBe(9);
   });
 
-  it("never goes below zero", async () => {
-    const { item, d, c } = await oneShelf(10, 2); // eight short
+  it("A3: a shelf counted again after the stocktake was sent cannot be overwritten by the older shortfall", async () => {
+    const { item, d, c } = await oneShelf(10, 2); // eight short in the stocktake
+    // Before anyone approves, the weekly count finds 3 on the shelf.
     const m = await c.from("stock_movements").insert({ item_id: item.id, kind: "count", quantity: 3 });
     if (m.error) throw m.error;
-    await decide(await secondCentreAdmin(), d, "approved");
-    expect(await stockNow(item.id)).toBe(0);
+    const approver = await secondCentreAdmin();
+    expect((await decide(approver, d, "approved")).error?.message).toMatch(/counted again after the stocktake/i);
+    // The newer count stands (before A3 the approval set it to 0).
+    expect(await stockNow(item.id)).toBe(3);
+    expect((await decide(approver, d, "rejected", "Test: the newer count stands")).error).toBeNull();
+    expect(await stockNow(item.id)).toBe(3);
+  });
+
+  it("A3: a restock after the stocktake still lets it be approved, and stock never goes below zero", async () => {
+    const { item, d, c } = await oneShelf(10, 2); // eight short
+    const r = await c.from("stock_movements").insert({ item_id: item.id, kind: "restock", quantity: 1 });
+    if (r.error) throw r.error;
+    expect((await decide(await secondCentreAdmin(), d, "approved")).error).toBeNull();
+    expect(await stockNow(item.id)).toBe(3); // 11 on record, 8 short
   });
 
   it("a shelf never counted before takes the number found", async () => {
