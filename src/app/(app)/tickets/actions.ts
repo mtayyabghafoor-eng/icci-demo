@@ -37,13 +37,31 @@ export async function reportProblem(
     photo_path = path;
   }
 
-  const { data, error } = await supabase
-    .from("maintenance_tickets")
-    .insert({ ...parsed.values, photo_path, asset_event_id: itemId && Number.isSafeInteger(damageId) ? damageId : null })
-    .select("id")
-    .single();
-  if (error || !data) return { error: friendlyTicketError(error?.message) };
-  redirect(`/tickets/${data.id}?done=reported`);
+  // P3.6: opened from an earlier damage report: the ticket links to it.
+  if (itemId && Number.isSafeInteger(damageId)) {
+    const { data, error } = await supabase
+      .from("maintenance_tickets")
+      .insert({ ...parsed.values, photo_path, asset_event_id: damageId })
+      .select("id")
+      .single();
+    if (error || !data) return { error: friendlyTicketError(error?.message) };
+    redirect(`/tickets/${data.id}?done=reported`);
+  }
+
+  // A4: one step for the ticket and, if ticked, the damage entry (all or nothing).
+  const v = parsed.values;
+  const { data: ticketId, error } = await supabase.rpc("report_problem", {
+    p_item_id: v.item_id ?? null,
+    p_location_id: v.location_id ?? null,
+    p_description: v.description,
+    p_priority: v.priority,
+    p_reported_by: v.reported_by ?? null,
+    p_reported_by_person_id: v.reported_by_person_id ?? null,
+    p_photo_path: photo_path,
+    p_mark_damaged: Boolean(itemId) && get("damaged") === "yes",
+  });
+  if (error || typeof ticketId !== "number") return { error: friendlyTicketError(error?.message) };
+  redirect(`/tickets/${ticketId}?done=${get("damaged") === "yes" && itemId ? "reported-damaged" : "reported"}`);
 }
 
 /**

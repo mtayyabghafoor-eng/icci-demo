@@ -19,13 +19,13 @@ const good = { note: "Leg came loose", reported_by: "Test volunteer" };
 
 describe("which actions an asset offers", () => {
   it("a good or fair asset can be moved, reported damaged or missing, or disposed of", () => {
-    expect(actionsFor("good", false)).toEqual(["move", "damage", "missing", "dispose"]);
-    expect(actionsFor("fair", false)).toEqual(["move", "damage", "missing", "dispose"]);
+    expect(actionsFor("good", false)).toEqual(["move", "missing", "dispose"]);
+    expect(actionsFor("fair", false)).toEqual(["move", "missing", "dispose"]);
   });
 
   it("a damaged asset can be repaired; a missing one found (and a missing one is not moved)", () => {
     expect(actionsFor("damaged", false)).toEqual(["move", "repaired", "missing", "dispose"]);
-    expect(actionsFor("missing", false)).toEqual(["found", "damage", "dispose"]);
+    expect(actionsFor("missing", false)).toEqual(["found", "dispose"]);
   });
 
   it("nothing while a disposal waits for approval, and nothing once disposed", () => {
@@ -152,5 +152,17 @@ describe("item history after an asset event", () => {
     );
     expect(moved).toMatchObject({ title: "Moved", changes: ["Location: Room A1 → Room B1"] });
     expect(cond).toMatchObject({ title: "Condition changed", changes: ["Condition: Good → Damaged"] });
+  });
+});
+
+describe("A4: the damage form without a button of its own", () => {
+  it("opens exactly when a damage report was allowed before", async () => {
+    const { mayReportDamage } = await import("@/lib/assets/rules");
+    expect(mayReportDamage("good", false)).toBe(true);
+    expect(mayReportDamage("fair", false)).toBe(true);
+    expect(mayReportDamage("missing", false)).toBe(true);
+    expect(mayReportDamage("damaged", false)).toBe(false);
+    expect(mayReportDamage("disposed", false)).toBe(false);
+    expect(mayReportDamage("good", true)).toBe(false);
   });
 });

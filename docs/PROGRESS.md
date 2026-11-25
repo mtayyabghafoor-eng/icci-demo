@@ -419,6 +419,16 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 25 Nov 2026, session 45 (slice A4, one "Report a problem"; owner said go,
+  demo included): migration 0048 report_problem() (tests first) records the
+  ticket and, if "It is broken or damaged" is ticked, the damage entry in
+  one step, linked. Item page: green "Report a problem" first, no "Report
+  damage" button (the damage form still opens from older links,
+  mayReportDamage). Report a problem from the menu finds the item by name or
+  label. Ticket summary shows "Passed to" and the job number; closing a
+  ticket on a damaged item starts with "mark repaired" ticked. Full suite
+  green (1795 + 321, build). 0048 to ICCI Staging, then pushed. Next: A5.
+
 - 25 Nov 2026, session 45 (slices A6 and A3; owner chose every recommended
   answer and approved A3 for local, staging and main). A6: ICCI not-found
   and "Try again" pages (app/ and (app)/), must() makes six lists and the

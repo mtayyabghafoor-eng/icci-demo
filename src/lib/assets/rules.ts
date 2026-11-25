@@ -30,12 +30,25 @@ export function isAssetAction(value: string): value is AssetAction {
   return Object.hasOwn(ASSET_ACTIONS, value);
 }
 
-/** Which buttons an asset shows, in order. */
+/**
+ * Which buttons an asset shows, in order. A4 (owner's choice): no separate
+ * "Report damage" button; "Report a problem" (shown first by the item page)
+ * has a tick that also marks the item damaged.
+ */
 export function actionsFor(condition: Condition | null, disposalPending: boolean): AssetAction[] {
   if (disposalPending || condition === "disposed" || condition == null) return [];
-  if (condition === "missing") return ["found", "damage", "dispose"];
+  if (condition === "missing") return ["found", "dispose"];
   if (condition === "damaged") return ["move", "repaired", "missing", "dispose"];
-  return ["move", "damage", "missing", "dispose"];
+  return ["move", "missing", "dispose"];
+}
+
+/**
+ * A4: the damage form has no button of its own any more, but it still
+ * opens from an older link (and "Open a ticket for this" follows it). It is
+ * allowed exactly when it was before: not damaged, disposed or awaiting disposal.
+ */
+export function mayReportDamage(condition: Condition | null, disposalPending: boolean): boolean {
+  return !disposalPending && (condition === "good" || condition === "fair" || condition === "missing");
 }
 
 type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };

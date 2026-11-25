@@ -533,3 +533,69 @@ describe("open tickets on the home page (P3.6)", () => {
     expect(now.tickets_urgent).toBe(before.tickets_urgent);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Slice A4: one "Report a problem". With "It is broken or damaged" ticked,
+// the damage entry and the ticket are made together, linked, or not at all.
+function reportProblem(client: SupabaseClient, args: Record<string, unknown>) {
+  return client.rpc("report_problem", {
+    p_item_id: null,
+    p_location_id: null,
+    p_description: `${testName("a4 ticket")}: it will not start`,
+    p_priority: "normal",
+    p_reported_by: "Test volunteer",
+    p_reported_by_person_id: null,
+    p_photo_path: null,
+    p_mark_damaged: false,
+    ...args,
+  });
+}
+
+describe("A4: one Report a problem", () => {
+  it("with 'broken or damaged' ticked, the asset is marked damaged and the ticket links to that entry", async () => {
+    const asset = await newFixedAsset();
+    const c = await asRole("centre_admin");
+    const { data: ticketId, error } = await reportProblem(c, { p_item_id: asset.id, p_mark_damaged: true });
+    expect(error).toBeNull();
+    expect(await conditionOf(asset.id)).toBe("damaged");
+    const { data: t } = await masterKeyClient().from("maintenance_tickets").select("item_id, asset_event_id, description").eq("id", ticketId).single();
+    expect(t!.item_id).toBe(asset.id);
+    const { data: ev } = await masterKeyClient().from("asset_events").select("kind, item_id, note, reported_by").eq("id", t!.asset_event_id).single();
+    expect(ev).toEqual({ kind: "damage", item_id: asset.id, note: t!.description, reported_by: "Test volunteer" });
+  });
+
+  it("without the tick, only the ticket is made and the asset stays as it was", async () => {
+    const asset = await newFixedAsset();
+    const { data: ticketId, error } = await reportProblem(await asRole("centre_admin"), { p_item_id: asset.id });
+    expect(error).toBeNull();
+    expect(await conditionOf(asset.id)).toBe("good");
+    const { data: t } = await masterKeyClient().from("maintenance_tickets").select("asset_event_id").eq("id", ticketId).single();
+    expect(t!.asset_event_id).toBeNull();
+  });
+
+  it("a place-only report works as before; the tick needs an asset", async () => {
+    const c = await asRole("centre_admin");
+    expect((await reportProblem(c, { p_location_id: await place() })).error).toBeNull();
+    expect((await reportProblem(c, { p_location_id: await place(), p_mark_damaged: true })).error?.message).toMatch(/only an asset/i);
+  });
+
+  it("all or nothing: if the ticket is refused, no damage entry is left behind", async () => {
+    const asset = await newFixedAsset();
+    const c = await asRole("centre_admin");
+    // An empty description is refused by the ticket's own rules.
+    const { error } = await reportProblem(c, { p_item_id: asset.id, p_mark_damaged: true, p_description: "" });
+    expect(error).not.toBeNull();
+    expect(await conditionOf(asset.id)).toBe("good");
+    const { data: evs } = await masterKeyClient().from("asset_events").select("id").eq("item_id", asset.id);
+    expect(evs ?? []).toHaveLength(0);
+  });
+
+  for (const who of noAccess) {
+    it(`${who.label} cannot report a problem this way`, async () => {
+      const asset = await newFixedAsset();
+      const { error } = await reportProblem(await who.client(), { p_item_id: asset.id, p_mark_damaged: true });
+      expect(error).not.toBeNull();
+      expect(await conditionOf(asset.id)).toBe("good");
+    });
+  }
+});

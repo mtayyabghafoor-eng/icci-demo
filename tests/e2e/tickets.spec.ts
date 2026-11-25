@@ -156,3 +156,38 @@ test("finance sees a note instead of tickets, and gets no CSV", async ({ page },
   expect((await page.request.get("/tickets/csv")).status()).toBe(403);
   await s(page, "tickets-finance", info.project.name);
 });
+
+// Slice A4: one "Report a problem". From the menu the item is found by name;
+// "It is broken or damaged" marks it damaged in the same step; closing the
+// ticket starts with "Also mark the asset repaired" ticked.
+test("A4: find the item from the menu, report it broken, close it repaired", async ({ page }, info) => {
+  const project = info.project.name;
+  const asset = await newTestAsset(project);
+
+  await signInAs(page, centre, "/tickets/new");
+  await page.getByRole("searchbox", { name: "The item's name or label number" }).fill(asset.name);
+  await page.getByRole("button", { name: "Find" }).click();
+  const found = page.getByTestId("found-items");
+  await expect(found.getByRole("link")).toHaveCount(1);
+  await s(page, "a4-find-item", project);
+  await found.getByRole("link").click();
+  await expect(page).toHaveURL(new RegExp(`/tickets/new\\?item=${asset.id}$`));
+
+  await page.getByRole("textbox", { name: "What is wrong?" }).fill("Test: it will not start (made-up)");
+  await page.getByTestId("mark-damaged").check();
+  await shot(page, "a4-report-broken", project, "a4");
+  await page.getByRole("button", { name: "Report the problem" }).click();
+  await expect(page.getByRole("status").filter({ hasText: /marked damaged until it is repaired/ })).toBeVisible();
+  await expect(field(page, "Opened from")).toContainText("a damage report");
+
+  // The item is now damaged, with the same words in its history.
+  await field(page, "Asset").getByRole("link").click();
+  await expect(page.getByTestId("status").first()).toHaveText("Damaged");
+  await expect(page.getByTestId("asset-events")).toContainText("it will not start");
+
+  // Closing: the repaired tick starts on.
+  await page.getByTestId("item-tickets").getByRole("link").first().click();
+  await page.getByRole("link", { name: "Close ticket" }).first().click();
+  await expect(page.getByRole("checkbox", { name: "Also mark the asset repaired" })).toBeChecked();
+  await shot(page, "a4-close-repaired", project, "a4");
+});

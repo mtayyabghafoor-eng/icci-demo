@@ -174,6 +174,8 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
           )}
           {assetActions.length > 0 && (
             <div className="mt-4 grid gap-2 sm:flex sm:flex-wrap" data-testid="asset-actions">
+              {/* A4: one way to report: a fault, or (ticked) broken or damaged. */}
+              <PrimaryLink href={`/tickets/new?item=${item.id}`}>Report a problem</PrimaryLink>
               {assetActions.map((a) =>
                 a === "dispose" ? (
                   <SecondaryLink key={a} href={`/items/${item.id}/asset/${a}`}>
@@ -203,7 +205,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
-            {!consumable && item.condition !== "disposed" && (
+            {!consumable && item.condition !== "disposed" && assetActions.length === 0 && (
               <SecondaryLink href={`/tickets/new?item=${item.id}`}>Report a problem</SecondaryLink>
             )}
             <SecondaryLink href={`/items/${item.id}/edit`}>Edit details</SecondaryLink>

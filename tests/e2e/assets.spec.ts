@@ -73,7 +73,8 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await signInAs(page, centre, `/items/${item.id}`);
   await expect(page.getByRole("heading", { level: 1, name: item.name })).toBeVisible();
   const actions = page.getByTestId("asset-actions");
-  await expect(actions.getByRole("link")).toHaveText(["Move", "Report damage", "Mark missing", "Dispose"]);
+  // A4: one "Report a problem" (with a "broken or damaged" tick) instead of "Report damage".
+  await expect(actions.getByRole("link")).toHaveText(["Report a problem", "Move", "Mark missing", "Dispose"]);
 
   // Move, with a photo.
   await actions.getByRole("link", { name: "Move" }).click();
@@ -94,15 +95,15 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await expect(events).toContainText("Reported by Test caretaker (fictional)");
   await expect(events.getByAltText("Photo with this entry")).toBeVisible();
 
-  // Report damage.
-  await actions.getByRole("link", { name: "Report damage" }).click();
+  // Report damage (A4: the damage form is still there for the older "Open a ticket for this" path).
+  await page.goto(`/items/${item.id}/asset/damage`);
   await expect(page.getByRole("heading", { level: 1, name: "Report damage" })).toBeVisible();
   await fillReport(page, "Test report: the made-up shelf is cracked");
   await s(page, "report-damage", project);
   await page.getByRole("button", { name: "Report damage" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Damage reported." })).toBeVisible();
   await expect(page.getByTestId("status").first()).toHaveText("Damaged");
-  await expect(actions.getByRole("link")).toHaveText(["Move", "Mark repaired", "Mark missing", "Dispose"]);
+  await expect(actions.getByRole("link")).toHaveText(["Report a problem", "Move", "Mark repaired", "Mark missing", "Dispose"]);
 
   // Mark repaired, as Fair.
   await actions.getByRole("link", { name: "Mark repaired" }).click();
@@ -121,7 +122,7 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await page.getByRole("button", { name: "Mark missing" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Marked missing." })).toBeVisible();
   await expect(page.getByTestId("status").first()).toHaveText("Missing");
-  await expect(actions.getByRole("link")).toHaveText(["Mark found", "Report damage", "Dispose"]);
+  await expect(actions.getByRole("link")).toHaveText(["Report a problem", "Mark found", "Dispose"]);
 
   // It is on the missing and damaged list, opened from the menu.
   await clickMenuLink(page, "Missing and damaged");

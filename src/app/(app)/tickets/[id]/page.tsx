@@ -84,6 +84,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
     (urls ?? []).forEach((u, i) => u.signedUrl && signed.set(paths[i], u.signedUrl));
   }
   const reportPhoto = t.photo_path ? signed.get(t.photo_path) : undefined;
+  const lastReferral = [...events].reverse().find((e) => e.kind === "referred") ?? null;
 
   const reporter = t.reported_by_person_id ? (
     <Link href={`/people/${t.reported_by_person_id}`} dir="auto">
@@ -107,6 +108,19 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
     ],
     ...(t.asset_event_id && item
       ? ([["Opened from", <Link key="from" href={`/items/${item.id}`}>a damage report on this asset</Link>]] as [string, React.ReactNode][])
+      : []),
+    // A4: the latest company it was passed to, with their job number, at a glance.
+    ...(lastReferral && lastReferral.company_id
+      ? ([
+          [
+            "Passed to",
+            <span key="passed" data-testid="passed-to">
+              <Link href={`/companies/${lastReferral.company_id}`}>{companyName.get(lastReferral.company_id) ?? "A company"}</Link>
+              {lastReferral.company_job_ref ? `, their job number ${lastReferral.company_job_ref}` : ""}
+              {` (${formatDateTime(lastReferral.created_at)})`}
+            </span>,
+          ],
+        ] as [string, React.ReactNode][])
       : []),
     ["Priority", PRIORITY_LABEL[t.priority].word],
     ["Reported by", reporter],
@@ -139,6 +153,9 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
         {t.priority === "urgent" && <StatusBadge {...PRIORITY_LABEL.urgent} />}
       </div>
       {done === "reported" && <Notice floating>Problem reported as ticket {ticketNumber(t.id)}.</Notice>}
+      {done === "reported-damaged" && (
+        <Notice floating>Problem reported as ticket {ticketNumber(t.id)}, and the item is marked damaged until it is repaired.</Notice>
+      )}
       {typeof done === "string" && isTicketStep(done) && <Notice floating>{STEP_DONE[done]}</Notice>}
 
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_280px]">

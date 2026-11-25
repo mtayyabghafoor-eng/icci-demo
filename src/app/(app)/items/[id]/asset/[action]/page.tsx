@@ -4,7 +4,7 @@ import { titleCase } from "@/lib/ui/text";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { actionsFor, ASSET_ACTIONS, isAssetAction } from "@/lib/assets/rules";
+import { actionsFor, ASSET_ACTIONS, isAssetAction, mayReportDamage } from "@/lib/assets/rules";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { locationOptions } from "@/lib/items/rules";
 import { allRows } from "@/lib/supabase/all-rows";
@@ -47,7 +47,8 @@ async function Content({ params }: { params: PageProps<"/items/[id]/asset/[actio
   const item = data as Pick<ItemRow, "id" | "name" | "kind" | "label_serial" | "location_id" | "condition"> | null;
   if (!item || item.kind !== "fixed_asset") notFound();
 
-  const allowed = actionsFor(item.condition, Boolean(pending.data?.length)).includes(action);
+  const waiting = Boolean(pending.data?.length);
+  const allowed = actionsFor(item.condition, waiting).includes(action) || (action === "damage" && mayReportDamage(item.condition, waiting));
   const places = locationOptions(lookups.locations).filter((p) => p.id !== item.location_id);
 
   return (

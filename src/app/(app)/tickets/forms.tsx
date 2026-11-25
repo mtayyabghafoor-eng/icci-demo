@@ -27,10 +27,13 @@ const choice =
 export function ReportProblemForm({
   itemId,
   damageId = null,
+  canMarkDamaged = false,
   places,
   people,
   myPersonId,
 }: {
+  /** A4: offer "It is broken or damaged" (an asset in good or fair condition). */
+  canMarkDamaged?: boolean;
   /** Set when reporting from an asset's page: the place is then the asset's own. */
   itemId: string | null;
   /** P3.6: the damage report this ticket comes from, if any. */
@@ -65,6 +68,16 @@ export function ReportProblemForm({
           dir="auto"
         />
       </label>
+      {canMarkDamaged && (
+        // A4 (owner's choice): one report. The tick also marks the item damaged, with the same words.
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#87948f] bg-white px-4 py-3 has-[:checked]:border-icci-error/60 has-[:checked]:bg-[var(--icci-bad-fill)]">
+          <input type="checkbox" name="damaged" value="yes" className="mt-1 h-5 w-5 shrink-0" data-testid="mark-damaged" />
+          <span>
+            <span className="block font-semibold">It is broken or damaged</span>
+            <span className="block text-sm text-icci-ink-60">Also marks the item damaged until it is repaired. Leave it off for a small fault.</span>
+          </span>
+        </label>
+      )}
       {!itemId && (
         <label className="block">
           <span className="font-semibold">Where?</span>
@@ -324,7 +337,8 @@ function StatusButton({ ticketId, status }: { ticketId: number; status: Exclude<
 
 /** "Close a ticket": closing note, optional cost, and "Mark repaired" when the asset is damaged. */
 export function CloseTicketForm({ ticketId, canMarkRepaired }: { ticketId: number; canMarkRepaired: boolean }) {
-  const [repair, setRepair] = useState(false);
+  // A4: a ticket on a damaged item is usually closed because it was repaired, so the tick starts on.
+  const [repair, setRepair] = useState(canMarkRepaired);
   return (
     <div className="mt-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card">
       <StepForm ticketId={ticketId} step="close" button="Close ticket" testId="form-close">
