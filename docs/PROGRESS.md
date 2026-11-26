@@ -56,8 +56,8 @@ are on ICCI Staging, main is pushed and the demo has 60 made-up claims
 (26 Nov 2026). Round C (docs/IMPROVEMENT-PLAN.md section 4): C4, C3, C2
 and C1 are done (26 Nov 2026, migrations 0055 to 0057), and so is C5, the accounts and
 audit log screens (owner chose option A; migration 0058). 0055 to 0058 are
-local only, not yet on ICCI Staging or pushed; ICCI Staging also needs
-SUPABASE_SECRET_KEY in Vercel's settings for the accounts screen. The two
+on ICCI Staging and main is pushed (26 Nov 2026). The online accounts
+screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
@@ -495,8 +495,9 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   C5: accounts screen (add with a 24-hour temporary password shown once;
   new temporary password; two-factor reset; switch off; link to a person),
   "choose your password" as the last first-sign-in step, read-only audit
-  log screen, Administration menu for Super Admins (0058). Next: 0055 to
-  0058 to ICCI Staging (plus SUPABASE_SECRET_KEY in Vercel), then main.
+  log screen, Administration menu for Super Admins (0058). Owner: "Yes,
+  Staging then push": 0055 to 0058 on ICCI Staging, main pushed. Next:
+  owner adds SUPABASE_SECRET_KEY in Vercel; then docs/AFTERCARE.md 12.
 
 - 26 Nov 2026, session 47 end (owner: "Yes, Staging then push", then
   "refill the demo with made-up expense claims"). 0050 to 0054 applied to
