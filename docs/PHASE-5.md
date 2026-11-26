@@ -320,7 +320,8 @@ Making it again keeps both copies, like rota publications.
 6. **P5.6 Board report**: draft, final copy, warnings, print page.
 7. **P5.7 Security review** of Phase 5 in a fresh session (Prompt 6).
    **Done 26 Nov 2026**: docs/security-review-2026-11-26.md (five
-   findings, none fixed yet).
+   findings). Findings 1 and 2 fixed the same day (migration 0052): a
+   new amount needs a second Super Admin; a used name is locked.
 
 ## 11. Phase 5 acceptance checks (proposed)
 

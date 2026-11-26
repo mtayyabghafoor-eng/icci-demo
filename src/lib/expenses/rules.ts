@@ -9,7 +9,7 @@ import { parseEuro } from "@/lib/items/rules";
 export const MAY_HANDLE_EXPENSES = ["super_admin", "centre_admin", "finance"];
 /** Add, rename and switch off spend categories and funds. */
 export const MAY_KEEP_EXPENSE_LISTS = ["super_admin", "finance"];
-/** Change the two amounts. */
+/** Ask for, confirm or turn down a new amount (a different Super Admin confirms; migration 0052). */
 export const MAY_CHANGE_EXPENSE_AMOUNTS = ["super_admin"];
 
 export type ExpenseCategory = { id: string; name: string; active: boolean };
@@ -64,11 +64,21 @@ export function isSettingKey(key: string): key is SettingKey {
   return (SETTING_KEYS as string[]).includes(key);
 }
 
+/** A request for a new amount, waiting for a second Super Admin (migration 0052). */
+export type SettingChange = { id: number; key: SettingKey; amount_cents: number; created_by: string | null; created_at: string };
+export type SettingDecision = "confirmed" | "turned_down" | "cancelled";
+
+export function isSettingDecision(s: string): s is SettingDecision {
+  return s === "confirmed" || s === "turned_down" || s === "cancelled";
+}
+
 /** The database's refusals, in the words the screens use. */
 export function friendlyExpenseError(message: string | undefined): string {
   const m = message ?? "";
   if (/already exists|duplicate key/i.test(m)) return m.includes("already exists") ? m : "That name is already on the list.";
   if (/restricted cannot be changed/i.test(m)) return m;
+  // Migration 0052: a used name is locked; amounts need a second Super Admin.
+  if (/already used on claims|second Super Admin|different Super Admin|only the person who asked|already decided|amount is already/i.test(m)) return m;
   if (/row-level security|permission denied/i.test(m)) return "Your account is not allowed to do this.";
   if (/amount_cents/i.test(m)) return "The amount must be between €0 and €1,000,000.";
   return "That could not be saved. Please try again.";

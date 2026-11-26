@@ -81,6 +81,9 @@ async function signInAs(page: Page, who: { email: string }, path: string) {
 }
 
 test("run a stocktake of a room, and a different admin decides on each difference", async ({ page }, info) => {
+  // Long: two sign-ins and three decisions. It takes about 1.4 minutes on the
+  // owner's PC, close to the usual 1.5-minute limit, so allow three times that.
+  test.slow();
   const project = info.project.name;
   const room = await newTestRoom(project);
 

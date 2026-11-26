@@ -33,8 +33,8 @@ admin. Two are worth fixing before real money is used.
 
 | # | Severity | In one line |
 | --- | --- | --- |
-| 1 | Medium | One Super Admin can switch off the second approval, approve alone, and switch it back |
-| 2 | Medium | Renaming a fund or category quietly changes past months' files |
+| 1 | Medium | One Super Admin can switch off the second approval, approve alone, and switch it back (**fixed**, 0052) |
+| 2 | Medium | Renaming a fund or category quietly changes past months' files (**fixed**, 0052) |
 | 3 | Low to medium | An admin can be paid back through a second People record they made themselves |
 | 4 | Low | Lowering a claim after it was repaid hides the overpayment |
 | 5 | Low | Files can be put in the receipt store without any claim |
@@ -44,6 +44,10 @@ Plus two notes that need no fix now (section "Notes").
 ---
 
 ## 1. One Super Admin can switch off the second approval (Medium)
+
+**Fixed 26 Nov 2026** (migration 0052): a Super Admin now *asks* for a new
+amount; it takes effect only when a different Super Admin confirms it. Nobody
+signed in can change an amount directly.
 
 **What happens.** The "second approver above €500" amount is a setting that
 any one Super Admin can change. They can raise it to €1,000,000, approve a
@@ -61,6 +65,9 @@ entry" rule, in the database). Simpler alternative: changes take effect
 from the next day, and the Board report lists any change made in its month.
 
 ## 2. Renaming a fund or category changes past months (Medium)
+
+**Fixed 26 Nov 2026** (migration 0052): a fund or category used on any claim
+keeps its name; the screen marks it "In use" and offers no Rename.
 
 **What happens.** Finance or a Super Admin can rename a fund or a spend
 category at any time. The monthly CSV and the Board report draft use
@@ -147,6 +154,6 @@ a monthly check that lists files not on any claim.
 
 ## Suggested order
 
-Fix 1 and 2 first (one small migration, with tests written first), then 3
-and 4 together, then 5. Each fix follows the usual rules: a numbered
+Fix 1 and 2 first (one small migration, with tests written first): **done
+26 Nov 2026, migration 0052**. Then 3 and 4 together, then 5. Each fix follows the usual rules: a numbered
 migration, tests for every role and a signed-out visitor, full test suite.

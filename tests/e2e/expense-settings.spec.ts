@@ -1,7 +1,8 @@
 // Slice P5.1 in a real browser, on a PC-sized and a phone-sized window:
 // Finance's Home (the "not linked yet" note and the two tiles), Expense
 // settings (add, rename and switch off a category; add a restricted fund;
-// the amounts read only), a Super Admin changing an amount, a Centre Admin
+// the amounts read only; a used name locked), a Super Admin asking for a new
+// amount and a second Super Admin confirming it (migration 0052), a Centre Admin
 // reading the page without changing it, and the Library Operator kept out.
 // Every screen is saved to docs/screens/.
 import { expect, test, type Page } from "@playwright/test";
@@ -11,6 +12,7 @@ import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { completeSignIn, expectSignInPage, shot, signInWithEmailCode } from "./helpers";
 
 const superAdmin = seedAdmin("super_admin");
+const superTwo = { email: "super.two@icci-prototype.test" };
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
 const library = seedAdmin("library_operator");
@@ -44,7 +46,7 @@ test("Finance adds, renames and switches off a category, adds a restricted fund,
   await signInAs(page, finance, "/expenses/settings");
   await expect(page.getByTestId("setting-second_approval_cents")).toContainText("€500.00");
   await expect(page.getByTestId("setting-lost_receipt_second_cents")).toContainText("€50.00");
-  await expect(page.getByText("Only a Super Admin can change these amounts.")).toBeVisible();
+  await expect(page.getByText("Only a Super Admin can ask for a new amount, and a second Super Admin must confirm it.")).toBeVisible();
   await expect(page.getByText("Change this amount")).toHaveCount(0);
   await expect(page.getByTestId("category-list")).toContainText("Repairs and maintenance");
   await expect(page.getByTestId("fund-list").getByTestId("fund-entry").filter({ hasText: "Zakat" })).toContainText("Restricted");
@@ -62,7 +64,14 @@ test("Finance adds, renames and switches off a category, adds a restricted fund,
   await page.getByRole("button", { name: "Add category" }).click();
   await expect(page.getByTestId("form-error").filter({ visible: true })).toContainText("already exists");
 
-  // Rename it, then switch it off.
+  // Security review finding 2: "Utilities" is on seeded claims, so its name is locked.
+  const utilities = page.getByTestId("category-entry").filter({ hasText: /^Utilities/ });
+  await expect(utilities.getByTestId("name-locked")).toContainText("In use");
+  await expect(utilities.getByText("Rename")).toHaveCount(0);
+  await utilities.scrollIntoViewIfNeeded();
+  await shot(page, "name-locked", project, "p5-7");
+
+  // Rename it (not used yet), then switch it off.
   await entry.getByText("Rename").click();
   await entry.getByRole("textbox", { name: "Name" }).fill(`${stamp} office supplies`);
   await entry.getByRole("button", { name: "Save" }).click();
@@ -83,21 +92,43 @@ test("Finance adds, renames and switches off a category, adds a restricted fund,
   await s(page, "settings-finance-added", project);
 });
 
-test("a Super Admin changes the lost-receipt amount (and puts it back)", async ({ page }, info) => {
+// Security review 26 Nov 2026, finding 1 (migration 0052): one Super Admin
+// asks for a new amount, a different Super Admin confirms it.
+test("a Super Admin asks for a new lost-receipt amount; a second Super Admin confirms it", async ({ page, browser }, info) => {
   const before = await master().from("app_settings").select("amount_cents").eq("key", "lost_receipt_second_cents").single();
   await signInAs(page, superAdmin, "/expenses/settings");
   await expect(page.getByTestId("expense-link")).toContainText("You cannot approve expense claims yet");
   const row = page.getByTestId("setting-lost_receipt_second_cents");
   await row.getByText("Change this amount").click();
-  await row.getByRole("textbox", { name: "Amount in euro" }).fill("nonsense");
-  await row.getByRole("button", { name: "Save amount" }).click();
+  await row.getByRole("textbox", { name: "New amount in euro" }).fill("nonsense");
+  await row.getByRole("button", { name: "Ask for this change" }).click();
   await expect(row.getByTestId("form-error")).toContainText("for example 500");
-  await row.getByRole("textbox", { name: "Amount in euro" }).fill("60");
-  await row.getByRole("button", { name: "Save amount" }).click();
-  await expect(saved(page)).toHaveText("Amount saved.");
-  await expect(page.getByTestId("setting-lost_receipt_second_cents")).toContainText("€60.00");
+  await row.getByRole("textbox", { name: "New amount in euro" }).fill("60");
+  await row.getByRole("button", { name: "Ask for this change" }).click();
+  await expect(saved(page)).toContainText("second Super Admin confirms it");
+  const waiting = page.getByTestId("setting-lost_receipt_second_cents").getByTestId("setting-waiting");
+  await expect(waiting).toContainText("New amount €60.00, asked for by you");
+  await expect(waiting.getByRole("button", { name: "Confirm the new amount" })).toHaveCount(0);
+  await expect(page.getByTestId("setting-lost_receipt_second_cents").getByTestId("setting-amount")).toHaveText(
+    `€${(before.data!.amount_cents / 100).toFixed(2)}`,
+  );
   await s(page, "settings-super-admin", info.project.name);
-  // Put it back for the other tests (an ordinary change, in the audit log).
+  await shot(page, "amount-asked", info.project.name, "p5-7");
+
+  // The second Super Admin, in a separate window.
+  const other = await (await browser.newContext({ viewport: page.viewportSize() })).newPage();
+  await signInAs(other, superTwo, "/expenses/settings");
+  const theirs = other.getByTestId("setting-lost_receipt_second_cents").getByTestId("setting-waiting");
+  await expect(theirs).toContainText(`asked for by ${superAdmin.displayName}`);
+  await shot(other, "amount-to-confirm", info.project.name, "p5-7");
+  await theirs.getByRole("button", { name: "Confirm the new amount" }).click();
+  await expect(saved(other)).toContainText("New amount confirmed");
+  await expect(other.getByTestId("setting-lost_receipt_second_cents").getByTestId("setting-amount")).toHaveText("€60.00");
+  await expect(other.getByTestId("setting-waiting")).toHaveCount(0);
+  await shot(other, "amount-confirmed", info.project.name, "p5-7");
+  await other.context().close();
+
+  // Put it back for the other tests (the master key, as the seed does).
   const { error } = await master().from("app_settings").update({ amount_cents: before.data!.amount_cents }).eq("key", "lost_receipt_second_cents");
   expect(error).toBeNull();
 });

@@ -6,8 +6,10 @@
 //     rename or switch them off. Never deleted. A fund's "restricted" tick is
 //     fixed once it is added.
 //   * The two amounts (second approval above €500, lost receipt above €50):
-//     the same three roles read them; only a Super Admin changes them; no new
-//     settings can be invented, and every change is in the audit log.
+//     the same three roles read them; a Super Admin asks for a change and a
+//     different Super Admin confirms it (migration 0052); no new settings can
+//     be invented, and every change is in the audit log.
+//   * A category or fund name is locked once used on a claim (0052).
 //   * "Is my account linked to my People record?" (needed to approve, 2A).
 //   * Finance gets the asset register through two narrow look-ups, and still
 //     cannot read the items or places tables themselves.
@@ -15,7 +17,7 @@
 // password-only sign-in get nothing.
 import { describe, expect, it } from "vitest";
 import { seedAdmin } from "../../scripts/seed-data.mts";
-import { asRole, masterKeyClient, passwordOnlyClient, signedInClient, signedOutClient, testName } from "./clients";
+import { asRole, masterKeyClient, passwordOnlyClient, signedInClient, signedOutClient, testName, userIdOf } from "./clients";
 import { newFixedAsset } from "./items-helpers";
 
 const LISTS = ["expense_categories", "expense_funds", "app_settings"] as const;
@@ -138,6 +140,42 @@ describe("spend categories and funds", () => {
     expect(error?.message).toMatch(/restricted.*cannot be changed/i);
   });
 
+  // Security review 26 Nov 2026, finding 2 (migration 0052): a name used on
+  // a claim never changes, so earlier months' files stay as they were.
+  it("once a category or fund is used on a claim, its name is locked; switching it off still works", async () => {
+    const cat = await newCategory();
+    const fund = await newFund();
+    const m = masterKeyClient();
+    const { error: claimError } = await m.rpc("enter_expense_claim", {
+      p_amount_cents: 1234,
+      p_receipt_date: new Date().toISOString().slice(0, 10),
+      p_category_id: cat.id,
+      p_description: "Test note: made-up claim for the name lock",
+      p_payment: "centre_direct",
+      p_suggested_fund_id: fund.id,
+      p_receipt_lost_reason: "Test note: made-up lost receipt",
+    });
+    expect(claimError).toBeNull();
+    for (const role of LIST_KEEPERS) {
+      const c = await asRole(role);
+      expect((await c.from("expense_categories").update({ name: testName("new name") }).eq("id", cat.id)).error?.message, role).toMatch(/already used.*switch it off/i);
+      expect((await c.from("expense_funds").update({ name: testName("new name") }).eq("id", fund.id)).error?.message, role).toMatch(/already used.*switch it off/i);
+    }
+    expect((await m.from("expense_funds").update({ name: testName("master") }).eq("id", fund.id)).error?.message).toMatch(/already used/i);
+    const f = await asRole("finance");
+    expect((await f.from("expense_categories").update({ active: false }).eq("id", cat.id)).error).toBeNull();
+    expect((await f.from("expense_funds").update({ active: false }).eq("id", fund.id)).error).toBeNull();
+  });
+
+  it("the starting Zakat fund, once on a claim, cannot be renamed", async () => {
+    const m = masterKeyClient();
+    const zakat = (await m.from("expense_funds").select("id").eq("name", "Zakat").single()).data!.id;
+    const { data } = await m.from("expense_entries").select("id").eq("fund_id", zakat).limit(1);
+    expect(data, "the seed puts Zakat on some claims").toHaveLength(1);
+    const { error } = await (await asRole("finance")).from("expense_funds").update({ name: "General" }).eq("id", zakat);
+    expect(error?.message).toMatch(/already used/i);
+  });
+
   it("nobody deletes a category, a fund or a setting, not even with the master key", async () => {
     const cat = await newCategory();
     const fund = await newFund();
@@ -149,40 +187,124 @@ describe("spend categories and funds", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Security review 26 Nov 2026, finding 1 (migration 0052): one Super Admin
+// asks for a new amount; it takes effect only when a different Super Admin
+// confirms it. Nobody changes an amount directly any more.
+const SUPER_TWO = "super.two@icci-prototype.test";
+const KEY = "lost_receipt_second_cents";
+
+async function askFor(amount: number, role = "super_admin") {
+  const { data, error } = await (await asRole(role)).from("app_setting_changes").insert({ key: KEY, amount_cents: amount }).select().single();
+  if (error) throw new Error(error.message);
+  return data as { id: number; status: string; amount_cents: number };
+}
+
+async function changeStatus(client: Awaited<ReturnType<typeof asRole>>, id: number, status: string, note?: string) {
+  return client.from("app_setting_changes").update({ status, ...(note ? { note } : {}) }).eq("id", id).select("id, status");
+}
+
 describe("the two amounts", () => {
-  it("only a Super Admin changes them; it is in the audit log", async () => {
-    const before = await settingCents("lost_receipt_second_cents");
-    for (const role of ["centre_admin", "finance"]) {
-      const { data } = await (await asRole(role)).from("app_settings").update({ amount_cents: before + 100 }).eq("key", "lost_receipt_second_cents").select("key");
+  it("nobody changes an amount directly, not even a Super Admin", async () => {
+    const before = await settingCents(KEY);
+    for (const role of ["super_admin", "centre_admin", "finance"]) {
+      const { data } = await (await asRole(role)).from("app_settings").update({ amount_cents: before + 100 }).eq("key", KEY).select("key");
       expect(data ?? [], role).toHaveLength(0);
     }
-    expect(await settingCents("lost_receipt_second_cents")).toBe(before);
+    const two = await signedInClient(SUPER_TWO);
+    expect((await two.from("app_settings").update({ amount_cents: before + 100 }).eq("key", KEY).select("key")).data ?? []).toHaveLength(0);
+    expect(await settingCents(KEY)).toBe(before);
+  });
 
-    const s = await asRole("super_admin");
-    const { error } = await s.from("app_settings").update({ amount_cents: before + 100 }).eq("key", "lost_receipt_second_cents");
-    expect(error).toBeNull();
-    expect(await settingCents("lost_receipt_second_cents")).toBe(before + 100);
+  it("a Super Admin asks, cannot confirm their own request, and a second Super Admin confirms it; it is in the audit log", async () => {
+    const before = await settingCents(KEY);
+    const ask = await askFor(before + 100);
+    expect(ask.status).toBe("waiting");
+    expect(await settingCents(KEY)).toBe(before);
+
+    const own = await changeStatus(await asRole("super_admin"), ask.id, "confirmed");
+    expect(own.error?.message).toMatch(/different Super Admin/i);
+    expect(await settingCents(KEY)).toBe(before);
+    for (const role of ["centre_admin", "finance"]) {
+      const { data } = await changeStatus(await asRole(role), ask.id, "confirmed");
+      expect(data ?? [], role).toHaveLength(0);
+    }
+
+    const ok = await changeStatus(await signedInClient(SUPER_TWO), ask.id, "confirmed");
+    expect(ok.error).toBeNull();
+    expect(await settingCents(KEY)).toBe(before + 100);
     const log = await masterKeyClient()
       .from("audit_log")
       .select("old_values, new_values")
       .eq("table_name", "app_settings")
-      .eq("record_id", "lost_receipt_second_cents")
+      .eq("record_id", KEY)
       .eq("action", "update")
       .order("id", { ascending: false })
       .limit(1)
       .single();
     expect(log.data!.old_values.amount_cents).toBe(before);
     expect(log.data!.new_values.amount_cents).toBe(before + 100);
-    expect((await s.from("app_settings").update({ amount_cents: before }).eq("key", "lost_receipt_second_cents")).error).toBeNull();
+    const { data: row } = await masterKeyClient().from("app_setting_changes").select("decided_by, decided_at").eq("id", ask.id).single();
+    expect(row!.decided_by).toBe(userIdOf(SUPER_TWO));
+    expect(row!.decided_at).not.toBeNull();
+
+    // A decided request never changes again.
+    expect((await changeStatus(await signedInClient(SUPER_TWO), ask.id, "turned_down")).error?.message).toMatch(/already/i);
+    // Put the amount back for the other tests (the master key, as the seed does).
+    expect((await masterKeyClient().from("app_settings").update({ amount_cents: before }).eq("key", KEY)).error).toBeNull();
+  });
+
+  it("only one request waits per amount; the asker cancels it, nobody else can; a second Super Admin may turn one down", async () => {
+    const before = await settingCents(KEY);
+    const ask = await askFor(before + 200);
+    await expect(askFor(before + 300)).rejects.toThrow(/already waiting/i);
+    expect((await changeStatus(await signedInClient(SUPER_TWO), ask.id, "cancelled")).error?.message).toMatch(/only the person who asked/i);
+    expect((await changeStatus(await asRole("super_admin"), ask.id, "cancelled")).error).toBeNull();
+
+    const second = await askFor(before + 400);
+    expect((await changeStatus(await asRole("super_admin"), second.id, "turned_down", "Not agreed")).error?.message).toMatch(/different Super Admin/i);
+    expect((await changeStatus(await signedInClient(SUPER_TWO), second.id, "turned_down", "Not agreed")).error).toBeNull();
+    expect(await settingCents(KEY)).toBe(before);
+  });
+
+  it("a request cannot be bent: not the same amount, not already decided, not a different amount on confirming", async () => {
+    const before = await settingCents(KEY);
+    await expect(askFor(before)).rejects.toThrow(/already/i);
+    const s = await asRole("super_admin");
+    expect((await s.from("app_setting_changes").insert({ key: KEY, amount_cents: before + 1, status: "confirmed" })).error).not.toBeNull();
+    expect((await s.from("app_setting_changes").insert({ key: "made_up_cents", amount_cents: 1 })).error).not.toBeNull();
+    expect((await s.from("app_setting_changes").insert({ key: KEY, amount_cents: 100000001 })).error).not.toBeNull();
+    const ask = await askFor(before + 500);
+    const bent = await (await signedInClient(SUPER_TWO)).from("app_setting_changes").update({ status: "confirmed", amount_cents: 100000000 }).eq("id", ask.id);
+    expect(bent.error?.message).toMatch(/never changes/i);
+    expect(await settingCents(KEY)).toBe(before);
+    expect((await masterKeyClient().from("app_setting_changes").delete().eq("id", ask.id)).error).not.toBeNull();
+    expect((await changeStatus(s, ask.id, "cancelled")).error).toBeNull();
+  });
+
+  it("Centre Admin and Finance read waiting requests but cannot ask; signed-out and the others see none", async () => {
+    const before = await settingCents(KEY);
+    const ask = await askFor(before + 600);
+    for (const role of ["centre_admin", "finance"]) {
+      const c = await asRole(role);
+      expect((await c.from("app_setting_changes").select("id").eq("id", ask.id)).data, role).toHaveLength(1);
+      expect((await c.from("app_setting_changes").insert({ key: "second_approval_cents", amount_cents: 1 })).error, role).not.toBeNull();
+    }
+    for (const who of noAccess) {
+      const c = await who.client();
+      expect((await c.from("app_setting_changes").select("id").limit(3)).data ?? [], who.label).toHaveLength(0);
+      expect((await c.from("app_setting_changes").insert({ key: KEY, amount_cents: 1 })).error, who.label).not.toBeNull();
+    }
+    expect((await changeStatus(await asRole("super_admin"), ask.id, "cancelled")).error).toBeNull();
   });
 
   it("no new setting can be invented, a key never changes, and the amount stays within €0 to €1,000,000", async () => {
     const s = await asRole("super_admin");
+    const m = masterKeyClient();
     expect((await s.from("app_settings").insert({ key: "made_up_cents", amount_cents: 1 })).error).not.toBeNull();
-    expect((await masterKeyClient().from("app_settings").insert({ key: "made_up_cents", amount_cents: 1 })).error).not.toBeNull();
-    expect((await s.from("app_settings").update({ key: "other_cents" }).eq("key", "second_approval_cents")).error).not.toBeNull();
-    expect((await s.from("app_settings").update({ amount_cents: -1 }).eq("key", "second_approval_cents")).error).not.toBeNull();
-    expect((await s.from("app_settings").update({ amount_cents: 100000001 }).eq("key", "second_approval_cents")).error).not.toBeNull();
+    expect((await m.from("app_settings").insert({ key: "made_up_cents", amount_cents: 1 })).error).not.toBeNull();
+    expect((await m.from("app_settings").update({ key: "other_cents" }).eq("key", "second_approval_cents")).error).not.toBeNull();
+    expect((await m.from("app_settings").update({ amount_cents: -1 }).eq("key", "second_approval_cents")).error).not.toBeNull();
+    expect((await m.from("app_settings").update({ amount_cents: 100000001 }).eq("key", "second_approval_cents")).error).not.toBeNull();
   });
 });
 
