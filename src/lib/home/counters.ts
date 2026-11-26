@@ -245,6 +245,9 @@ export const ATTENTION_ORDER = [
   "corrections-for-me",
   "disposals-for-me",
   "stocktake-for-me",
+  // P5.3: expense claims, after the other approval queues.
+  "expenses-for-me",
+  "awaiting-repayment",
 ];
 
 /**

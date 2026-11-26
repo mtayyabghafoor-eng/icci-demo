@@ -32,8 +32,8 @@ test("Home: four headline numbers, slim Needs attention rows, big actions; the m
   await signIn(page, centre);
   await expect(page.getByRole("heading", { level: 1, name: "Home" })).toBeVisible();
   for (const id of ["items", "low-stock", "missing", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
-  // The approvals headline adds up the three "for you to approve" queues.
-  const queues = ["corrections-for-me", "disposals-for-me", "stocktake-for-me"];
+  // The approvals headline adds up the "for you to approve" queues (P5.3: expense claims too).
+  const queues = ["corrections-for-me", "disposals-for-me", "stocktake-for-me", "expenses-for-me"];
   let sum = 0;
   for (const id of queues) sum += Number(await page.getByTestId(`counter-${id}`).getByTestId("count").textContent());
   await expect(page.getByTestId("headline-approvals").getByTestId("headline-count")).toHaveText(String(sum));
