@@ -25,3 +25,37 @@ export async function fileFrom(
   }
   return { file: f, ext };
 }
+
+/** What a file really is, from its first bytes: a PDF, a JPEG, PNG or WebP picture, or nothing we accept. */
+export function sniffType(head: Uint8Array): "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | null {
+  const at = (i: number, ...bytes: number[]) => bytes.every((b, k) => head[i + k] === b);
+  if (at(0, 0x25, 0x50, 0x44, 0x46, 0x2d)) return "application/pdf"; // %PDF-
+  if (at(0, 0xff, 0xd8, 0xff)) return "image/jpeg";
+  if (at(0, 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return "image/png";
+  if (at(0, 0x52, 0x49, 0x46, 0x46) && at(8, 0x57, 0x45, 0x42, 0x50)) return "image/webp"; // RIFF....WEBP
+  return null;
+}
+
+/**
+ * Every file in one form field (P5.2 receipts: photos or PDFs, several at
+ * once). Each is checked by its content, not only its name or the type the
+ * browser claims (Round C3's rule). An empty list if none was chosen, a
+ * plain sentence if one is not acceptable.
+ */
+export async function filesFrom(
+  form: FormData,
+  field: string,
+  rules: { maxFiles: number; maxMb: number; what: string },
+): Promise<{ file: File; type: string; ext: string }[] | string> {
+  const files = form.getAll(field).filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length > rules.maxFiles) return `Add at most ${rules.maxFiles} files for one ${rules.what}.`;
+  const out: { file: File; type: string; ext: string }[] = [];
+  for (const [i, f] of files.entries()) {
+    const n = files.length > 1 ? ` (file ${i + 1})` : "";
+    if (f.size > rules.maxMb * 1024 * 1024) return `The ${rules.what}${n} is too large (over ${rules.maxMb} MB).`;
+    const type = sniffType(new Uint8Array(await f.slice(0, 12).arrayBuffer()));
+    if (!type) return `The ${rules.what}${n} must be a PDF or a JPEG, PNG or WebP picture.`;
+    out.push({ file: f, type, ext: PDF_OR_PICTURE_TYPES[type] });
+  }
+  return out;
+}

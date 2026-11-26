@@ -44,7 +44,12 @@ export type IconKey =
   | "mostBorrowed"
   | "lostBooks"
   | "libraryOverview"
-  | "expenseSettings";
+  | "expenseSettings"
+  | "expenses"
+  | "newClaim"
+  | "monthlyExport"
+  | "boardReport"
+  | "repay";
 
 export type MenuLink = {
   href: string;
@@ -66,6 +71,8 @@ const ADMINS = ["super_admin", "centre_admin"] as const;
  * reach the same pages through the "Library desk" tab bar.
  */
 const OPERATOR = ["library_operator"] as const;
+/** Expense claims, the monthly file and the Board report (docs/PHASE-5.md section 5). */
+const EXPENSES = ["super_admin", "centre_admin", "finance"] as const;
 
 export const MENU: MenuGroup[] = [
   {
@@ -75,6 +82,8 @@ export const MENU: MenuGroup[] = [
       { href: "/renewals", label: "Renewals", icon: "renewals", roles: ADMINS },
       // A5 (owner, 25 Nov 2026): the email reminders get their own menu line.
       { href: "/reminders", label: "Reminders", icon: "reminders", roles: ADMINS },
+      // P5.6: the monthly Board report sits with the other overviews.
+      { href: "/board-report", label: "Board report", icon: "boardReport", roles: EXPENSES },
     ],
   },
   {
@@ -132,9 +141,14 @@ export const MENU: MenuGroup[] = [
     ],
   },
   {
-    // Phase 5. Claims, approvals, the monthly file and the Board report join this group in later slices.
+    // Phase 5 (docs/PHASE-5.md section 4).
     title: "Expenses",
-    links: [{ href: "/expenses/settings", label: "Expense settings", icon: "expenseSettings", roles: ["super_admin", "finance"] }],
+    links: [
+      { href: "/expenses", label: "Expenses", icon: "expenses", roles: EXPENSES },
+      { href: "/expenses/new", label: "New claim", icon: "newClaim", roles: EXPENSES },
+      { href: "/expenses/export", label: "Monthly export", icon: "monthlyExport", roles: EXPENSES },
+      { href: "/expenses/settings", label: "Expense settings", icon: "expenseSettings", roles: ["super_admin", "finance"] },
+    ],
   },
   {
     title: "Library",
@@ -234,5 +248,12 @@ export function bottomBarFor(roleCode: string): BarLink[] {
   else if (can("/library")) bar.push({ href: "/library", label: "Library", icon: "library" });
   if (can("/items") || can("/library")) bar.push({ href: "/scan", label: "Scan", icon: "scan", raised: true });
   if (can("/people")) bar.push({ href: "/people", label: "People", icon: "people" });
+  // P5.2: Finance's own shortcuts (it has no items or people): the claims,
+  // a new claim in the middle, and who is waiting to be paid back.
+  if (!can("/items") && !can("/library") && can("/expenses")) {
+    bar.push({ href: "/expenses", label: "Expenses", icon: "expenses" });
+    bar.push({ href: "/expenses/new", label: "New claim", icon: "newClaim", raised: true });
+    bar.push({ href: "/expenses?tab=repay", label: "To repay", icon: "repay" });
+  }
   return bar;
 }

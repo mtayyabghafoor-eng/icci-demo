@@ -72,9 +72,9 @@ test("home page counters match their lists and open them", async ({ page }, info
   await expect(page.getByRole("heading", { level: 1, name: "Disposals waiting" })).toBeVisible();
 });
 
-test("finance sees a note instead of the counters", async ({ page }, info) => {
+test("finance sees its expense counters instead of the Centre's (P5.3)", async ({ page }, info) => {
   await signInAtHome(page, finance);
-  await expect(page.getByTestId("no-counters")).toBeVisible();
+  await expect(page.getByTestId("headline-expenses-for-me")).toBeVisible();
   await expect(page.getByTestId("greeting")).toContainText(finance.displayName);
   // No quick actions for a role that cannot use them.
   await expect(page.getByRole("link", { name: /^Register an item/ })).toHaveCount(0);

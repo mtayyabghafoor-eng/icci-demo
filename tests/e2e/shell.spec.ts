@@ -62,15 +62,17 @@ test("Centre Admin: every menu group, the current page marked, the page named in
   await expect(page.getByTestId("where-am-i")).toContainText("Garda vetting");
 });
 
-// P5.1: Finance also has the asset register and Expense settings.
-test("Finance sees only Home, the asset register and Expense settings in the menu", async ({ page }, info) => {
+// P5.1 and P5.2: Finance has the Board report, the asset register and the Expenses group.
+test("Finance sees only Home, the Board report, the asset register and the Expenses group in the menu", async ({ page }, info) => {
   await signIn(page, finance);
   const menu = await mainMenu(page);
-  await expect(menu.getByRole("link")).toHaveCount(3);
-  for (const name of ["Home", "Asset register", "Expense settings"]) await expect(menu.getByRole("link", { name, exact: true })).toBeVisible();
+  const names = ["Home", "Board report", "Asset register", "Expenses", "New claim", "Monthly export", "Expense settings"];
+  await expect(menu.getByRole("link")).toHaveCount(names.length);
+  for (const name of names) await expect(menu.getByRole("link", { name, exact: true })).toBeVisible();
   if (info.project.name === "phone") {
     const bar = page.getByTestId("bottom-bar");
-    await expect(bar.getByRole("link")).toHaveCount(1);
+    // Home, Expenses, New claim (raised) and To repay.
+    await expect(bar.getByRole("link")).toHaveCount(4);
     await expect(bar.getByRole("link", { name: "Scan" })).toHaveCount(0);
   } else {
     // No label box for a role that cannot open items.

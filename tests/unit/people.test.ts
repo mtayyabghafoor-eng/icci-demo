@@ -81,7 +81,7 @@ describe("status words", () => {
 describe("made-up seed people", () => {
   it("about 40 people, every name starting with 'Test ' and no two the same", () => {
     expect(SEED_PEOPLE.length).toBeGreaterThanOrEqual(38);
-    expect(SEED_PEOPLE.length).toBeLessThanOrEqual(42);
+    expect(SEED_PEOPLE.length).toBeLessThanOrEqual(44);
     for (const p of SEED_PEOPLE) expect(p.full_name).toMatch(/^Test /);
     expect(new Set(SEED_PEOPLE.map((p) => p.full_name)).size).toBe(SEED_PEOPLE.length);
   });

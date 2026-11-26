@@ -71,10 +71,12 @@ describe("the admin-account choices on a person page (Super Admin only)", () => 
 });
 
 describe("seed links (made-up)", () => {
-  it("Test Centre Admin and Test Second Admin each have a person record linked to their account", () => {
+  it("both Centre Admins, the second Super Admin and the second Finance account each have a linked person record (P5.2)", () => {
     const linked = SEED_PEOPLE.filter((p) => p.account);
     expect(linked.map((p) => p.account).sort()).toEqual(
-      SEED_ADMINS.filter((a) => a.role === "centre_admin" && a.active).map((a) => a.email).sort(),
+      SEED_ADMINS.filter((a) => (a.role === "centre_admin" && a.active) || a.email.startsWith("super.two") || a.email.startsWith("finance.two"))
+        .map((a) => a.email)
+        .sort(),
     );
     for (const p of linked) expect(p.full_name).toBe(SEED_ADMINS.find((a) => a.email === p.account)!.displayName);
   });

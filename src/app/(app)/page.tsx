@@ -35,6 +35,11 @@ import {
   type LucideIcon,
   SlidersHorizontal,
   Table2,
+  Receipt,
+  ReceiptText,
+  HandCoins,
+  FileSpreadsheet,
+  Presentation,
 } from "lucide-react";
 import { Suspense } from "react";
 import { ActionTile, AttentionRow, Card, CardTitle, ClearChip, CounterCard, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
@@ -45,14 +50,17 @@ import {
   approvalsTotal,
   attentionSentence,
   counterCards,
+  expenseCards,
   greeting,
   longDate,
   MAY_SEE_COUNTERS,
   splitCards,
   stocktakeLink,
   type CounterCard as Counter,
+  type ExpenseCounters,
   type HomeCounters,
 } from "@/lib/home/counters";
+import { formatEuro } from "@/lib/items/rules";
 import { libraryCards, type Counters as LibraryCounters } from "@/lib/library/lists";
 import { createClient } from "@/lib/supabase/server";
 
@@ -89,30 +97,16 @@ const ICON: Record<string, LucideIcon> = {
   "rota-today": CalendarDays,
   "library-overdue": BookOpen,
   tickets: Wrench,
+  "expenses-for-me": Receipt,
+  "awaiting-repayment": HandCoins,
 };
 
 async function HomeContent() {
   const me = await requireAdmin();
   if (me.roleCode === "library_operator") return <LibraryHome me={me} />;
   if (!MAY_SEE_COUNTERS.includes(me.roleCode)) {
-    // P5.1: Finance's Home. Its claim counters arrive with expense claims (P5.2 and P5.3).
-    return (
-      <>
-        <Greeting me={me} line="Welcome to the ICCI Control Dashboard." />
-        <div className="mt-6">
-          <ExpenseLinkNote />
-        </div>
-        <Card className="mt-6">
-          <p data-testid="no-counters">Expense claims waiting for you will be counted here.</p>
-        </Card>
-        <section className="mt-6" aria-label="Actions">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <ActionTile href="/assets/register" icon={Table2} label="Asset register" hint="Values by place" />
-            <ActionTile href="/expenses/settings" icon={SlidersHorizontal} label="Expense settings" hint="Categories, funds, amounts" />
-          </div>
-        </section>
-      </>
-    );
+    // P5.1 and P5.3: Finance's Home: its expense counters and actions.
+    return <FinanceHome me={me} />;
   }
 
   const supabase = await createClient();
@@ -139,10 +133,12 @@ async function HomeContent() {
     supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
   ]);
   const stocktakeHref = stocktakeLink(data.stocktake_diffs_for_me > 0 ? await stocktakesWaitingFor(me.id) : []);
-  const cards = [...counterCards(data, notCounted ?? 0, stocktakeHref), ...(lib ? libraryCards(lib) : [])];
+  // P5.3: expense claims (a separate call, so a problem there never hides the rest).
+  const { data: exp } = await supabase.rpc("expense_counters").single<ExpenseCounters>();
+  const cards = [...counterCards(data, notCounted ?? 0, stocktakeHref), ...(lib ? libraryCards(lib) : []), ...(exp ? expenseCards(exp, formatEuro) : [])];
   const { attention, clear } = splitCards(cards);
-  const approvals = approvalsTotal(data);
-  const toApprove = approvalLinks(data, stocktakeHref);
+  const approvals = approvalsTotal(data) + (exp?.for_me ?? 0);
+  const toApprove = approvalLinks(data, stocktakeHref, exp?.for_me ?? 0);
   const missing = data.damaged + data.missing;
   return (
     <>
@@ -237,6 +233,7 @@ async function HomeContent() {
                 <ChevronDown aria-hidden size={18} className="transition-transform duration-200 group-open:rotate-180" />
               </summary>
               <div className="-mx-1 mt-1 flex flex-col">
+                <QuickAction href="/expenses/new" icon={ReceiptText} label="New expense claim" hint="Money spent, with its receipt" />
                 <QuickAction href="/assets/overview" icon={Shapes} label="What we own" hint="How many of each, and how many work" />
                 <QuickAction href="/stock/count" icon={ClipboardCheck} label="Weekly count" hint="Count a store room's shelves" />
                 <QuickAction href="/stocktake" icon={ScanLine} label="Stocktake" hint="Check a room against the records" />
@@ -265,6 +262,63 @@ async function HomeContent() {
           )}
         </div>
       </div>
+    </>
+  );
+}
+
+/** P5.3: Finance's Home: what waits for them, who is owed, and their pages. */
+async function FinanceHome({ me }: { me: CurrentAdmin }) {
+  const supabase = await createClient();
+  const { data: e } = await supabase.rpc("expense_counters").single<ExpenseCounters>();
+  return (
+    <>
+      <Greeting me={me} line="Here is where the Centre's expenses stand." />
+      <div className="mt-6">
+        <ExpenseLinkNote />
+      </div>
+      {e ? (
+        <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3" aria-label="At a glance">
+          <li>
+            <HeadlineCard
+              href={e.for_me > 0 ? "/expenses" : undefined}
+              icon={ClipboardCheck}
+              label="For you to approve"
+              count={e.for_me}
+              tone={e.for_me > 0 ? "gold" : "neutral"}
+              testId="headline-expenses-for-me"
+            />
+          </li>
+          <li>
+            <HeadlineCard href="/expenses" icon={Receipt} label="Claims waiting" count={e.waiting} tone="neutral" testId="headline-expenses-waiting" />
+          </li>
+          <li className="col-span-2 xl:col-span-1">
+            <HeadlineCard
+              href="/expenses?tab=repay"
+              icon={HandCoins}
+              label={e.owed_people === 0 ? "Nobody awaiting repayment" : `Awaiting repayment: ${formatEuro(e.owed_cents)}`}
+              count={e.owed_people}
+              tone={e.owed_people > 0 ? "red" : "neutral"}
+              testId="headline-owed"
+            />
+          </li>
+        </ul>
+      ) : (
+        <div className="mt-6">
+          <Notice tone="error" title="The counters could not be loaded.">
+            Please reload the page.
+          </Notice>
+        </div>
+      )}
+      <section className="mt-6" aria-label="Actions">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <ActionTile href="/expenses/new" icon={ReceiptText} label="New claim" hint="With its receipt" primary />
+          <ActionTile href="/expenses" icon={Receipt} label="Expenses" hint="Waiting, owed, all" />
+          <ActionTile href="/expenses/export" icon={FileSpreadsheet} label="Monthly export" hint="For the bookkeeper" />
+          <ActionTile href="/board-report" icon={Presentation} label="Board report" hint="A month on one page" />
+          <ActionTile href="/assets/register" icon={Table2} label="Asset register" hint="Values by place" />
+          <ActionTile href="/expenses/settings" icon={SlidersHorizontal} label="Expense settings" hint="Categories, funds, amounts" />
+        </div>
+      </section>
     </>
   );
 }
@@ -304,6 +358,8 @@ const CHIP: Record<string, string> = {
   "rota-today": "Today's rota",
   tickets: "Maintenance tickets",
   "library-overdue": "Library returns",
+  "expenses-for-me": "Expense claims",
+  "awaiting-repayment": "Repayments",
 };
 
 /** The Library Operator's Home: library cards and the three library actions only. */

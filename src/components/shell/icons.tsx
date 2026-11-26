@@ -41,6 +41,11 @@ import {
   BookX,
   LayoutDashboard,
   SlidersHorizontal,
+  Receipt,
+  ReceiptText,
+  FileSpreadsheet,
+  Presentation,
+  HandCoins,
   type LucideIcon,
 } from "lucide-react";
 import type { IconKey } from "@/lib/ui/menu";
@@ -87,4 +92,9 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   corrections: ClipboardCheck,
   reminders: BellRing,
   expenseSettings: SlidersHorizontal,
+  expenses: Receipt,
+  newClaim: ReceiptText,
+  monthlyExport: FileSpreadsheet,
+  boardReport: Presentation,
+  repay: HandCoins,
 };

@@ -8,6 +8,13 @@ export const SEED_ADMINS: SeedAdmin[] = [
   { email: "centre.admin@icci-prototype.test", displayName: "Test Centre Admin", role: "centre_admin", active: true },
   { email: "second.admin@icci-prototype.test", displayName: "Test Second Admin", role: "centre_admin", active: true },
   { email: "finance@icci-prototype.test", displayName: "Test Finance Officer", role: "finance", active: true },
+  // Slice P5.2: a second Super Admin and a second Finance account, both
+  // linked to their People records, so expense claims can be approved in
+  // tests by every role (an approver must be linked, question 2A). The
+  // first Super Admin and Finance accounts stay unlinked, so the "not
+  // linked yet" note and linking on screen can still be tried.
+  { email: "super.two@icci-prototype.test", displayName: "Test Second Super Admin", role: "super_admin", active: true },
+  { email: "finance.two@icci-prototype.test", displayName: "Test Second Finance Officer", role: "finance", active: true },
   // Used only by the permission tests: proves the library role sees nothing
   // outside the library (Phase 4), and a switched-off account sees nothing.
   { email: "library@icci-prototype.test", displayName: "Test Library Operator", role: "library_operator", active: true },
@@ -351,7 +358,12 @@ export const SEED_PEOPLE: SeedPerson[] = PEOPLE_PLAN.map(([role, section], i) =>
 // P2.2: the two Centre Admins also have person records, linked to their
 // accounts, so "reported by" can start with "you". The Super Admin is left
 // unlinked, so a Super Admin is free to link the others on screen.
-for (const [email, n] of [["centre.admin@icci-prototype.test", 41], ["second.admin@icci-prototype.test", 42]] as const) {
+for (const [email, n] of [
+  ["centre.admin@icci-prototype.test", 41],
+  ["second.admin@icci-prototype.test", 42],
+  ["super.two@icci-prototype.test", 43],
+  ["finance.two@icci-prototype.test", 44],
+] as const) {
   const admin = SEED_ADMINS.find((a) => a.email === email)!;
   SEED_PEOPLE.push({
     full_name: admin.displayName,
@@ -1036,3 +1048,205 @@ export const SEED_REFERRAL = {
   jobRef: "DEMO-123",
   note: "Test: engineer to call on Thursday (made up)",
 };
+
+// ---------------------------------------------------------------------------
+// Phase 5, slice P5.2: about 60 made-up expense claims, showing every state:
+// waiting, needing a second approval, approved (some corrected), rejected,
+// withdrawn; own money awaiting repayment and paid back; lost receipts.
+// Every receipt is a plainly fake picture saying "SAMPLE RECEIPT - NOT
+// REAL" (question 13), never a real firm's name. Entered and decided by the
+// signed-in test accounts, exactly as on screen, so every rule applies.
+export const SEED_SHOPS = [
+  "Test Hardware Shop",
+  "Test Cash and Carry",
+  "Test Cleaning Supplies",
+  "Test Print Shop",
+  "Test Fuel Station",
+  "Test Electrical Wholesale",
+  "Test Bakery",
+  "Test Office Supplies",
+  "Test Plumbing Services",
+  "Test Post Office",
+];
+
+/** Linked test accounts that may approve (an approver must be linked, question 2A). */
+export const SEED_APPROVERS = [
+  "finance.two@icci-prototype.test",
+  "centre.admin@icci-prototype.test",
+  "second.admin@icci-prototype.test",
+  "super.two@icci-prototype.test",
+];
+const ENTERERS = [
+  "centre.admin@icci-prototype.test",
+  "second.admin@icci-prototype.test",
+  "finance@icci-prototype.test",
+  "finance.two@icci-prototype.test",
+  "super.two@icci-prototype.test",
+];
+/** The person record linked to each linked test account. */
+export const SEED_ACCOUNT_PERSON: Record<string, string> = {
+  "centre.admin@icci-prototype.test": "Test Centre Admin",
+  "second.admin@icci-prototype.test": "Test Second Admin",
+  "super.two@icci-prototype.test": "Test Second Super Admin",
+  "finance.two@icci-prototype.test": "Test Second Finance Officer",
+};
+
+export type SeedClaim = {
+  daysAgo: number;
+  amountCents: number;
+  vatCents: number | null;
+  category: string;
+  description: string;
+  shop: string;
+  payment: "centre_direct" | "centre_card" | "personal";
+  /** A person's full name, or null for the Centre paying directly. */
+  paidBy: string | null;
+  lost: string | null;
+  enteredBy: string;
+  outcome: "waiting" | "second" | "approved" | "rejected" | "withdrawn";
+  fund: "Unrestricted" | "Zakat" | "Fitra";
+  repaid: boolean;
+  correctTo: number | null;
+};
+
+const CLAIM_PLAN: [category: string, description: string, cents: number][] = [
+  ["Cleaning and hygiene", "Test bin bags and floor cleaner", 3450],
+  ["Kitchen and catering", "Test tea, milk and sugar for the office", 1875],
+  ["Repairs and maintenance", "Test replacement tap washers", 1240],
+  ["Office, printing and post", "Test printer ink cartridges", 6899],
+  ["Vehicles and fuel", "Test diesel for the Centre van", 7500],
+  ["Events and programmes", "Test dates and water for the open day", 12500],
+  ["Utilities", "Test electricity bill (direct debit)", 48230],
+  ["Phones, internet and IT", "Test broadband for the office", 5999],
+  ["Equipment and furniture", "Test folding tables for the hall", 64000],
+  ["Funeral services", "Test ghusl room supplies", 8920],
+  ["Books and learning materials", "Test exercise books for the weekend school", 4310],
+  ["Insurance, licences and fees", "Test music licence renewal", 21000],
+  ["Professional services", "Test locksmith call-out", 15500],
+  ["Other", "Test flowers for a visiting school", 2500],
+  ["Repairs and maintenance", "Test boiler service", 72000],
+];
+
+/** The payers of own-money claims: switched-on made-up people with no admin account. */
+const PAYER_INDEXES = [0, 1, 2, 3, 4, 5, 6, 7];
+
+export function seedClaims(): SeedClaim[] {
+  const out: SeedClaim[] = [];
+  for (let i = 0; i < 60; i++) {
+    const [category, description, base] = CLAIM_PLAN[i % CLAIM_PLAN.length];
+    const amountCents = base + (i % 7) * 105;
+    const payment: SeedClaim["payment"] =
+      category === "Utilities" || category === "Insurance, licences and fees" ? "centre_direct" : i % 5 === 3 ? "centre_card" : "personal";
+    const enteredBy = ENTERERS[i % ENTERERS.length];
+    // Now and then an own-money claim was paid by the admin who entered it (if linked).
+    const ownMoney = payment === "personal" && i % 9 === 4 && Boolean(SEED_ACCOUNT_PERSON[enteredBy]);
+    const paidBy =
+      payment === "centre_direct" ? null : ownMoney ? SEED_ACCOUNT_PERSON[enteredBy] : SEED_PEOPLE[PAYER_INDEXES[i % PAYER_INDEXES.length]].full_name;
+    const lost = i % 13 === 6 ? "Test: the till printer was broken (made-up)" : null;
+    const bigOrLost = amountCents > 50000 || (lost !== null && amountCents > 5000);
+    // The first eight wait, a few big ones need a second approval, a few are rejected or withdrawn, the rest approved.
+    const outcome: SeedClaim["outcome"] =
+      i < 8 ? "waiting" : i < 16 && bigOrLost ? "second" : i % 17 === 5 ? "rejected" : i % 19 === 7 ? "withdrawn" : "approved";
+    out.push({
+      daysAgo: 2 + ((i * 3) % 80),
+      amountCents,
+      vatCents: i % 3 === 0 ? Math.round(amountCents * 0.187) : null,
+      category,
+      description,
+      shop: SEED_SHOPS[i % SEED_SHOPS.length],
+      payment,
+      paidBy,
+      lost,
+      enteredBy,
+      outcome,
+      fund: i % 11 === 2 ? "Zakat" : i % 23 === 9 ? "Fitra" : "Unrestricted",
+      // Own money: about half of the approved ones are already paid back.
+      repaid: outcome === "approved" && payment === "personal" && i % 2 === 0,
+      correctTo: outcome === "approved" && i % 16 === 12 ? amountCents + 450 : null,
+    });
+  }
+  return out;
+}
+
+// A plain 5 by 7 dot font for the fake receipt pictures (capital letters,
+// digits and a few signs), so the seed needs no extra software.
+const FONT: Record<string, string> = {
+  A: "01110100011000111111100011000110001", B: "11110100011000111110100011000111110", C: "01110100011000010000100001000101110",
+  D: "11110100011000110001100011000111110", E: "11111100001000011110100001000011111", F: "11111100001000011110100001000010000",
+  G: "01110100011000010111100011000101111", H: "10001100011000111111100011000110001", I: "01110001000010000100001000010001110",
+  J: "00111000100001000010000101001001100", K: "10001100101010011000101001001010001", L: "10000100001000010000100001000011111",
+  M: "10001110111010110101100011000110001", N: "10001110011010110011100011000110001", O: "01110100011000110001100011000101110",
+  P: "11110100011000111110100001000010000", Q: "01110100011000110001101011001001101", R: "11110100011000111110101001001010001",
+  S: "01111100001000001110000010000111110", T: "11111001000010000100001000010000100", U: "10001100011000110001100011000101110",
+  V: "10001100011000110001100010101000100", W: "10001100011000110101101011010101010", X: "10001100010101000100010101000110001",
+  Y: "10001100010101000100001000010000100", Z: "11111000010001000100010001000011111", "0": "01110100011001110101110011000101110",
+  "1": "00100011000010000100001000010001110", "2": "01110100010000100010001000100011111", "3": "11111000100010000010000011000101110",
+  "4": "00010001100101010010111110001000010", "5": "11111100001111000001000011000101110", "6": "00110010001000011110100011000101110",
+  "7": "11111000010001000100010000100001000", "8": "01110100011000101110100011000101110", "9": "01110100011000101111000010001001100",
+  ".": "00000000000000000000000000110001100", ":": "00000011000110000000011000110000000", "-": "00000000000000011111000000000000000",
+  " ": "00000000000000000000000000000000000", "/": "00001000010001000100010001000010000",
+};
+
+function crc32(bytes: Uint8Array): number {
+  let c = ~0;
+  for (const b of bytes) {
+    c ^= b;
+    for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+  }
+  return ~c >>> 0;
+}
+
+/** A grey-on-white PNG "receipt" with these lines of text, plainly marked as fake. */
+export async function sampleReceiptPng(raw: string[]): Promise<Uint8Array> {
+  const { deflateSync } = await import("node:zlib");
+  const lines = ["SAMPLE RECEIPT", "NOT REAL - TEST DATA", "", ...raw.map((l) => l.toUpperCase().replace(/[^A-Z0-9 .:/-]/g, ""))];
+  const scale = 3;
+  const cols = Math.max(...lines.map((l) => l.length), 20);
+  const width = (cols * 6 + 8) * scale;
+  const height = (lines.length * 10 + 8) * scale;
+  const px = new Uint8Array(width * height).fill(255);
+  lines.forEach((line, row) => {
+    [...line].forEach((ch, col) => {
+      const glyph = FONT[ch] ?? FONT[" "];
+      for (let y = 0; y < 7; y++)
+        for (let x = 0; x < 5; x++)
+          if (glyph[y * 5 + x] === "1")
+            for (let dy = 0; dy < scale; dy++)
+              for (let dx = 0; dx < scale; dx++) {
+                const X = (4 + col * 6 + x) * scale + dx;
+                const Y = (4 + row * 10 + y) * scale + dy;
+                px[Y * width + X] = row < 2 ? 150 : 30;
+              }
+    });
+  });
+  // Grey-scale PNG: one filter byte (0) before each row.
+  const rows = new Uint8Array((width + 1) * height);
+  for (let y = 0; y < height; y++) rows.set(px.subarray(y * width, (y + 1) * width), y * (width + 1) + 1);
+  const chunk = (type: string, data: Uint8Array) => {
+    const out = new Uint8Array(12 + data.length);
+    const view = new DataView(out.buffer);
+    view.setUint32(0, data.length);
+    out.set(new TextEncoder().encode(type), 4);
+    out.set(data, 8);
+    view.setUint32(8 + data.length, crc32(out.subarray(4, 8 + data.length)));
+    return out;
+  };
+  const ihdr = new Uint8Array(13);
+  const v = new DataView(ihdr.buffer);
+  v.setUint32(0, width);
+  v.setUint32(4, height);
+  ihdr.set([8, 0, 0, 0, 0], 8); // 8 bits, grey, no interlace
+  const parts = [
+    new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", ihdr),
+    chunk("IDAT", new Uint8Array(deflateSync(rows))),
+    chunk("IEND", new Uint8Array()),
+  ];
+  const png = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of parts) {
+    png.set(p, at);
+    at += p.length;
+  }
+  return png;
+}

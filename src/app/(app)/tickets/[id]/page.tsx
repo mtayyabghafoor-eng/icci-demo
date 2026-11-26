@@ -30,6 +30,7 @@ import { TicketActions } from "../forms";
 import { BackLink } from "@/components/ui";
 import { allCompanies, companyChoices } from "../../companies/data";
 import { ContactCard, contactContext } from "../../companies/contact-card";
+import { TicketExpenseClaims } from "../expense-claims";
 
 export const metadata: Metadata = { title: "Ticket | ICCI Control Dashboard" };
 
@@ -200,6 +201,8 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
           <ContactCard itemId={item.id} />
         </div>
       )}
+
+      <TicketExpenseClaims ticketId={t.id} closedWithCost={t.status === "closed" && t.cost_cents != null} />
 
       <section className="mt-8" aria-labelledby="history-title">
         <h2 id="history-title" className="text-lg font-bold text-icci-green-dark">

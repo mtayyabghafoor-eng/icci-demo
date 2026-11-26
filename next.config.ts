@@ -28,8 +28,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   cacheComponents: true,
   // Item photos (up to 6 MB) and policy PDFs (up to 10 MB, slice P2.5) are
-  // sent through the website. The database stores refuse anything larger.
-  experimental: { serverActions: { bodySizeLimit: "11mb" } },
+  // sent through the website, and up to 3 expense receipts of 10 MB each
+  // (P5.2). The database stores refuse anything larger.
+  experimental: { serverActions: { bodySizeLimit: "32mb" } },
   partialPrefetching: true,
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];

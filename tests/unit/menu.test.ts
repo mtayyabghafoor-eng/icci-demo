@@ -12,8 +12,8 @@ describe("menuFor: each role sees only what it can use", () => {
     // P5.1: only Super Admin and Finance keep the expense lists and amounts.
     expect(labels("centre_admin")).toEqual(all.filter((l) => l !== "Expense settings"));
   });
-  it("Finance sees Home, the asset register and Expense settings (P5.1); the Library Operator also sees the library (P4.2)", () => {
-    expect(labels("finance")).toEqual(["Home", "Asset register", "Expense settings"]);
+  it("Finance sees Home, the Board report, the asset register and the Expenses group (P5.1, P5.2); the Library Operator also sees the library (P4.2)", () => {
+    expect(labels("finance")).toEqual(["Home", "Board report", "Asset register", "Expenses", "New claim", "Monthly export", "Expense settings"]);
     expect(menuFor("finance").map((g) => g.title)).toEqual(["Overview", "Assets", "Expenses"]);
     expect(labels("library_operator")).toEqual(["Home", "Library", "Add a book", "Lend", "Return", "Borrowers", "On loan", "Overdue", "Most borrowed", "Lost and withdrawn"]);
   });
@@ -122,8 +122,10 @@ describe("bottomBarFor: the phone bottom bar", () => {
     expect(bar.map((b) => b.label)).toEqual(["Home", "Items", "Scan", "People"]);
     expect(bar.find((b) => b.label === "Scan")?.raised).toBe(true);
   });
-  it("gives Finance only Home", () => {
-    expect(bottomBarFor("finance").map((b) => b.label)).toEqual(["Home"]);
+  it("gives Finance Home, Expenses, a raised New claim and To repay (P5.2)", () => {
+    const bar = bottomBarFor("finance");
+    expect(bar.map((b) => b.label)).toEqual(["Home", "Expenses", "New claim", "To repay"]);
+    expect(bar.find((b) => b.raised)?.href).toBe("/expenses/new");
   });
   it("gives the Library Operator Home, Library and a raised Scan (slice P4.2)", () => {
     const bar = bottomBarFor("library_operator");

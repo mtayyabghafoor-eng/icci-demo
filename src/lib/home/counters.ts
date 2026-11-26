@@ -69,8 +69,11 @@ export function approvalsTotal(c: Pick<HomeCounters, "corrections_for_me" | "dis
 export function approvalLinks(
   c: Pick<HomeCounters, "corrections_for_me" | "disposals_for_me" | "stocktake_diffs_for_me">,
   stocktakeHref = "/stocktake",
+  expensesForMe = 0,
 ): { href?: string; links: { href: string; label: string }[] } {
   const queues = [
+    // P5.3: expense claims waiting for this admin.
+    { n: expensesForMe, href: "/expenses", label: plural(expensesForMe, "expense claim", "expense claims") },
     { n: c.corrections_for_me, href: "/stock/approvals", label: plural(c.corrections_for_me, "stock correction", "stock corrections") },
     { n: c.disposals_for_me, href: "/assets/approvals", label: plural(c.disposals_for_me, "disposal", "disposals") },
     { n: c.stocktake_diffs_for_me, href: stocktakeHref, label: plural(c.stocktake_diffs_for_me, "stocktake difference", "stocktake differences") },
@@ -279,4 +282,34 @@ export function longDate(at: number): string {
   return new Intl.DateTimeFormat("en-IE", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Dublin" })
     .format(at)
     .replace(",", "");
+}
+
+// ---------------------------------------------------------------------------
+// P5.3: expense claims (public.expense_counters, migration 0050).
+export type ExpenseCounters = { for_me: number; waiting: number; owed_people: number; owed_cents: number; linked: boolean };
+
+/** "Expenses for you to approve" (red when any) and "Awaiting repayment" (amber when anyone is owed). */
+export function expenseCards(e: ExpenseCounters, euro: (cents: number) => string): CounterCard[] {
+  return [
+    {
+      id: "expenses-for-me",
+      title: "Expense claims for you to approve",
+      count: e.for_me,
+      detail: !e.linked
+        ? "Your account is not linked to People yet, so you cannot approve claims."
+        : e.for_me === 0
+          ? "All clear. Nothing waiting for you."
+          : "Entered and paid by someone else.",
+      href: "/expenses",
+      tone: e.for_me > 0 ? "red" : "green",
+    },
+    {
+      id: "awaiting-repayment",
+      title: "Awaiting repayment",
+      count: e.owed_people,
+      detail: e.owed_people === 0 ? "All clear. Nobody is waiting to be paid back." : `${euro(e.owed_cents)} owed to ${plural(e.owed_people, "person", "people")}.`,
+      href: "/expenses?tab=repay",
+      tone: e.owed_people > 0 ? "amber" : "green",
+    },
+  ];
 }

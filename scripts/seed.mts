@@ -68,6 +68,10 @@ import {
   seedStock,
   seedTraining,
   seedVetting,
+  sampleReceiptPng,
+  seedClaims,
+  SEED_APPROVERS,
+  SEED_ACCOUNT_PERSON,
 } from "./seed-data.mts";
 import type { SeedModel } from "./seed-data.mts";
 import { DEMO_CATEGORY_CONTACTS, DEMO_COMPANIES, DEMO_FILES_DIR, DEMO_ITEM_LINKS, DEMO_MODELS, DEMO_REFERRAL } from "./demo-data.mts";
@@ -1185,6 +1189,111 @@ if (process.env.CRON_SECRET?.trim()) {
     if (step.error) throw step.error;
   }
   console.log(`Companies: ${newCompanies.length} added; makes and models with ${manuals} sample manuals; ${linked} items linked; category contacts set.`);
+}
+
+// 23. Expense claims (P5.2): only if there are none yet. About 60 made-up
+// claims entered and decided by the signed-in test accounts, as on screen,
+// so every rule applies (nobody approves their own entry or money they paid;
+// approvers are linked; big ones get a second approval). Each receipt is a
+// plainly fake "SAMPLE RECEIPT" picture. Every decision is dated today: the
+// database stamps the time itself, so the seed cannot backdate them.
+{
+  const { count: claimCount, error: claimCountError } = await admin.from("expense_claims").select("id", { count: "exact", head: true });
+  if (claimCountError) throw claimCountError;
+  if (!claimCount) {
+    const clients = new Map<string, Awaited<ReturnType<typeof signedInAs>>>();
+    const as = async (email: string) => {
+      if (!clients.has(email)) clients.set(email, await signedInAs(email));
+      return clients.get(email)!;
+    };
+    const [{ data: cats }, { data: funds }, { data: people }] = await Promise.all([
+      admin.from("expense_categories").select("id, name"),
+      admin.from("expense_funds").select("id, name"),
+      admin.from("people").select("id, full_name"),
+    ]);
+    const catId = new Map((cats ?? []).map((c) => [c.name, c.id]));
+    const fundId = new Map((funds ?? []).map((f) => [f.name, f.id]));
+    const personId = new Map((people ?? []).map((p) => [p.full_name, p.id]));
+    const accountOf = new Map(Object.entries(SEED_ACCOUNT_PERSON).map(([email, name]) => [D(name), email]));
+    const ok = async (r: PromiseLike<{ error: { message: string } | null }>) => {
+      const { error } = await r;
+      if (error) throw new Error(error.message);
+    };
+    const owed = new Map<string, number[]>();
+    let made = 0;
+    for (const [i, c] of seedClaims().entries()) {
+      const enterer = await as(c.enteredBy);
+      const paidBy = c.paidBy ? D(c.paidBy) : null;
+      const files: string[] = [];
+      if (!c.lost) {
+        const png = await sampleReceiptPng([D(c.shop), `Date: ${addDays(todayInDublin(), -c.daysAgo)}`, `Total EUR ${(c.amountCents / 100).toFixed(2)}`]);
+        const path = `claims/seed/${String(i + 1).padStart(3, "0")}-receipt-1.png`;
+        const up = await enterer.storage.from("expense-receipts").upload(path, png, { contentType: "image/png", upsert: false });
+        if (up.error && !/exists/i.test(up.error.message)) throw up.error;
+        files.push(path);
+      }
+      const { data: id, error } = await enterer.rpc("enter_expense_claim", {
+        p_amount_cents: c.amountCents,
+        p_receipt_date: addDays(todayInDublin(), -c.daysAgo),
+        p_category_id: catId.get(c.category),
+        p_description: D(c.description),
+        p_payment: c.payment,
+        p_paid_by_person_id: paidBy ? personId.get(paidBy) : null,
+        p_vat_cents: c.vatCents,
+        p_paid_to_text: D(c.shop),
+        p_suggested_fund_id: fundId.get(c.fund),
+        p_receipt_lost_reason: c.lost ? D(c.lost) : null,
+        p_files: files,
+      });
+      if (error) throw new Error(`Claim ${i + 1}: ${error.message}`);
+      made++;
+      // The approvers who may decide: not whoever entered it or paid.
+      const payerAccount = paidBy ? accountOf.get(paidBy) : undefined;
+      const allowed = SEED_APPROVERS.filter((a) => a !== c.enteredBy && a !== payerAccount);
+      const [first, second] = allowed;
+      const decide = async (who: string, kind: string, extra: Record<string, unknown> = {}) =>
+        ok((await as(who)).from("expense_decisions").insert({ claim_id: id, kind, ...extra }));
+      if (c.outcome === "withdrawn") await decide(c.enteredBy, "withdrawn", { note: D("Test: typed the wrong amount (made-up)") });
+      if (c.outcome === "rejected") await decide(first, "rejected", { note: D("Test: not a Centre expense (made-up)") });
+      if (c.outcome === "second" || c.outcome === "approved") await decide(first, "approved", { fund_id: fundId.get(c.fund) });
+      const needsSecond = c.amountCents > 50000 || (c.lost !== null && c.amountCents > 5000);
+      if (c.outcome === "approved" && needsSecond) await decide(second, "second_approved");
+      if (c.outcome === "approved" && c.correctTo) {
+        const { data: fix, error: fixError } = await enterer.rpc("enter_expense_claim", {
+          p_amount_cents: c.correctTo,
+          p_receipt_date: addDays(todayInDublin(), -c.daysAgo),
+          p_category_id: catId.get(c.category),
+          p_description: null,
+          p_payment: c.payment,
+          p_paid_by_person_id: paidBy ? personId.get(paidBy) : null,
+          p_vat_cents: c.vatCents,
+          p_suggested_fund_id: fundId.get(c.fund),
+          p_corrects_id: id,
+          p_correction_reason: D("Test: the receipt said a little more (made-up)"),
+        });
+        if (fixError) throw new Error(`Correction of claim ${i + 1}: ${fixError.message}`);
+        await ok((await as(first)).from("expense_decisions").insert({ claim_id: fix, kind: "approved", fund_id: fundId.get(c.fund) }));
+      }
+      if (c.repaid && paidBy) owed.set(paidBy, [...(owed.get(paidBy) ?? []), id as number]);
+    }
+    // One repayment per person for their repaid claims, recorded by someone else.
+    let repayments = 0;
+    for (const [person, claims] of owed) {
+      const recorder = SEED_APPROVERS.find((a) => a !== accountOf.get(person))!;
+      await ok(
+        (await as(recorder)).rpc("record_expense_repayment", {
+          p_claim_ids: claims,
+          p_paid_on: todayInDublin(),
+          p_method: repayments % 2 ? "cash" : "bank_transfer",
+          p_reference: `TEST-${String(repayments + 1).padStart(3, "0")}`,
+        }),
+      );
+      repayments++;
+    }
+    console.log(`Expense claims: ${made} made-up claims with sample receipts, ${repayments} repayments.`);
+  } else {
+    console.log(`Expense claims: ${claimCount} already there.`);
+  }
 }
 
 // 21. On the staging demo, nobody keeps the seed's authenticator keys: they are
