@@ -486,13 +486,14 @@ export function RepaymentForm({
   disabledWhy,
 }: {
   personName: string;
-  claims: { id: number; label: string; owed_cents: number }[];
+  /** enteredByMe: whoever entered a claim never records its repayment (migration 0053). */
+  claims: { id: number; label: string; owed_cents: number; enteredByMe?: boolean }[];
   today: string;
   /** Set when the signed-in admin is the person (never pay yourself back). */
   disabledWhy: string | null;
 }) {
   const [state, send] = useActionState(recordRepayment, none);
-  const [ticked, setTicked] = useState<number[]>(claims.map((c) => c.id));
+  const [ticked, setTicked] = useState<number[]>(claims.filter((c) => !c.enteredByMe).map((c) => c.id));
   const total = claims.filter((c) => ticked.includes(c.id)).reduce((n, c) => n + c.owed_cents, 0);
   return (
     <form action={send} className="space-y-3" data-testid="repayment-form">
@@ -505,11 +506,17 @@ export function RepaymentForm({
                 name="claim"
                 value={c.id}
                 checked={ticked.includes(c.id)}
+                disabled={c.enteredByMe}
                 onChange={(e) => setTicked((t) => (e.target.checked ? [...t, c.id] : t.filter((x) => x !== c.id)))}
                 className="h-5 w-5 accent-icci-green-dark"
               />
               <span className="flex-1" dir="auto">
                 {c.label}
+                {c.enteredByMe && (
+                  <span className="block text-sm text-icci-ink-60" data-testid="entered-by-me">
+                    You entered this claim, so another admin pays it back.
+                  </span>
+                )}
               </span>
               <span className="font-semibold tabular-nums">{formatEuro(c.owed_cents)}</span>
             </label>

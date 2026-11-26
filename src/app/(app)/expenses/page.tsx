@@ -29,7 +29,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PAGE_SIZE, pageOf, readPage } from "@/lib/ui/text";
 import { cx } from "@/lib/ui/text";
 import { CannotSeeExpenses } from "./cannot-see";
-import { loadClaims, loadExpenseNames, loadWaiting, paidByText, type ExpenseNames } from "./data";
+import { loadClaims, loadCorrectedBy, loadExpenseNames, loadWaiting, paidByText, type ExpenseNames } from "./data";
 import { RepaymentForm } from "./forms";
 import { ExpenseLinkNote } from "./link-note";
 
@@ -89,7 +89,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/expenses">[
         </ul>
       </nav>
       {tab === "waiting" && <Waiting meId={me.id} names={names} />}
-      {tab === "repay" && <Repay names={names} />}
+      {tab === "repay" && <Repay names={names} meId={me.id} />}
       {tab === "all" && <All names={names} month={typeof params.month === "string" ? params.month : ""} page={readPage(params.page)} />}
     </div>
   );
@@ -98,8 +98,10 @@ async function Content({ searchParams }: { searchParams: PageProps<"/expenses">[
 async function Waiting({ meId, names }: { meId: string; names: ExpenseNames }) {
   const supabase = await createClient();
   const [rows, link] = await Promise.all([loadWaiting(supabase), supabase.rpc("my_expense_link")]);
+  const correctedBy = await loadCorrectedBy(supabase, rows);
   const linked = Boolean((link.data as { linked: boolean }[] | null)?.[0]?.linked);
-  const mine = (e: EntryRow) => mayDecide(meId, linked, e, Boolean(e.paid_by_person_id && names.me?.id === e.paid_by_person_id)).ok;
+  const mine = (e: EntryRow) =>
+    mayDecide(meId, linked, e, Boolean(e.paid_by_person_id && names.me?.id === e.paid_by_person_id), e.corrects_id ? (correctedBy.get(e.corrects_id) ?? null) : null).ok;
   const forMe = rows.filter(mine).length;
   return (
     <>
@@ -156,9 +158,9 @@ function EntryList({ rows, names, forMe }: { rows: EntryRow[]; names: ExpenseNam
   );
 }
 
-async function Repay({ names }: { names: ExpenseNames }) {
+async function Repay({ names, meId }: { names: ExpenseNames; meId: string }) {
   const supabase = await createClient();
-  const owed = await loadClaims(supabase, { owed: true });
+  const [owed, overpaid] = await Promise.all([loadClaims(supabase, { owed: true }), loadClaims(supabase, { overpaid: true })]);
   const byPerson = new Map<string, ClaimRow[]>();
   for (const c of owed.sort((a, b) => a.id - b.id)) {
     const key = c.paid_by_person_id!;
@@ -171,7 +173,7 @@ async function Repay({ names }: { names: ExpenseNames }) {
       <p className="text-[15px] text-icci-ink-60" data-testid="owed-total">
         {groups.length === 0 ? "Nobody is waiting to be paid back." : `${formatEuro(total)} owed to ${groups.length === 1 ? "1 person" : `${groups.length} people`}`}
       </p>
-      {groups.length === 0 && (
+      {groups.length === 0 && overpaid.length === 0 && (
         <EmptyState icon={Receipt} title="Nobody is owed">
           When a claim paid with someone&apos;s own money is approved, it waits here until they are paid back.
         </EmptyState>
@@ -191,18 +193,65 @@ async function Repay({ names }: { names: ExpenseNames }) {
               <RepaymentForm
                 personName={name}
                 today={todayInDublin()}
-                disabledWhy={names.me?.id === personId ? "This is you. Another admin records your repayment." : null}
+                disabledWhy={
+                  names.me?.id === personId
+                    ? "This is you. Another admin records your repayment."
+                    : claims.every((c) => c.created_by === meId)
+                      ? "You entered these claims, so another admin records the repayment."
+                      : null
+                }
                 claims={claims.map((c) => ({
                   id: c.id,
                   label: `${claimNumber(c.id)} · ${formatDate(c.current_receipt_date)} · ${c.description}`,
                   owed_cents: c.owed_cents,
+                  enteredByMe: c.created_by === meId,
                 }))}
               />
             </li>
           );
         })}
       </ul>
+      {overpaid.length > 0 && <ToGetBack claims={overpaid} names={names} />}
     </>
+  );
+}
+
+/**
+ * Claims paid back and then corrected to less: the person was paid too much
+ * (security review finding 4, migration 0053). The app only shows it; getting
+ * the money back happens outside the app.
+ */
+function ToGetBack({ claims, names }: { claims: ClaimRow[]; names: ExpenseNames }) {
+  const total = claims.reduce((n, c) => n - c.owed_cents, 0);
+  return (
+    <section className="mt-6 space-y-3" aria-labelledby="to-get-back" data-testid="to-get-back">
+      <h2 id="to-get-back" className="text-lg font-bold text-icci-green-dark">
+        Paid too much: {formatEuro(total)} to get back
+      </h2>
+      <p className="text-[15px] text-icci-ink-60">
+        These claims were paid back, then corrected to a lower amount. The Treasurer asks for the difference back; the app does not record
+        money coming in.
+      </p>
+      <ul className="space-y-3">
+        {claims
+          .sort((a, b) => a.id - b.id)
+          .map((c) => (
+            <li key={c.id}>
+              <Link href={`/expenses/${c.id}`} className="list-card" data-testid="overpaid-row">
+                <span className="flex flex-wrap items-start justify-between gap-2">
+                  <span className="font-semibold text-icci-green" dir="auto">
+                    {claimNumber(c.id)} · {names.personName(c.paid_by_person_id)}
+                  </span>
+                  <StatusPill tone="amber">{formatEuro(-c.owed_cents)} to get back</StatusPill>
+                </span>
+                <span className="block text-sm text-icci-ink-60" dir="auto">
+                  {c.description} · paid back {formatEuro(c.repaid_cents)}, now {formatEuro(c.current_amount_cents)}
+                </span>
+              </Link>
+            </li>
+          ))}
+      </ul>
+    </section>
   );
 }
 

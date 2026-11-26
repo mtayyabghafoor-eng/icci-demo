@@ -142,6 +142,9 @@ describe("who may decide (what the screen offers)", () => {
     expect(mayDecide("you", false, { ...claim, created_by: "them" }, false)).toMatchObject({ ok: false, why: expect.stringMatching(/not linked/i) });
     expect(mayDecide("you", true, { state: "second", created_by: "them", first_by: "you" }, false)).toMatchObject({ ok: false, why: expect.stringMatching(/first approval/i) });
     expect(mayDecide("you", true, { ...claim, created_by: "them" }, false)).toEqual({ ok: true });
+    // Migration 0053: not a correction of a claim you entered.
+    expect(mayDecide("you", true, { ...claim, created_by: "them" }, false, "you")).toMatchObject({ ok: false, why: expect.stringMatching(/claim this corrects/i) });
+    expect(mayDecide("you", true, { ...claim, created_by: "them" }, false, "someone else")).toEqual({ ok: true });
     expect(mayDecide("you", true, { state: "approved", created_by: "them", first_by: "x" }, false).ok).toBe(false);
   });
 

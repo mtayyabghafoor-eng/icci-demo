@@ -16,8 +16,15 @@ export async function savePerson(id: string | null, _state: PersonFormState, for
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
 
+  // Editing someone without changing their name asks nothing again.
+  let nameChanged = true;
+  if (id !== null) {
+    const { data: current } = await supabase.from("people").select("full_name").eq("id", id).maybeSingle();
+    nameChanged = !current || sameNameAs(parsed.values.full_name, [{ id: "", full_name: current.full_name as string }]).length === 0;
+  }
+
   // Two people can share a name, so this is a warning the admin can pass.
-  if (form.get("same_name_ok") !== "yes") {
+  if (nameChanged && form.get("same_name_ok") !== "yes") {
     const { data: similar } = await supabase
       .from("people")
       .select("id, full_name, active")
@@ -27,12 +34,14 @@ export async function savePerson(id: string | null, _state: PersonFormState, for
     if (same.length) return { error: null, sameName: same };
   }
 
+  // The database also checks the name, and keeps this answer (migration 0053).
+  const values = { ...parsed.values, same_name_confirmed: form.get("same_name_ok") === "yes" };
   if (id === null) {
-    const { data, error } = await supabase.from("people").insert(parsed.values).select("id").single();
+    const { data, error } = await supabase.from("people").insert(values).select("id").single();
     if (error || !data) return { error: friendlyPeopleError(error?.message) };
     redirect(`/people/${data.id}?done=added`);
   }
-  const { data, error } = await supabase.from("people").update(parsed.values).eq("id", id).select("id");
+  const { data, error } = await supabase.from("people").update(values).eq("id", id).select("id");
   if (error) return { error: friendlyPeopleError(error.message) };
   if (!data?.length) return { error: "Your account is not allowed to do this." };
   redirect(`/people/${id}?done=saved`);

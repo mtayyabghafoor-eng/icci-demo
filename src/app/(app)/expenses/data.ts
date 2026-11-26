@@ -54,7 +54,7 @@ export function paidByText(c: { payment: string; paid_by_person_id: string | nul
   return names.personName(c.paid_by_person_id);
 }
 
-export type ClaimFilter = { states?: string[]; month?: { from: string; to: string }; ticket?: number; owed?: boolean };
+export type ClaimFilter = { states?: string[]; month?: { from: string; to: string }; ticket?: number; owed?: boolean; overpaid?: boolean };
 
 /** Claims (not corrections), newest first, every one of them that matches. */
 export async function loadClaims(supabase: SupabaseClient, f: ClaimFilter = {}): Promise<ClaimRow[]> {
@@ -64,6 +64,8 @@ export async function loadClaims(supabase: SupabaseClient, f: ClaimFilter = {}):
     if (f.month) q = q.gte("created_at", f.month.from).lt("created_at", f.month.to);
     if (f.ticket) q = q.eq("ticket_id", f.ticket);
     if (f.owed) q = q.gt("owed_cents", 0);
+    // Repaid, then corrected to less: money to get back (migration 0053).
+    if (f.overpaid) q = q.lt("owed_cents", 0);
     return q.order("id", { ascending: false }).range(from, to);
   });
 }
@@ -71,4 +73,12 @@ export async function loadClaims(supabase: SupabaseClient, f: ClaimFilter = {}):
 /** Claims and corrections still waiting for a decision, oldest first. */
 export async function loadWaiting(supabase: SupabaseClient): Promise<EntryRow[]> {
   return allRows<EntryRow>((from, to) => supabase.from("expense_entries").select("*").in("state", ["waiting", "second"]).order("id").range(from, to));
+}
+
+/** Who entered each claim that these corrections correct (migration 0053). */
+export async function loadCorrectedBy(supabase: SupabaseClient, rows: EntryRow[]): Promise<Map<number, string | null>> {
+  const ids = [...new Set(rows.map((r) => r.corrects_id).filter((x): x is number => x !== null))];
+  if (!ids.length) return new Map();
+  const { data } = await supabase.from("expense_claims").select("id, created_by").in("id", ids);
+  return new Map((data ?? []).map((c) => [c.id as number, c.created_by as string | null]));
 }

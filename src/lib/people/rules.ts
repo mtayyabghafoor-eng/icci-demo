@@ -76,7 +76,7 @@ export const PERSON_STATUS: Record<"active" | "off", { word: string; tone: Tone 
 
 export function friendlyPeopleError(message: string | undefined): string {
   if (!message) return "Something went wrong. Please try again.";
-  if (/switched off/i.test(message)) return message;
+  if (/switched off|already a person called/i.test(message)) return message;
   if (/row-level security|permission denied/i.test(message)) return "Your account is not allowed to do this.";
   if (/phone/i.test(message)) return "That does not look like a phone number.";
   if (/email/i.test(message)) return "That does not look like an email address.";

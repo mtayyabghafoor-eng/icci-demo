@@ -222,6 +222,10 @@ async function Content({ searchParams }: { searchParams: PageProps<"/board-repor
                 rows={[
                   ["Claims waiting for a decision", String(a.claims_waiting)],
                   ["Owed back to people", `${formatEuro(a.owed_cents)} (${a.owed_people} ${a.owed_people === 1 ? "person" : "people"})`],
+                  // Migration 0053; final copies made before it have no such figure.
+                  ...(typeof a.overpaid_cents === "number"
+                    ? [["Paid too much, to get back", `${formatEuro(a.overpaid_cents)} (${a.overpaid_people} ${a.overpaid_people === 1 ? "person" : "people"})`] as [string, string]]
+                    : []),
                 ]}
               />
               <Rows

@@ -101,7 +101,11 @@ test("add a person, see the same-name warning, edit, switch off and back on", as
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByTestId("same-name-warning")).toContainText("already a person called");
   await s(page, "person-same-name", project);
-  // Go back to the first person instead of saving a second.
+  // "Yes, this is a different person" saves the second one; the database
+  // keeps that answer (migration 0053).
+  await page.getByRole("button", { name: "Yes, this is a different person: save" }).click();
+  await expect(page.getByTestId("notice")).toHaveText(/added/i);
+  expect(page.url()).not.toBe(firstUrl);
   await page.goto(firstUrl);
 
   // Edit the phone.

@@ -50,8 +50,9 @@ are built (26 Nov 2026, overnight, committed but not pushed; migrations
 0050 and 0051 are not on ICCI Staging yet). Next: the owner reviews them,
 P5.7, the security review, is done (26 Nov 2026,
 docs/security-review-2026-11-26.md: 2 medium, 3 low findings, nothing
-fixed yet). Findings 1 and 2 are fixed (migration 0052, 26 Nov 2026);
-3 to 5 wait for the owner. 0050 to 0052 are not on ICCI Staging yet. Before real use: Resend as Supabase's mail sender, then switch
+fixed yet). Findings 1 and 2 are fixed (migration 0052), 3 and 4 too
+(migration 0053, both 26 Nov 2026); 5 waits for the owner. 0050 to 0053
+are not on ICCI Staging yet. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -459,6 +460,17 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   confirm, especially repayments counted by the day recorded.
 
 ## Session log
+
+- 26 Nov 2026, session 47 continued (security fixes 3 and 4, with the
+  owner's extras A and B; owner said "Go with A and B"). Migration 0053:
+  whoever entered a claim or its approved correction cannot record or
+  withdraw its repayment; a same-name person needs "Yes, this is a
+  different person" (people.same_name_confirmed, checked by the database);
+  whoever entered a claim cannot decide on a correction of it; money to get
+  back (repaid, then corrected to less) shows on the claim, under Awaiting
+  repayment and in the Board report (overpaid_cents, overpaid_people).
+  Tests first; screens slice-p5-7-*. Not pushed; 0053 not on ICCI Staging.
+  Next: finding 5 if the owner wants it, then Staging and push.
 
 - 26 Nov 2026, session 47 continued (security fixes 1 and 2; owner said
   "go"). Migration 0052: a Super Admin asks for a new amount and a

@@ -322,6 +322,9 @@ Making it again keeps both copies, like rota publications.
    **Done 26 Nov 2026**: docs/security-review-2026-11-26.md (five
    findings). Findings 1 and 2 fixed the same day (migration 0052): a
    new amount needs a second Super Admin; a used name is locked.
+   Findings 3 and 4 fixed the same day (migration 0053): whoever entered
+   a claim does not pay it back or decide on its corrections; a same-name
+   person needs a "different person" answer; money to get back is shown.
 
 ## 11. Phase 5 acceptance checks (proposed)
 

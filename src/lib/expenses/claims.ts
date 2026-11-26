@@ -300,9 +300,13 @@ export function mayDecide(
   linked: boolean,
   claim: { state: ClaimState; created_by: string | null; first_by: string | null },
   payerIsMe: boolean,
+  /** For a correction: who entered the claim it corrects (migration 0053). */
+  correctsEnteredBy: string | null = null,
 ): { ok: true } | { ok: false; why: string } {
   if (claim.state !== "waiting" && claim.state !== "second") return { ok: false, why: "This claim has been decided." };
   if (me === claim.created_by) return { ok: false, why: "You entered this claim, so a different admin must decide on it." };
+  if (correctsEnteredBy && me === correctsEnteredBy)
+    return { ok: false, why: "You entered the claim this corrects, so a different admin must decide on the correction." };
   if (payerIsMe) return { ok: false, why: "You paid this money yourself, so a different admin must decide on it." };
   if (!linked) return { ok: false, why: "Your account is not linked to your record in People yet, so you cannot approve or reject claims." };
   if (claim.state === "second" && me === claim.first_by) return { ok: false, why: "You gave the first approval, so a different admin must give the second." };

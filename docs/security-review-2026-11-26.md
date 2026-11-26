@@ -35,8 +35,8 @@ admin. Two are worth fixing before real money is used.
 | --- | --- | --- |
 | 1 | Medium | One Super Admin can switch off the second approval, approve alone, and switch it back (**fixed**, 0052) |
 | 2 | Medium | Renaming a fund or category quietly changes past months' files (**fixed**, 0052) |
-| 3 | Low to medium | An admin can be paid back through a second People record they made themselves |
-| 4 | Low | Lowering a claim after it was repaid hides the overpayment |
+| 3 | Low to medium | An admin can be paid back through a second People record they made themselves (**fixed**, 0053) |
+| 4 | Low | Lowering a claim after it was repaid hides the overpayment (**fixed**, 0053) |
 | 5 | Low | Files can be put in the receipt store without any claim |
 
 Plus two notes that need no fix now (section "Notes").
@@ -89,6 +89,12 @@ same day, before any claim uses it, stays allowed.
 
 ## 3. Paying yourself back through a second People record (Low to medium)
 
+**Fixed 26 Nov 2026** (migration 0053): whoever entered a claim, or an
+approved correction of it, cannot record or withdraw its repayment. The
+owner also chose the extra rule: a new person with the same name as
+someone already in People needs "Yes, this is a different person", now
+checked by the database and kept on the record.
+
 **What happens.** The rule "never record a repayment to yourself" checks
 only the People record linked to your own account. A Centre Admin can add
 a second People record with their own name (Centre Admins may add people),
@@ -107,6 +113,12 @@ person" tick. The real protection stays the bank: the Treasurer pays the
 bank details they hold, not a name in the app.
 
 ## 4. A lower correction after repayment hides an overpayment (Low)
+
+**Fixed 26 Nov 2026** (migration 0053): the claim shows "Paid too much:
+€X to get back", Awaiting repayment lists such claims under their own
+heading, and the Board report shows "Paid too much, to get back". The
+owner also chose the optional rule: whoever entered a claim cannot
+approve or reject a correction of it.
 
 **What happens.** If a claim is repaid and then corrected to a lower
 amount, the app works out "owed" as a minus figure (the person was paid
@@ -155,5 +167,6 @@ a monthly check that lists files not on any claim.
 ## Suggested order
 
 Fix 1 and 2 first (one small migration, with tests written first): **done
-26 Nov 2026, migration 0052**. Then 3 and 4 together, then 5. Each fix follows the usual rules: a numbered
+26 Nov 2026, migration 0052**. Then 3 and 4 together: **done 26 Nov 2026,
+migration 0053**. Then 5. Each fix follows the usual rules: a numbered
 migration, tests for every role and a signed-out visitor, full test suite.

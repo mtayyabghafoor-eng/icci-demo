@@ -107,7 +107,10 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
 
   const isCorrection = entry.kind === "correction";
   const payerIsMe = Boolean(entry.paid_by_person_id && names.me?.id === entry.paid_by_person_id);
-  const decide = mayDecide(me.id, linked, entry, payerIsMe);
+  const decide = mayDecide(me.id, linked, entry, payerIsMe, isCorrection ? claim.created_by : null);
+  // Whoever entered the claim, or an approved correction of it, never records
+  // or withdraws its repayment (migration 0053).
+  const enteredByMe = claim.created_by === me.id || corrections.some((c) => c.state === "approved" && c.created_by === me.id);
   const waitingCorrection = corrections.find((c) => c.state === "waiting" || c.state === "second");
   const label = STATE_LABEL[entry.state];
   const title = isCorrection ? `Correction ${claimNumber(entry.id)}` : claimNumber(entry.id);
@@ -161,7 +164,7 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
           {claim.owed_cents > 0
             ? `${formatEuro(claim.owed_cents)} still owed${claim.repaid_cents ? ` (${formatEuro(claim.repaid_cents)} paid back)` : ""}`
             : claim.owed_cents < 0
-              ? `Overpaid by ${formatEuro(-claim.owed_cents)}`
+              ? `Paid too much: ${formatEuro(-claim.owed_cents)} to get back (${formatEuro(claim.repaid_cents)} paid back)`
               : `Yes, ${formatEuro(claim.repaid_cents)}`}
         </span>
       ),
@@ -374,7 +377,10 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
                         {formatDate(r.paid_on)}, {METHOD_LABEL[r.method]}
                         {r.reference ? `, reference ${r.reference}` : ""}, to <span dir="auto">{names.personName(r.person_id)}</span>
                       </p>
-                      {names.me?.id !== r.person_id && <WithdrawRepaymentForm repaymentId={r.id} claimId={claimId} />}
+                      {names.me?.id !== r.person_id && !enteredByMe && <WithdrawRepaymentForm repaymentId={r.id} claimId={claimId} />}
+                      {names.me?.id !== r.person_id && enteredByMe && (
+                        <p className="text-sm text-icci-ink-60">You entered this claim, so if this repayment is wrong another admin withdraws it.</p>
+                      )}
                     </li>
                   ))}
               </ul>

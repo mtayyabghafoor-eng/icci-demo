@@ -185,12 +185,38 @@ describe("what a person record accepts", () => {
     expect((await addPerson(c, { email: "test.person@example.test" })).error).toBeNull();
   });
 
-  it("two people may share the same name (the screen warns instead)", async () => {
+  // Security review 26 Nov 2026, finding 3, owner's choice A (migration
+  // 0053): two people may share a name, but only when the admin says "yes,
+  // this is a different person", and that answer is kept.
+  it("two people may share a name only with a 'different person' tick, which is kept", async () => {
     const name = testName("same name");
-    await mustAdd({ full_name: name });
-    await mustAdd({ full_name: name });
+    const first = await mustAdd({ full_name: name });
+    expect((first as Person & { same_name_confirmed: boolean }).same_name_confirmed).toBe(false);
+    for (const role of ["centre_admin", "super_admin"]) {
+      const twin = await addPerson(await asRole(role), { full_name: `  ${name.toLowerCase()} ` });
+      expect(twin.error?.message, role).toMatch(/already a person called.*different person/i);
+    }
+    const second = await mustAdd({ full_name: name, same_name_confirmed: true });
+    expect((second as Person & { same_name_confirmed: boolean }).same_name_confirmed).toBe(true);
     const { data } = await (await asRole("centre_admin")).from("people").select("id").eq("full_name", name);
     expect(data).toHaveLength(2);
+
+    // The tick cannot be faked where no name is shared, nor taken away later.
+    const alone = await mustAdd({ same_name_confirmed: true });
+    expect((alone as Person & { same_name_confirmed: boolean }).same_name_confirmed).toBe(false);
+    const c = await asRole("centre_admin");
+    const kept = await c.from("people").update({ same_name_confirmed: false, phone: "+353 1 000 0101" }).eq("id", second.id).select("same_name_confirmed").single();
+    expect(kept.error).toBeNull();
+    expect(kept.data!.same_name_confirmed).toBe(true);
+
+    // Renaming someone to a name already there needs the tick too.
+    const rename = await c.from("people").update({ full_name: name }).eq("id", alone.id);
+    expect(rename.error?.message).toMatch(/already a person called/i);
+    expect((await c.from("people").update({ full_name: name, same_name_confirmed: true }).eq("id", alone.id)).error).toBeNull();
+
+    // The seed and migrations (master key, nobody signed in) are not asked.
+    const m = await masterKeyClient().from("people").insert(await personFields({ full_name: name })).select("id").single();
+    expect(m.error).toBeNull();
   });
 
   it("has no place for an address, date of birth, notes, PPS number or documents", async () => {

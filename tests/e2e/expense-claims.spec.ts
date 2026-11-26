@@ -228,6 +228,60 @@ test("an approved claim is corrected with a new entry that another admin approve
   await s(page, "claim-corrected", project);
 });
 
+// Security review 26 Nov 2026, findings 3 and 4 (migration 0053): whoever
+// entered a claim does not pay it back, and a repaid claim corrected to less
+// shows the money to get back, on the claim, under Awaiting repayment and in
+// the Board report.
+test("a repaid claim corrected to less shows money to get back; whoever entered it cannot pay it back", async ({ page }, info) => {
+  const project = info.project.name;
+  const approver = await apiAs(second.email);
+  const other = await apiAs(superB.email);
+  const fund = (await approver.from("expense_funds").select("id").eq("name", "Unrestricted").single()).data!.id;
+  // Repaid at €40, then corrected to €10 by a different admin.
+  const repaid = await claimByApi({ amountCents: 4000 });
+  expect((await approver.from("expense_decisions").insert({ claim_id: repaid, kind: "approved", fund_id: fund })).error).toBeNull();
+  expect((await other.rpc("record_expense_repayment", { p_claim_ids: [repaid], p_paid_on: new Date().toISOString().slice(0, 10), p_method: "cash" })).error).toBeNull();
+  const r = (await other.from("expense_claim_list").select("*").eq("id", repaid).single()).data!;
+  const fix = await other.rpc("enter_expense_claim", {
+    p_amount_cents: 1000,
+    p_receipt_date: r.current_receipt_date,
+    p_category_id: r.current_category_id,
+    p_description: null,
+    p_payment: r.payment,
+    p_paid_by_person_id: r.paid_by_person_id,
+    p_suggested_fund_id: fund,
+    p_corrects_id: repaid,
+    p_correction_reason: "Test: half of it was for the shop",
+  });
+  expect(fix.error).toBeNull();
+  expect((await approver.from("expense_decisions").insert({ claim_id: fix.data, kind: "approved", fund_id: fund })).error).toBeNull();
+  // One more approved claim, still owed, entered by the Centre Admin.
+  const owed = await claimByApi({ amountCents: 1234 });
+  expect((await approver.from("expense_decisions").insert({ claim_id: owed, kind: "approved", fund_id: fund })).error).toBeNull();
+
+  await signInAs(page, centre, "/expenses");
+  await page.getByRole("link", { name: "Awaiting repayment" }).click();
+  const group = page.getByTestId("owed-person").filter({ hasText: `EXP-${String(owed).padStart(4, "0")}` });
+  await expect(group).toContainText("another admin");
+  const back = page.getByTestId("to-get-back");
+  await expect(back).toContainText("Paid too much");
+  await expect(back.getByTestId("overpaid-row").filter({ hasText: `EXP-${String(repaid).padStart(4, "0")}` })).toContainText("€30.00 to get back");
+  await back.scrollIntoViewIfNeeded();
+  await shot(page, "to-get-back", project, "p5-7");
+
+  await page.goto(`/expenses/${repaid}`);
+  await expect(shown(page, "claim-owed")).toContainText("Paid too much: €30.00 to get back");
+  await expect(shown(page, "claim-repayments")).toContainText("another admin withdraws it");
+  await expect(page.getByText("Withdraw this repayment")).toHaveCount(0);
+  await shot(page, "claim-paid-too-much", project, "p5-7");
+
+  const month = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Dublin" }).slice(0, 7);
+  await page.goto(`/board-report?month=${month}`);
+  await expect(page.getByText("Paid too much, to get back")).toBeVisible();
+  await page.getByText("Paid too much, to get back").scrollIntoViewIfNeeded();
+  await shot(page, "board-to-get-back", project, "p5-7");
+});
+
 test("a ticket offers 'Add an expense claim', filled in from the ticket", async ({ page }) => {
   const c = await apiAs(centre.email);
   const { data: t } = await c.from("maintenance_tickets").select("id").order("id").limit(1).single();

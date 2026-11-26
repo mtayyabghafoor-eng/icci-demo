@@ -10,10 +10,13 @@
 //   * Nobody approves their own entry or money they paid; an approver must
 //     be linked to People; above €500 (or €50 without a receipt) a third
 //     person gives a second approval.
-//   * Repayments: never to yourself, only approved claims of one person's
+//   * Repayments: never to yourself, never by whoever entered the claim or
+//     its correction (migration 0053), only approved claims of one person's
 //     own money, never twice; withdrawn once with a reason.
 //   * Corrections: only of an approved claim, one at a time, same approval
-//     rules, the amount rule on the corrected total.
+//     rules, the amount rule on the corrected total; not decided by whoever
+//     entered the claim (0053). A repaid claim corrected to less shows money
+//     to get back (0053).
 import { describe, expect, it } from "vitest";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { asRole, masterKeyClient, passwordOnlyClient, signedInClient, signedOutClient, testName, userIdOf } from "./clients";
@@ -437,7 +440,7 @@ describe("paying people back", () => {
 
   it("a wrong repayment is withdrawn once, with a reason; the claims are owed again", async () => {
     const a = await approvedFor(await payer(4), 900);
-    const { data: id } = await repay(await centre(), [a]);
+    const { data: id } = await repay(await superA(), [a]);
     const f = await financeA();
     const noReason = await f.from("expense_repayments").update({ withdrawn_reason: " " }).eq("id", id);
     expect(noReason.error?.message).toMatch(/say why|check/i);
@@ -448,6 +451,42 @@ describe("paying people back", () => {
     expect((await masterKeyClient().from("expense_repayments").delete().eq("id", id)).error).not.toBeNull();
     // Claims cannot be slipped into a repayment later.
     expect((await f.from("expense_repayment_claims").insert({ repayment_id: id, claim_id: a, amount_cents: 1 })).error?.message).toMatch(/when it is recorded/i);
+  });
+
+  // Security review 26 Nov 2026, finding 3 (migration 0053): someone could
+  // enter a claim for a second People record of their own and pay it back
+  // themself. Whoever entered a claim (or its approved correction) cannot
+  // record or withdraw its repayment.
+  it("whoever entered a claim cannot record or withdraw its repayment", async () => {
+    const a = await approvedFor(await payer(1), 700); // entered by the Centre Admin
+    expect((await repay(await centre(), [a])).error?.message).toMatch(/you entered EXP-\d+.*different admin/i);
+    expect((await row(a)).owed_cents).toBe(700);
+    const { data: id, error } = await repay(await superA(), [a]);
+    expect(error).toBeNull();
+    const withdraw = await (await centre()).from("expense_repayments").update({ withdrawn_reason: "Test: wrong" }).eq("id", id);
+    expect(withdraw.error?.message).toMatch(/you entered a claim in this repayment/i);
+    expect((await row(a)).owed_cents).toBe(0);
+    expect((await (await financeA()).from("expense_repayments").update({ withdrawn_reason: "Test: wrong" }).eq("id", id)).error).toBeNull();
+    expect((await row(a)).owed_cents).toBe(700);
+  });
+
+  it("whoever entered an approved correction of a claim cannot record its repayment", async () => {
+    const a = await approvedFor(await payer(2), 1000);
+    const { data: fix, error } = await (await financeB()).rpc("enter_expense_claim", {
+      p_amount_cents: 1600,
+      p_receipt_date: "2026-11-01",
+      p_category_id: (await ids()).other,
+      p_description: null,
+      p_payment: "personal",
+      p_paid_by_person_id: await payer(2),
+      p_suggested_fund_id: (await ids()).unrestricted,
+      p_corrects_id: a,
+      p_correction_reason: "Test: the receipt said more",
+    });
+    expect(error).toBeNull();
+    await approve(await centreB(), fix as number);
+    expect((await repay(await financeB(), [a])).error?.message).toMatch(/you entered a correction of EXP-\d+/i);
+    expect((await repay(await superA(), [a])).error).toBeNull();
   });
 });
 
@@ -545,5 +584,49 @@ describe("correcting an approved claim", () => {
     const link = await masterKeyClient().from("expense_repayment_claims").select("amount_cents").eq("repayment_id", rep).single();
     expect(link.data!.amount_cents).toBe(500);
     expect((await row(id)).owed_cents).toBe(0);
+  });
+
+  // Security review finding 4 (migration 0053): a repaid claim corrected to
+  // less shows the money to get back, and the Board report counts it.
+  it("a repaid claim corrected downwards shows money to get back, in the list and the Board report", async () => {
+    const c = await centre();
+    const id = await newClaim(c, { amount: 4000, paidBy: await payer(3) });
+    await approve(await centreB(), id);
+    await (await financeA()).rpc("record_expense_repayment", { p_claim_ids: [id], p_paid_on: "2026-11-20", p_method: "cash" });
+    const { data: fix } = await correct(await superB(), id, { amount: 1000 });
+    await approve(await centreB(), fix as number);
+    expect((await row(id)).owed_cents).toBe(-3000);
+    // Nothing more can be "paid back" on it.
+    expect((await (await financeA()).rpc("record_expense_repayment", { p_claim_ids: [id], p_paid_on: "2026-11-21", p_method: "cash" })).error?.message).toMatch(/already been paid back/i);
+    // The three roles see it among the claims with money to get back.
+    for (const who of [superA, centre, financeA]) {
+      const { data } = await (await who()).from("expense_claim_list").select("id").lt("owed_cents", 0);
+      expect(data!.map((r) => r.id)).toContain(id);
+    }
+    const month = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Dublin" }).slice(0, 7);
+    const { data: report, error } = await (await financeA()).rpc("board_report", { p_month: month });
+    expect(error).toBeNull();
+    const asAt = (report as { as_at: Record<string, number> }).as_at;
+    expect(asAt.overpaid_cents).toBeGreaterThanOrEqual(3000);
+    expect(asAt.overpaid_people).toBeGreaterThanOrEqual(1);
+    const { data: all } = await masterKeyClient().from("expense_claim_list").select("owed_cents, paid_by_person_id").lt("owed_cents", 0);
+    expect(asAt.overpaid_cents).toBe(all!.reduce((n, r) => n - r.owed_cents, 0));
+    expect(asAt.overpaid_people).toBe(new Set(all!.map((r) => r.paid_by_person_id)).size);
+  });
+
+  // Owner's choice B with the review (migration 0053): whoever entered a
+  // claim cannot approve or reject a correction of it.
+  it("whoever entered a claim cannot decide on a correction of it", async () => {
+    const id = await newClaim(await centre(), { amount: 2500 });
+    await approve(await centreB(), id);
+    const { data: fix, error } = await correct(await superB(), id, { amount: 2000 });
+    expect(error).toBeNull();
+    expect((await decide(await centre(), fix as number, "approved", { fund_id: (await ids()).unrestricted })).error?.message).toMatch(
+      /you entered the claim this corrects/i,
+    );
+    expect((await decide(await centre(), fix as number, "rejected", { note: "Test: no" })).error?.message).toMatch(/you entered the claim this corrects/i);
+    expect((await entry(fix as number)).state).toBe("waiting");
+    await approve(await centreB(), fix as number);
+    expect((await row(id)).current_amount_cents).toBe(2000);
   });
 });
