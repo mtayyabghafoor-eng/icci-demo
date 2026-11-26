@@ -8,6 +8,7 @@ import type { RegisterRow } from "@/lib/assets/lists";
 import { categoryPath, type CategoryRow } from "@/lib/categories/rules";
 import { locationPath, type LocationRow } from "@/lib/items/rules";
 import { allRows } from "@/lib/supabase/all-rows";
+import { pageRows } from "@/lib/supabase/page-rows";
 
 type Raw = {
   id: string;
@@ -67,4 +68,45 @@ export async function loadRegister(supabase: SupabaseClient, placeId: string) {
     };
   });
   return { rows, place, placeName: place ? lookups.locationName.get(place)! : "", placeIdOf, lookups };
+}
+
+export type PlaceTotal = { place: string; location_id: string; assets: number; total_cents: number; without_value: number };
+
+/**
+ * Round C2: what the register page shows, without reading every asset. The
+ * totals by place are counted by the database (asset_register_totals,
+ * migration 0057); with a place chosen, its assets (and those inside it)
+ * come one page at a time, most valuable first.
+ */
+export async function loadRegisterPage(supabase: SupabaseClient, placeId: string, page: number, size: number) {
+  const lookups = await loadRegisterNames(supabase);
+  const place = lookups.locationName.has(placeId) ? placeId : "";
+  const totalsRes = await supabase.rpc("asset_register_totals", { p_place: place || null });
+  if (totalsRes.error) throw new Error(`A list could not be loaded: ${totalsRes.error.message}`);
+  const totals: PlaceTotal[] = ((totalsRes.data ?? []) as { location_id: string; assets: number; total_cents: number; without_value: number }[])
+    .map((t) => ({ ...t, total_cents: Number(t.total_cents), place: lookups.locationName.get(t.location_id) ?? "Unknown location" }))
+    .sort((a, b) => a.place.localeCompare(b.place));
+
+  const shown = place
+    ? await pageRows<Raw>(page, size, (from, to) =>
+        supabase
+          .rpc("asset_register_rows", { p_place: place }, { count: "exact" })
+          .order("value_cents", { ascending: false, nullsFirst: false })
+          .order("name")
+          .order("id")
+          .range(from, to),
+      )
+    : { rows: [] as Raw[], page: 1, pages: 1, total: 0 };
+  const rows: RegisterRow[] = shown.rows.map((r) => ({
+    id: r.id,
+    label_serial: r.label_serial,
+    name: r.name,
+    category: lookups.categoryName.get(r.category_id) ?? "",
+    place: lookups.locationName.get(r.location_id) ?? "Unknown location",
+    condition: r.condition,
+    value_cents: r.value_cents,
+    purchase_date: r.purchase_date,
+    warranty_end: r.warranty_end,
+  }));
+  return { totals, rows, page: shown.page, assetsShown: shown.total, place, placeName: place ? lookups.locationName.get(place)! : "", lookups };
 }

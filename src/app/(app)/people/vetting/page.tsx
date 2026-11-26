@@ -10,12 +10,12 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
-import { PAGE_SIZE, pageOf, readPage } from "@/lib/ui/text";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { statusLine, todayInDublin, VETTING_STATUS, VETTING_YEARS, type VettingStatus } from "@/lib/vetting/rules";
 import { SecondaryLink, StatusBadge } from "../../items/ui";
 import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists } from "../data";
-import { loadVettingList, readVettingFilter } from "./data";
+import { loadVettingPage, readVettingFilter } from "./data";
 
 export const metadata: Metadata = { title: "Garda vetting | ICCI Control Dashboard" };
 
@@ -44,7 +44,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/vetting
   const lists = await loadPeopleLists(supabase);
   const filter = readVettingFilter(params, new Set(lists.sectionName.keys()));
   // Everyone who matches is counted, worst first; one page of 50 is drawn.
-  const shown = pageOf(await loadVettingList(supabase, filter), readPage(params.page), PAGE_SIZE);
+  const shown = await loadVettingPage(supabase, filter, readPage(params.page), PAGE_SIZE);
   const rows = shown.rows;
   const today = todayInDublin();
   const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";

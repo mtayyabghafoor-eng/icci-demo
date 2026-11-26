@@ -220,11 +220,12 @@ describe("item history", () => {
     const { data, error } = await (await asRole("centre_admin")).rpc("item_history", { p_item_id: item.id });
     expect(error).toBeNull();
     expect(data).toHaveLength(2);
-    expect(data[0]).toMatchObject({ action: "insert", changed_by_name: "Test Centre Admin" });
-    expect(data[0].new_values.name).toBe(item.name);
-    expect(data[1]).toMatchObject({ action: "update", changed_by_name: "Test Super Admin" });
-    expect(data[1].old_values.name).toBe(item.name);
-    expect(data[1].new_values.name).toBe(item.name + " v2");
+    // Round C2 (migration 0057): newest first.
+    expect(data[1]).toMatchObject({ action: "insert", changed_by_name: "Test Centre Admin" });
+    expect(data[1].new_values.name).toBe(item.name);
+    expect(data[0]).toMatchObject({ action: "update", changed_by_name: "Test Super Admin" });
+    expect(data[0].old_values.name).toBe(item.name);
+    expect(data[0].new_values.name).toBe(item.name + " v2");
   });
 
   it("a centre admin can see an item's history but still not the audit log itself", async () => {

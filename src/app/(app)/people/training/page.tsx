@@ -12,12 +12,12 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
 import { DUE_WITHIN_DAYS, STATUS_ORDER, TRAINING_STATUS, trainingLine } from "@/lib/training/rules";
-import { PAGE_SIZE, pageOf, readPage } from "@/lib/ui/text";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { SecondaryLink, StatusBadge } from "../../items/ui";
 import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists } from "../data";
-import { loadTrainingList, loadTrainingTypes, readTrainingFilter } from "./data";
+import { loadTrainingPage, loadTrainingTypes, readTrainingFilter } from "./data";
 
 export const metadata: Metadata = { title: "Training | ICCI Control Dashboard" };
 
@@ -44,7 +44,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
   const [lists, types] = await Promise.all([loadPeopleLists(supabase), loadTrainingTypes(supabase)]);
   const typeName = new Map(types.map((t) => [t.id, t.name]));
   const filter = readTrainingFilter(params, new Set(typeName.keys()), new Set(lists.sectionName.keys()));
-  const shown = pageOf(await loadTrainingList(supabase, filter), readPage(params.page), PAGE_SIZE);
+  const shown = await loadTrainingPage(supabase, filter, readPage(params.page), PAGE_SIZE);
   const rows = shown.rows;
   const today = todayInDublin();
   const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";

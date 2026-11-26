@@ -1,6 +1,7 @@
 // What the vehicle screens read. Reads as the signed-in admin, so the
 // database's own rules apply.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { allRows } from "@/lib/supabase/all-rows";
 import type { Choice } from "./forms";
 
 /** Switched-on people, by name, for the "Keeper" picker (plus the current keeper, even if switched off). */
@@ -8,7 +9,10 @@ export async function keeperChoices(supabase: SupabaseClient, current?: string |
   // Only switched-on people are asked for (the directory also holds many
   // switched-off people), plus the current one if they are switched off.
   const [{ data }, { data: extra }] = await Promise.all([
-    supabase.from("people").select("id, full_name, active").eq("active", true).order("full_name").limit(5000),
+    // Round C2: every one, page by page (one request returns at most 1,000).
+    allRows<{ id: string; full_name: string; active: boolean }>((from, to) =>
+      supabase.from("people").select("id, full_name, active").eq("active", true).order("full_name").order("id").range(from, to),
+    ).then((rows) => ({ data: rows })),
     current ? supabase.from("people").select("id, full_name, active").eq("id", current).eq("active", false) : Promise.resolve({ data: [] }),
   ]);
   return [...((data ?? []) as { id: string; full_name: string; active: boolean }[]), ...((extra ?? []) as { id: string; full_name: string; active: boolean }[])].map(

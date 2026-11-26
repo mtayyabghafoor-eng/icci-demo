@@ -26,7 +26,9 @@ import { createClient } from "@/lib/supabase/server";
 import { daysBetween, todayInDublin } from "@/lib/vetting/rules";
 import { fieldClass, PrimaryLink, SecondaryLink, StatusBadge } from "../items/ui";
 import { CannotSeeRenewals } from "./cannot-see";
-import { loadRegister, ownerNames } from "./data";
+import { loadRegisterPage, ownerNames } from "./data";
+import { Pagination } from "@/components/ui";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Renewals | ICCI Control Dashboard" };
 
@@ -56,9 +58,17 @@ export default function RenewalsPage(props: PageProps<"/renewals">) {
 async function List({ searchParams }: Pick<PageProps<"/renewals">, "searchParams">) {
   const me = await requireAdmin();
   if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSeeRenewals />;
-  const filter = readRegisterFilter(await searchParams);
+  const params = await searchParams;
+  const filter = readRegisterFilter(params);
   const supabase = await createClient();
-  const rows = await loadRegister(supabase, filter);
+  // Round C2: one page of 50 from the database.
+  const { rows, page, total } = await loadRegisterPage(supabase, filter, readPage(params.page), PAGE_SIZE);
+  const pageLink = (n: number) => {
+    const p = new URLSearchParams({ ...(filter.show !== "attention" && { show: filter.show }), ...(filter.from && { from: filter.from }) });
+    if (n > 1) p.set("page", String(n));
+    const s = p.toString();
+    return s ? `/renewals?${s}` : "/renewals";
+  };
   const owners = await ownerNames(supabase, rows);
   const today = todayInDublin();
   const filtered = filter.show !== "attention" || filter.from !== "";
@@ -109,7 +119,7 @@ async function List({ searchParams }: Pick<PageProps<"/renewals">, "searchParams
             ? filter.show === "attention" || filter.show === "soon"
               ? "Nothing is overdue or due soon."
               : "Nothing matches."
-            : `${rows.length} ${rows.length === 1 ? "renewal" : "renewals"}`}
+            : `${total} ${total === 1 ? "renewal" : "renewals"}`}
         </p>
         <div className="flex flex-wrap gap-3">
           <SecondaryLink href="/reminders">Email reminders</SecondaryLink>
@@ -117,6 +127,7 @@ async function List({ searchParams }: Pick<PageProps<"/renewals">, "searchParams
         </div>
       </div>
       <Rows rows={rows} owners={owners} today={today} />
+      {total > PAGE_SIZE && <Pagination page={page} size={PAGE_SIZE} total={total} hrefFor={pageLink} />}
       <p className="mt-4 text-sm">Only dates and short notes are kept here, never the certificates, contracts or policies themselves.</p>
     </>
   );

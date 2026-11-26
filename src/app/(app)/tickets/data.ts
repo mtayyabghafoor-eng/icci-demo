@@ -4,7 +4,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { locationAndInside, locationOptions } from "@/lib/items/rules";
 import { allRows } from "@/lib/supabase/all-rows";
-import { listOrder, TICKET_COLUMNS, type TicketCsvRow, type TicketFilters, type TicketRow } from "@/lib/tickets/rules";
+import { pageRows } from "@/lib/supabase/page-rows";
+import { TICKET_COLUMNS, type TicketCsvRow, type TicketFilters, type TicketRow } from "@/lib/tickets/rules";
 import { loadLookups } from "../items/data";
 
 export const TICKET_PHOTO_BUCKET = "ticket-photos";
@@ -31,8 +32,14 @@ export async function assetNames(supabase: SupabaseClient, ids: (string | null)[
   return names;
 }
 
-export async function loadTickets(supabase: SupabaseClient, f: TicketFilters) {
-  const lookups = await loadLookups(supabase);
+type Lookups = Awaited<ReturnType<typeof loadLookups>>;
+
+/**
+ * The filtered list, in the list's order (worked out by the database, the
+ * same order as listOrder: not closed first, urgent at the top; then the
+ * most recently closed). Round C2: the page asks for one page at a time.
+ */
+async function ticketQuery(supabase: SupabaseClient, f: TicketFilters, lookups: Lookups, count: boolean) {
   const places = f.place ? locationAndInside(f.place, lookups.locations) : null;
   // P1.21: tickets passed to one company (a "referred" entry naming it).
   const referred = f.company
@@ -46,9 +53,15 @@ export async function loadTickets(supabase: SupabaseClient, f: TicketFilters) {
         ),
       ]
     : null;
-
-  const rows = await allRows<TicketRow>((from, to) => {
-    let q = supabase.from("maintenance_tickets").select(TICKET_COLUMNS).order("id").range(from, to);
+  const filtered = (onlyUrgentOpen = false) => {
+    let q = supabase
+      .from("maintenance_ticket_list")
+      .select(TICKET_COLUMNS, count ? { count: "exact", head: onlyUrgentOpen } : undefined)
+      .order("closed_rank")
+      .order("priority_rank")
+      .order("status_rank")
+      .order("order_time")
+      .order("order_id");
     if (f.status === "not_closed") q = q.neq("status", "closed");
     else if (f.status !== "all") q = q.eq("status", f.status);
     if (f.priority) q = q.eq("priority", f.priority);
@@ -56,22 +69,45 @@ export async function loadTickets(supabase: SupabaseClient, f: TicketFilters) {
     if (referred) q = q.in("id", referred.length ? referred : [0]);
     if (f.assigned === "nobody") q = q.is("assigned_person_id", null);
     else if (f.assigned) q = q.eq("assigned_person_id", f.assigned);
+    if (onlyUrgentOpen) q = q.eq("priority", "urgent").neq("status", "closed");
     return q;
-  });
-  rows.sort(listOrder);
+  };
+  return filtered;
+}
 
+/** The names that go with each ticket (place, asset, reported by, assigned to). */
+async function withNames(supabase: SupabaseClient, rows: TicketRow[], lookups: Lookups): Promise<TicketCsvRow[]> {
   const [people, assets] = await Promise.all([
     personNames(supabase, rows.flatMap((r) => [r.reported_by_person_id, r.assigned_person_id])),
     assetNames(supabase, rows.map((r) => r.item_id)),
   ]);
-  const withNames: TicketCsvRow[] = rows.map((r) => ({
+  return rows.map((r) => ({
     ...r,
     place: lookups.locationName.get(r.location_id) ?? "Unknown location",
     asset: r.item_id ? (assets.get(r.item_id) ?? "") : "",
     reporter: r.reported_by_person_id ? (people.get(r.reported_by_person_id) ?? "A person in the directory") : (r.reported_by ?? ""),
     assignee: r.assigned_person_id ? (people.get(r.assigned_person_id) ?? "A person in the directory") : "",
   }));
-  return { rows: withNames, lookups };
+}
+
+/** Every ticket that matches (the CSV file). */
+export async function loadTickets(supabase: SupabaseClient, f: TicketFilters) {
+  const lookups = await loadLookups(supabase);
+  const q = await ticketQuery(supabase, f, lookups, false);
+  const rows = await allRows<TicketRow>((from, to) => q().range(from, to));
+  return { rows: await withNames(supabase, rows, lookups), lookups };
+}
+
+/** One page of the list, how many match in all, and how many of those are urgent and open. */
+export async function loadTicketPage(supabase: SupabaseClient, f: TicketFilters, page: number, size: number) {
+  const lookups = await loadLookups(supabase);
+  const q = await ticketQuery(supabase, f, lookups, true);
+  const [shown, urgent] = await Promise.all([
+    pageRows<TicketRow>(page, size, (from, to) => q().range(from, to)),
+    q(true),
+  ]);
+  if (urgent.error) throw new Error(`A list could not be loaded: ${urgent.error.message}`);
+  return { ...shown, rows: await withNames(supabase, shown.rows, lookups), urgent: urgent.count ?? 0, lookups };
 }
 
 /** The choices for the list's filters: every place (switched-off ones too, old tickets may be there) and everyone who has a ticket. */

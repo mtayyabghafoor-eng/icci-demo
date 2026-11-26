@@ -3,6 +3,7 @@
 // by the database (view rota_warnings), and the names to show. Reads as the
 // signed-in admin, so the database's access rules apply.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { allRows } from "@/lib/supabase/all-rows";
 import { SLOT_TYPE_COLUMNS, type SlotGroup, type SlotType, type TimeKey } from "@/lib/rota/rules";
 import { WARNING_COLUMNS, type RotaWarning } from "@/lib/rota/week";
 
@@ -29,8 +30,10 @@ export type Place = { id: string; label: string };
 
 /** Switched-on buildings and rooms, as "Room (Building)". */
 export async function loadPlaces(supabase: SupabaseClient, alsoIds: string[] = []): Promise<Place[]> {
-  const { data } = await supabase.from("locations").select("id, name, kind, parent_id, active").in("kind", ["building", "room"]).order("name");
-  const all = (data ?? []) as { id: string; name: string; kind: string; parent_id: string | null; active: boolean }[];
+  // Round C2: every one, page by page (one request returns at most 1,000).
+  const all = await allRows<{ id: string; name: string; kind: string; parent_id: string | null; active: boolean }>((from, to) =>
+    supabase.from("locations").select("id, name, kind, parent_id, active").in("kind", ["building", "room"]).order("name").order("id").range(from, to),
+  );
   const byId = new Map(all.map((l) => [l.id, l]));
   return all
     .filter((l) => l.active || alsoIds.includes(l.id))

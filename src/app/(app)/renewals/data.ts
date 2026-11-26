@@ -2,6 +2,7 @@
 // database's own rules apply.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { allRows } from "@/lib/supabase/all-rows";
+import { pageRows, type Page } from "@/lib/supabase/page-rows";
 import { addDays, todayInDublin } from "@/lib/vetting/rules";
 import { REGISTER_COLUMNS, SOON_DAYS, SOURCE_GROUPS, statusesFor, worstFirst, type RegisterFilter, type RegisterRow } from "@/lib/renewals/rules";
 
@@ -25,6 +26,30 @@ export async function loadRegister(supabase: SupabaseClient, f: RegisterFilter):
     return q;
   });
   return worstFirst(rows);
+}
+
+/**
+ * Round C2: one page of the register, worst first, straight from the
+ * database (view renewals_register_list, migration 0057, sorts the way
+ * worstFirst does).
+ */
+export async function loadRegisterPage(supabase: SupabaseClient, f: RegisterFilter, page: number, size: number): Promise<Page<RegisterRow>> {
+  const sources = f.from ? SOURCE_GROUPS.find((g) => g.id === f.from)!.sources : null;
+  return pageRows<RegisterRow>(page, size, (from, to) => {
+    let q = supabase
+      .from("renewals_register_list")
+      .select(REGISTER_COLUMNS, { count: "exact" })
+      .in("status", statusesFor(f.show))
+      .order("list_rank")
+      .order("due_on", { nullsFirst: false })
+      .order("title")
+      .order("source")
+      .order("record_id")
+      .range(from, to);
+    if (sources) q = q.in("source", sources);
+    if (f.show === "soon") q = q.lte("due_on", addDays(todayInDublin(), SOON_DAYS));
+    return q;
+  });
 }
 
 /** Names of the owners in these rows, by person id. */

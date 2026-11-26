@@ -11,8 +11,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { cleanSearch, formatDate } from "@/lib/items/rules";
 import { MAY_SEE_PEOPLE, PERSON_STATUS } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
-import { allRows } from "@/lib/supabase/all-rows";
-import { PAGE_SIZE, pageOf, readPage } from "@/lib/ui/text";
+import { pageRows } from "@/lib/supabase/page-rows";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { VETTING_STATUS, type VettingStatus } from "@/lib/vetting/rules";
 import { PrimaryLink, StatusBadge } from "../items/ui";
 import { CannotSeePeople } from "./cannot-see";
@@ -52,26 +52,25 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
 
   const vetting = one(params.vetting) in VETTING_STATUS ? (one(params.vetting) as VettingStatus) : "";
 
-  // P2.3: each person's vetting status, worked out by the database. Asked
-  // for at the same time as the people themselves.
-  const statusRows = allRows<{ person_id: string; status: VettingStatus }>((from, to) =>
-    supabase.from("people_vetting").select("person_id, status").order("person_id").range(from, to),
-  );
-  const everyoneRows = allRows<PersonRow>((from, to) => {
-    let query = supabase.from("people").select(PERSON_COLUMNS).order("full_name").order("id").range(from, to);
+  // P2.3: each person's vetting status, worked out by the database, beside
+  // them (view people_list, migration 0057). Round C2: everyone who matches
+  // is counted, but only one page of 50 is read, however many people there are.
+  const shown = await pageRows<PersonRow & { vetting_status: VettingStatus | null }>(readPage(params.page), PAGE_SIZE, (from, to) => {
+    let query = supabase
+      .from("people_list")
+      .select(`${PERSON_COLUMNS}, vetting_status`, { count: "exact" })
+      .order("full_name")
+      .order("id")
+      .range(from, to);
     if (q) query = query.or(`full_name.ilike.*${q}*,phone.ilike.*${q}*,email.ilike.*${q}*`);
     if (role) query = query.eq("person_role_id", role);
     if (section) query = query.eq("section_id", section);
     if (show === "") query = query.eq("active", true);
     if (show === "off") query = query.eq("active", false);
+    if (vetting) query = query.eq("vetting_status", vetting);
     return query;
   });
-  const [statusList, everyone] = await Promise.all([statusRows, everyoneRows]);
-  const statuses = new Map(statusList.map((v) => [v.person_id, v.status]));
-  const matching = vetting ? everyone.filter((p) => statuses.get(p.id) === vetting) : everyone;
-  // Everyone who matches is counted; only one page of 50 is drawn, which
-  // keeps the page small and quick however many people there are.
-  const shown = pageOf(matching, readPage(params.page), PAGE_SIZE);
+  const statuses = new Map(shown.rows.map((p) => [p.id, p.vetting_status]));
   const rows = shown.rows;
   const pageLink = (n: number) => {
     const p = new URLSearchParams();

@@ -3,6 +3,7 @@
 // Reads as the signed-in admin.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { allRows } from "@/lib/supabase/all-rows";
+import { pageRows, type Page } from "@/lib/supabase/page-rows";
 import {
   TRAINING_ROW_COLUMNS,
   TRAINING_STATUS,
@@ -51,4 +52,27 @@ export async function loadTrainingList(supabase: SupabaseClient, f: TrainingFilt
     return q;
   });
   return worstFirst(rows);
+}
+
+/**
+ * Round C2: one page of the list, worst first, straight from the database
+ * (view people_training_list, migration 0057, sorts the way worstFirst does).
+ */
+export async function loadTrainingPage(supabase: SupabaseClient, f: TrainingFilter, page: number, size: number): Promise<Page<TrainingRow>> {
+  return pageRows<TrainingRow>(page, size, (from, to) => {
+    let q = supabase
+      .from("people_training_list")
+      .select(TRAINING_ROW_COLUMNS, { count: "exact" })
+      .eq("active", true)
+      .order("list_rank")
+      .order("expires_on", { nullsFirst: false })
+      .order("full_name")
+      .order("person_id")
+      .order("training_type_id")
+      .range(from, to);
+    if (f.status) q = q.eq("status", f.status);
+    if (f.type) q = q.eq("training_type_id", f.type);
+    if (f.section) q = q.eq("section_id", f.section);
+    return q;
+  });
 }

@@ -5,13 +5,15 @@ import type { Metadata } from "next";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
-import { type RegisterRow, groupByPlace, MAY_SEE_ASSET_LISTS, MAY_SEE_ASSET_REGISTER } from "@/lib/assets/lists";
+import { type RegisterRow, MAY_SEE_ASSET_LISTS, MAY_SEE_ASSET_REGISTER } from "@/lib/assets/lists";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatEuro, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { ItemStatus } from "../../items/ui";
 import { CannotSeeAssets } from "../cannot-see";
-import { loadRegister } from "./data";
+import { loadRegisterPage } from "./data";
+import { Pagination } from "@/components/ui";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Asset register | ICCI Control Dashboard" };
 
@@ -40,10 +42,18 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
 
   const params = await searchParams;
   const supabase = await createClient();
-  const { rows, place, placeName, placeIdOf, lookups } = await loadRegister(supabase, typeof params.place === "string" ? params.place : "");
-  const groups = groupByPlace(rows);
-  const total = groups.reduce((sum, g) => sum + g.total_cents, 0);
-  const withoutValue = groups.reduce((sum, g) => sum + g.without_value, 0);
+  // Round C2: the totals are counted by the database; with a place chosen,
+  // its assets come 50 at a time, most valuable first.
+  const { totals, rows, page, assetsShown, place, placeName, lookups } = await loadRegisterPage(
+    supabase,
+    typeof params.place === "string" ? params.place : "",
+    readPage(params.page),
+    PAGE_SIZE,
+  );
+  const count = totals.reduce((sum, g) => sum + g.assets, 0);
+  const total = totals.reduce((sum, g) => sum + g.total_cents, 0);
+  const withoutValue = totals.reduce((sum, g) => sum + g.without_value, 0);
+  const pageLink = (n: number) => `/assets/register?place=${encodeURIComponent(place)}${n > 1 ? `&page=${n}` : ""}`;
   const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   const csvHref = `/assets/register/csv${place ? `?place=${encodeURIComponent(place)}` : ""}`;
 
@@ -81,7 +91,7 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
 
       <p className="mt-5 text-lg font-semibold text-icci-green-dark" data-testid="register-total">
         <span className="font-semibold">{place ? `${placeName} and inside: ` : "Total: "}</span>
-        {plural(rows.length)} · {formatEuro(total)}
+        {plural(count)} · {formatEuro(total)}
         {withoutValue > 0 && <span className="block text-base">{withoutValue} with no value recorded (not in the total).</span>}
       </p>
 
@@ -96,21 +106,21 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
           </tr>
         </thead>
         <tbody>
-          {groups.map((g) => (
-            <tr key={g.place} className="border-b border-icci-panel align-top">
+          {totals.map((g) => (
+            <tr key={g.location_id} className="border-b border-icci-panel align-top">
               <td className="px-3 py-2">
-                <Link href={`/assets/register?place=${encodeURIComponent(placeIdOf.get(g.place) ?? "")}`} className="font-semibold">
+                <Link href={`/assets/register?place=${encodeURIComponent(g.location_id)}`} className="font-semibold">
                   {g.place}
                 </Link>
               </td>
-              <td className="px-3 py-2 text-right">{g.rows.length}</td>
+              <td className="px-3 py-2 text-right">{g.assets}</td>
               <td className="px-3 py-2 text-right whitespace-nowrap">
                 {formatEuro(g.total_cents)}
                 {g.without_value > 0 && <span className="block text-sm">{g.without_value} not valued</span>}
               </td>
             </tr>
           ))}
-          {groups.length === 0 && (
+          {totals.length === 0 && (
             <tr>
               <td colSpan={3} className="px-3 py-2">
                 No assets here.
@@ -121,19 +131,19 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
       </table>
       </div>
 
-      {/* One place chosen: its assets, most valuable first */}
-      {place &&
-        groups.map((g) => (
-          <section key={g.place} className="mt-6" data-testid="register-place-assets">
-            <h2 className="text-lg font-bold text-icci-green-dark">
-              {g.place} <span className="text-base font-normal">· {plural(g.rows.length)} · {formatEuro(g.total_cents)}</span>
-            </h2>
-            <div className="list-table-wrap">
+      {/* One place chosen: its assets and those inside it, most valuable first */}
+      {place && rows.length > 0 && (
+        <section className="mt-6" data-testid="register-place-assets">
+          <h2 className="text-lg font-bold text-icci-green-dark">
+            {placeName} and inside <span className="text-base font-normal">· most valuable first</span>
+          </h2>
+          <div className="list-table-wrap">
             <table className="list-table hidden md:table">
               <thead>
                 <tr>
                   <th className="px-3 py-2">Label</th>
                   <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Place</th>
                   <th className="px-3 py-2">Category</th>
                   <th className="px-3 py-2">Bought</th>
                   <th className="px-3 py-2 text-right">Value</th>
@@ -141,12 +151,13 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
                 </tr>
               </thead>
               <tbody>
-                {g.rows.map((r) => (
+                {rows.map((r) => (
                   <tr key={r.id} className="border-b border-icci-panel align-top">
                     <td className="px-3 py-2 font-mono text-sm whitespace-nowrap">
                       {opensItems ? <Link href={`/items/${r.id}`}>{r.label_serial}</Link> : r.label_serial}
                     </td>
                     <td className="px-3 py-2">{r.name}</td>
+                    <td className="px-3 py-2 text-sm">{r.place}</td>
                     <td className="px-3 py-2 text-sm">{r.category}</td>
                     <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(r.purchase_date)}</td>
                     <td className="px-3 py-2 text-right whitespace-nowrap">{formatEuro(r.value_cents)}</td>
@@ -157,24 +168,25 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
                 ))}
               </tbody>
             </table>
-            </div>
-            <ul className="mt-3 space-y-3 md:hidden">
-              {g.rows.map((r) => (
-                <li key={r.id}>
-                  {opensItems ? (
-                    <Link href={`/items/${r.id}`} className="list-card">
-                      <RegisterCard r={r} />
-                    </Link>
-                  ) : (
-                    <div className="list-card">
-                      <RegisterCard r={r} />
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+          </div>
+          <ul className="mt-3 space-y-3 md:hidden">
+            {rows.map((r) => (
+              <li key={r.id}>
+                {opensItems ? (
+                  <Link href={`/items/${r.id}`} className="list-card">
+                    <RegisterCard r={r} />
+                  </Link>
+                ) : (
+                  <div className="list-card">
+                    <RegisterCard r={r} />
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          {assetsShown > PAGE_SIZE && <Pagination page={page} size={PAGE_SIZE} total={assetsShown} hrefFor={pageLink} />}
+        </section>
+      )}
     </>
   );
 }
@@ -187,7 +199,7 @@ function RegisterCard({ r }: { r: RegisterRow }) {
         <ItemStatus kind="fixed_asset" condition={r.condition as never} />
       </span>
       <span className="mt-1 block text-sm">
-        {r.label_serial} · {r.category} · {formatEuro(r.value_cents)}
+        {r.label_serial} · {r.place} · {r.category} · {formatEuro(r.value_cents)}
       </span>
     </>
   );

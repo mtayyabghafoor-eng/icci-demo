@@ -24,6 +24,10 @@ async function ids() {
     db.from("policies").select("id").limit(1).single(),
     db.from("locations").select("id").eq("name", "Test Building A").single(),
   ]);
+  const [room, bulkChair] = await Promise.all([
+    db.from("locations").select("id").eq("name", "Test Room A1").single(),
+    db.from("items").select("id").eq("name", "Test bulk chair 0001").maybeSingle(),
+  ]);
   return {
     item: item.data!.id,
     garden: garden.data!.id,
@@ -33,6 +37,8 @@ async function ids() {
     person: person.data!.id,
     policy: policy.data!.id,
     place: place.data!.id,
+    room: room.data!.id,
+    bulkChair: bulkChair.data?.id as string | undefined,
   };
 }
 
@@ -72,7 +78,15 @@ test("every main page opens quickly, three times over, with no browser errors", 
     ["Rota week", "/rota"],
     ["Library overview", "/library/overview"],
     ["Library desk", "/library"],
+    // Round C2: lists that read one page at a time, deep into the list.
+    ["Training", "/people/training"],
+    ["Tickets, page 20", "/tickets?page=20"],
+    ["People, page 20", "/people?page=20"],
+    ["Asset register: one room", `/assets/register?place=${id.room}`],
   ];
+  // Round C2: with the bulk made-up data (npm run db:load-many), the chair
+  // with 1,200 changes in its history.
+  if (id.bulkChair) pages.push(["Item with 1,200 changes", `/items/${id.bulkChair}`]);
 
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(`${page.url()}: ${e.message}`));

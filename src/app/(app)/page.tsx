@@ -110,7 +110,19 @@ async function HomeContent() {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("home_counters").single<HomeCounters>();
+  // Round C2: every counter is asked for at the same time (each worked out
+  // in one pass by the database, migration 0057). The library and expense
+  // counters stay separate calls, so a problem there never hides the rest.
+  const [{ data, error }, { data: lib }, { count: registered }, { count: notCounted }, { data: exp }] = await Promise.all([
+    supabase.rpc("home_counters").single<HomeCounters>(),
+    supabase.rpc("library_counters").single<LibraryCounters>(),
+    // UI-9: two plain counts the admins can already read: items still with the
+    // Centre, and consumables never counted (named on the Low stock line).
+    supabase.from("items").select("id", { count: "exact", head: true }).or("condition.is.null,condition.neq.disposed"),
+    supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
+    // P5.3: expense claims.
+    supabase.rpc("expense_counters").single<ExpenseCounters>(),
+  ]);
   if (error || !data) {
     return (
       <>
@@ -124,17 +136,7 @@ async function HomeContent() {
     );
   }
 
-  // P4.5: the library's own counter (a separate call, so a library problem never hides the rest).
-  const { data: lib } = await supabase.rpc("library_counters").single<LibraryCounters>();
-  // UI-9: two plain counts the admins can already read: items still with the
-  // Centre, and consumables never counted (named on the Low stock line).
-  const [{ count: registered }, { count: notCounted }] = await Promise.all([
-    supabase.from("items").select("id", { count: "exact", head: true }).or("condition.is.null,condition.neq.disposed"),
-    supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
-  ]);
   const stocktakeHref = stocktakeLink(data.stocktake_diffs_for_me > 0 ? await stocktakesWaitingFor(me.id) : []);
-  // P5.3: expense claims (a separate call, so a problem there never hides the rest).
-  const { data: exp } = await supabase.rpc("expense_counters").single<ExpenseCounters>();
   const cards = [...counterCards(data, notCounted ?? 0, stocktakeHref), ...(lib ? libraryCards(lib) : []), ...(exp ? expenseCards(exp, formatEuro) : [])];
   const { attention, clear } = splitCards(cards);
   const approvals = approvalsTotal(data) + (exp?.for_me ?? 0);

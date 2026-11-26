@@ -14,6 +14,7 @@ import {
 import { describeHistory, type HistoryRow } from "@/lib/items/history";
 import { formatDate, formatDateTime, formatEuro, KIND_LABEL } from "@/lib/items/rules";
 import { ADJUSTMENT_STATUS, describeUsage, MOVEMENT_LABEL } from "@/lib/stock/rules";
+import { allRows } from "@/lib/supabase/all-rows";
 import { createClient } from "@/lib/supabase/server";
 import { listOrder, PRIORITY_LABEL, shortDescription, STATUS_LABEL, TICKET_COLUMNS, ticketNumber, type TicketRow } from "@/lib/tickets/rules";
 import { Reporter, reporterNames } from "../../people/reporter";
@@ -51,16 +52,17 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
   const consumable = item.kind === "consumable";
   const [lookups, history, photo, level, moves, nameOf, events, vehicleRes, companies, models] = await Promise.all([
     loadLookups(supabase),
-    supabase.rpc("item_history", { p_item_id: id }),
+    // Round C2: every entry, newest first (migration 0057), page by page.
+    allRows<HistoryRow>((from, to) => supabase.rpc("item_history", { p_item_id: id }).range(from, to)),
     item.photo_path ? supabase.storage.from(PHOTO_BUCKET).createSignedUrl(item.photo_path, 600) : null,
     consumable ? stockLevelOf(supabase, id) : null,
     consumable
-      ? supabase.from("stock_movements").select(MOVEMENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).limit(200)
+      ? allRows<Movement>((from, to) => supabase.from("stock_movements").select(MOVEMENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).range(from, to))
       : null,
     adminNames(supabase),
     consumable
       ? null
-      : supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).limit(200),
+      : allRows<AssetEventRow>((from, to) => supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).range(from, to)),
     // P2.7: vehicle details, if this asset is a vehicle.
     consumable ? null : supabase.from("vehicles").select("id, registration").eq("item_id", id).maybeSingle(),
     // P1.19: company and make-and-model names for the details and the history.
@@ -75,7 +77,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
     : await supabase.from("maintenance_tickets").select(TICKET_COLUMNS).eq("item_id", id).order("id", { ascending: false }).limit(100);
   const tickets = ((ticketsRes?.data ?? []) as TicketRow[]).sort(listOrder);
   const vehicle = (vehicleRes?.data ?? null) as { id: string; registration: string } | null;
-  const assetEvents = (events?.data ?? []) as AssetEventRow[];
+  const assetEvents = events ?? [];
   // P3.6: the damage report just made (newest first), for "Open a ticket for this".
   const latestDamage = item.condition === "damaged" ? assetEvents.find((e) => e.kind === "damage") : undefined;
   const reporters = await reporterNames(supabase, assetEvents);
@@ -89,15 +91,15 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
   }
   const disposalPending = assetEvents.some((e) => e.status === "pending");
   const assetActions = consumable ? [] : actionsFor(item.condition, disposalPending);
-  const movements = (moves?.data ?? []) as Movement[];
+  const movements = moves ?? [];
   const movementById = new Map(movements.map((m) => [m.id, m]));
   const pendingFor = new Set(movements.filter((m) => m.status === "pending").map((m) => m.corrects_id));
-  const lines = describeHistory((history.data ?? []) as HistoryRow[], {
+  const lines = describeHistory(history, {
     categories: lookups.categoryName,
     locations: lookups.locationName,
     companies: companyName,
     models: modelName,
-  }).reverse();
+  });
 
   const fields: [string, string][] = [
     ["Label", item.label_serial],

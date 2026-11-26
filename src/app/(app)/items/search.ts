@@ -4,6 +4,7 @@
 // companies that made, supplied or service it. Also the "working", "open
 // ticket" and "company" filters other pages link to.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { allRows } from "@/lib/supabase/all-rows";
 import { matchCategories } from "@/lib/categories/counts";
 import { categoryAndInside, type CategoryRow } from "@/lib/categories/rules";
 
@@ -30,8 +31,10 @@ export async function searchFilter(supabase: SupabaseClient, q: string, categori
 async function companyParts(supabase: SupabaseClient, companyIds: string[]): Promise<string[]> {
   if (!companyIds.length) return [];
   const list = companyIds.join(",");
-  const { data } = await supabase.from("product_models").select("id").or(`maker_company_id.in.(${list}),service_company_id.in.(${list})`).limit(1000);
-  const models = ((data ?? []) as { id: string }[]).map((m) => m.id);
+  const data = await allRows<{ id: string }>((from, to) =>
+    supabase.from("product_models").select("id").or(`maker_company_id.in.(${list}),service_company_id.in.(${list})`).order("id").range(from, to),
+  );
+  const models = data.map((m) => m.id);
   return [`supplier_company_id.in.(${list})`, `service_company_id.in.(${list})`, ...(models.length ? [`model_id.in.(${models.join(",")})`] : [])];
 }
 
@@ -42,8 +45,11 @@ export async function companyFilter(supabase: SupabaseClient, companyId: string)
 
 /** Items with a maintenance ticket not yet closed. */
 export async function itemsWithOpenTickets(supabase: SupabaseClient): Promise<string[]> {
-  const { data } = await supabase.from("maintenance_tickets").select("item_id").neq("status", "closed").not("item_id", "is", null).limit(5000);
-  const ids = [...new Set(((data ?? []) as { item_id: string }[]).map((t) => t.item_id))];
+  // Round C2: every open ticket, page by page (one request returns at most 1,000).
+  const data = await allRows<{ item_id: string }>((from, to) =>
+    supabase.from("maintenance_tickets").select("item_id").neq("status", "closed").not("item_id", "is", null).order("id").range(from, to),
+  );
+  const ids = [...new Set(data.map((t) => t.item_id))];
   // An empty list would match nothing anyway; a made-up id keeps the filter valid.
   return ids.length ? ids : ["00000000-0000-0000-0000-000000000000"];
 }

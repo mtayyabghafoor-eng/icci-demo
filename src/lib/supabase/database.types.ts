@@ -147,13 +147,31 @@ isOneToOne: false
       foreignKeyName: "asset_events_reported_by_person_id_fkey"
       columns: ["reported_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "asset_events_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "asset_events_reported_by_person_id_fkey"
       columns: ["reported_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "asset_events_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "asset_events_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "asset_events_reported_by_person_id_fkey"
@@ -307,13 +325,31 @@ isOneToOne: false
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
       columns: ["paid_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
       columns: ["paid_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
@@ -332,6 +368,12 @@ isOneToOne: false
       columns: ["suggested_fund_id"]
 isOneToOne: false
       referencedRelation: "expense_funds"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_claims_ticket_id_fkey"
+      columns: ["ticket_id"]
+isOneToOne: false
+      referencedRelation: "maintenance_ticket_list"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "expense_claims_ticket_id_fkey"
@@ -503,13 +545,31 @@ isOneToOne: false
       foreignKeyName: "expense_repayments_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_repayments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_repayments_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_repayments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_repayments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_repayments_person_id_fkey"
@@ -541,13 +601,31 @@ isOneToOne: false
       foreignKeyName: "item_categories_contact_person_id_fkey"
       columns: ["contact_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "item_categories_contact_person_id_fkey"
+      columns: ["contact_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "item_categories_contact_person_id_fkey"
       columns: ["contact_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "item_categories_contact_person_id_fkey"
+      columns: ["contact_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "item_categories_contact_person_id_fkey"
+      columns: ["contact_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "item_categories_contact_person_id_fkey"
@@ -863,7 +941,19 @@ isOneToOne: false
       foreignKeyName: "maintenance_ticket_events_new_assignee_person_id_fkey"
       columns: ["new_assignee_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_ticket_events_new_assignee_person_id_fkey"
+      columns: ["new_assignee_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_ticket_events_new_assignee_person_id_fkey"
+      columns: ["new_assignee_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "maintenance_ticket_events_new_assignee_person_id_fkey"
@@ -875,8 +965,20 @@ isOneToOne: false
       foreignKeyName: "maintenance_ticket_events_new_assignee_person_id_fkey"
       columns: ["new_assignee_person_id"]
 isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_ticket_events_new_assignee_person_id_fkey"
+      columns: ["new_assignee_person_id"]
+isOneToOne: false
       referencedRelation: "policy_grid"
       referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_ticket_events_ticket_id_fkey"
+      columns: ["ticket_id"]
+isOneToOne: false
+      referencedRelation: "maintenance_ticket_list"
+      referencedColumns: ["id"]
     },{
       foreignKeyName: "maintenance_ticket_events_ticket_id_fkey"
       columns: ["ticket_id"]
@@ -913,13 +1015,31 @@ isOneToOne: false
       foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
       columns: ["assigned_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
       columns: ["assigned_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
@@ -961,13 +1081,31 @@ isOneToOne: false
       foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
       columns: ["reported_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
       columns: ["reported_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
@@ -1045,13 +1183,31 @@ isOneToOne: false
       foreignKeyName: "policies_owner_person_id_fkey"
       columns: ["owner_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "policies_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "policies_owner_person_id_fkey"
       columns: ["owner_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "policies_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "policies_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "policies_owner_person_id_fkey"
@@ -1121,13 +1277,31 @@ isOneToOne: false
       foreignKeyName: "policy_signoffs_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "policy_signoffs_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "policy_signoffs_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "policy_signoffs_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "policy_signoffs_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "policy_signoffs_person_id_fkey"
@@ -1367,13 +1541,31 @@ isOneToOne: false
       foreignKeyName: "renewals_owner_person_id_fkey"
       columns: ["owner_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "renewals_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "renewals_owner_person_id_fkey"
       columns: ["owner_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "renewals_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "renewals_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "renewals_owner_person_id_fkey"
@@ -1425,13 +1617,31 @@ isOneToOne: false
       foreignKeyName: "rota_assignments_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rota_assignments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "rota_assignments_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "rota_assignments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "rota_assignments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "rota_assignments_person_id_fkey"
@@ -1791,13 +2001,31 @@ isOneToOne: false
       foreignKeyName: "training_records_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_records_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "training_records_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "training_records_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "training_records_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "training_records_person_id_fkey"
@@ -1893,13 +2121,31 @@ isOneToOne: false
       foreignKeyName: "vehicles_keeper_person_id_fkey"
       columns: ["keeper_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicles_keeper_person_id_fkey"
+      columns: ["keeper_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "vehicles_keeper_person_id_fkey"
       columns: ["keeper_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "vehicles_keeper_person_id_fkey"
+      columns: ["keeper_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "vehicles_keeper_person_id_fkey"
+      columns: ["keeper_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "vehicles_keeper_person_id_fkey"
@@ -1931,13 +2177,31 @@ isOneToOne: false
       foreignKeyName: "vetting_records_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vetting_records_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "vetting_records_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "vetting_records_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "vetting_records_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "vetting_records_person_id_fkey"
@@ -2046,13 +2310,31 @@ isOneToOne: false
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
       columns: ["paid_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
       columns: ["paid_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
@@ -2071,6 +2353,12 @@ isOneToOne: false
       columns: ["suggested_fund_id"]
 isOneToOne: false
       referencedRelation: "expense_funds"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_claims_ticket_id_fkey"
+      columns: ["ticket_id"]
+isOneToOne: false
+      referencedRelation: "maintenance_ticket_list"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "expense_claims_ticket_id_fkey"
@@ -2162,13 +2450,31 @@ isOneToOne: false
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
       columns: ["paid_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
       columns: ["paid_by_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "expense_claims_paid_by_person_id_fkey"
+      columns: ["paid_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "expense_claims_paid_by_person_id_fkey"
@@ -2187,6 +2493,12 @@ isOneToOne: false
       columns: ["suggested_fund_id"]
 isOneToOne: false
       referencedRelation: "expense_funds"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "expense_claims_ticket_id_fkey"
+      columns: ["ticket_id"]
+isOneToOne: false
+      referencedRelation: "maintenance_ticket_list"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "expense_claims_ticket_id_fkey"
@@ -2280,9 +2592,189 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"maintenance_ticket_list": {
+                  Row: {
+                    "asset_event_id": number | null,"assigned_person_id": string | null,"closed_at": string | null,"closed_rank": number | null,"closing_note": string | null,"cost_cents": number | null,"created_at": string,"created_by": string | null,"description": string,"id": number,"item_id": string | null,"location_id": string,"order_id": number | null,"order_time": number | null,"photo_path": string | null,"priority": string,"priority_rank": number | null,"reported_by": string | null,"reported_by_person_id": string | null,"status": string,"status_rank": number | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "asset_event_id"?: number | null,"assigned_person_id"?: string | null,"closed_at"?: string | null,"closed_rank"?: never,"closing_note"?: string | null,"cost_cents"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"id"?: number | null,"item_id"?: string | null,"location_id"?: string | null,"order_id"?: never,"order_time"?: never,"photo_path"?: string | null,"priority"?: string | null,"priority_rank"?: never,"reported_by"?: string | null,"reported_by_person_id"?: string | null,"status"?: string | null,"status_rank"?: never,"updated_at"?: string | null,"updated_by"?: string | null
+                         }
+                        Update: {
+                           "asset_event_id"?: number | null,"assigned_person_id"?: string | null,"closed_at"?: string | null,"closed_rank"?: never,"closing_note"?: string | null,"cost_cents"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"id"?: number | null,"item_id"?: string | null,"location_id"?: string | null,"order_id"?: never,"order_time"?: never,"photo_path"?: string | null,"priority"?: string | null,"priority_rank"?: never,"reported_by"?: string | null,"reported_by_person_id"?: string | null,"status"?: string | null,"status_rank"?: never,"updated_at"?: string | null,"updated_by"?: string | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "maintenance_tickets_asset_event_id_fkey"
+      columns: ["asset_event_id"]
+isOneToOne: true
+      referencedRelation: "asset_events"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_assigned_person_id_fkey"
+      columns: ["assigned_person_id"]
+isOneToOne: false
+      referencedRelation: "policy_grid"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "asset_last_seen"
+      referencedColumns: ["item_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "stock_levels"
+      referencedColumns: ["item_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_location_id_fkey"
+      columns: ["location_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
+      columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "policy_grid"
+      referencedColumns: ["person_id"]
+    }
+                  ]
+                },"people_list": {
+                  Row: {
+                    "active": boolean,"app_user_id": string | null,"created_at": string,"created_by": string | null,"email": string | null,"full_name": string,"id": string,"person_role_id": string,"phone": string | null,"same_name_confirmed": boolean,"section_id": string,"start_date": string | null,"updated_at": string,"updated_by": string | null,"vetting_status": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "people_app_user_id_fkey"
+      columns: ["app_user_id"]
+isOneToOne: true
+      referencedRelation: "app_users"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "people_person_role_id_fkey"
+      columns: ["person_role_id"]
+isOneToOne: false
+      referencedRelation: "person_roles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "people_section_id_fkey"
+      columns: ["section_id"]
+isOneToOne: false
+      referencedRelation: "sections"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"people_training": {
                   Row: {
                     "active": boolean,"completed_on": string,"expires_on": string | null,"full_name": string,"person_id": string,"person_role_id": string,"section_id": string,"status": string | null,"training_type_id": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "people_person_role_id_fkey"
+      columns: ["person_role_id"]
+isOneToOne: false
+      referencedRelation: "person_roles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "people_section_id_fkey"
+      columns: ["section_id"]
+isOneToOne: false
+      referencedRelation: "sections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_records_training_type_id_fkey"
+      columns: ["training_type_id"]
+isOneToOne: false
+      referencedRelation: "training_types"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"people_training_list": {
+                  Row: {
+                    "active": boolean,"completed_on": string,"expires_on": string | null,"full_name": string,"list_rank": number | null,"person_id": string,"person_role_id": string,"section_id": string,"status": string | null,"training_type_id": string
                   }
                   ComputedFields: never
                   Relationships: [
@@ -2326,6 +2818,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"people_vetting_list": {
+                  Row: {
+                    "active": boolean,"applied_on": string | null,"expires_on": string | null,"full_name": string,"list_rank": number | null,"needs_vetting": boolean,"person_id": string,"person_role_id": string,"section_id": string,"status": string | null,"vetted_on": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "people_person_role_id_fkey"
+      columns: ["person_role_id"]
+isOneToOne: false
+      referencedRelation: "person_roles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "people_section_id_fkey"
+      columns: ["section_id"]
+isOneToOne: false
+      referencedRelation: "sections"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"policies_overview": {
                   Row: {
                     "active": boolean,"approved_on": string | null,"current_label": string | null,"current_version_id": string | null,"has_draft": boolean | null,"id": string,"must_sign": number | null,"next_review_on": string | null,"owner_person_id": string,"published_at": string | null,"review_status": string | null,"title": string
@@ -2342,13 +2854,31 @@ isOneToOne: false
       foreignKeyName: "policies_owner_person_id_fkey"
       columns: ["owner_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "policies_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "policies_owner_person_id_fkey"
       columns: ["owner_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "policies_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "policies_owner_person_id_fkey"
+      columns: ["owner_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "policies_owner_person_id_fkey"
@@ -2386,6 +2916,14 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"renewals_register_list": {
+                  Row: {
+                    "category": string | null,"due_on": string | null,"list_rank": number | null,"note": string | null,"owner_person_id": string | null,"record_id": string | null,"source": string | null,"status": string | null,"title": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
                 },"rota_changes": {
                   Row: {
                     "assignment_id": number | null,"kind": string | null,"week_id": string
@@ -2416,13 +2954,31 @@ isOneToOne: false
       foreignKeyName: "rota_assignments_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rota_assignments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "rota_assignments_person_id_fkey"
       columns: ["person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "rota_assignments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "rota_assignments_person_id_fkey"
+      columns: ["person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "rota_assignments_person_id_fkey"
@@ -2530,13 +3086,31 @@ isOneToOne: false
       foreignKeyName: "vehicles_keeper_person_id_fkey"
       columns: ["keeper_person_id"]
 isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehicles_keeper_person_id_fkey"
+      columns: ["keeper_person_id"]
+isOneToOne: false
       referencedRelation: "people_training"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "vehicles_keeper_person_id_fkey"
       columns: ["keeper_person_id"]
 isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "vehicles_keeper_person_id_fkey"
+      columns: ["keeper_person_id"]
+isOneToOne: false
       referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "vehicles_keeper_person_id_fkey"
+      columns: ["keeper_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
       referencedColumns: ["person_id"]
     },{
       foreignKeyName: "vehicles_keeper_person_id_fkey"
@@ -2563,6 +3137,11 @@ isOneToOne: false
 "asset_register_rows":
 { Args: { "p_place"?: string | null }; Returns: {
               "category_id": string,"condition": string,"id": string,"label_serial": string,"location_id": string,"name": string,"purchase_date": string,"value_cents": number,"warranty_end": string
+            }[]
+                           },
+"asset_register_totals":
+{ Args: { "p_place"?: string | null }; Returns: {
+              "assets": number,"location_id": string,"total_cents": number,"without_value": number
             }[]
                            },
 "assign_rota_person":

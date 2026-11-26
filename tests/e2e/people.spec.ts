@@ -3,6 +3,7 @@
 // same-name warning), edit, switch off and back on. Finance sees a note.
 // Every screen is saved to docs/screens/.
 import { expect, test, type Page } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters } from "./helpers";
@@ -41,8 +42,23 @@ test("people list: search and filter", async ({ page }, info) => {
   for (const text of await rows.allInnerTexts()) expect(text).toContain("Switched off");
 });
 
+/** At least `n` people in the directory: switched-off made-up ones are added if needed. */
+async function atLeastPeople(n: number) {
+  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, { auth: { persistSession: false } });
+  const { count } = await db.from("people").select("id", { count: "exact", head: true });
+  const short = n - (count ?? 0);
+  if (short <= 0) return;
+  const role = (await db.from("person_roles").select("id").eq("name", "Volunteer").single()).data!.id;
+  const section = (await db.from("sections").select("id").eq("name", "Volunteers").single()).data!.id;
+  const rows = Array.from({ length: short }, (_, i) => ({ full_name: `Test run filler person ${Date.now()} ${i}`, person_role_id: role, section_id: section, active: false }));
+  const { error } = await db.from("people").insert(rows);
+  if (error) throw error;
+}
+
 test("people list: 50 at a time, with Previous and Next", async ({ page }, info) => {
-  // "Everyone" includes switched-off people; the seed alone has more than 50.
+  // "Everyone" includes switched-off people. Round C2: on a freshly reset
+  // database the seed has fewer than 50, so made-up ones are added first.
+  await atLeastPeople(75);
   await signInAs(page, centre, "/people?show=all");
   const count = page.getByTestId("people-count");
   await expect(count).toHaveText(/\d+ people/);

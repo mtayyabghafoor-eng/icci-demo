@@ -2,6 +2,7 @@
 // (view people_vetting) and put worst first. Reads as the signed-in admin.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { allRows } from "@/lib/supabase/all-rows";
+import { pageRows, type Page } from "@/lib/supabase/page-rows";
 import { VETTING_ROW_COLUMNS, VETTING_STATUS, worstFirst, type VettingRow, type VettingStatus } from "@/lib/vetting/rules";
 
 /** A5: "attention" is what Home counts: expired, not vetted, or due within 60 days. */
@@ -29,4 +30,27 @@ export async function loadVettingList(supabase: SupabaseClient, f: VettingFilter
     return q;
   });
   return worstFirst(rows);
+}
+
+/**
+ * Round C2: one page of the list, worst first, straight from the database
+ * (view people_vetting_list, migration 0057, sorts the way worstFirst does).
+ */
+export async function loadVettingPage(supabase: SupabaseClient, f: VettingFilter, page: number, size: number): Promise<Page<VettingRow>> {
+  return pageRows<VettingRow>(page, size, (from, to) => {
+    let q = supabase
+      .from("people_vetting_list")
+      .select(VETTING_ROW_COLUMNS, { count: "exact" })
+      .eq("active", true)
+      .order("list_rank")
+      .order("expires_on", { nullsFirst: false })
+      .order("full_name")
+      .order("person_id")
+      .range(from, to);
+    if (f.status === "attention") q = q.in("status", VETTING_ATTENTION);
+    else if (f.status) q = q.eq("status", f.status);
+    else if (!f.showNotRequired) q = q.neq("status", "not_required");
+    if (f.section) q = q.eq("section_id", f.section);
+    return q;
+  });
 }

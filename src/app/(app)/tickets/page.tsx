@@ -23,10 +23,10 @@ import {
   ticketNumber,
   type TicketCsvRow,
 } from "@/lib/tickets/rules";
-import { PAGE_SIZE, pageOf, readPage } from "@/lib/ui/text";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { PrimaryLink, StatusBadge } from "../items/ui";
 import { CannotSeeTickets } from "./cannot-see";
-import { filterChoices, loadTickets } from "./data";
+import { filterChoices, loadTicketPage } from "./data";
 
 export const metadata: Metadata = { title: "Tickets | ICCI Control Dashboard" };
 
@@ -52,13 +52,12 @@ async function List({ searchParams }: { searchParams: PageProps<"/tickets">["sea
   const params = await searchParams;
   const f = readFilters(params);
   const supabase = await createClient();
-  const { rows: all, lookups } = await loadTickets(supabase, f);
+  // Round C2: one page of 50 from the database, and the counts.
+  const { rows, page, total, urgent, lookups } = await loadTicketPage(supabase, f, readPage(params.page), PAGE_SIZE);
   const choices = await filterChoices(supabase, lookups);
-  const { rows, page, total } = pageOf(all, readPage(params.page), PAGE_SIZE);
   const query = filtersQuery(f);
   const pageLink = (p: number) => `/tickets${query}${query ? "&" : "?"}page=${p}`;
   const filtered = query !== "";
-  const urgent = all.filter((t) => t.priority === "urgent" && t.status !== "closed").length;
 
   return (
     <>
