@@ -7,9 +7,8 @@
 // the front door, not the only lock.
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { assuranceOf, decideRoute, LAST_ACTIVE_COOKIE, type Assurance } from "@/lib/auth/rules";
+import { activityCookieOptions, assuranceOf, decideRoute, LAST_ACTIVE_COOKIE, type Assurance } from "@/lib/auth/rules";
 
-const ACTIVITY_COOKIE_OPTIONS = { path: "/", sameSite: "lax" as const, maxAge: 60 * 60 * 24 };
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -55,12 +54,15 @@ export async function proxy(request: NextRequest) {
   // Opening a page counts as activity (background prefetches do not).
   const isPrefetch = request.headers.has("next-router-prefetch") || request.headers.get("purpose") === "prefetch";
   if (aal !== null && !isPrefetch) {
-    response.cookies.set(LAST_ACTIVE_COOKIE, String(now), ACTIVITY_COOKIE_OPTIONS);
+    response.cookies.set(LAST_ACTIVE_COOKIE, String(now), activityCookieOptions(request.nextUrl.protocol === "https:"));
   }
   return response;
 }
 
 export const config = {
-  // Everything except the site's own files (scripts, styles, images, icons).
-  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:jpg|jpeg|png|svg|webp|ico)$).*)"],
+  // Everything except the site's own files: scripts and styles, the
+  // browser icon and the brand pictures in public/. Round C3: before, any
+  // address ending like a picture name (".png") skipped the sign-in and
+  // idle checks; now only these exact folders and files do.
+  matcher: ["/((?!_next/static/|_next/image|favicon\\.ico$|brand/|icci-logo\\.jpg$).*)"],
 };

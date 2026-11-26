@@ -5,6 +5,7 @@
 import { redirect } from "next/navigation";
 import { friendlyStockError, parseQuantity, parseReason } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
+import { NOT_FOUND, anyBad, isId, isOneOf, isUuid } from "@/lib/action-input";
 
 export type StockFormState = { error: string | null; fieldErrors?: Record<string, string> };
 
@@ -20,6 +21,8 @@ export async function recordOne(
   _state: StockFormState,
   form: FormData,
 ): Promise<StockFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(itemId), isOneOf(kind, ["count", "restock"]))) return { error: NOT_FOUND };
   const q = parseQuantity(text(form, "quantity"), kind);
   if (!q.ok) return { error: q.error };
   const supabase = await createClient();
@@ -30,6 +33,8 @@ export async function recordOne(
 
 /** The weekly count of a store room: every box filled in is saved together. */
 export async function recordWeeklyCount(roomId: string, _state: StockFormState, form: FormData): Promise<StockFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(roomId))) return { error: NOT_FOUND };
   const rows: { item_id: string; kind: "count"; quantity: number }[] = [];
   const fieldErrors: Record<string, string> = {};
   for (const [key, value] of form.entries()) {
@@ -58,6 +63,8 @@ export async function requestCorrection(
   _state: StockFormState,
   form: FormData,
 ): Promise<StockFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(itemId), isId(entryId))) return { error: NOT_FOUND };
   const q = parseQuantity(text(form, "quantity"), "correction");
   if (!q.ok) return { error: q.error };
   const r = parseReason(text(form, "reason"));
@@ -72,6 +79,8 @@ export async function requestCorrection(
 
 /** Approve or reject a correction. The database refuses if it is your own. */
 export async function decideCorrection(adjustmentId: number, _state: StockFormState, form: FormData): Promise<StockFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(adjustmentId))) return { error: NOT_FOUND };
   const decision = text(form, "decision");
   if (decision !== "approved" && decision !== "rejected") return { error: "Choose Approve or Reject." };
   const note = text(form, "note").trim();

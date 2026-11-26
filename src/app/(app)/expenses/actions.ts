@@ -22,6 +22,7 @@ import { formatDate, formatEuro } from "@/lib/items/rules";
 import { filesFrom } from "@/lib/files";
 import { formGetAll, formGetter } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
+import { NOT_FOUND, anyBad, isId, orNull } from "@/lib/action-input";
 
 export type ClaimFormState = { error: string | null; warning?: string | null };
 
@@ -30,6 +31,8 @@ export type ClaimFormState = { error: string | null; warning?: string | null };
  * claim; its receipt files are kept unless new ones are chosen.
  */
 export async function enterClaim(copiedFrom: number | null, _state: ClaimFormState, form: FormData): Promise<ClaimFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(orNull(isId)(copiedFrom))) return { error: NOT_FOUND };
   const get = formGetter(form);
   const files = await filesFrom(form, "receipt", { maxFiles: RECEIPT_MAX_FILES, maxMb: RECEIPT_MAX_MB, what: "receipt" });
   if (typeof files === "string") return { error: files };
@@ -96,6 +99,8 @@ export async function enterClaim(copiedFrom: number | null, _state: ClaimFormSta
 
 /** Approve, give the second approval, reject, or withdraw (P5.2, P5.3). */
 export async function decideClaim(claimId: number, kind: string, _state: ClaimFormState, form: FormData): Promise<ClaimFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(claimId))) return { error: NOT_FOUND };
   if (!isDecisionKind(kind)) return { error: "Unknown step." };
   const parsed = parseDecisionForm(kind, formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
@@ -107,6 +112,8 @@ export async function decideClaim(claimId: number, kind: string, _state: ClaimFo
 
 /** "Correct this claim" (P5.4): a new entry pointing at the approved claim. */
 export async function correctClaim(claimId: number, _state: ClaimFormState, form: FormData): Promise<ClaimFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(claimId))) return { error: NOT_FOUND };
   const parsed = parseCorrectionForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const v = parsed.values;
@@ -147,6 +154,8 @@ export async function recordRepayment(_state: ClaimFormState, form: FormData): P
 
 /** A wrong repayment is withdrawn once, with a reason; its claims are owed again. */
 export async function withdrawRepayment(repaymentId: number, claimId: number, _state: ClaimFormState, form: FormData): Promise<ClaimFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(repaymentId), isId(claimId))) return { error: NOT_FOUND };
   const reason = parseRepaymentWithdrawal(formGetter(form));
   if (!reason.ok) return { error: reason.error };
   const supabase = await createClient();

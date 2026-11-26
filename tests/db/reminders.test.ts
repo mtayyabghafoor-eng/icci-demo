@@ -19,7 +19,7 @@ import { addDays, todayInDublin } from "@/lib/vetting/rules";
 import { asRole, masterKeyClient, passwordOnlyClient, signedOutClient, testName, userIdOf } from "./clients";
 
 const today = () => todayInDublin();
-const TABLES = ["reminder_runs", "reminders_sent", "reminder_deliveries"] as const;
+const TABLES = ["reminder_runs", "reminders_sent", "reminder_deliveries", "reminder_retries"] as const;
 
 /** The timer's key from .env.local; its fingerprint is (re)stored so the database matches. */
 async function timerKey(): Promise<string> {
@@ -51,7 +51,7 @@ async function newRenewal(dueIn: number, label = "reminder renewal"): Promise<{ 
 }
 
 type Item = { source: string; record_id: string; title: string; category: string; due_on: string; stage: number; days_left: number };
-type Run = { run_id: number; run_on: string; trigger: string; items: Item[]; recipients: { id: string; name: string; email: string }[] };
+type Run = { run_id: number; run_on: string; trigger: string; items: Item[]; recipients: { id: string; name: string; email: string; retry: Item[] }[] };
 
 async function run(client: SupabaseClient, key?: string): Promise<Run> {
   const { data, error } = await client.rpc("run_reminders", key ? { p_key: key } : {});
@@ -256,6 +256,61 @@ describe("writing down what happened to each email", () => {
     );
     const ok = await signedOutClient().rpc("record_reminder_deliveries", { p_run_id: byTimer.run_id, p_outcomes: outcomesFor(byTimer), p_key: key });
     expect(ok.error).toBeNull();
+  });
+});
+
+// Round C4 (migration 0055): a failed email is tried again on the next run.
+describe("an email that failed to send", () => {
+  const record = (c: SupabaseClient, r: Run, outcome: (id: string) => string) =>
+    c.rpc("record_reminder_deliveries", {
+      p_run_id: r.run_id,
+      p_outcomes: r.recipients.map((p) => ({ recipient_id: p.id, outcome: outcome(p.id), detail: outcome(p.id) === "failed" ? "Test: the email service could not be reached." : "Test: recorded only." })),
+    });
+
+  it("is sent again to that admin only, once, until an email to them works", async () => {
+    const c = await asRole("super_admin");
+    const me = userIdOf(seedAdmin("super_admin").email);
+    const other = userIdOf(seedAdmin("centre_admin").email);
+    await run(c); // take anything already due, so only this test's renewals are new
+    const missed = await newRenewal(3, "retried renewal");
+    const gone = await newRenewal(4, "switched off before the retry");
+
+    const first = await run(c);
+    expect(first.items.map((i) => i.record_id)).toEqual(expect.arrayContaining([missed.id, gone.id]));
+    expect((await record(c, first, (id) => (id === me ? "failed" : "recorded only"))).error).toBeNull();
+    // One of the two is switched off before the next run: no point sending it.
+    await (await asRole("centre_admin")).from("renewals").update({ active: false }).eq("id", gone.id);
+
+    const second = await run(c);
+    expect(second.items).toEqual([]);
+    expect(second.recipients.map((p) => p.id)).toEqual([me]);
+    expect(second.recipients[0].retry.map((i) => i.record_id)).toEqual([missed.id]);
+    expect(second.recipients[0].retry[0]).toMatchObject({ title: missed.title, stage: 7, days_left: 3 });
+    // Written down, and readable by a Centre Admin.
+    const { data: rows } = await (await asRole("centre_admin")).from("reminder_retries").select("recipient_id").eq("run_id", second.run_id);
+    expect(rows).toEqual([{ recipient_id: me }]);
+    // A run with only a retry has nothing for the other admins.
+    const wrong = await c.rpc("record_reminder_deliveries", { p_run_id: second.run_id, p_outcomes: [{ recipient_id: other, outcome: "sent", detail: null }] });
+    expect(wrong.error?.message).toMatch(/nothing to send to that admin/);
+    // It fails again: still owed. Then it works: no longer owed.
+    expect((await record(c, second, () => "failed")).error).toBeNull();
+    const third = await run(c);
+    expect(third.recipients.find((p) => p.id === me)?.retry.map((i) => i.record_id)).toEqual([missed.id]);
+    expect((await record(c, third, () => "recorded only")).error).toBeNull();
+    const fourth = await run(c);
+    expect(fourth.recipients).toEqual([]);
+  });
+
+  it("nobody adds, changes or deletes retry records directly", async () => {
+    const c = await asRole("super_admin");
+    const me = userIdOf(seedAdmin("super_admin").email);
+    const r = await run(c);
+    expect((await c.from("reminder_retries").insert({ run_id: r.run_id, recipient_id: me, sent_id: 1 }).select()).data ?? []).toHaveLength(0);
+    // The test above made at least one (so this never passes by finding none).
+    const { data: rows } = await masterKeyClient().from("reminder_retries").select("id").limit(1);
+    expect(rows).toHaveLength(1);
+    expect((await masterKeyClient().from("reminder_retries").update({ sent_id: 1 }).eq("id", rows![0].id)).error?.message).toMatch(/never changed/);
+    expect((await masterKeyClient().from("reminder_retries").delete().eq("id", rows![0].id)).error?.message).toMatch(/cannot be deleted/);
   });
 });
 

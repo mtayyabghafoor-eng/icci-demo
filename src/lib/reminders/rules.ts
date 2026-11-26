@@ -30,7 +30,8 @@ export type ReminderItem = {
   stage: Stage;
   days_left: number;
 };
-export type Recipient = { id: string; name: string; email: string };
+/** retry (0055): reminders from this admin's earlier emails that failed to send. */
+export type Recipient = { id: string; name: string; email: string; retry?: ReminderItem[] };
 export type RunResult = {
   run_id: number;
   run_on: string;
@@ -59,8 +60,20 @@ function whenLine(days: number): string {
   return `in ${days} ${days === 1 ? "day" : "days"}`;
 }
 
+/**
+ * One admin's reminders (Round C4): today's new ones, then any from their
+ * earlier failed emails, each once, earliest due first.
+ */
+export function itemsFor(items: ReminderItem[], retry: ReminderItem[] = []): { items: ReminderItem[]; retried: number } {
+  const key = (i: ReminderItem) => `${i.source}|${i.record_id}|${i.due_on}|${i.stage}`;
+  const seen = new Set(items.map(key));
+  const extra = retry.filter((i) => !seen.has(key(i)) && (seen.add(key(i)), true));
+  const all = [...items, ...extra].sort((a, b) => a.due_on.localeCompare(b.due_on) || a.title.localeCompare(b.title));
+  return { items: all, retried: extra.length };
+}
+
 /** The daily summary email: grouped 7, 30, 60 days; a link to Renewals when the site address is known. */
-export function buildReminderEmail(items: ReminderItem[], siteUrl?: string, opts: { test?: boolean } = {}) {
+export function buildReminderEmail(items: ReminderItem[], siteUrl?: string, opts: { test?: boolean; retried?: number } = {}) {
   const n = items.length;
   const subject = `${opts.test ? "[Test] " : ""}ICCI renewals: ${n} ${n === 1 ? "reminder" : "reminders"}`;
   const link = siteUrl ? `${siteUrl.replace(/\/+$/, "")}/renewals` : null;
@@ -70,7 +83,8 @@ export function buildReminderEmail(items: ReminderItem[], siteUrl?: string, opts
 
   const intro = opts.test
     ? "This is a test email from the ICCI Control Dashboard. It shows what a daily reminder looks like, using what is in the register now. Nothing was recorded as sent."
-    : "These renewals have just reached a reminder point. Each one is reminded at 60, 30 and 7 days before it is due.";
+    : "These renewals have just reached a reminder point. Each one is reminded at 60, 30 and 7 days before it is due." +
+      (opts.retried ? ` ${opts.retried === 1 ? "One of them was" : `${opts.retried} of them were`} in an earlier email that could not be sent, so ${opts.retried === 1 ? "it is" : "they are"} included again.` : "");
   const outro = link ? `Open the Renewals register: ${link}` : "Open the ICCI Control Dashboard and choose Renewals.";
 
   const text = [

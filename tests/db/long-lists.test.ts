@@ -39,7 +39,10 @@ describe("lists loaded in full", () => {
 
   it("every admin's name is loaded", async () => {
     const nameOf = await adminNames(await asRole("centre_admin"));
-    const { data } = await masterKeyClient().from("app_users").select("id, display_name");
-    for (const u of data ?? []) expect(nameOf(u.id)).toBe(u.display_name);
+    const { data, error } = await masterKeyClient().from("app_users").select("id, display_name");
+    // Round C4: never passes by checking nobody (the seed makes 9 accounts).
+    expect(error).toBeNull();
+    expect(data!.length).toBeGreaterThanOrEqual(9);
+    for (const u of data!) expect(nameOf(u.id)).toBe(u.display_name);
   });
 });

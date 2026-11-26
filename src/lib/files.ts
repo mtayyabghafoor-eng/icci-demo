@@ -16,14 +16,13 @@ export async function fileFrom(
 ): Promise<{ file: File; ext: string } | null | string> {
   const f = form.get(field);
   if (!(f instanceof File) || f.size === 0) return null;
-  const ext = rules.types[f.type];
-  if (!ext) return `The ${rules.what} must be ${rules.typesText}.`;
+  if (!rules.types[f.type]) return `The ${rules.what} must be ${rules.typesText}.`;
   if (f.size > rules.maxMb * 1024 * 1024) return `The ${rules.what} is too large (over ${rules.maxMb} MB).`;
-  if (ext === "pdf") {
-    const start = new TextDecoder().decode(new Uint8Array(await f.slice(0, 5).arrayBuffer()));
-    if (start !== "%PDF-") return `The ${rules.what} does not look like a real PDF.`;
-  }
-  return { file: f, ext };
+  // Round C3: what the file really is, from its first bytes.
+  const real = sniffType(new Uint8Array(await f.slice(0, 12).arrayBuffer()));
+  if (f.type === "application/pdf" && real !== "application/pdf") return `The ${rules.what} does not look like a real PDF.`;
+  if (!real || !rules.types[real]) return `The ${rules.what} must be ${rules.typesText}.`;
+  return { file: real === f.type ? f : new File([f], f.name, { type: real }), ext: rules.types[real] };
 }
 
 /** What a file really is, from its first bytes: a PDF, a JPEG, PNG or WebP picture, or nothing we accept. */

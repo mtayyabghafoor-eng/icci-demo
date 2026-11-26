@@ -1,16 +1,16 @@
 "use server";
 // What happens when each sign-in form is sent. Runs on the web server only.
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { LAST_ACTIVE_COOKIE, LIBRARY_PENDING_COOKIE, safeNextPath } from "@/lib/auth/rules";
+import { activityCookieOptions, LAST_ACTIVE_COOKIE, LIBRARY_PENDING_COOKIE, safeNextPath } from "@/lib/auth/rules";
 import { createClient } from "@/lib/supabase/server";
 
 export type FormState = { error: string | null };
 
-const ACTIVITY_COOKIE_OPTIONS = { path: "/", sameSite: "lax" as const, maxAge: 60 * 60 * 24 };
-
 async function markActive() {
-  (await cookies()).set(LAST_ACTIVE_COOKIE, String(Date.now()), ACTIVITY_COOKIE_OPTIONS);
+  // Round C3: "secure" when the site is reached over https (as on Vercel).
+  const https = (await headers()).get("x-forwarded-proto") === "https";
+  (await cookies()).set(LAST_ACTIVE_COOKIE, String(Date.now()), activityCookieOptions(https));
 }
 
 function withNext(path: string, next: string) {
@@ -156,6 +156,11 @@ function looksLikeEmail(email: string): boolean {
 
 async function sendCode(email: string): Promise<string | null> {
   const supabase = await createClient();
+  // Round C3 (migration 0056): only a switched-on Library Operator's
+  // address gets a code; an admin's address never does. The screen goes on
+  // exactly as if a code was sent, so it never reveals who has an account.
+  const { data: allowed, error: checkError } = await supabase.rpc("library_code_allowed", { p_email: email });
+  if (checkError || allowed !== true) return null;
   // shouldCreateUser: false, so an unknown address never becomes an account.
   const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
   // Only "too many requests from this device" is shown: it applies to every

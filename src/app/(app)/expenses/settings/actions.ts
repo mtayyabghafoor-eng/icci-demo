@@ -3,7 +3,7 @@
 // on the web server as the signed-in account: the database decides what is
 // allowed (Super Admin and Finance keep the lists; a Super Admin asks for a
 // new amount and a different Super Admin confirms it; nothing is deleted).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   friendlyExpenseError,
   isSettingDecision,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/expenses/rules";
 import { formGetter, UUID } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
+import { NOT_FOUND, anyBad, isBool, isId, isOneOf, isUuid } from "@/lib/action-input";
 
 export type ExpenseFormState = { error: string | null };
 
@@ -23,6 +24,8 @@ const TABLE = { category: "expense_categories", fund: "expense_funds" } as const
 type ListKind = keyof typeof TABLE;
 
 export async function addListEntry(kind: ListKind, _state: ExpenseFormState, form: FormData): Promise<ExpenseFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isOneOf(kind, ["category", "fund"]))) return { error: NOT_FOUND };
   const parsed = kind === "fund" ? parseNewFund(formGetter(form)) : parseListName(formGetter(form), "category");
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
@@ -33,6 +36,8 @@ export async function addListEntry(kind: ListKind, _state: ExpenseFormState, for
 }
 
 export async function renameListEntry(kind: ListKind, id: string, _state: ExpenseFormState, form: FormData): Promise<ExpenseFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isOneOf(kind, ["category", "fund"]), isUuid(id))) return { error: NOT_FOUND };
   if (!UUID.test(id)) return { error: "That could not be found." };
   const parsed = parseListName(formGetter(form), kind);
   if (!parsed.ok) return { error: parsed.error };
@@ -44,6 +49,8 @@ export async function renameListEntry(kind: ListKind, id: string, _state: Expens
 }
 
 export async function setListEntryActive(kind: ListKind, id: string, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isOneOf(kind, ["category", "fund"]), isUuid(id), isBool(active))) notFound();
   if (!UUID.test(id)) redirect(PAGE);
   const supabase = await createClient();
   const { data, error } = await supabase.from(TABLE[kind]).update({ active }).eq("id", id).select("id");
@@ -68,6 +75,8 @@ export async function askSettingChange(key: string, _state: ExpenseFormState, fo
 
 /** Confirm or turn down another Super Admin's request, or cancel your own. */
 export async function decideSettingChange(id: number, status: SettingDecision, _state: ExpenseFormState, form: FormData): Promise<ExpenseFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(id))) return { error: NOT_FOUND };
   if (!Number.isInteger(id) || !isSettingDecision(status)) return { error: "That could not be found." };
   const note = formGetter(form)("note").trim().slice(0, 500);
   const supabase = await createClient();

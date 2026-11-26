@@ -3,16 +3,19 @@
 // server as the signed-in admin: the database's rules decide what is allowed
 // (never your own sign-off, only published versions, no future dates or dates
 // before approval, withdraw with a reason, never delete).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlySignoffError, parseSignoffForm, readGridBack, SCAN_BUCKET, scanFrom, scanPath } from "@/lib/policies/signoffs";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isId, isUuid } from "@/lib/action-input";
 
 export type SignoffFormState = { error: string | null };
 
 /** One signed sheet: the same date (and scan) for every person ticked, saved together or not at all. */
 export async function recordSignoffs(policyId: string, versionId: string, _state: SignoffFormState, form: FormData): Promise<SignoffFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId), isUuid(versionId))) return { error: NOT_FOUND };
   if (!UUID.test(policyId) || !UUID.test(versionId)) return { error: "This policy could not be found." };
   const supabase = await createClient();
   const { data: version } = await supabase.from("policy_versions").select("approved_on").eq("id", versionId).eq("policy_id", policyId).maybeSingle();
@@ -40,6 +43,8 @@ export async function recordSignoffs(policyId: string, versionId: string, _state
 }
 
 export async function withdrawSignoff(policyId: string, signoffId: number, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId), isId(signoffId))) notFound();
   if (!UUID.test(policyId) || !Number.isSafeInteger(signoffId)) redirect("/policies");
   const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/policies/${policyId}?done=withdraw-reason`);

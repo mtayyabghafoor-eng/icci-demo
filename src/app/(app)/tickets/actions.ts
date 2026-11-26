@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { friendlyTicketError, isTicketStep, parseStepForm, parseTicketForm } from "@/lib/tickets/rules";
 import { photoFrom } from "../items/photos";
 import { TICKET_PHOTO_BUCKET } from "./data";
+import { NOT_FOUND, anyBad, isId, isUuid, orNull } from "@/lib/action-input";
 
 export type TicketFormState = { error: string | null };
 
@@ -18,13 +19,15 @@ export async function reportProblem(
   _state: TicketFormState,
   form: FormData,
 ): Promise<TicketFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(orNull(isUuid)(itemId), orNull(isId)(damageId))) return { error: NOT_FOUND };
   const get = (name: string) => {
     const v = form.get(name);
     return typeof v === "string" ? v : "";
   };
   const parsed = parseTicketForm(get, itemId);
   if (!parsed.ok) return { error: parsed.error };
-  const photo = photoFrom(form);
+  const photo = await photoFrom(form);
   if (typeof photo === "string") return { error: photo };
 
   const supabase = await createClient();
@@ -71,6 +74,8 @@ export async function reportProblem(
  * allowed (for example closing a ticket twice).
  */
 export async function recordTicketStep(ticketId: number, step: string, _state: TicketFormState, form: FormData): Promise<TicketFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(ticketId))) return { error: NOT_FOUND };
   if (!isTicketStep(step)) return { error: "Unknown step." };
   const get = (name: string) => {
     const v = form.get(name);
@@ -92,7 +97,7 @@ export async function recordTicketStep(ticketId: number, step: string, _state: T
   } else {
     let photo_path: string | null = null;
     if (v.step === "note") {
-      const photo = photoFrom(form);
+      const photo = await photoFrom(form);
       if (typeof photo === "string") return { error: photo };
       if (photo) {
         const path = `tickets/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}.${EXT[photo.type]}`;

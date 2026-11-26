@@ -24,8 +24,10 @@
     "typecheck": "next typegen && tsc --noEmit",
     "db:pause": "node -e \"setTimeout(()=>{},10000)\"",
     "db:seed:staging": "node scripts/seed-staging.mts",
+    "db:load-many": "node --env-file=.env.local --env-file=.env.localdb scripts/load-many.mts",
     "setup:local-db": "node scripts/setup-local-db.mts",
-    "db:wait": "node --env-file=.env.localdb scripts/wait-for-db.mjs"
+    "db:wait": "node --env-file=.env.localdb scripts/wait-for-db.mjs",
+    "db:types": "node scripts/db-types.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

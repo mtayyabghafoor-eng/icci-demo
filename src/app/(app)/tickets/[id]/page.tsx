@@ -52,7 +52,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
   if (!/^\d{1,12}$/.test(id)) notFound();
 
   const supabase = await createClient();
-  const { data } = await supabase.from("maintenance_tickets").select(TICKET_COLUMNS).eq("id", id).maybeSingle();
+  const { data } = await supabase.from("maintenance_tickets").select(TICKET_COLUMNS).eq("id", Number(id)).maybeSingle();
   if (!data) notFound();
   const t = data as TicketRow;
 

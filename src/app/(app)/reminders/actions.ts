@@ -16,9 +16,10 @@ export async function runRemindersNow(): Promise<void> {
   let done = "failed";
   let count = 0;
   try {
-    const { run } = await runAndDeliver(await createClient(), null);
+    const { run, outcomes } = await runAndDeliver(await createClient(), null);
     count = run.items.length;
-    done = count > 0 ? "ran" : "quiet";
+    // Round C4: a run that only sends again an earlier failed email still ran.
+    done = count > 0 || outcomes.length > 0 ? "ran" : "quiet";
   } catch {
     done = "failed";
   }

@@ -58,6 +58,13 @@ describe("everything else in the database", () => {
     expect(ofKind(list, "function_open")).toEqual([]);
   });
 
+  // Round C3 (migration 0056).
+  it("signed-out visitors cannot read or change a number counter, and no admin can reset one", async () => {
+    const list = await problems();
+    expect(ofKind(list, "anon_sequence")).toEqual([]);
+    expect(ofKind(list, "sequence_reset")).toEqual([]);
+  });
+
   it("functions that run with the owner's rights fix where they look things up", async () => {
     expect(ofKind(await problems(), "function_search_path")).toEqual([]);
   });

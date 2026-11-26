@@ -3,17 +3,20 @@
 // web server as the signed-in admin: the database's rules decide what is
 // allowed (never your own training, no future dates, withdraw with a reason,
 // no new entries for switched-off people or types).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyTrainingError, parseTrainingForm, parseTrainingTypeForm } from "@/lib/training/rules";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isId, isUuid } from "@/lib/action-input";
 
 export type TrainingFormState = { error: string | null };
 
 const TYPES = "/people/training/types";
 
 export async function recordTraining(personId: string, _state: TrainingFormState, form: FormData): Promise<TrainingFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(personId))) return { error: NOT_FOUND };
   if (!UUID.test(personId)) return { error: "This person could not be found." };
   const parsed = parseTrainingForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
@@ -24,6 +27,8 @@ export async function recordTraining(personId: string, _state: TrainingFormState
 }
 
 export async function withdrawTraining(personId: string, recordId: number, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(personId), isId(recordId))) notFound();
   if (!UUID.test(personId) || !Number.isSafeInteger(recordId)) redirect("/people");
   const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/people/${personId}?done=withdraw-reason`);
@@ -50,6 +55,8 @@ export async function addTrainingType(_state: TrainingFormState, form: FormData)
 }
 
 export async function saveTrainingType(typeId: string, _state: TrainingFormState, form: FormData): Promise<TrainingFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(typeId))) return { error: NOT_FOUND };
   if (!UUID.test(typeId)) return { error: "This training type could not be found." };
   const parsed = parseTrainingTypeForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
@@ -61,6 +68,8 @@ export async function saveTrainingType(typeId: string, _state: TrainingFormState
 }
 
 export async function setTrainingTypeActive(typeId: string, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(typeId), isBool(active))) notFound();
   if (!UUID.test(typeId)) redirect(TYPES);
   const supabase = await createClient();
   const { data, error } = await supabase.from("training_types").update({ active }).eq("id", typeId).select("id");

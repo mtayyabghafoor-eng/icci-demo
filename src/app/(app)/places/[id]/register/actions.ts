@@ -3,7 +3,7 @@
 // web server as the signed-in admin; the database's rules decide what is
 // allowed, exactly as for "Register an item" (the same save step is used).
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { parseRegister } from "@/lib/items/form";
 import { ROOM_COOKIE, ROOM_COOKIE_HOURS, stockAllowedIn } from "@/lib/places/room-register";
@@ -13,11 +13,14 @@ import { photoFrom } from "../../../items/photos";
 import { insertNewItem } from "../../../items/register";
 import { UUID } from "../../data";
 import { MAY_SEE_PLACES } from "../../page";
+import { NOT_FOUND, anyBad, isUuid } from "@/lib/action-input";
 
 export type RoomFormState = { error: string | null };
 
 /** Turns "registering here" on in this browser and opens the room screen. */
 export async function startRoomRegister(placeId: string) {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(placeId))) notFound();
   const me = await requireAdmin();
   if (!MAY_SEE_PLACES.includes(me.roleCode) || !UUID.test(placeId)) redirect("/places");
   (await cookies()).set(ROOM_COOKIE, placeId, {
@@ -32,12 +35,16 @@ export async function startRoomRegister(placeId: string) {
 
 /** Turns "registering here" off and goes back to the place. */
 export async function finishRoomRegister(placeId: string) {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(placeId))) notFound();
   (await cookies()).delete(ROOM_COOKIE);
   redirect(UUID.test(placeId) ? `/places/${placeId}` : "/places");
 }
 
 /** Saves one item in this place, then comes back for the next label. */
 export async function registerInRoom(placeId: string, _state: RoomFormState, form: FormData): Promise<RoomFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(placeId))) return { error: NOT_FOUND };
   const me = await requireAdmin();
   if (!MAY_SEE_PLACES.includes(me.roleCode)) return { error: "Your account cannot register items." };
   if (!UUID.test(placeId)) return { error: "This place could not be found." };
@@ -57,7 +64,7 @@ export async function registerInRoom(placeId: string, _state: RoomFormState, for
   if (parsed.values.kind === "consumable" && !stockAllowedIn(place.kind)) {
     return { error: "Stock is kept in a store room or on a shelf. Register it there, or choose Fixed asset." };
   }
-  const photo = photoFrom(form);
+  const photo = await photoFrom(form);
   if (typeof photo === "string") return { error: photo };
 
   const saved = await insertNewItem(supabase, parsed.values, photo);

@@ -47,7 +47,9 @@ export default defineConfig({
       // look-ups go to the real Open Library: close it before a test run.
       reuseExistingServer: true,
       timeout: 180_000,
-      env: { OPEN_LIBRARY_URL: "http://127.0.0.1:3999" },
+      // Round C3: printed labels take their address from SITE_URL; in a
+      // test run that is this test website.
+      env: { OPEN_LIBRARY_URL: "http://127.0.0.1:3999", SITE_URL: "http://localhost:3000" },
     },
   ],
 });

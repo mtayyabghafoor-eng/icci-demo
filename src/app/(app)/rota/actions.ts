@@ -4,7 +4,7 @@
 // decide what is allowed (Super Admin and Centre Admin only, prayers in
 // order, Jumu'ah on Fridays only, a slot's group never changes, nothing
 // deleted).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   friendlyRotaError,
@@ -17,6 +17,7 @@ import {
   type PrayerDay,
 } from "@/lib/rota/rules";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isMonth, isOneOf, isUuid } from "@/lib/action-input";
 
 /** On a refusal the typed values come back, so a month of typing is never lost. */
 export type MonthFormState = { error: string | null; values: Record<string, string> | null };
@@ -32,6 +33,8 @@ function typed(form: FormData): Record<string, string> {
 }
 
 export async function savePrayerMonth(month: string, _state: MonthFormState, form: FormData): Promise<MonthFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isMonth(month))) return { error: NOT_FOUND, values: null };
   if (!MONTH.test(month)) return { error: "That month could not be found.", values: null };
   const supabase = await createClient();
   const days = monthDays(month);
@@ -62,6 +65,8 @@ export async function addSlotType(_state: SlotFormState, form: FormData): Promis
 }
 
 export async function saveSlotType(id: string, _state: SlotFormState, form: FormData): Promise<SlotFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(id))) return { error: NOT_FOUND };
   if (!UUID.test(id)) return { error: "This slot type could not be found." };
   const parsed = parseSlotTypeForm(formGetter(form), "edit");
   if (!parsed.ok) return { error: parsed.error };
@@ -73,6 +78,8 @@ export async function saveSlotType(id: string, _state: SlotFormState, form: Form
 }
 
 export async function setSlotTypeActive(id: string, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(id), isBool(active))) notFound();
   if (!UUID.test(id)) redirect(SLOTS);
   const supabase = await createClient();
   const { data, error } = await supabase.from("rota_slot_types").update({ active }).eq("id", id).select("id");
@@ -81,6 +88,8 @@ export async function setSlotTypeActive(id: string, active: boolean): Promise<vo
 }
 
 export async function moveSlotType(id: string, direction: "up" | "down"): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(id), isOneOf(direction, ["up", "down"]))) notFound();
   if (!UUID.test(id) || (direction !== "up" && direction !== "down")) redirect(SLOTS);
   const supabase = await createClient();
   const { error } = await supabase.rpc("move_rota_slot_type", { p_id: id, p_direction: direction });

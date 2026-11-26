@@ -4,7 +4,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { currentOrigin } from "@/lib/labels/origin";
+import { labelOrigin } from "@/lib/labels/origin";
 import {
   labelLink,
   labelsAreTest,
@@ -64,11 +64,11 @@ async function Sheet({
     );
   }
 
-  const origin = await currentOrigin();
+  const origin = labelOrigin();
   const test = labelsAreTest(process.env.ICCI_ENVIRONMENT);
   const tag = labelTag(process.env.ICCI_ENVIRONMENT);
   const sheets = layoutSheets(serialsInRange(run.first_number, run.last_number), skip);
-  const range = run.label_count > 1 ? `${serialOf(run.first_number)} to ${serialOf(run.last_number)}` : serialOf(run.first_number);
+  const range = (run.label_count ?? 0) > 1 ? `${serialOf(run.first_number)} to ${serialOf(run.last_number)}` : serialOf(run.first_number);
 
   return (
     <>

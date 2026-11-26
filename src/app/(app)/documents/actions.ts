@@ -12,8 +12,9 @@ import {
   parseHideReason,
 } from "@/lib/documents/rules";
 import { fileFrom, PDF_OR_PICTURE_TYPES } from "@/lib/files";
-import { formGetter, UUID } from "@/lib/forms";
+import { formGetter } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
+import { NOT_FOUND, anyBad, isId, isUuid } from "@/lib/action-input";
 
 export type DocumentFormState = { error: string | null };
 export type DocumentOwner = { model_id: string } | { item_id: string };
@@ -23,12 +24,21 @@ function safeReturn(path: string): string {
   return /^\/(models|items)\/[0-9a-f-]{36}$/.test(path) ? path : "/";
 }
 
-function ownerOk(owner: DocumentOwner): boolean {
-  return UUID.test("model_id" in owner ? owner.model_id : owner.item_id);
+/**
+ * Round C3: exactly one of the two expected fields, a real id, and nothing
+ * else. Whatever else the browser sends is never passed on to the database.
+ */
+function cleanOwner(owner: unknown): DocumentOwner | null {
+  if (!owner || typeof owner !== "object" || Object.keys(owner).length !== 1) return null;
+  const o = owner as Record<string, unknown>;
+  if (isUuid(o.model_id)) return { model_id: o.model_id };
+  if (isUuid(o.item_id)) return { item_id: o.item_id };
+  return null;
 }
 
-export async function addDocument(owner: DocumentOwner, returnTo: string, _state: DocumentFormState, form: FormData): Promise<DocumentFormState> {
-  if (!ownerOk(owner)) return { error: "This record could not be found." };
+export async function addDocument(rawOwner: DocumentOwner, returnTo: string, _state: DocumentFormState, form: FormData): Promise<DocumentFormState> {
+  const owner = cleanOwner(rawOwner);
+  if (!owner || typeof returnTo !== "string") return { error: "This record could not be found." };
   const parsed = parseDocumentForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const file = await fileFrom(form, "file", {
@@ -49,6 +59,8 @@ export async function addDocument(owner: DocumentOwner, returnTo: string, _state
 }
 
 export async function hideDocument(id: number, returnTo: string, _state: DocumentFormState, form: FormData): Promise<DocumentFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(id))) return { error: NOT_FOUND };
   const reason = parseHideReason(formGetter(form));
   if (!reason.ok) return { error: reason.error };
   const supabase = await createClient();

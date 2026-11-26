@@ -4,12 +4,13 @@
 // allowed (Super Admin and Centre Admin only, no switched-off people or
 // places, a week locked once its Sunday has passed, nothing typed over or
 // deleted). Warnings never block.
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SLOT_GROUPS, type SlotGroup } from "@/lib/rota/rules";
 import { publishProblem } from "@/lib/rota/publish";
 import { friendlyWeekError, parseAddSlotForm } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { UUID } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isDate, isId, isUuid, orNull } from "@/lib/action-input";
 
 export type AddSlotState = { error: string | null };
 
@@ -26,6 +27,8 @@ function problemKey(message: string | undefined): string {
 }
 
 export async function startWeek(monday: string): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isDate(monday))) notFound();
   if (!DATE.test(monday)) redirect("/rota");
   const supabase = await createClient();
   const { error } = await supabase.from("rota_weeks").insert({ week_start: monday });
@@ -34,6 +37,8 @@ export async function startWeek(monday: string): Promise<void> {
 }
 
 export async function assignPerson(assignmentId: number, monday: string, personId: string | null): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(assignmentId), isDate(monday), orNull(isUuid)(personId))) notFound();
   if (!Number.isSafeInteger(assignmentId) || !DATE.test(monday) || (personId !== null && !UUID.test(personId))) redirect("/rota");
   const supabase = await createClient();
   const { data: newId, error } = await supabase.rpc("assign_rota_person", { p_assignment_id: assignmentId, p_person_id: personId });
@@ -66,6 +71,8 @@ async function emptySameSlots(supabase: Awaited<ReturnType<typeof createClient>>
  * slot; the week page says how many were saved and how many were refused.
  */
 export async function assignMore(monday: string, personId: string, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isDate(monday), isUuid(personId))) notFound();
   if (!DATE.test(monday) || !UUID.test(personId)) redirect("/rota");
   const ids = [...new Set(form.getAll("slots").map(Number))].filter((n) => Number.isSafeInteger(n) && n > 0).slice(0, 14);
   if (ids.length === 0) redirect(`/rota?week=${monday}`);
@@ -79,6 +86,8 @@ export async function assignMore(monday: string, personId: string, form: FormDat
 }
 
 export async function removeSlot(assignmentId: number, monday: string): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(assignmentId), isDate(monday))) notFound();
   if (!Number.isSafeInteger(assignmentId) || !DATE.test(monday)) redirect("/rota");
   const supabase = await createClient();
   const { data, error } = await supabase.from("rota_assignments").update({ removed_at: new Date().toISOString() }).eq("id", assignmentId).select("id");
@@ -88,6 +97,8 @@ export async function removeSlot(assignmentId: number, monday: string): Promise<
 }
 
 export async function addSlot(weekId: string, monday: string, _state: AddSlotState, form: FormData): Promise<AddSlotState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(weekId), isDate(monday))) return { error: NOT_FOUND };
   if (!UUID.test(weekId) || !DATE.test(monday)) return { error: "This week could not be found." };
   const supabase = await createClient();
   const { data: types } = await supabase.from("rota_slot_types").select("id, slot_group").eq("active", true);
@@ -113,6 +124,8 @@ export async function addSlot(weekId: string, monday: string, _state: AddSlotSta
  * copy that the one-page rota prints. Then the print view opens.
  */
 export async function publishWeek(weekId: string, monday: string, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(weekId), isDate(monday))) notFound();
   if (!UUID.test(weekId) || !DATE.test(monday)) redirect("/rota");
   const seen = form.get("seen_warnings") === "yes";
   const supabase = await createClient();

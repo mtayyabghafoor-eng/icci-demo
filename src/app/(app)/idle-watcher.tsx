@@ -32,7 +32,8 @@ export function IdleWatcher({ serverNow }: { serverNow: number }) {
 
     const write = (t: number) => {
       lastWrite = t;
-      document.cookie = `${LAST_ACTIVE_COOKIE}=${t}; path=/; max-age=86400; samesite=lax`;
+      // Round C3: "secure" on the real site (https), as the server sets it.
+      document.cookie = `${LAST_ACTIVE_COOKIE}=${t}; path=/; max-age=86400; samesite=lax${location.protocol === "https:" ? "; secure" : ""}`;
     };
 
     const check = () => {

@@ -33,7 +33,7 @@ async function Content({ params }: { params: PageProps<"/expenses/[id]/correct">
   const { id } = await params;
   if (!/^\d{1,12}$/.test(id)) notFound();
   const supabase = await createClient();
-  const { data } = await supabase.from("expense_claim_list").select("*").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("expense_claim_list").select("*").eq("id", Number(id)).maybeSingle();
   if (!data) notFound();
   const c = data as ClaimRow;
   const names = await loadExpenseNames(supabase);

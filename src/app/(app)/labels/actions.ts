@@ -5,6 +5,7 @@
 import { redirect } from "next/navigation";
 import { friendlyLabelError, parsePrintCount } from "@/lib/labels/sheet";
 import { createClient } from "@/lib/supabase/server";
+import { NOT_FOUND, anyBad, isId } from "@/lib/action-input";
 
 export type LabelFormState = { error: string | null };
 
@@ -19,6 +20,8 @@ export async function createLabelSheet(_state: LabelFormState, form: FormData): 
 }
 
 export async function reprintLabelSheet(runId: number): Promise<LabelFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(runId))) return { error: NOT_FOUND };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("reprint_labels", { p_run_id: runId });
   if (error || !data) return { error: friendlyLabelError(error?.message ?? "") };

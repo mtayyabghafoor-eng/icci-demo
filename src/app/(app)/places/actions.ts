@@ -7,11 +7,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CHILD_KIND, friendlyPlaceError, isPlaceKind, parsePlaceForm } from "@/lib/places/rules";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isUuid, orNull } from "@/lib/action-input";
 
 export type PlaceFormState = { error: string | null };
 
 /** Adds a building (no parent) or the next kind of place inside a parent. */
 export async function addPlace(parentId: string | null, _state: PlaceFormState, form: FormData): Promise<PlaceFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(orNull(isUuid)(parentId))) return { error: NOT_FOUND };
   const parsed = parsePlaceForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   const supabase = await createClient();
@@ -33,6 +36,8 @@ export async function addPlace(parentId: string | null, _state: PlaceFormState, 
 }
 
 export async function savePlace(placeId: string, _state: PlaceFormState, form: FormData): Promise<PlaceFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(placeId))) return { error: NOT_FOUND };
   if (!UUID.test(placeId)) return { error: "This place could not be found." };
   const parsed = parsePlaceForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
@@ -44,6 +49,8 @@ export async function savePlace(placeId: string, _state: PlaceFormState, form: F
 }
 
 export async function setPlaceActive(placeId: string, active: boolean): Promise<PlaceFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(placeId), isBool(active))) return { error: NOT_FOUND };
   if (!UUID.test(placeId)) return { error: "This place could not be found." };
   const supabase = await createClient();
   const { data, error } = await supabase.from("locations").update({ active }).eq("id", placeId).select("id");

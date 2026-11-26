@@ -157,7 +157,8 @@ describe("documents", () => {
   });
 
   it("a stored file cannot be replaced or deleted", async () => {
-    const path = await uploadPdf("items/test-run");
+    // Round C3: a folder named like a real item (the store takes no other names).
+    const path = await uploadPdf(`items/${crypto.randomUUID()}`);
     const c = await asRole("centre_admin");
     expect((await c.storage.from("asset-documents").upload(path, PDF, { contentType: "application/pdf", upsert: true })).error).not.toBeNull();
     await c.storage.from("asset-documents").remove([path]);

@@ -4,11 +4,12 @@
 // allowed (Super Admin and Centre Admin only, the rota's own slot rules, a
 // template never used on a week that already has people on it, nothing
 // typed over or deleted).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SLOT_GROUPS, type SlotGroup } from "@/lib/rota/rules";
 import { friendlyTemplateError, parseTemplateSlotForm, type TemplateKind } from "@/lib/rota/templates";
 import { createClient } from "@/lib/supabase/server";
 import { UUID } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isDate, isId, isUuid } from "@/lib/action-input";
 
 export type TemplateSlotState = { error: string | null };
 export type UseTemplateState = { error: string | null };
@@ -16,6 +17,8 @@ export type UseTemplateState = { error: string | null };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function addTemplateSlot(templateId: string, _state: TemplateSlotState, form: FormData): Promise<TemplateSlotState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(templateId))) return { error: NOT_FOUND };
   if (!UUID.test(templateId)) return { error: "This template could not be found." };
   const supabase = await createClient();
   const [{ data: template }, { data: types }] = await Promise.all([
@@ -41,6 +44,8 @@ export async function addTemplateSlot(templateId: string, _state: TemplateSlotSt
 }
 
 export async function setTemplateSlotActive(templateId: string, slotId: number, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(templateId), isId(slotId), isBool(active))) notFound();
   if (!UUID.test(templateId) || !Number.isSafeInteger(slotId)) redirect("/rota/templates");
   const supabase = await createClient();
   const { data, error } = await supabase.from("rota_template_slots").update({ active }).eq("id", slotId).eq("template_id", templateId).select("id");
@@ -50,6 +55,8 @@ export async function setTemplateSlotActive(templateId: string, slotId: number, 
 
 /** Use a template on a week; for an Eid template the form gives the day. Then back to the week. */
 export async function applyTemplate(weekId: string, monday: string, templateId: string, _state: UseTemplateState, form: FormData): Promise<UseTemplateState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(weekId), isDate(monday), isUuid(templateId))) return { error: NOT_FOUND };
   if (!UUID.test(weekId) || !DATE.test(monday) || !UUID.test(templateId)) return { error: "This week or template could not be found." };
   const day = form.get("on_day");
   const p_day = typeof day === "string" && DATE.test(day) ? day : null;

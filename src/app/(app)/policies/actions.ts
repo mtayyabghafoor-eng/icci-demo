@@ -3,8 +3,9 @@
 // server as the signed-in admin: the database's rules decide what is allowed
 // (a different admin publishes, a published version never changes, PDFs are
 // never replaced, policies are switched off rather than deleted).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { TablesUpdate } from "@/lib/supabase/database.types";
 import {
   friendlyPolicyError,
   parsePolicyForm,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/policies/rules";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isUuid } from "@/lib/action-input";
 
 export type PolicyFormState = { error: string | null };
 
@@ -56,6 +58,8 @@ export async function addPolicy(_state: PolicyFormState, form: FormData): Promis
 }
 
 export async function savePolicy(policyId: string, _state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId))) return { error: NOT_FOUND };
   if (!UUID.test(policyId)) return { error: "This policy could not be found." };
   const parsed = parsePolicyForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
@@ -67,6 +71,8 @@ export async function savePolicy(policyId: string, _state: PolicyFormState, form
 }
 
 export async function saveRequiredRoles(policyId: string, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId))) notFound();
   if (!UUID.test(policyId)) redirect("/policies");
   const supabase = await createClient();
   const roles = pickedRoles(form.getAll("roles").map(String), await knownRoles(supabase));
@@ -75,6 +81,8 @@ export async function saveRequiredRoles(policyId: string, form: FormData): Promi
 }
 
 export async function setPolicyActive(policyId: string, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId), isBool(active))) notFound();
   if (!UUID.test(policyId)) redirect("/policies");
   const supabase = await createClient();
   const { data, error } = await supabase.from("policies").update({ active }).eq("id", policyId).select("id");
@@ -90,6 +98,8 @@ async function savePdf(supabase: Supabase, policyId: string, pdf: File): Promise
 }
 
 export async function uploadVersion(policyId: string, _state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId))) return { error: NOT_FOUND };
   if (!UUID.test(policyId)) return { error: "This policy could not be found." };
   const parsed = parseVersionForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
@@ -105,13 +115,15 @@ export async function uploadVersion(policyId: string, _state: PolicyFormState, f
 }
 
 export async function saveDraft(policyId: string, versionId: string, _state: PolicyFormState, form: FormData): Promise<PolicyFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId), isUuid(versionId))) return { error: NOT_FOUND };
   if (!UUID.test(policyId) || !UUID.test(versionId)) return { error: "This version could not be found." };
   const parsed = parseVersionForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
   const pdf = await pdfFrom(form);
   if (typeof pdf === "string") return { error: pdf };
   const supabase = await createClient();
-  const changes: Record<string, string> = { ...parsed.values };
+  const changes: TablesUpdate<"policy_versions"> = { ...parsed.values };
   if (pdf) {
     const saved = await savePdf(supabase, policyId, pdf);
     if ("error" in saved) return { error: saved.error };
@@ -124,6 +136,8 @@ export async function saveDraft(policyId: string, versionId: string, _state: Pol
 }
 
 export async function publishVersion(policyId: string, versionId: string): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(policyId), isUuid(versionId))) notFound();
   if (!UUID.test(policyId) || !UUID.test(versionId)) redirect("/policies");
   const supabase = await createClient();
   const { data, error } = await supabase

@@ -1,16 +1,19 @@
 "use server";
 // What happens when the person forms are sent. Runs on the web server, as
 // the signed-in admin: the database's rules decide what is allowed.
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { friendlyPeopleError, parsePersonForm, sameNameAs } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isUuid, orNull } from "@/lib/action-input";
 
 export type SameName = { id: string; full_name: string; active: boolean };
 export type PersonFormState = { error: string | null; sameName?: SameName[] };
 
 /** Adds a person (id null) or saves changes to one. */
 export async function savePerson(id: string | null, _state: PersonFormState, form: FormData): Promise<PersonFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(orNull(isUuid)(id))) return { error: NOT_FOUND };
   if (id !== null && !UUID.test(id)) return { error: "This person could not be found." };
   const parsed = parsePersonForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
@@ -49,6 +52,8 @@ export async function savePerson(id: string | null, _state: PersonFormState, for
 
 /** Switches a person off (they stay on old records) or back on. */
 export async function setPersonActive(id: string, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(id), isBool(active))) notFound();
   if (!UUID.test(id)) redirect("/people");
   const supabase = await createClient();
   const { data, error } = await supabase.from("people").update({ active }).eq("id", id).select("id");
@@ -62,6 +67,8 @@ export async function setPersonActive(id: string, active: boolean): Promise<void
  * account, and one person per account.
  */
 export async function setPersonAccount(id: string, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(id))) notFound();
   if (!UUID.test(id)) redirect("/people");
   const raw = form.get("app_user_id");
   const account = typeof raw === "string" && UUID.test(raw) ? raw : null;

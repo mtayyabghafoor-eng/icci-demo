@@ -90,6 +90,8 @@ describe("tidy-up after a test run", () => {
     const result = await switchOffTestLeftovers(masterKeyClient(), prefix);
     expect(result).toEqual({
       categories: 0,
+      companies: 0,
+      models: 0,
       expenseLists: 0,
       books: 1,
       borrowers: 1,
@@ -191,6 +193,25 @@ describe("tidy-up after a test run", () => {
     const m = masterKeyClient();
     expect((await m.from("expense_categories").select("active").eq("id", cat.data.id).single()).data?.active).toBe(false);
     expect((await m.from("expense_funds").select("active").eq("id", fund.data.id).single()).data?.active).toBe(false);
+  });
+
+  // Round C4: test companies and makes and models are switched off too.
+  it("switches off this run's makes and models, then its companies", async () => {
+    const prefix = `Test run tidy ${Date.now()} ${Math.random().toString(36).slice(2, 7)} `;
+    const admin = await asRole("centre_admin");
+    const m = masterKeyClient();
+    const cat = await m.from("item_categories").select("id").eq("name", "Lawnmowers").single();
+    if (cat.error) throw cat.error;
+    const maker = await admin.from("companies").insert({ name: `${prefix}maker`, kinds: ["maker"] }).select("id").single();
+    if (maker.error) throw maker.error;
+    // Named like an ordinary model, but made by a test company.
+    const model = await admin.from("product_models").insert({ maker_company_id: maker.data.id, model_name: "Mower 3000", category_id: cat.data.id }).select("id").single();
+    if (model.error) throw model.error;
+
+    const result = await switchOffTestLeftovers(m, prefix);
+    expect(result).toMatchObject({ companies: 1, models: 1 });
+    expect((await m.from("companies").select("active").eq("id", maker.data.id).single()).data?.active).toBe(false);
+    expect((await m.from("product_models").select("active").eq("id", model.data.id).single()).data?.active).toBe(false);
   });
 
   it("refuses to touch anything not named \"Test run ...\"", async () => {

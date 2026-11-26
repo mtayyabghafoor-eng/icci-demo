@@ -68,7 +68,7 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
   if (!/^\d{1,12}$/.test(id)) notFound();
 
   const supabase = await createClient();
-  const { data } = await supabase.from("expense_entries").select("*").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("expense_entries").select("*").eq("id", Number(id)).maybeSingle();
   if (!data) notFound();
   const entry = data as EntryRow;
   const claimId = entry.kind === "claim" ? entry.id : entry.corrects_id!;

@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { currentOrigin } from "@/lib/labels/origin";
+import { labelOrigin } from "@/lib/labels/origin";
 import { labelsAreTest, labelTag, qrMatrix, qrSvgPath } from "@/lib/labels/sheet";
 import {
   KIND_WORD,
@@ -65,7 +65,7 @@ async function Content({
     where: lineOf(p.id, byId).slice(0, -1).map((x) => x.name).join(" › "),
   }));
   const sheets = layoutPlaceSheets(cells, skip);
-  const origin = await currentOrigin();
+  const origin = labelOrigin();
   const test = labelsAreTest(process.env.ICCI_ENVIRONMENT);
   const tag = labelTag(process.env.ICCI_ENVIRONMENT);
   const line = lineOf(id, byId);

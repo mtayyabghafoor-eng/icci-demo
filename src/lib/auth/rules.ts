@@ -7,6 +7,15 @@ export const IDLE_LIMIT_MS = 15 * 60 * 1000;
 /** Cookie holding the time of the admin's last activity (milliseconds). */
 export const LAST_ACTIVE_COOKIE = "icci_last_active";
 
+/**
+ * Round C3: the activity cookie is marked "secure" on the real site, so it
+ * only ever travels over an encrypted (https) connection. On this PC
+ * (http://localhost) it cannot be, or it would not be kept.
+ */
+export function activityCookieOptions(https: boolean) {
+  return { path: "/", sameSite: "lax" as const, maxAge: 60 * 60 * 24, secure: https };
+}
+
 /** Allowed clock difference between the admin's device and the server. */
 const FUTURE_TOLERANCE_MS = 2 * 60 * 1000;
 

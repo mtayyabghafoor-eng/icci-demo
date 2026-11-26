@@ -9,6 +9,7 @@ import {
   deliveryDecision,
   emailServiceReady,
   emailTitle,
+  itemsFor,
   reminderStage,
   sameSecret,
   type ReminderItem,
@@ -123,5 +124,27 @@ describe("the sign-in gate lets only the timer's address through", () => {
     expect(decideRoute({ ...base, pathname: `${REMINDER_TIMER_PATH}/more` })).toMatchObject({ kind: "redirect" });
     expect(decideRoute({ ...base, pathname: "/api/reminders" })).toMatchObject({ kind: "redirect" });
     expect(decideRoute({ ...base, pathname: "/reminders" })).toMatchObject({ kind: "redirect" });
+  });
+});
+
+// Round C4: an admin whose earlier email failed gets those reminders again.
+describe("one admin's list, with reminders from a failed email", () => {
+  const item = (record_id: string, due_on: string, stage: 7 | 30 | 60 = 7): ReminderItem =>
+    ({ source: "renewal", record_id, title: `Made-up ${record_id}`, category: "Insurance", due_on, stage, days_left: 3 });
+  it("adds the missed ones once, earliest due first, and counts them", () => {
+    const today = [item("b", "2026-12-05")];
+    const missed = [item("a", "2026-12-01"), item("b", "2026-12-05"), item("a", "2026-12-01")];
+    const r = itemsFor(today, missed);
+    expect(r.items.map((i) => i.record_id)).toEqual(["a", "b"]);
+    expect(r.retried).toBe(1);
+  });
+  it("with nothing missed, is just today's list", () => {
+    expect(itemsFor([item("c", "2026-12-09")])).toEqual({ items: [item("c", "2026-12-09")], retried: 0 });
+  });
+  it("the email says some were in an earlier email that could not be sent", () => {
+    const one = buildReminderEmail([item("a", "2026-12-01")], undefined, { retried: 1 });
+    expect(one.text).toMatch(/One of them was in an earlier email that could not be sent, so it is included again\./);
+    const none = buildReminderEmail([item("a", "2026-12-01")]);
+    expect(none.text).not.toMatch(/earlier email/);
   });
 });

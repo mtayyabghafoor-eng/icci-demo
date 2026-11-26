@@ -8,11 +8,14 @@ import { friendlyCategoryError, parseCategoryForm } from "@/lib/categories/rules
 import { createClient } from "@/lib/supabase/server";
 import { UUID } from "./data";
 import { formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isUuid, orNull } from "@/lib/action-input";
 
 export type CategoryFormState = { error: string | null };
 
 /** Adds a main category (no parent) or a sub-category inside a main one. */
 export async function addCategory(parentId: string | null, _state: CategoryFormState, form: FormData): Promise<CategoryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(orNull(isUuid)(parentId))) return { error: NOT_FOUND };
   const parsed = parseCategoryForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
   if (parentId && !UUID.test(parentId)) return { error: "The main category to add it inside could not be found." };
@@ -28,6 +31,8 @@ export async function addCategory(parentId: string | null, _state: CategoryFormS
 
 /** Renames a category; a sub-category may also move to another main category. */
 export async function saveCategory(categoryId: string, _state: CategoryFormState, form: FormData): Promise<CategoryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(categoryId))) return { error: NOT_FOUND };
   if (!UUID.test(categoryId)) return { error: "This category could not be found." };
   const get = formGetter(form);
   const parsed = parseCategoryForm(get);
@@ -53,6 +58,8 @@ export async function saveCategory(categoryId: string, _state: CategoryFormState
 }
 
 export async function setCategoryActive(categoryId: string, active: boolean): Promise<CategoryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(categoryId), isBool(active))) return { error: NOT_FOUND };
   if (!UUID.test(categoryId)) return { error: "This category could not be found." };
   const supabase = await createClient();
   const { data, error } = await supabase.from("item_categories").update({ active }).eq("id", categoryId).select("id");

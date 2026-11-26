@@ -9,6 +9,7 @@ import { friendlyAssetError, isAssetAction, parseAssetForm } from "@/lib/assets/
 import { createClient } from "@/lib/supabase/server";
 import { photoFrom, savePhoto } from "../items/photos";
 import { formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isId, isUuid } from "@/lib/action-input";
 
 export type AssetFormState = { error: string | null };
 
@@ -18,13 +19,15 @@ export async function recordAssetEvent(
   _state: AssetFormState,
   form: FormData,
 ): Promise<AssetFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(itemId))) return { error: NOT_FOUND };
   if (!isAssetAction(action)) return { error: "Unknown action." };
   const parsed = parseAssetForm(formGetter(form), action);
   if (!parsed.ok) return { error: parsed.error };
   // Slice P1.14: a disposal says how the item leaves.
   const route = action === "dispose" ? parseDisposalFields(formGetter(form)) : null;
   if (route && !route.ok) return { error: route.error };
-  const photo = photoFrom(form);
+  const photo = await photoFrom(form);
   if (typeof photo === "string") return { error: photo };
 
   const supabase = await createClient();
@@ -44,6 +47,8 @@ export async function recordAssetEvent(
 
 /** Approve or reject a disposal. The database refuses if it is your own. */
 export async function decideDisposal(eventId: number, _state: AssetFormState, form: FormData): Promise<AssetFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(eventId))) return { error: NOT_FOUND };
   const decision = formGetter(form)("decision");
   if (decision !== "approved" && decision !== "rejected") return { error: "Choose Approve or Reject." };
   const note = formGetter(form)("note").trim();

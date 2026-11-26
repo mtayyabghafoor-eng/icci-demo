@@ -1,7 +1,8 @@
 // Step-by-step screenshots of each workflow, for the Centre's admins to
 // approve. Made-up seed data only. Forms are filled in to show the step but
 // NOT saved, except a stocktake of Test Room A1 (started and two labels
-// scanned, never sent). If one step fails, it is noted and the rest go on.
+// scanned, never sent). If one step fails, it is noted and the rest go on;
+// at the end, that walkthrough is reported as failed (Round C4), not passed.
 import { createClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
@@ -61,6 +62,15 @@ async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sign out" }).filter({ visible: true }).first().click();
   await expectSignInPage(page);
 }
+
+// Round C4: a failed step fails its walkthrough (after the other steps ran).
+let failedBefore = 0;
+test.beforeEach(() => {
+  failedBefore = failed.length;
+});
+test.afterEach(() => {
+  expect(failed.slice(failedBefore), "steps that failed in this walkthrough").toEqual([]);
+});
 
 test.afterAll(() => {
   if (failed.length) console.log(`\nSTEPS THAT FAILED (${failed.length}):\n- ${failed.join("\n- ")}`);

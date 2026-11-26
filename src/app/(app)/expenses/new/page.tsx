@@ -69,7 +69,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/expenses/ne
   }
 
   if (typeof rawAgain === "string" && /^\d{1,12}$/.test(rawAgain)) {
-    const { data } = await supabase.from("expense_entries").select("*").eq("id", rawAgain).maybeSingle();
+    const { data } = await supabase.from("expense_entries").select("*").eq("id", Number(rawAgain)).maybeSingle();
     const old = data as EntryRow | null;
     if (!old || old.kind !== "claim") notFound();
     if (old.state !== "withdrawn" && old.state !== "rejected") {

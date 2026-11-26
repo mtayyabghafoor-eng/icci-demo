@@ -127,7 +127,9 @@ test("an unlinked Finance account is told why it cannot decide; a linked one rej
   const id = await claimByApi();
   await signInAs(page, financeA, `/expenses/${id}`);
   await expect(shown(page, "cannot-decide")).toContainText("not linked");
-  await page.goto("/sign-out");
+  // Round C3: /sign-out no longer ends a sign-in that is not due; clear it instead.
+  await page.context().clearCookies();
+  await page.goto("/");
   await signInAs(page, financeB, `/expenses/${id}`);
   await page.getByText("Reject this claim", { exact: true }).click();
   await page.getByTestId("form-reject").getByLabel("Why is it rejected?").fill("Test: a personal purchase");

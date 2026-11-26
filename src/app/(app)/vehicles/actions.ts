@@ -3,11 +3,12 @@
 // server as the signed-in admin: the database's rules decide what is allowed
 // (unique registrations, a switched-on keeper or nobody, no future renewal
 // dates, entries withdrawn with a reason and never changed or deleted).
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyVehicleError, parseRenewalForm, parseVehicleForm } from "@/lib/vehicles/rules";
 import { parseWithdrawReason, todayInDublin } from "@/lib/vetting/rules";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isId, isUuid } from "@/lib/action-input";
 
 export type VehicleFormState = { error: string | null };
 
@@ -23,6 +24,8 @@ export async function addVehicle(_state: VehicleFormState, form: FormData): Prom
 }
 
 export async function saveVehicle(vehicleId: string, _state: VehicleFormState, form: FormData): Promise<VehicleFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(vehicleId))) return { error: NOT_FOUND };
   if (!UUID.test(vehicleId)) return { error: "This vehicle could not be found." };
   const parsed = parseVehicleForm(formGetter(form));
   if (!parsed.ok) return { error: parsed.error };
@@ -34,6 +37,8 @@ export async function saveVehicle(vehicleId: string, _state: VehicleFormState, f
 }
 
 export async function setVehicleActive(vehicleId: string, active: boolean): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(vehicleId), isBool(active))) notFound();
   if (!UUID.test(vehicleId)) redirect("/vehicles");
   const supabase = await createClient();
   const { data, error } = await supabase.from("vehicles").update({ active }).eq("id", vehicleId).select("id");
@@ -42,6 +47,8 @@ export async function setVehicleActive(vehicleId: string, active: boolean): Prom
 }
 
 export async function recordRenewal(vehicleId: string, _state: VehicleFormState, form: FormData): Promise<VehicleFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(vehicleId))) return { error: NOT_FOUND };
   if (!UUID.test(vehicleId)) return { error: "This vehicle could not be found." };
   const parsed = parseRenewalForm(formGetter(form), todayInDublin());
   if (!parsed.ok) return { error: parsed.error };
@@ -52,6 +59,8 @@ export async function recordRenewal(vehicleId: string, _state: VehicleFormState,
 }
 
 export async function withdrawRenewal(vehicleId: string, renewalId: number, form: FormData): Promise<void> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(vehicleId), isId(renewalId))) notFound();
   if (!UUID.test(vehicleId) || !Number.isSafeInteger(renewalId)) redirect("/vehicles");
   const reason = parseWithdrawReason(formGetter(form)("reason"));
   if (!reason.ok) redirect(`/vehicles/${vehicleId}?done=withdraw-reason`);

@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import type { LibraryFormState } from "./actions";
 import { UUID, formGetter } from "@/lib/forms";
+import { NOT_FOUND, anyBad, isBool, isId, isOneOf, isUuid } from "@/lib/action-input";
 
 function refused(form: FormData, state: LibraryFormState, error: string): LibraryFormState {
   const values: Record<string, string> = {};
@@ -20,6 +21,8 @@ function refused(form: FormData, state: LibraryFormState, error: string): Librar
 
 /** Lend or Return, with a typed label number: find the copy it is on. */
 export async function findCopy(purpose: "lend" | "return", state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isOneOf(purpose, ["lend", "return"]))) return { error: NOT_FOUND };
   const label = parseLabelNumber(formGetter(form)("label"));
   if (!label) return refused(form, state, "Please type the number printed on the book's label, for example ICCI-000123.");
   const supabase = await createClient();
@@ -46,6 +49,8 @@ export async function addBorrower(state: LibraryFormState, form: FormData): Prom
 
 /** Correct a borrower's name or contact. The audit log keeps the old values. */
 export async function saveBorrower(borrowerId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(borrowerId))) return { error: NOT_FOUND };
   if (!UUID.test(borrowerId)) return refused(form, state, "This borrower could not be found.");
   const b = parseBorrowerForm(formGetter(form));
   if (!b.ok) return refused(form, state, b.error);
@@ -58,6 +63,8 @@ export async function saveBorrower(borrowerId: string, state: LibraryFormState, 
 
 /** Switch a borrower off (only with nothing on loan) or back on. */
 export async function setBorrowerActive(borrowerId: string, active: boolean, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(borrowerId), isBool(active))) return { error: NOT_FOUND };
   if (!UUID.test(borrowerId)) return refused(form, state, "This borrower could not be found.");
   const supabase = await createClient();
   const { data, error } = await supabase.from("library_borrowers").update({ active }).eq("id", borrowerId).select("id");
@@ -72,6 +79,8 @@ function dueFrom(form: FormData) {
 
 /** Lend a copy to a borrower we have. */
 export async function lendToBorrower(copyId: string, borrowerId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(copyId), isUuid(borrowerId))) return { error: NOT_FOUND };
   if (!UUID.test(copyId) || !UUID.test(borrowerId)) return refused(form, state, "This book or borrower could not be found.");
   const due = dueFrom(form);
   if (!due.ok) return refused(form, state, due.error);
@@ -83,6 +92,8 @@ export async function lendToBorrower(copyId: string, borrowerId: string, state: 
 
 /** Lend a copy to someone new: the borrower and the loan are saved together. */
 export async function lendToNewBorrower(copyId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(copyId))) return { error: NOT_FOUND };
   if (!UUID.test(copyId)) return refused(form, state, "This book could not be found.");
   const b = parseBorrowerForm(formGetter(form));
   if (!b.ok) return refused(form, state, b.error);
@@ -102,6 +113,8 @@ export async function lendToNewBorrower(copyId: string, state: LibraryFormState,
 
 /** Return: one button. */
 export async function returnCopy(copyId: string, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(copyId))) return { error: NOT_FOUND };
   if (!UUID.test(copyId)) return refused(form, state, "This book could not be found.");
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("return_copy", { p_copy_id: copyId });
@@ -112,6 +125,8 @@ export async function returnCopy(copyId: string, state: LibraryFormState, form: 
 
 /** Move the due date: a new entry, the first due date stays in the loan. */
 export async function moveDueDate(copyId: string, loanId: number, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(copyId), isId(loanId))) return { error: NOT_FOUND };
   if (!UUID.test(copyId) || !Number.isInteger(loanId)) return refused(form, state, "This loan could not be found.");
   const due = dueFrom(form);
   if (!due.ok) return refused(form, state, due.error);
@@ -123,6 +138,8 @@ export async function moveDueDate(copyId: string, loanId: number, state: Library
 
 /** "Returned by mistake, still on loan": cancels the latest return. */
 export async function undoReturn(copyId: string, loanId: number, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(copyId), isId(loanId))) return { error: NOT_FOUND };
   if (!UUID.test(copyId) || !Number.isInteger(loanId)) return refused(form, state, "This loan could not be found.");
   const supabase = await createClient();
   const { error } = await supabase.rpc("undo_return", { p_loan_id: loanId });
@@ -132,6 +149,8 @@ export async function undoReturn(copyId: string, loanId: number, state: LibraryF
 
 /** Mark a copy lost, withdrawn, or found again (a new entry; nothing is changed or deleted). */
 export async function markCopy(copyId: string, kind: MarkKind, state: LibraryFormState, form: FormData): Promise<LibraryFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isUuid(copyId), isOneOf(kind, ["lost", "withdrawn", "found"]))) return { error: NOT_FOUND };
   if (!UUID.test(copyId) || !["lost", "withdrawn", "found"].includes(kind)) return refused(form, state, "This book could not be found.");
   const supabase = await createClient();
   const { error } = await supabase.rpc("mark_copy", { p_copy_id: copyId, p_kind: kind });

@@ -76,9 +76,12 @@ describe("who can see the Board report", () => {
       expect(r.month).toBe(thisMonth());
       for (const key of ["spend_cents", "tickets_opened", "items_registered", "loans", "copies_lost"]) expect(typeof r.during[key], key).toBe("number");
       for (const key of ["claims_waiting", "owed_cents", "receipts_unclaimed", "assets_value_cents", "vetting_expired", "books_overdue"]) expect(typeof r.as_at[key], key).toBe("number");
-      const { data: people } = await masterKeyClient().from("people").select("full_name").limit(1000);
+      // Round C4: never passes by checking no names (the seed has 44 people).
+      const { data: people, error } = await masterKeyClient().from("people").select("full_name").limit(1000);
+      expect(error).toBeNull();
+      expect(people!.length).toBeGreaterThanOrEqual(40);
       const text = JSON.stringify(r);
-      for (const p of people ?? []) expect(text.includes(p.full_name), p.full_name).toBe(false);
+      for (const p of people!) expect(text.includes(p.full_name), p.full_name).toBe(false);
     });
   }
 

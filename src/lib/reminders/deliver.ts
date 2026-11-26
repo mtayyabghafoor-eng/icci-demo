@@ -4,7 +4,7 @@
 // per admin through the email service (Resend), only when deliveryDecision
 // allows it, and writes down what happened to each email.
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { buildReminderEmail, deliveryDecision, type EmailSettings, type RunResult } from "./rules";
+import { buildReminderEmail, deliveryDecision, itemsFor, type EmailSettings, type RunResult } from "./rules";
 
 const RESEND_URL = "https://api.resend.com/emails";
 
@@ -40,12 +40,15 @@ export async function runAndDeliver(client: SupabaseClient, key: string | null):
   const { data, error } = await client.rpc("run_reminders", key ? { p_key: key } : {});
   if (error) throw new Error(error.message);
   const run = data as RunResult;
-  if (run.items.length === 0 || run.recipients.length === 0) return { run, outcomes: [] };
+  // Nothing new and no earlier failed email to send again: nobody is listed.
+  if (run.recipients.length === 0) return { run, outcomes: [] };
 
   const settings = emailSettings();
-  const email = buildReminderEmail(run.items, process.env.SITE_URL);
   const outcomes: Outcome[] = [];
   for (const r of run.recipients) {
+    const mine = itemsFor(run.items, r.retry);
+    if (mine.items.length === 0) continue;
+    const email = buildReminderEmail(mine.items, process.env.SITE_URL, { retried: mine.retried });
     const decision = deliveryDecision(settings, r.email);
     if (!decision.send) {
       outcomes.push({ recipient_id: r.id, outcome: "recorded only", detail: decision.detail });
@@ -55,6 +58,7 @@ export async function runAndDeliver(client: SupabaseClient, key: string | null):
     outcomes.push(sent.ok ? { recipient_id: r.id, outcome: "sent", detail: null } : { recipient_id: r.id, outcome: "failed", detail: sent.detail });
   }
 
+  if (outcomes.length === 0) return { run, outcomes };
   const recorded = await client.rpc("record_reminder_deliveries", {
     p_run_id: run.run_id,
     p_outcomes: outcomes,

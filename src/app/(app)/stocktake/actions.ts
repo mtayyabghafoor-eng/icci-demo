@@ -4,11 +4,12 @@
 // stocktake, what counts as a difference, and that nobody approves a
 // stocktake they took part in).
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { parseLabelNumber } from "@/lib/items/rules";
 import { parseQuantity } from "@/lib/stock/rules";
 import { friendlyStocktakeError, SCANNING_COOKIE } from "@/lib/stocktake/rules";
 import { createClient } from "@/lib/supabase/server";
+import { NOT_FOUND, anyBad, isId, isLabelSerial, isOneOf } from "@/lib/action-input";
 
 export type StocktakeFormState = { error: string | null };
 
@@ -40,18 +41,24 @@ export async function startStocktake(_state: StocktakeFormState, form: FormData)
 
 /** "Carry on scanning": labels scanned with the phone's camera come back to this stocktake. */
 export async function carryOn(stocktakeId: number) {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(stocktakeId))) notFound();
   await rememberScanning(stocktakeId);
   redirect(`/stocktake/${stocktakeId}`);
 }
 
 /** "Stop scanning": labels open their item again, as normal. */
 export async function stopScanning(stocktakeId: number) {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(stocktakeId))) notFound();
   (await cookies()).delete(SCANNING_COOKIE);
   redirect(`/stocktake/${stocktakeId}`);
 }
 
 /** A typed label number: open the scan screen for it. */
 export async function openLabel(stocktakeId: number, _state: StocktakeFormState, form: FormData): Promise<StocktakeFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(stocktakeId))) return { error: NOT_FOUND };
   const serial = parseLabelNumber(text(form, "label"));
   if (!serial) return { error: "That is not a label number. Type it like ICCI-000123, or just 123." };
   redirect(`/stocktake/${stocktakeId}/scan?label=${serial}`);
@@ -65,6 +72,8 @@ export async function recordScan(
   _state: StocktakeFormState,
   form: FormData,
 ): Promise<StocktakeFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(stocktakeId), isLabelSerial(serial), isOneOf(kind, ["fixed_asset", "consumable", "unknown"]))) return { error: NOT_FOUND };
   let found_quantity: number | undefined;
   if (kind === "consumable") {
     const q = parseQuantity(text(form, "quantity"), "count");
@@ -81,6 +90,8 @@ export async function recordScan(
 }
 
 export async function submitStocktake(stocktakeId: number): Promise<StocktakeFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(stocktakeId))) return { error: NOT_FOUND };
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_stocktake", { p_stocktake_id: stocktakeId });
   if (error) return { error: friendlyStocktakeError(error.message) };
@@ -95,6 +106,8 @@ export async function decideDifference(
   _state: StocktakeFormState,
   form: FormData,
 ): Promise<StocktakeFormState> {
+  // Round C3: what the browser handed over is checked first.
+  if (anyBad(isId(stocktakeId), isId(differenceId))) return { error: NOT_FOUND };
   const decision = text(form, "decision");
   if (decision !== "approved" && decision !== "rejected") return { error: "Choose Approve or Reject." };
   const note = text(form, "note").trim();

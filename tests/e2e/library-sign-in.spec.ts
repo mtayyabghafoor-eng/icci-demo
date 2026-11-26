@@ -74,7 +74,9 @@ test("the Library Operator signs in with an emailed code and sees only the libra
   await page.goto("/people");
   await expect(page.getByTestId("cannot-see-people")).toBeVisible();
 
-  await page.goto("/sign-out");
+  // Round C3: /sign-out no longer ends a sign-in that is not due; clear it instead.
+  await page.context().clearCookies();
+  await page.goto("/");
   await expect(page).toHaveURL(/\/sign-in/);
 });
 

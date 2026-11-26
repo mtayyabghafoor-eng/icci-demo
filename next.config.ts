@@ -6,11 +6,44 @@ import type { NextConfig } from "next";
 // - never pass the page address on to other websites
 // - no microphone, location or payment features; the camera only for this site
 // - always use the secure (https) connection once seen
-// The content rule is kept to these safe parts: a full script rule would need
-// changes to how Next.js loads its own scripts.
+//
+// Round C3: a stricter rule on what a page may load. Scripts, styles and
+// fonts come only from this site; pictures only from this site, the
+// database's file store (photos, receipts) and the browser itself (a photo
+// preview, the authenticator QR code); the page talks only to this site.
+// Text is never run as code on the real website ("eval"; the development
+// server needs it for its error screens). Next.js writes a few small
+// scripts into each page itself, so those stay allowed ('unsafe-inline'):
+// the stricter way (a new secret code per visit, a "nonce") cannot work
+// with the pages drawn in advance (cacheComponents) and would slow every
+// page, which the plan rules out.
+const isDev = process.env.NODE_ENV === "development";
+const fileStore = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").origin;
+  } catch {
+    return "";
+  }
+})();
+const CONTENT_RULES = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  `img-src 'self' blob: data:${fileStore ? ` ${fileStore}` : ""}`,
+  "font-src 'self'",
+  "connect-src 'self'",
+  "media-src 'self' blob:",
+  "worker-src 'self' blob:",
+  "frame-src 'none'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
+
 const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'" },
+  { key: "Content-Security-Policy", value: CONTENT_RULES },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "same-origin" },
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=()" },
@@ -21,9 +54,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   // Hide the development badge so screenshots show what admins will see.
   devIndicators: false,
-  // Testing on a phone over home Wi-Fi (development only, ignored on the
-  // real website): let the dev server answer this PC's Wi-Fi address.
-  allowedDevOrigins: ["192.168.0.237"],
   // Do not announce which software runs the site.
   poweredByHeader: false,
   cacheComponents: true,
