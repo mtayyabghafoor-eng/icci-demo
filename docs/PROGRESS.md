@@ -45,7 +45,10 @@ wrong"); all five are done (22 Nov 2026), with category pictures, the
 staff call sheet and the in-app camera on the stocktake screen. Next:
 the owner tries them on the demo. Round A of docs/IMPROVEMENT-PLAN.md (A1
 to A7) is done (25 Nov 2026). Next: Phase 5 (expenses and Board report),
-planned in docs/PHASE-5.md (owner approved every answer); P5.1 is done, next P5.2 (enter a claim). Before real use: Resend as Supabase's mail sender, then switch
+planned in docs/PHASE-5.md (owner approved every answer); P5.1 to P5.6
+are built (26 Nov 2026, overnight, committed but not pushed; migrations
+0050 and 0051 are not on ICCI Staging yet). Next: the owner reviews them,
+then P5.7, the security review in a fresh session. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -56,6 +59,27 @@ Not yet checked in real life (Phase 1): a real label printer, a real phone
 camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
+
+- P5.2 to P5.6, built overnight 26 Nov 2026 (owner: "do all the remaining
+  steps"). Choices Claude made where docs/PHASE-5.md was silent, for the
+  owner to confirm or change:
+  * Two new test accounts, a second Super Admin and a second Finance, both
+    linked to People; the first Super Admin and Finance stay unlinked (the
+    "not linked" note and linking on screen still need them).
+  * The phone "three steps" are one form in three numbered parts; on a PC
+    "Save and enter another" is offered.
+  * Finance's phone bar: Home, Expenses, New claim (raised), To repay.
+  * Repayments go in the monthly file by the day they were recorded (the
+    "date paid" is shown beside it), so a month's file never changes; a
+    repayment typed in late with an earlier date still lands in the month
+    it was recorded.
+  * One receipt file can be on only one live claim (a fraud check the plan
+    did not name).
+  * The Board report opens on last month; the seed's claims are all
+    approved "today" (the database stamps the time, so the seed cannot
+    backdate), so earlier months are empty in development.
+  * Uploads through the website may now be 32 MB in total (3 receipts of
+    10 MB), up from 11 MB.
 
 - Phase 5 (25 Nov 2026, owner approved every recommended answer in
   docs/PHASE-5.md section 13): all three admin roles enter, see, approve
@@ -428,8 +452,25 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Library: how long to keep a borrower's details, decided with ICCI
   before real borrowers (docs/PHASE-4.md section 10).
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
+- Phase 5 choices made overnight 26 Nov 2026 (see Decisions): the owner to
+  confirm, especially repayments counted by the day recorded.
 
 ## Session log
+
+- 26 Nov 2026, session 46 continued overnight (slices P5.2 to P5.6; owner
+  asked for all remaining steps while asleep). Migration 0050 (claims,
+  receipt files, decisions, repayments, corrections, two views, three
+  narrow look-ups for Finance, Home counters; 36 database tests) and 0051
+  (Board report and frozen final copies; 13 tests). Screens: New claim
+  (receipt photo or PDFs, duplicate and payer warnings, Enter again, from a
+  ticket), Expenses (Waiting, Awaiting repayment grouped by person, All),
+  claim page (receipt beside Approve, reject, withdraw, second approval,
+  correct, repayments, history), Monthly export (CSV in three parts,
+  receipts pack), Board report (draft, final copy, print). Home counters
+  for admins and Finance; Finance's phone shortcuts; ticket page claims.
+  Seed: 60 made-up claims with "SAMPLE RECEIPT - NOT REAL" pictures.
+  Committed, not pushed. Next: owner review, then P5.7 (security review in
+  a fresh session) and putting 0050 and 0051 on ICCI Staging.
 
 - 26 Nov 2026, session 46 (slice P5.1, expense lists and settings; owner
   approved every recommended answer). Migration 0049 (tests first: 15 of 21

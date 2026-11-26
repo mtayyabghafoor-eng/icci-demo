@@ -390,6 +390,14 @@ begin
      and not exists (select 1 from public.expense_files f where f.claim_id = c.copied_from_id and f.file_path = new.file_path) then
     raise exception 'The receipt file was not found in the store. Please add it again.';
   end if;
+  -- One receipt, one live claim: a file already on a claim that is waiting
+  -- or approved cannot be used again (only "Enter again" of a withdrawn or
+  -- rejected claim reuses its files).
+  if exists (select 1 from public.expense_files f
+             where f.file_path = new.file_path
+               and (f.claim_id = new.claim_id or private.expense_state(f.claim_id) not in ('withdrawn', 'rejected'))) then
+    raise exception 'This receipt is already on another claim. One receipt can only be claimed once.';
+  end if;
   return new;
 end $$;
 revoke all on function private.check_expense_file() from public, anon;

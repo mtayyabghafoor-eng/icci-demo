@@ -303,6 +303,9 @@ Making it again keeps both copies, like rota publications.
    phone shortcuts (P5.2, when the claim pages exist) and linking the test
    Super Admin and Finance accounts to People (P5.3; a browser test today
    links Finance by hand).
+   **P5.2 to P5.6 built 26 Nov 2026** (overnight, migrations 0050 and
+   0051; see PROGRESS.md "Decisions" for the choices made where this plan
+   was silent). Not yet pushed or on ICCI Staging.
 2. **P5.2 Enter a claim**: the receipt button, receipt store, phone steps
    and PC form, warnings, claim page with the receipt shown, list with tabs,
    withdraw and "Enter again", claim from a ticket. Seed: about 60 made-up

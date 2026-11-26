@@ -200,6 +200,15 @@ describe("entering a claim", () => {
     expect((await enter(c, { files: [await upload(c)], lost: "and lost too" })).error?.message).toMatch(/receipt lost/i);
   });
 
+  it("one receipt file can only be on one live claim", async () => {
+    const c = await centre();
+    const path = await upload(c);
+    await newClaim(c, { files: [path] });
+    expect((await enter(await centreB(), { files: [path] })).error?.message).toMatch(/already on another claim/i);
+    const twice = await upload(c);
+    expect((await enter(c, { files: [twice, twice] })).error?.message).toMatch(/already on another claim/i);
+  });
+
   it("refuses a future date, VAT above the amount, a switched-off category and the wrong payer shape", async () => {
     const c = await centre();
     expect((await enter(c, { date: "2999-01-01" })).error?.message).toMatch(/future/i);

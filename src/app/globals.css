@@ -688,3 +688,33 @@ a.list-card:hover {
     break-inside: avoid;
   }
 }
+
+/*
+  Receipts pack (slice P5.5): one claim per printed A4 page.
+*/
+@media print {
+  .receipt-pack-page {
+    break-after: page;
+  }
+  .receipt-pack-page:last-child {
+    break-after: auto;
+  }
+}
+
+/*
+  Board report (slice P5.6): A4 with a small margin, smaller text, aimed at
+  two printed pages at most.
+*/
+@media print {
+  @page boardreport {
+    size: A4;
+    margin: 12mm;
+  }
+  .board-report {
+    page: boardreport;
+    font-size: 11px;
+  }
+  .board-report table {
+    font-size: 11px;
+  }
+}
