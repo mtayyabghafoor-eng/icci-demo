@@ -90,6 +90,7 @@ describe("tidy-up after a test run", () => {
     const result = await switchOffTestLeftovers(masterKeyClient(), prefix);
     expect(result).toEqual({
       categories: 0,
+      expenseLists: 0,
       books: 1,
       borrowers: 1,
       people: 1,
@@ -175,6 +176,21 @@ describe("tidy-up after a test run", () => {
     expect(result.categories).toBe(2);
     const { data } = await masterKeyClient().from("item_categories").select("active").in("id", [main.data.id, sub.data.id]);
     expect(data?.map((c) => c.active)).toEqual([false, false]);
+  });
+
+  // P5.1: test spend categories and funds.
+  it("switches off this run's spend categories and funds", async () => {
+    const prefix = `Test run tidy ${Date.now()} ${Math.random().toString(36).slice(2, 7)} `;
+    const finance = await asRole("finance");
+    const cat = await finance.from("expense_categories").insert({ name: `${prefix}spend` }).select("id").single();
+    const fund = await finance.from("expense_funds").insert({ name: `${prefix}fund`, restricted: true }).select("id").single();
+    if (cat.error || fund.error) throw cat.error ?? fund.error;
+
+    const result = await switchOffTestLeftovers(masterKeyClient(), prefix);
+    expect(result.expenseLists).toBe(2);
+    const m = masterKeyClient();
+    expect((await m.from("expense_categories").select("active").eq("id", cat.data.id).single()).data?.active).toBe(false);
+    expect((await m.from("expense_funds").select("active").eq("id", fund.data.id).single()).data?.active).toBe(false);
   });
 
   it("refuses to touch anything not named \"Test run ...\"", async () => {

@@ -43,7 +43,9 @@ overview and desk tabs, label emblem, demo names; 20 Nov 2026). On 21 Nov
 "What we own", companies and makes and models, documents, "If this goes
 wrong"); all five are done (22 Nov 2026), with category pictures, the
 staff call sheet and the in-app camera on the stocktake screen. Next:
-the owner tries them on the demo, then Phase 5 (expenses). Before real use: Resend as Supabase's mail sender, then switch
+the owner tries them on the demo. Round A of docs/IMPROVEMENT-PLAN.md (A1
+to A7) is done (25 Nov 2026). Next: Phase 5 (expenses and Board report),
+planned in docs/PHASE-5.md (owner approved every answer); P5.1 is done, next P5.2 (enter a claim). Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -55,6 +57,16 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
 
+- Phase 5 (25 Nov 2026, owner approved every recommended answer in
+  docs/PHASE-5.md section 13): all three admin roles enter, see, approve
+  and export claims; Finance is an ICCI treasurer, an outside bookkeeper
+  gets files, not a login; an approver's account must be linked to their
+  People record (links still made by another Super Admin; two Super
+  Admins); lost receipt needs a second approver above €50; second approval
+  above €500; claims count in the month approved, repayments in the month
+  made; corrections as old line out, new line in; waiting claims never
+  change (withdraw and "Enter again"); Finance gets the Asset register read
+  only; accounts and audit log screens become Round C slice C5.
 - Admin-only system: three roles (Super Admin, Centre Admin, Finance), plus a
   limited Library Operator added in the library phase.
 - No offline mode. No staff or volunteer logins.
@@ -418,6 +430,35 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 
 ## Session log
+
+- 26 Nov 2026, session 46 (slice P5.1, expense lists and settings; owner
+  approved every recommended answer). Migration 0049 (tests first: 15 of 21
+  failed before): spend categories (14) and funds (Unrestricted, Zakat,
+  Fitra; restricted fixed once added), kept by Super Admin and Finance;
+  second approver above €500 and lost receipt above €50, changed by a Super
+  Admin only; my_expense_link(); Finance reads the asset register through
+  two narrow look-ups (no item links). Expense settings page, Expenses menu
+  group, Finance's Home tiles and "not linked yet" note. Found and fixed: the
+  register sent every place inside a building in the web address ("URI too
+  long"); the database now works it out. Accounts and audit log screens
+  added to Round C as C5. Full suite: 1,847 unit/db, 344 browser, build, all
+  passed. Not pushed: 0049 goes to ICCI Staging first. Next: P5.2.
+
+- 25 Nov 2026, session 46 (planning only, no code changed): reviewed
+  PLAN.md 5.5 against the app and wrote docs/PHASE-5.md (expenses and Board
+  report): 12 review findings, who does what, how a claim works, monthly
+  CSV, Board report, slices P5.1 to P5.7, 13 questions. Main finding: "not
+  the person who paid" only works if every approver's account is linked to
+  their People record, and a lone Super Admin cannot be linked today
+  (question 2). Next: owner answers the questions, then P5.1.
+- 25 Nov 2026, session 46 (continued, no code changed): checked three Gemini
+  reviews of PHASE-5.md (Neon, Argon, Carbon) and rewrote it. Confirmed:
+  three-account deadlock (stuck, not waiting), repayments must count in the
+  month paid, fund-only corrections need old-out/new-in lines, repayments
+  can be withdrawn and grouped, receipts from gallery and PDF (today's photo
+  button is camera-only, 1,600 px), receipts pack, direct debits, Finance's
+  Asset register, accounts and audit log screens in no plan. Now 16
+  questions. Next: owner answers, then P5.1.
 
 - 25 Nov 2026, session 45 (slice A7, policy grid and rota; owner said go).
   No database change. Policy grid reads every square page by page (also

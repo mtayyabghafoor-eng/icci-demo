@@ -9,12 +9,13 @@ describe("menuFor: each role sees only what it can use", () => {
     const deskOnly = ["Library", "Add a book", "Lend", "Return", "Borrowers", "On loan", "Overdue", "Most borrowed", "Lost and withdrawn"];
     const all = MENU.flatMap((g) => g.links.map((l) => l.label)).filter((l) => !deskOnly.includes(l));
     expect(labels("super_admin")).toEqual(all);
-    expect(labels("centre_admin")).toEqual(all);
+    // P5.1: only Super Admin and Finance keep the expense lists and amounts.
+    expect(labels("centre_admin")).toEqual(all.filter((l) => l !== "Expense settings"));
   });
-  it("Finance sees Home only; the Library Operator also sees the library (P4.2)", () => {
-    expect(labels("finance")).toEqual(["Home"]);
+  it("Finance sees Home, the asset register and Expense settings (P5.1); the Library Operator also sees the library (P4.2)", () => {
+    expect(labels("finance")).toEqual(["Home", "Asset register", "Expense settings"]);
+    expect(menuFor("finance").map((g) => g.title)).toEqual(["Overview", "Assets", "Expenses"]);
     expect(labels("library_operator")).toEqual(["Home", "Library", "Add a book", "Lend", "Return", "Borrowers", "On loan", "Overdue", "Most borrowed", "Lost and withdrawn"]);
-    expect(menuFor("finance").map((g) => g.title)).toEqual(["Overview"]);
   });
   it("P1.16: Places sits next to Register an item; Disposals waiting is under Assets", () => {
     const items = MENU.find((g) => g.title === "Items and stock")!.links.map((l) => l.label);
@@ -183,7 +184,7 @@ describe("the Library menu (slice P4.2)", () => {
 });
 
 describe("UI-9: folding menu groups", () => {
-  it("folds only for roles with more than two groups", () => {
+  it("folds only for long menus: more than two groups and more than ten links", () => {
     expect(foldsMenu("centre_admin")).toBe(true);
     expect(foldsMenu("super_admin")).toBe(true);
     expect(foldsMenu("library_operator")).toBe(false);

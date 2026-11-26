@@ -1,7 +1,7 @@
 // The asset register as a CSV file (all of it, or one place and what is
 // inside it). The gatekeeper (src/proxy.ts) sends signed-out visitors to the
-// sign-in page first; here only a Super Admin or Centre Admin gets a file.
-import { MAY_SEE_ASSET_LISTS, registerCsv, registerFileName } from "@/lib/assets/lists";
+// sign-in page first; here only a Super Admin, Centre Admin or Finance gets a file.
+import { MAY_SEE_ASSET_REGISTER, registerCsv, registerFileName } from "@/lib/assets/lists";
 import { createClient } from "@/lib/supabase/server";
 import { loadRegister } from "../data";
 
@@ -12,8 +12,8 @@ export async function GET(request: Request) {
   if (!id || claims.claims.aal !== "aal2") return new Response("Please sign in.", { status: 401 });
 
   const { data: me } = await supabase.from("app_users").select("role").eq("id", id).maybeSingle();
-  if (!me || !MAY_SEE_ASSET_LISTS.includes(me.role)) {
-    return new Response("Your account cannot see assets. Only a Super Admin or Centre Admin can.", { status: 403 });
+  if (!me || !MAY_SEE_ASSET_REGISTER.includes(me.role)) {
+    return new Response("Your account cannot see the asset register. Only a Super Admin, Centre Admin or Finance can.", { status: 403 });
   }
 
   const place = new URL(request.url).searchParams.get("place") ?? "";

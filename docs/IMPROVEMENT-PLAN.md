@@ -277,6 +277,13 @@ check is re-run.
 - If the owner agrees (question 8): the code is given an exact description
   of the database, so a misspelt column name is caught before it runs.
 
+### C5. Accounts and audit log screens (added 25 Nov 2026, owner)
+
+The accounts screen (create an account with a one-time temporary password
+that opens only the authenticator set-up, switch off, reset two-factor,
+link to a People record) and a read-only audit log screen for Super Admins
+(PLAN.md 3). Needed before any real person gets an account.
+
 Then `docs/AFTERCARE.md` section 12, in its order.
 
 ## 5. New features suggested by the reviews (not planned unless approved)

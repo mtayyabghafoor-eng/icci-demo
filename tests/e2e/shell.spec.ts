@@ -62,11 +62,12 @@ test("Centre Admin: every menu group, the current page marked, the page named in
   await expect(page.getByTestId("where-am-i")).toContainText("Garda vetting");
 });
 
-test("Finance sees only Home in the menu", async ({ page }, info) => {
+// P5.1: Finance also has the asset register and Expense settings.
+test("Finance sees only Home, the asset register and Expense settings in the menu", async ({ page }, info) => {
   await signIn(page, finance);
   const menu = await mainMenu(page);
-  await expect(menu.getByRole("link")).toHaveCount(1);
-  await expect(menu.getByRole("link", { name: "Home", exact: true })).toBeVisible();
+  await expect(menu.getByRole("link")).toHaveCount(3);
+  for (const name of ["Home", "Asset register", "Expense settings"]) await expect(menu.getByRole("link", { name, exact: true })).toBeVisible();
   if (info.project.name === "phone") {
     const bar = page.getByTestId("bottom-bar");
     await expect(bar.getByRole("link")).toHaveCount(1);

@@ -120,3 +120,5 @@ export function registerFileName(now: Date): string {
 
 /** Who may see these lists (the database refuses everyone else anyway). */
 export const MAY_SEE_ASSET_LISTS = ["super_admin", "centre_admin"];
+/** P5.1 (owner, 25 Nov 2026): Finance also reads the asset register, never the items themselves. */
+export const MAY_SEE_ASSET_REGISTER = [...MAY_SEE_ASSET_LISTS, "finance"];

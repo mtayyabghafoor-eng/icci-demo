@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
-import { groupByPlace, MAY_SEE_ASSET_LISTS } from "@/lib/assets/lists";
+import { type RegisterRow, groupByPlace, MAY_SEE_ASSET_LISTS, MAY_SEE_ASSET_REGISTER } from "@/lib/assets/lists";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatEuro, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
@@ -34,7 +34,9 @@ const plural = (n: number) => `${n} asset${n === 1 ? "" : "s"}`;
 
 async function Register({ searchParams }: { searchParams: PageProps<"/assets/register">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_ASSET_LISTS.includes(me.roleCode)) return <CannotSeeAssets />;
+  if (!MAY_SEE_ASSET_REGISTER.includes(me.roleCode)) return <CannotSeeAssets />;
+  // Finance reads the register only; the item pages stay with the admins.
+  const opensItems = MAY_SEE_ASSET_LISTS.includes(me.roleCode);
 
   const params = await searchParams;
   const supabase = await createClient();
@@ -142,7 +144,7 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
                 {g.rows.map((r) => (
                   <tr key={r.id} className="border-b border-icci-panel align-top">
                     <td className="px-3 py-2 font-mono text-sm whitespace-nowrap">
-                      <Link href={`/items/${r.id}`}>{r.label_serial}</Link>
+                      {opensItems ? <Link href={`/items/${r.id}`}>{r.label_serial}</Link> : r.label_serial}
                     </td>
                     <td className="px-3 py-2">{r.name}</td>
                     <td className="px-3 py-2 text-sm">{r.category}</td>
@@ -159,20 +161,34 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
             <ul className="mt-3 space-y-3 md:hidden">
               {g.rows.map((r) => (
                 <li key={r.id}>
-                  <Link href={`/items/${r.id}`} className="list-card">
-                    <span className="flex items-start justify-between gap-2">
-                      <span className="font-semibold text-icci-green">{r.name}</span>
-                      <ItemStatus kind="fixed_asset" condition={r.condition as never} />
-                    </span>
-                    <span className="mt-1 block text-sm">
-                      {r.label_serial} · {r.category} · {formatEuro(r.value_cents)}
-                    </span>
-                  </Link>
+                  {opensItems ? (
+                    <Link href={`/items/${r.id}`} className="list-card">
+                      <RegisterCard r={r} />
+                    </Link>
+                  ) : (
+                    <div className="list-card">
+                      <RegisterCard r={r} />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
           </section>
         ))}
+    </>
+  );
+}
+
+function RegisterCard({ r }: { r: RegisterRow }) {
+  return (
+    <>
+      <span className="flex items-start justify-between gap-2">
+        <span className="font-semibold text-icci-green">{r.name}</span>
+        <ItemStatus kind="fixed_asset" condition={r.condition as never} />
+      </span>
+      <span className="mt-1 block text-sm">
+        {r.label_serial} · {r.category} · {formatEuro(r.value_cents)}
+      </span>
     </>
   );
 }

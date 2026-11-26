@@ -1,5 +1,5 @@
 // After a test run: switch off the made-up places, people, training types
-// (P2.4), policies (P2.5), vehicles (P2.7), renewals (P2.8), rota slot types (P3.1), rota templates (P3.4), library books (P4.2), library borrowers (P4.4) and categories (P1.17) that the tests created (names starting "Test run "), so the
+// (P2.4), policies (P2.5), vehicles (P2.7), renewals (P2.8), rota slot types (P3.1), rota templates (P3.4), library books (P4.2), library borrowers (P4.4), categories (P1.17) and expense categories and funds (P5.1) that the tests created (names starting "Test run "), so the
 // development screens are not crowded with thousands of them. Nothing is
 // deleted; each switch-off is an ordinary change, recorded in the audit log
 // like any other.
@@ -23,7 +23,7 @@ const SEED_BUILDING = "Test Building A";
 const WHO = "Test run tidy-up";
 const NOTE = "Test run tidy-up: moved out of a test place so the place can be switched off.";
 
-export type TidyResult = { categories: number; books: number; borrowers: number; people: number; trainingTypes: number; slotTypes: number; rotaTemplates: number; policies: number; vehicles: number; renewals: number; warrantiesCleared: number; places: number; placesLeftOn: number; chairsMoved: number; stockCounted: number };
+export type TidyResult = { categories: number; expenseLists: number; books: number; borrowers: number; people: number; trainingTypes: number; slotTypes: number; rotaTemplates: number; policies: number; vehicles: number; renewals: number; warrantiesCleared: number; places: number; placesLeftOn: number; chairsMoved: number; stockCounted: number };
 
 function inGroups<T>(all: T[], size: number): T[][] {
   const groups: T[][] = [];
@@ -187,6 +187,14 @@ export async function switchOffTestLeftovers(db: SupabaseClient, prefix = "Test 
     categories += results.filter((r) => !r.error && r.data?.length).length;
   }
 
+  // P5.1: test spend categories and funds.
+  let expenseLists = 0;
+  for (const table of ["expense_categories", "expense_funds"]) {
+    const r = await db.from(table).update({ active: false }).eq("active", true).like("name", `${prefix}%`).select("id");
+    if (r.error) throw new Error(r.error.message);
+    expenseLists += r.data?.length ?? 0;
+  }
+
   let left = await activeTestPlaces(db, prefix);
   const emptied = await emptyPlaces(db, left.map((l) => l.id));
 
@@ -209,5 +217,5 @@ export async function switchOffTestLeftovers(db: SupabaseClient, prefix = "Test 
     left = await activeTestPlaces(db, prefix);
     if (done === 0) break;
   }
-  return { categories, books: books.data?.length ?? 0, borrowers: borrowers.data?.length ?? 0, people: people.data?.length ?? 0, trainingTypes: trainingTypes.data?.length ?? 0, slotTypes: slotTypes.data?.length ?? 0, rotaTemplates: rotaTemplates.data?.length ?? 0, policies: policies.data?.length ?? 0, vehicles, renewals: renewals.data?.length ?? 0, warrantiesCleared: warranties.data?.length ?? 0, places, placesLeftOn: left.length, ...emptied };
+  return { categories, expenseLists, books: books.data?.length ?? 0, borrowers: borrowers.data?.length ?? 0, people: people.data?.length ?? 0, trainingTypes: trainingTypes.data?.length ?? 0, slotTypes: slotTypes.data?.length ?? 0, rotaTemplates: rotaTemplates.data?.length ?? 0, policies: policies.data?.length ?? 0, vehicles, renewals: renewals.data?.length ?? 0, warrantiesCleared: warranties.data?.length ?? 0, places, placesLeftOn: left.length, ...emptied };
 }

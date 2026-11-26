@@ -33,10 +33,13 @@ import {
   TriangleAlert,
   Wrench,
   type LucideIcon,
+  SlidersHorizontal,
+  Table2,
 } from "lucide-react";
 import { Suspense } from "react";
 import { ActionTile, AttentionRow, Card, CardTitle, ClearChip, CounterCard, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
 import { requireAdmin, type CurrentAdmin } from "@/lib/auth/current-admin";
+import { ExpenseLinkNote } from "./expenses/link-note";
 import {
   approvalLinks,
   approvalsTotal,
@@ -92,12 +95,22 @@ async function HomeContent() {
   const me = await requireAdmin();
   if (me.roleCode === "library_operator") return <LibraryHome me={me} />;
   if (!MAY_SEE_COUNTERS.includes(me.roleCode)) {
+    // P5.1: Finance's Home. Its claim counters arrive with expense claims (P5.2 and P5.3).
     return (
       <>
         <Greeting me={me} line="Welcome to the ICCI Control Dashboard." />
+        <div className="mt-6">
+          <ExpenseLinkNote />
+        </div>
         <Card className="mt-6">
-          <p data-testid="no-counters">Nothing for your role yet. Expenses arrive in a later phase.</p>
+          <p data-testid="no-counters">Expense claims waiting for you will be counted here.</p>
         </Card>
+        <section className="mt-6" aria-label="Actions">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <ActionTile href="/assets/register" icon={Table2} label="Asset register" hint="Values by place" />
+            <ActionTile href="/expenses/settings" icon={SlidersHorizontal} label="Expense settings" hint="Categories, funds, amounts" />
+          </div>
+        </section>
       </>
     );
   }

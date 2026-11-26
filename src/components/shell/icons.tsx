@@ -40,6 +40,7 @@ import {
   TrendingUp,
   BookX,
   LayoutDashboard,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import type { IconKey } from "@/lib/ui/menu";
@@ -85,4 +86,5 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   libraryOverview: LayoutDashboard,
   corrections: ClipboardCheck,
   reminders: BellRing,
+  expenseSettings: SlidersHorizontal,
 };

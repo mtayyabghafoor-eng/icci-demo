@@ -54,20 +54,27 @@ test("asset register: totals by place, one place in detail, and the CSV file", a
   for (const line of lines.slice(1, -1)) expect(line).toContain("Test Room A1");
 });
 
-test("finance sees a note on both lists and cannot download the CSV; signed out goes to sign-in", async ({ page }, info) => {
+// P5.1 (owner, 25 Nov 2026): Finance reads the asset register and its CSV,
+// never the item pages, and still not "Not seen in 12 months".
+test("finance reads the register and its CSV without item links, but not the other asset list; signed out goes to sign-in", async ({ page }, info) => {
   const signedOut = await page.request.get("/assets/register/csv", { maxRedirects: 0 });
   expect(signedOut.status()).toBe(307);
   expect(signedOut.headers()["location"]).toMatch(/\/sign-in/);
 
   await signInAs(page, finance, "/assets/register");
-  await expect(page.getByTestId("cannot-see-assets")).toHaveText(/Only a Super Admin or Centre Admin/);
+  await expect(page.getByTestId("register-total")).toContainText(/Total: \d+ assets/);
+  await expect(page.locator('a[href^="/items/"]')).toHaveCount(0);
+  const firstPlace = page.locator("table.list-table tbody a").first();
+  await firstPlace.click();
+  await expect(page.getByTestId("register-place-assets").first()).toBeVisible();
+  await expect(page.locator('a[href^="/items/"]')).toHaveCount(0);
   await s(page, "register-finance", info.project.name);
   await page.goto("/assets/not-seen");
   await expect(page.getByTestId("cannot-see-assets")).toBeVisible();
 
   const csv = await page.request.get("/assets/register/csv");
-  expect(csv.status()).toBe(403);
-  expect(await csv.text()).not.toContain("ICCI-");
+  expect(csv.status()).toBe(200);
+  expect(await csv.text()).toContain("ICCI-");
 });
 
 test("on a phone the list's drop-down filters fold away until asked for", async ({ page }, info) => {

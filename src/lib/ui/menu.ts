@@ -43,7 +43,8 @@ export type IconKey =
   | "overdueBooks"
   | "mostBorrowed"
   | "lostBooks"
-  | "libraryOverview";
+  | "libraryOverview"
+  | "expenseSettings";
 
 export type MenuLink = {
   href: string;
@@ -99,7 +100,8 @@ export const MENU: MenuGroup[] = [
       { href: "/assets", label: "Missing and damaged", icon: "missing", roles: ADMINS },
       { href: "/assets/approvals", label: "Disposals waiting", icon: "disposals", roles: ADMINS },
       { href: "/assets/not-seen", label: "Not seen in 12 months", icon: "notSeen", roles: ADMINS },
-      { href: "/assets/register", label: "Asset register", icon: "assetRegister", roles: ADMINS },
+      // P5.1 (owner, 25 Nov 2026): Finance reads the register, for insurance and year-end.
+      { href: "/assets/register", label: "Asset register", icon: "assetRegister", roles: [...ADMINS, "finance"] },
       { href: "/vehicles", label: "Vehicles", icon: "vehicles", roles: ADMINS },
     ],
   },
@@ -128,6 +130,11 @@ export const MENU: MenuGroup[] = [
       { href: "/tickets", label: "Tickets", icon: "tickets", roles: ADMINS },
       { href: "/tickets/new", label: "Report a problem", icon: "reportProblem", roles: ADMINS },
     ],
+  },
+  {
+    // Phase 5. Claims, approvals, the monthly file and the Board report join this group in later slices.
+    title: "Expenses",
+    links: [{ href: "/expenses/settings", label: "Expense settings", icon: "expenseSettings", roles: ["super_admin", "finance"] }],
   },
   {
     title: "Library",
@@ -180,9 +187,14 @@ export function activeLink(pathname: string, roleCode?: string): { link: MenuLin
 /** UI-9: the group that always stays open; every other group folds on a PC and in the phone menu. */
 export const FIXED_GROUP = "Overview";
 
-/** UI-9: only a long menu folds. The Library Operator and Finance have two groups or fewer. */
+/**
+ * UI-9: only a long menu folds. The Library Operator has two groups; Finance
+ * has a few groups of one or two links each (P5.1), which would only hide
+ * them, so a menu also needs more than ten links to fold.
+ */
 export function foldsMenu(roleCode: string): boolean {
-  return menuFor(roleCode).length > 2;
+  const groups = menuFor(roleCode);
+  return groups.length > 2 && groups.reduce((n, g) => n + g.links.length, 0) > 10;
 }
 
 /** UI-9: the group holding this page, opened by itself when the page loads. */
