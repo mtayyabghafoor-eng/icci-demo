@@ -59,7 +59,7 @@ async function fillClaim(page: Page, o: { amount: string; description: string; p
 /** A claim entered through the database as the Centre Admin (with a receipt), for tests that start later. */
 async function claimByApi(o: { amountCents?: number; payment?: string; payer?: string } = {}) {
   const c = await apiAs(centre.email);
-  const path = `claims/test/${crypto.randomUUID()}.png`;
+  const path = `claims/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`;
   await c.storage.from("expense-receipts").upload(path, PNG, { contentType: "image/png" });
   const { data: cats } = await c.from("expense_categories").select("id").eq("name", "Other").single();
   const { data: people } = await c.from("people").select("id").eq("full_name", o.payer ?? "Test Amina Byrne").maybeSingle();
@@ -278,6 +278,8 @@ test("a repaid claim corrected to less shows money to get back; whoever entered 
   const month = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Dublin" }).slice(0, 7);
   await page.goto(`/board-report?month=${month}`);
   await expect(page.getByText("Paid too much, to get back")).toBeVisible();
+  // Finding 5 (migration 0054): stray receipt files are counted.
+  await expect(page.getByText("Receipt files not on any claim")).toBeVisible();
   await page.getByText("Paid too much, to get back").scrollIntoViewIfNeeded();
   await shot(page, "board-to-get-back", project, "p5-7");
 });

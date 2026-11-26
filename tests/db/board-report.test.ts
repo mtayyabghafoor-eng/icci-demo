@@ -42,7 +42,7 @@ async function approvedClaim(amount: number, fundName = "Unrestricted") {
   const m = masterKeyClient();
   const other = (await m.from("expense_categories").select("id").eq("name", "Other").single()).data!.id;
   const fund = (await m.from("expense_funds").select("id").eq("name", fundName).single()).data!.id;
-  const path = `claims/test/${crypto.randomUUID()}.png`;
+  const path = `claims/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`;
   await c.storage.from("expense-receipts").upload(path, PNG, { contentType: "image/png" });
   const { data: id, error } = await c.rpc("enter_expense_claim", {
     p_amount_cents: amount,
@@ -75,7 +75,7 @@ describe("who can see the Board report", () => {
       const r = await report(await asRole(role));
       expect(r.month).toBe(thisMonth());
       for (const key of ["spend_cents", "tickets_opened", "items_registered", "loans", "copies_lost"]) expect(typeof r.during[key], key).toBe("number");
-      for (const key of ["claims_waiting", "owed_cents", "assets_value_cents", "vetting_expired", "books_overdue"]) expect(typeof r.as_at[key], key).toBe("number");
+      for (const key of ["claims_waiting", "owed_cents", "receipts_unclaimed", "assets_value_cents", "vetting_expired", "books_overdue"]) expect(typeof r.as_at[key], key).toBe("number");
       const { data: people } = await masterKeyClient().from("people").select("full_name").limit(1000);
       const text = JSON.stringify(r);
       for (const p of people ?? []) expect(text.includes(p.full_name), p.full_name).toBe(false);
@@ -146,6 +146,16 @@ describe("spend in the month", () => {
     const after = await report(await centre());
     expect(after.during.spend_cents).toBe(before.during.spend_cents);
     expect((after.during.tickets_closed as number) - (before.during.tickets_closed as number)).toBe(1);
+  });
+});
+
+// Security review 26 Nov 2026, finding 5 (migration 0054).
+describe("receipt files not on any claim", () => {
+  it("are counted, so a stray file in the receipt store is noticed", async () => {
+    const c = await centre();
+    const path = `claims/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`;
+    expect((await c.storage.from("expense-receipts").upload(path, PNG, { contentType: "image/png" })).error).toBeNull();
+    expect((await report(c)).as_at.receipts_unclaimed).toBeGreaterThanOrEqual(1);
   });
 });
 

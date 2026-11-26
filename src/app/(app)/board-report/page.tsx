@@ -226,6 +226,10 @@ async function Content({ searchParams }: { searchParams: PageProps<"/board-repor
                   ...(typeof a.overpaid_cents === "number"
                     ? [["Paid too much, to get back", `${formatEuro(a.overpaid_cents)} (${a.overpaid_people} ${a.overpaid_people === 1 ? "person" : "people"})`] as [string, string]]
                     : []),
+                  // Migration 0054 (security review, finding 5); absent from older final copies.
+                  ...(typeof a.receipts_unclaimed === "number"
+                    ? [["Receipt files not on any claim", String(a.receipts_unclaimed)] as [string, string]]
+                    : []),
                 ]}
               />
               <Rows

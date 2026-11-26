@@ -37,7 +37,7 @@ admin. Two are worth fixing before real money is used.
 | 2 | Medium | Renaming a fund or category quietly changes past months' files (**fixed**, 0052) |
 | 3 | Low to medium | An admin can be paid back through a second People record they made themselves (**fixed**, 0053) |
 | 4 | Low | Lowering a claim after it was repaid hides the overpayment (**fixed**, 0053) |
-| 5 | Low | Files can be put in the receipt store without any claim |
+| 5 | Low | Files can be put in the receipt store without any claim (**fixed**, 0054) |
 
 Plus two notes that need no fix now (section "Notes").
 
@@ -137,6 +137,11 @@ its corrections.
 
 ## 5. Files in the receipt store with no claim (Low)
 
+**Fixed 26 Nov 2026** (migration 0054): the store takes only the names
+the website gives, and the Board report shows "Receipt files not on any
+claim" (the owner chose a count there rather than a list). Files already
+in the store stay as they are.
+
 **What happens.** The receipt store accepts any file name from any of the
 three admin roles, outside the website's checks, even when no claim is
 entered. Such files can never be read by anyone else without a claim
@@ -168,5 +173,5 @@ a monthly check that lists files not on any claim.
 
 Fix 1 and 2 first (one small migration, with tests written first): **done
 26 Nov 2026, migration 0052**. Then 3 and 4 together: **done 26 Nov 2026,
-migration 0053**. Then 5. Each fix follows the usual rules: a numbered
+migration 0053**. Then 5: **done 26 Nov 2026, migration 0054**. Each fix follows the usual rules: a numbered
 migration, tests for every role and a signed-out visitor, full test suite.

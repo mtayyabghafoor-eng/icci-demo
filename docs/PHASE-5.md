@@ -325,6 +325,8 @@ Making it again keeps both copies, like rota publications.
    Findings 3 and 4 fixed the same day (migration 0053): whoever entered
    a claim does not pay it back or decide on its corrections; a same-name
    person needs a "different person" answer; money to get back is shown.
+   Finding 5 fixed the same day (migration 0054): the receipt store takes
+   only the website's file names; the Board report counts stray files.
 
 ## 11. Phase 5 acceptance checks (proposed)
 

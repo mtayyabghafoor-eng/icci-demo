@@ -1227,7 +1227,8 @@ if (process.env.CRON_SECRET?.trim()) {
       const files: string[] = [];
       if (!c.lost) {
         const png = await sampleReceiptPng([D(c.shop), `Date: ${addDays(todayInDublin(), -c.daysAgo)}`, `Total EUR ${(c.amountCents / 100).toFixed(2)}`]);
-        const path = `claims/seed/${String(i + 1).padStart(3, "0")}-receipt-1.png`;
+        // The name the website gives a receipt; the store takes no other (0054).
+        const path = `claims/${todayInDublin().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`;
         const up = await enterer.storage.from("expense-receipts").upload(path, png, { contentType: "image/png", upsert: false });
         if (up.error && !/exists/i.test(up.error.message)) throw up.error;
         files.push(path);

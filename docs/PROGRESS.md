@@ -51,7 +51,7 @@ are built (26 Nov 2026, overnight, committed but not pushed; migrations
 P5.7, the security review, is done (26 Nov 2026,
 docs/security-review-2026-11-26.md: 2 medium, 3 low findings, nothing
 fixed yet). Findings 1 and 2 are fixed (migration 0052), 3 and 4 too
-(migration 0053, both 26 Nov 2026); 5 waits for the owner. 0050 to 0053
+(migration 0053) and 5 (migration 0054), all 26 Nov 2026. 0050 to 0054
 are not on ICCI Staging yet. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
@@ -460,6 +460,14 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   confirm, especially repayments counted by the day recorded.
 
 ## Session log
+
+- 26 Nov 2026, session 47 continued (security fix 5; owner chose a Board
+  report count). Migration 0054: the receipt store takes only
+  claims/<year-month>/<random>-receipt-<1-3>.<pdf|jpg|png|webp>; the Board
+  report's "As at" adds receipts_unclaimed ("Receipt files not on any
+  claim"). Seed and tests now use the website's file names. All five
+  findings are fixed. Not pushed; 0050 to 0054 not on ICCI Staging.
+  Next: Staging (migrations first), then push.
 
 - 26 Nov 2026, session 47 continued (security fixes 3 and 4, with the
   owner's extras A and B; owner said "Go with A and B"). Migration 0053:

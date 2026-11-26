@@ -77,7 +77,8 @@ async function payer(n = 0): Promise<string> {
 }
 
 async function upload(c: SupabaseClient): Promise<string> {
-  const path = `claims/test/${crypto.randomUUID()}.png`;
+  // The name the website gives a receipt; the store takes no other (0054).
+  const path = `claims/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`;
   const { error } = await c.storage.from("expense-receipts").upload(path, PNG, { contentType: "image/png" });
   if (error) throw error;
   return path;
@@ -144,7 +145,7 @@ describe("who can see and enter expense claims", () => {
       const c = await who.client();
       for (const t of TABLES) expect((await c.from(t).select("*").limit(3)).data ?? [], t).toHaveLength(0);
       expect((await enter(c, { files: [], lost: "gone" })).error).not.toBeNull();
-      expect((await c.storage.from("expense-receipts").upload(`claims/test/${crypto.randomUUID()}.png`, PNG, { contentType: "image/png" })).error).not.toBeNull();
+      expect((await c.storage.from("expense-receipts").upload(`claims/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`, PNG, { contentType: "image/png" })).error).not.toBeNull();
       for (const fn of ["expense_people", "expense_companies", "expense_tickets"]) {
         const r = await c.rpc(fn);
         expect(r.error !== null || (r.data as unknown[]).length === 0, fn).toBe(true);
@@ -199,8 +200,35 @@ describe("entering a claim", () => {
     const three = await newClaim(c, { files: [await upload(c), await upload(c), await upload(c)] });
     expect((await row(three)).file_count).toBe(3);
     expect((await enter(c, { files: [await upload(c), await upload(c), await upload(c), await upload(c)] })).error?.message).toMatch(/at most 3/i);
-    expect((await enter(c, { files: [`claims/test/${crypto.randomUUID()}.png`] })).error?.message).toMatch(/not found/i);
+    expect((await enter(c, { files: [`claims/${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-receipt-1.png`] })).error?.message).toMatch(/not found/i);
     expect((await enter(c, { files: [await upload(c)], lost: "and lost too" })).error?.message).toMatch(/receipt lost/i);
+  });
+
+  // Security review 26 Nov 2026, finding 5 (migration 0054).
+  it("the receipt store takes only the file names the website gives", async () => {
+    const month = new Date().toISOString().slice(0, 7);
+    const id = () => crypto.randomUUID();
+    const wrong = [
+      "anything/at-all.png",
+      `claims/test/${id()}.png`,
+      `claims/${month}/${id()}.png`,
+      `claims/${month}/${id()}-receipt-4.png`,
+      `claims/${month}/${id()}-receipt-1.gif`,
+      `claims/${month}/${id()}-receipt-1.png.exe`,
+      `claims/${month}/../${id()}-receipt-1.png`,
+      `claims/2026-13/${id()}-receipt-1.png`,
+      `claims/${month}/sub/${id()}-receipt-1.png`,
+    ];
+    for (const who of [superA, centre, financeA]) {
+      const c = await who();
+      for (const path of wrong) {
+        expect((await c.storage.from("expense-receipts").upload(path, PNG, { contentType: "image/png" })).error, path).not.toBeNull();
+      }
+      for (const ext of ["png", "jpg", "webp"]) {
+        const path = `claims/${month}/${id()}-receipt-3.${ext}`;
+        expect((await c.storage.from("expense-receipts").upload(path, PNG, { contentType: "image/png" })).error, path).toBeNull();
+      }
+    }
   });
 
   it("one receipt file can only be on one live claim", async () => {
