@@ -48,7 +48,9 @@ to A7) is done (25 Nov 2026). Next: Phase 5 (expenses and Board report),
 planned in docs/PHASE-5.md (owner approved every answer); P5.1 to P5.6
 are built (26 Nov 2026, overnight, committed but not pushed; migrations
 0050 and 0051 are not on ICCI Staging yet). Next: the owner reviews them,
-then P5.7, the security review in a fresh session. Before real use: Resend as Supabase's mail sender, then switch
+P5.7, the security review, is done (26 Nov 2026,
+docs/security-review-2026-11-26.md: 2 medium, 3 low findings, nothing
+fixed yet); the owner chooses which fixes to make. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -456,6 +458,16 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   confirm, especially repayments counted by the day recorded.
 
 ## Session log
+
+- 26 Nov 2026, session 47 (slice P5.7, security review of Phase 5; no code
+  changed). Read migrations 0049-0051 and the expense pages as an outside
+  reviewer. Core rules hold (no self-approval, no double approval, no
+  deletes, signed-out and Library Operator see nothing). Five weaknesses,
+  each tried on the local database and rolled back: one Super Admin can
+  lift the second-approval amount (medium); renaming a fund or category
+  changes past CSVs (medium); repaying yourself through a second People
+  record, hidden overpayment, files in the receipt store with no claim
+  (low). Next: owner picks the fixes (recommended: 1 and 2 first).
 
 - 26 Nov 2026, session 46 continued overnight (slices P5.2 to P5.6; owner
   asked for all remaining steps while asleep). Migration 0050 (claims,
