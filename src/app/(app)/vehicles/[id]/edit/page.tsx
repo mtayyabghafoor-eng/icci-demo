@@ -6,10 +6,9 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
 import { MAY_SEE_VEHICLES } from "@/lib/vehicles/rules";
-import { CannotSeeVehicles } from "../../cannot-see";
 import { keeperChoices } from "../../data";
 import { VehicleForm } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Change vehicle | ICCI Control Dashboard" };
@@ -17,7 +16,7 @@ export const metadata: Metadata = { title: "Change vehicle | ICCI Control Dashbo
 export default function EditVehiclePage(props: PageProps<"/vehicles/[id]/edit">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -26,7 +25,7 @@ export default function EditVehiclePage(props: PageProps<"/vehicles/[id]/edit">)
 
 async function Content({ params }: { params: PageProps<"/vehicles/[id]/edit">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSeeVehicles />;
+  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSee area="vehicles" />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();

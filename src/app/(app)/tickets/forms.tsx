@@ -15,14 +15,14 @@ import {
   type TicketStep,
 } from "@/lib/tickets/rules";
 import { PhotoInput } from "../items/photo-input";
-import { fieldClass } from "../items/ui";
 import { recordTicketStep, reportProblem, type TicketFormState } from "./actions";
+import { fieldClass } from "@/components/ui";
 
 const none: TicketFormState = { error: null };
 const primary =
   "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark px-6 text-lg font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 sm:w-auto";
 const choice =
-  "flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 px-3 rounded-xl border border-[#87948f] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold";
+  "flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 px-3 rounded-xl border border-icci-field bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold";
 
 export function ReportProblemForm({
   itemId,
@@ -70,7 +70,7 @@ export function ReportProblemForm({
       </label>
       {canMarkDamaged && (
         // A4 (owner's choice): one report. The tick also marks the item damaged, with the same words.
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#87948f] bg-white px-4 py-3 has-[:checked]:border-icci-error/60 has-[:checked]:bg-[var(--icci-bad-fill)]">
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-icci-field bg-white px-4 py-3 has-[:checked]:border-icci-error/60 has-[:checked]:bg-[var(--icci-bad-fill)]">
           <input type="checkbox" name="damaged" value="yes" className="mt-1 h-5 w-5 shrink-0" data-testid="mark-damaged" />
           <span>
             <span className="block font-semibold">It is broken or damaged</span>

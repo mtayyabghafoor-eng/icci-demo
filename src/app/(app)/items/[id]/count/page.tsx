@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { QuantityForm } from "../../../stock/forms";
 import { loadConsumable, StockHeader } from "../../../stock/item-page";
+import { Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Count this shelf | ICCI Control Dashboard" };
 
 export default function CountPage(props: PageProps<"/items/[id]/count">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading item…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>

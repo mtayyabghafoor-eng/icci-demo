@@ -12,7 +12,7 @@ import { savePrayerMonth, type MonthFormState } from "../actions";
 export type GridDay = { date: string; short: string; full: string; friday: boolean; today: boolean; saved: DayTimes | null };
 
 const box =
-  "block min-h-11 w-[6.6rem] rounded-lg border border-[#87948f] bg-white px-1.5 text-base tabular-nums text-icci-text " +
+  "block min-h-11 w-[6.6rem] rounded-lg border border-icci-field bg-white px-1.5 text-base tabular-nums text-icci-text " +
   "hover:border-icci-green/60 focus:border-icci-green focus:outline-3 focus:outline-offset-2 focus:outline-icci-focus";
 
 export function MonthForm({ month, days }: { month: string; days: GridDay[] }) {

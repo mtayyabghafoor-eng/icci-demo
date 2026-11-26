@@ -22,20 +22,19 @@ import {
 } from "@/lib/stocktake/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../../items/data";
-import { Notice, PrimaryLink, StatusBadge } from "../../items/ui";
 import { adminNames } from "../../stock/data";
 import { carryOn, stopScanning } from "../actions";
 import { type Difference, loadItems, loadScans, loadStocktake } from "../data";
 import { DecideDifferenceForm, LabelBox, StocktakeCamera } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, PageNotice, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Stocktake | ICCI Control Dashboard" };
 
 export default function StocktakePage(props: PageProps<"/stocktake/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/stocktake">All stocktakes</BackLink>
-      <Suspense fallback={<p className="mt-4">Loading the stocktake…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -94,9 +93,9 @@ async function Content({
           </span>
         </p>
       )}
-      {query.done === "sent" && <Notice>Sent for approval. A different admin now approves or rejects each difference.</Notice>}
-      {query.done === "approved" && <Notice>Difference approved. The item has been updated.</Notice>}
-      {query.done === "rejected" && <Notice>Difference rejected. Nothing was changed.</Notice>}
+      {query.done === "sent" && <PageNotice>Sent for approval. A different admin now approves or rejects each difference.</PageNotice>}
+      {query.done === "approved" && <PageNotice>Difference approved. The item has been updated.</PageNotice>}
+      {query.done === "rejected" && <PageNotice>Difference rejected. Nothing was changed.</PageNotice>}
 
       {st.status === "open" ? (
         await openSection({ id, scanningHere, scans: scans.latest })

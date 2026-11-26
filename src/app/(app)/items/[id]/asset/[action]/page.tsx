@@ -12,16 +12,15 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { AssetEventForm } from "../../../../assets/forms";
 import { loadLookups, type ItemRow } from "../../../data";
-import { ItemStatus } from "../../../ui";
-import { BackLink } from "@/components/ui";
+import { BackLink, ItemStatus, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Asset | ICCI Control Dashboard" };
 
 export default function AssetActionPage(props: PageProps<"/items/[id]/asset/[action]">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading item…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>

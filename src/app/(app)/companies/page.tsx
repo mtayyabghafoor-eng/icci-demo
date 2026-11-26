@@ -5,20 +5,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Building, Plus } from "lucide-react";
-import { DataTable, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { DataTable, EmptyState, fieldClass, LinkButton, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { COMPANY_KINDS, kindWords, telLink, type CompanyRow } from "@/lib/companies/rules";
 import { createClient } from "@/lib/supabase/server";
 import { MAY_SEE_CATEGORIES } from "../categories/data";
-import { StatusBadge, fieldClass } from "../items/ui";
 import { allCompanies } from "./data";
 
 export const metadata: Metadata = { title: "Companies | ICCI Control Dashboard" };
 
 export default function CompaniesPage(props: PageProps<"/companies">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">
-      <Suspense fallback={<p>Loading companies…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

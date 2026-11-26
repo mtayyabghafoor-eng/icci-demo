@@ -4,15 +4,13 @@
 // change is "switch off, add the new one". Super Admin and Centre Admin only.
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { buttonClass, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, CannotSee, Card, CardTitle, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_ROTA, SLOT_GROUPS, type SlotType } from "@/lib/rota/rules";
 import { dayName, DAY_NAMES, KIND_TEXT, TEMPLATE_COLUMNS, TEMPLATE_SLOT_COLUMNS, templateSlotText, type RotaTemplate, type TemplateSlot } from "@/lib/rota/templates";
 import { slotOptionLabel } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
-import { StatusBadge } from "../../../items/ui";
-import { CannotSeeRota } from "../../cannot-see";
 import { loadPlaces, loadSlotTypes } from "../../week-data";
 import { setTemplateSlotActive } from "../actions";
 import { AddTemplateSlotForm } from "./forms";
@@ -23,7 +21,7 @@ export const metadata: Metadata = { title: "Rota template | ICCI Control Dashboa
 export default function TemplatePage(props: PageProps<"/rota/templates/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -36,7 +34,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/temp
     return (
       <>
         <PageHeader title="Rota Template" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

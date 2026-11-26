@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayUseLibrary } from "@/lib/library/rules";
-import { CannotSeeLibrary } from "../cannot-see";
 import { FindCopyForm } from "../loan-forms";
 import { DeskTabs } from "../desk-tabs";
+import { CannotSee, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Return a Book | ICCI Control Dashboard" };
 
@@ -15,7 +15,7 @@ export default function ReturnPage() {
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
       <DeskTabs />
       <h1 className="page-title text-[28px] md:text-[34px]">Return a Book</h1>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -24,7 +24,7 @@ export default function ReturnPage() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   return (
     <>
       <ol className="mt-3 list-decimal space-y-1 ps-5">

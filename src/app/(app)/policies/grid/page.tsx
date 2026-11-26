@@ -5,15 +5,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { BackLink, buttonClass } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, fieldClass, PageNotice, SecondaryLink, Skeleton } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_POLICIES } from "@/lib/policies/rules";
 import { filterSquares, gridQuery, OVERDUE_DAYS, readGridFilter, SIGNOFF_STATUS, SQUARE_ORDER } from "@/lib/policies/signoffs";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, SecondaryLink } from "../../items/ui";
 import { loadPeopleLists } from "../../people/data";
-import { CannotSeePolicies } from "../cannot-see";
 import { loadGridSquares } from "./data";
 import { GridTable } from "./grid-table";
 
@@ -21,14 +19,14 @@ export const metadata: Metadata = { title: "Policy grid | ICCI Control Dashboard
 
 export default function PolicyGridPage(props: PageProps<"/policies/grid">) {
   return (
-    <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
       <BackLink href="/policies">Policies</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Policy Grid</h1>
       <p className="mt-2">
         Who has signed the current version of each policy. &ldquo;Overdue&rdquo; means still unsigned {OVERDUE_DAYS} days after
         publishing. &ldquo;–&rdquo; means the policy does not apply to that person&rsquo;s role.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Grid searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -37,13 +35,13 @@ export default function PolicyGridPage(props: PageProps<"/policies/grid">) {
 
 async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
+  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSee area="policies" />;
   const params = await searchParams;
   const supabase = await createClient();
   const [lists, all] = await Promise.all([loadPeopleLists(supabase), loadGridSquares(supabase)]);
   const filter = readGridFilter(params, new Set(lists.sectionName.keys()), new Set(lists.roleName.keys()));
   const squares = filterSquares(all, filter);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const filterParams = gridQuery(filter);
   const signed = params.done === "signed" ? Number(params.n) || 0 : 0;
   const filtered = filterParams !== "";
@@ -53,9 +51,9 @@ async function Grid({ searchParams }: { searchParams: PageProps<"/policies/grid"
     <>
       {signed > 0 && (
         <div className="mb-4">
-          <Notice>
+          <PageNotice>
             Sign-off recorded for {signed} {signed === 1 ? "person" : "people"}.
-          </Notice>
+          </PageNotice>
         </div>
       )}
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-3" aria-label="Filter the policy grid">

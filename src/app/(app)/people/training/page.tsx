@@ -6,7 +6,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Pagination } from "@/components/ui";
+import { CannotSee, fieldClass, Pagination, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
@@ -14,8 +14,6 @@ import { createClient } from "@/lib/supabase/server";
 import { DUE_WITHIN_DAYS, STATUS_ORDER, TRAINING_STATUS, trainingLine } from "@/lib/training/rules";
 import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { SecondaryLink, StatusBadge } from "../../items/ui";
-import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists } from "../data";
 import { loadTrainingPage, loadTrainingTypes, readTrainingFilter } from "./data";
 
@@ -29,7 +27,7 @@ export default function TrainingListPage(props: PageProps<"/people/training">) {
         Training recorded for each person, worst first. &ldquo;Due soon&rdquo; means it expires within {DUE_WITHIN_DAYS} days.
         Only the newest course of each type counts.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -38,7 +36,7 @@ export default function TrainingListPage(props: PageProps<"/people/training">) {
 
 async function List({ searchParams }: { searchParams: PageProps<"/people/training">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
   const params = await searchParams;
   const supabase = await createClient();
   const [lists, types] = await Promise.all([loadPeopleLists(supabase), loadTrainingTypes(supabase)]);
@@ -47,7 +45,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
   const shown = await loadTrainingPage(supabase, filter, readPage(params.page), PAGE_SIZE);
   const rows = shown.rows;
   const today = todayInDublin();
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const filtered = Boolean(filter.status || filter.type || filter.section);
   const filterParams = {
     ...(filter.type && { type: filter.type }),

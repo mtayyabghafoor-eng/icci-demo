@@ -4,7 +4,7 @@ import { startTransition, useActionState, useEffect, useRef, type FormEvent } fr
 import { FormError } from "@/app/sign-in/ui";
 import { decideCorrection, recordOne, recordWeeklyCount, requestCorrection, type StockFormState } from "./actions";
 import { Stepper } from "@/components/ui/stepper";
-import { fieldClass } from "../items/ui";
+import { fieldClass } from "@/components/ui";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 min-h-12 w-full px-6 text-lg sm:w-auto";

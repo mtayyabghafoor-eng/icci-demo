@@ -22,12 +22,10 @@ import {
   type TicketRow,
 } from "@/lib/tickets/rules";
 import { loadLookups } from "../../items/data";
-import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames } from "../../stock/data";
-import { CannotSeeTickets } from "../cannot-see";
 import { personNames, TICKET_PHOTO_BUCKET } from "../data";
 import { TicketActions } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 import { allCompanies, companyChoices } from "../../companies/data";
 import { ContactCard, contactContext } from "../../companies/contact-card";
 import { TicketExpenseClaims } from "../expense-claims";
@@ -36,8 +34,8 @@ export const metadata: Metadata = { title: "Ticket | ICCI Control Dashboard" };
 
 export default function TicketPage(props: PageProps<"/tickets/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading ticket…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -46,7 +44,7 @@ export default function TicketPage(props: PageProps<"/tickets/[id]">) {
 
 async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; searchParams: PageProps<"/tickets/[id]">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_TICKETS.includes(me.roleCode)) return <CannotSeeTickets />;
+  if (!MAY_SEE_TICKETS.includes(me.roleCode)) return <CannotSee area="tickets" />;
   const { id } = await props.params;
   const { done } = await props.searchParams;
   if (!/^\d{1,12}$/.test(id)) notFound();
@@ -153,11 +151,11 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
         <StatusBadge {...STATUS_LABEL[t.status]} />
         {t.priority === "urgent" && <StatusBadge {...PRIORITY_LABEL.urgent} />}
       </div>
-      {done === "reported" && <Notice floating>Problem reported as ticket {ticketNumber(t.id)}.</Notice>}
+      {done === "reported" && <PageNotice floating>Problem reported as ticket {ticketNumber(t.id)}.</PageNotice>}
       {done === "reported-damaged" && (
-        <Notice floating>Problem reported as ticket {ticketNumber(t.id)}, and the item is marked damaged until it is repaired.</Notice>
+        <PageNotice floating>Problem reported as ticket {ticketNumber(t.id)}, and the item is marked damaged until it is repaired.</PageNotice>
       )}
-      {typeof done === "string" && isTicketStep(done) && <Notice floating>{STEP_DONE[done]}</Notice>}
+      {typeof done === "string" && isTicketStep(done) && <PageNotice floating>{STEP_DONE[done]}</PageNotice>}
 
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_280px]">
         <section className="rounded-2xl border border-icci-line bg-white p-5 shadow-card" aria-label="Details">

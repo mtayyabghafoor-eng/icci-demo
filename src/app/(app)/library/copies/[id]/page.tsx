@@ -14,12 +14,10 @@ import { MARK_DONE, statusWord } from "@/lib/library/lists";
 import { LANGUAGE_LABEL, mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, todayInDublin } from "@/lib/vetting/rules";
-import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../../items/ui";
-import { CannotSeeLibrary } from "../../cannot-see";
 import { loadBook, loadBorrowers, loadCopyRow, loadLoansOfCopies, UUID, type Copy } from "../../data";
 import { CopyNoteForm } from "../../forms";
 import { MarkCopyForm, MoveDueForm, ReturnForm, UndoReturnForm } from "../../loan-forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Library Copy | ICCI Control Dashboard" };
 
@@ -39,7 +37,7 @@ export default function CopyPage(props: PageProps<"/library/copies/[id]">) {
       {/* A5: the desk tabs, as on every other library desk page. */}
       <DeskTabs />
       <BackLink href="/library">Library</BackLink>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -48,7 +46,7 @@ export default function CopyPage(props: PageProps<"/library/copies/[id]">) {
 
 async function Content({ params, searchParams }: Pick<PageProps<"/library/copies/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const { id } = await params;
   const { done, late } = await searchParams;
   if (!UUID.test(id)) notFound();
@@ -81,7 +79,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/copies
         {book.author ?? "Author not recorded"}
       </p>
       {notice && (
-        <Notice floating testId="notice">{notice}</Notice>
+        <PageNotice floating testId="notice">{notice}</PageNotice>
       )}
       <div className="mt-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card">
         <div className="flex items-center justify-between gap-3">

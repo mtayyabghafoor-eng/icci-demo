@@ -19,9 +19,8 @@ import {
   SHEET_MM,
 } from "@/lib/labels/sheet";
 import { createClient } from "@/lib/supabase/server";
-import { fieldClass, Notice } from "../../../items/ui";
 import { PrintNowButton } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, fieldClass, PageNotice, Skeleton } from "@/components/ui";
 import { DomeEmblem } from "../../dome-emblem";
 
 export const metadata: Metadata = { title: "Label sheet | ICCI Control Dashboard" };
@@ -31,7 +30,7 @@ const QR_MARGIN = 2; // light squares around the code, so the camera can find it
 export default function LabelSheetPage(props: PageProps<"/labels/sheet/[id]">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:m-0 print:max-w-none print:p-0">
-      <Suspense fallback={<p>Loading the sheet…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Sheet params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -75,7 +74,7 @@ async function Sheet({
       <div className="print:hidden">
         <BackToLabels />
         <h1 className="page-title text-[28px] md:text-[34px] mt-2">Label Sheet</h1>
-        {query.new === "1" && <Notice>{run.label_count} new label numbers created.</Notice>}
+        {query.new === "1" && <PageNotice>{run.label_count} new label numbers created.</PageNotice>}
         <p className="mt-3 text-lg font-semibold" data-testid="sheet-range">
           {range}
         </p>

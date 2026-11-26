@@ -9,10 +9,8 @@ import { type RegisterRow, MAY_SEE_ASSET_LISTS, MAY_SEE_ASSET_REGISTER } from "@
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatEuro, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
-import { ItemStatus } from "../../items/ui";
-import { CannotSeeAssets } from "../cannot-see";
 import { loadRegisterPage } from "./data";
-import { Pagination } from "@/components/ui";
+import { CannotSee, fieldClass, ItemStatus, Pagination, Skeleton } from "@/components/ui";
 import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Asset register | ICCI Control Dashboard" };
@@ -25,7 +23,7 @@ export default function RegisterPage(props: PageProps<"/assets/register">) {
         Every fixed asset the Centre still has, by place and value. Disposed assets are not included. Consumables are
         counted, not valued, so they are not listed here.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading the register…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Register searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -36,7 +34,7 @@ const plural = (n: number) => `${n} asset${n === 1 ? "" : "s"}`;
 
 async function Register({ searchParams }: { searchParams: PageProps<"/assets/register">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_ASSET_REGISTER.includes(me.roleCode)) return <CannotSeeAssets />;
+  if (!MAY_SEE_ASSET_REGISTER.includes(me.roleCode)) return <CannotSee area="assets" />;
   // Finance reads the register only; the item pages stay with the admins.
   const opensItems = MAY_SEE_ASSET_LISTS.includes(me.roleCode);
 
@@ -54,7 +52,7 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
   const total = totals.reduce((sum, g) => sum + g.total_cents, 0);
   const withoutValue = totals.reduce((sum, g) => sum + g.without_value, 0);
   const pageLink = (n: number) => `/assets/register?place=${encodeURIComponent(place)}${n > 1 ? `&page=${n}` : ""}`;
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const csvHref = `/assets/register/csv${place ? `?place=${encodeURIComponent(place)}` : ""}`;
 
   return (

@@ -5,10 +5,9 @@
 // (dir="auto" follows what is typed).
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { LANGUAGE_LABEL, type Language } from "@/lib/library/rules";
-import { fieldClass } from "../items/ui";
 import { addBook, addCopy, saveBook, saveCopyNote, type LibraryFormState } from "./actions";
 
 const box = "mt-4 space-y-5 rounded-2xl border border-icci-line bg-white p-5 shadow-card";
@@ -93,7 +92,7 @@ function BookFields({ book, typed }: { book?: BookDetails; typed?: Typed }) {
           {(Object.keys(LANGUAGE_LABEL) as Language[]).map((code) => (
             <label
               key={code}
-              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#87948f] bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
+              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-icci-field bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
             >
               <input type="radio" name="language" value={code} required defaultChecked={v("language", book?.language) === code} className="h-4 w-4" />
               {LANGUAGE_LABEL[code]}

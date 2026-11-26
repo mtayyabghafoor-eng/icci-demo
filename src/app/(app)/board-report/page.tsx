@@ -8,7 +8,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Notice, PageHeader, PageShell, StatusPill } from "@/components/ui";
+import { CannotSee, Notice, PageHeader, PageShell, StatusPill } from "@/components/ui";
 import { ROUTE_LABEL, type DisposalRoute } from "@/lib/assets/disposal";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { monthName, monthRange, recentMonths, todayInDublin } from "@/lib/expenses/claims";
@@ -16,7 +16,6 @@ import { MAY_HANDLE_EXPENSES } from "@/lib/expenses/rules";
 import { formatDateTime, formatEuro } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "../categories/call-sheet/print-button";
-import { CannotSeeExpenses } from "../expenses/cannot-see";
 import { FinalCopyForm } from "./forms";
 
 export const metadata: Metadata = { title: "Board report | ICCI Control Dashboard" };
@@ -60,7 +59,7 @@ export default function BoardReportPage(props: PageProps<"/board-report">) {
 
 async function Content({ searchParams }: { searchParams: PageProps<"/board-report">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses title="Board Report" />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" title="Board Report" />;
   const { month: raw, copy: rawCopy, done } = await searchParams;
   const months = recentMonths();
   // The month just finished is the one a Board usually wants.
@@ -111,7 +110,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/board-repor
         <form method="get" className="mb-5 flex flex-wrap items-end gap-3" aria-label="Choose a month">
           <label className="min-w-52">
             <span className="font-semibold">Month</span>
-            <select name="month" defaultValue={month} className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2">
+            <select name="month" defaultValue={month} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2">
               {months.map((m) => (
                 <option key={m} value={m}>
                   {monthName(m)}

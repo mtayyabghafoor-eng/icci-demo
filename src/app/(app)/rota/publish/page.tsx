@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, CannotSee, Card, CardTitle, Notice, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { changesSentence, publishedAtText } from "@/lib/rota/publish";
 import { fullDayLabel, MAY_SEE_ROTA } from "@/lib/rota/rules";
@@ -16,7 +16,6 @@ import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { adminNames } from "../../stock/data";
-import { CannotSeeRota } from "../cannot-see";
 import { loadPublishState, loadSlotTypes, loadWeek, peopleNames } from "../week-data";
 import { publishWeek } from "../week-actions";
 
@@ -32,7 +31,7 @@ const PROBLEM: Record<string, string> = {
 export default function PublishRotaPage(props: PageProps<"/rota/publish">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -45,7 +44,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/publis
     return (
       <>
         <PageHeader title="Publish the Rota" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

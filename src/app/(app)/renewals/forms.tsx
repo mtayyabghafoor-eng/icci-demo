@@ -5,10 +5,9 @@
 // itself in a year later until the admin changes it).
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { CATEGORIES, MAX_DUE_YEARS, suggestedNextDue } from "@/lib/renewals/rules";
-import { fieldClass } from "../items/ui";
 import { addRenewal, markRenewed, saveRenewal, type RenewalFormState } from "./actions";
 
 export type Choice = { id: string; name: string };

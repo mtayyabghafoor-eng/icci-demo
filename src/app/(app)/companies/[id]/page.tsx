@@ -6,14 +6,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Pencil } from "lucide-react";
-import { Card, CardTitle, FactGrid, LinkButton, PageHeader } from "@/components/ui";
+import { Card, CardTitle, FactGrid, LinkButton, PageHeader, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { categoryPath } from "@/lib/categories/rules";
 import { kindWords, telLink } from "@/lib/companies/rules";
 import { UUID } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
 import { allCategories, MAY_SEE_CATEGORIES } from "../../categories/data";
-import { Notice, StatusBadge } from "../../items/ui";
 import { companyFilter } from "../../items/search";
 import { allCompanies, allModels, DONE } from "../data";
 import { SwitchActive } from "../forms";
@@ -23,7 +22,7 @@ export const metadata: Metadata = { title: "Company | ICCI Control Dashboard" };
 export default function CompanyPage(props: PageProps<"/companies/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -65,7 +64,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/companies
           </LinkButton>
         }
       />
-      {done && <Notice floating>{done}</Notice>}
+      {done && <PageNotice floating>{done}</PageNotice>}
       <div className="mt-4 space-y-4">
         <Card>
           <FactGrid

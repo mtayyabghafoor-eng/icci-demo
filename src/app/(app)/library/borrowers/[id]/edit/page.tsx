@@ -6,17 +6,16 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeLibrary } from "../../../cannot-see";
 import { loadBorrower } from "../../../data";
 import { BorrowerForm } from "../../../loan-forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Correct a Borrower | ICCI Control Dashboard" };
 
 export default function EditBorrowerPage(props: PageProps<"/library/borrowers/[id]/edit">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -25,7 +24,7 @@ export default function EditBorrowerPage(props: PageProps<"/library/borrowers/[i
 
 async function Content({ params }: Pick<PageProps<"/library/borrowers/[id]/edit">, "params">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const { id } = await params;
   const b = await loadBorrower(await createClient(), id);
   if (!b) notFound();

@@ -9,7 +9,7 @@ import type { CategoryGroup } from "@/lib/categories/rules";
 import { CategoryOptions } from "../../categories/options";
 import { registerItem, type ItemFormState } from "../actions";
 import { PhotoInput } from "../photo-input";
-import { fieldClass } from "../ui";
+import { fieldClass } from "@/components/ui";
 
 type Option = { id: string; path: string };
 

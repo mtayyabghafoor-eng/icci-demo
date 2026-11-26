@@ -10,10 +10,9 @@ import { ADJUSTMENT_STATUS, MOVEMENT_LABEL } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
 import { must } from "@/lib/supabase/must";
 import { loadLookups } from "../../items/data";
-import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames, MOVEMENT_COLUMNS, type Movement } from "../data";
 import { DecideForm } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Waiting for approval | ICCI Control Dashboard" };
 
@@ -26,7 +25,7 @@ export default function ApprovalsPage(props: PageProps<"/stock/approvals">) {
         Corrections of stock entries. Each one counts only after a <strong>different admin</strong> approves it. The
         original entry always stays in the history.
       </p>
-      <Suspense fallback={<p className="mt-4">Loading corrections…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -60,8 +59,8 @@ async function List({ searchParams }: { searchParams: PageProps<"/stock/approval
 
   return (
     <>
-      {done === "approved" && <Notice>Correction approved. The stock now uses the corrected number.</Notice>}
-      {done === "rejected" && <Notice>Correction rejected. The original number still stands.</Notice>}
+      {done === "approved" && <PageNotice>Correction approved. The stock now uses the corrected number.</PageNotice>}
+      {done === "rejected" && <PageNotice>Correction rejected. The original number still stands.</PageNotice>}
       <p className="mt-4" data-testid="pending-count">
         {pending.length === 0 ? "Nothing is waiting for approval." : `${pending.length} waiting.`}
       </p>

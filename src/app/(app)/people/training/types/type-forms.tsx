@@ -4,13 +4,13 @@
 import { useActionState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { MAX_YEARS, type TrainingType } from "@/lib/training/rules";
-import { fieldClass } from "../../../items/ui";
 import { addTrainingType, saveTrainingType, type TrainingFormState } from "../../training-actions";
+import { fieldClass } from "@/components/ui";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center rounded-[10px] bg-icci-green-dark px-4 py-2 font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60";
 const secondary =
-  "inline-flex min-h-11 items-center justify-center rounded-[10px] border border-[#87948f] bg-white px-4 py-2 font-semibold text-icci-text transition-colors duration-150 hover:border-icci-green hover:bg-icci-green-50 disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center rounded-[10px] border border-icci-field bg-white px-4 py-2 font-semibold text-icci-text transition-colors duration-150 hover:border-icci-green hover:bg-icci-green-50 disabled:opacity-60";
 
 function Fields({ prefix, name, years }: { prefix: string; name?: string; years?: number | null }) {
   return (

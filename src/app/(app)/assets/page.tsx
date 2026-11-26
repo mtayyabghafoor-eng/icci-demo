@@ -2,7 +2,7 @@
 // Designed for a PC first; one card per asset on a phone.
 import { PackageCheck } from "lucide-react";
 import type { Metadata } from "next";
-import { Pagination, EmptyState, LinkButton } from "@/components/ui";
+import { EmptyState, fieldClass, ItemStatus, LinkButton, Pagination, Skeleton } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -12,7 +12,6 @@ import { createClient } from "@/lib/supabase/server";
 import { must } from "@/lib/supabase/must";
 import { lastPage, PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { loadLookups, type ItemRow } from "../items/data";
-import { ItemStatus } from "../items/ui";
 import { reporterNames } from "../people/reporter";
 
 export const metadata: Metadata = { title: "Missing and damaged | ICCI Control Dashboard" };
@@ -22,7 +21,7 @@ export default function AssetsPage(props: PageProps<"/assets">) {
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
       <h1 className="page-title text-[28px] md:text-[34px]">Missing and Damaged</h1>
       <p className="mt-2">Fixed assets reported damaged or missing. Open one to mark it repaired or found, move it, or dispose of it.</p>
-      <Suspense fallback={<p className="mt-6">Loading assets…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -97,7 +96,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets">["sear
   const damaged = damagedCount.count ?? 0;
   const missing = total - damaged;
   const filtered = Boolean(q || location || show);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const since = (r: Row) => {
     const e = latest.get(r.id);
     return e ? `${formatDate(e.created_at)} · reported by ${reporterOf(e, reporters).name}` : "No report recorded";

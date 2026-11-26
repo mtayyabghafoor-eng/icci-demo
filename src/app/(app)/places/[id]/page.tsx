@@ -7,13 +7,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Pencil, Plus, Printer, ScanLine } from "lucide-react";
-import { Button, Card, CardTitle, FactGrid, LinkButton, PageHeader } from "@/components/ui";
+import { Button, Card, CardTitle, FactGrid, ItemStatus, LinkButton, PageHeader, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { KIND_LABEL, type ItemKind } from "@/lib/items/rules";
 import { CHILD_KIND, KIND_WORD, placeCode } from "@/lib/places/rules";
 import type { StockStatus } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
-import { ItemStatus, Notice, StatusBadge } from "../../items/ui";
 import { allPlaces, childrenOf, lineOf, UUID } from "../data";
 import { SwitchPlace } from "../forms";
 import { startRoomRegister } from "./register/actions";
@@ -33,7 +32,7 @@ const SHOWN_ITEMS = 100;
 export default function PlacePage(props: PageProps<"/places/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -91,7 +90,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/places/[i
           </div>
         }
       />
-      {done && <Notice floating>{done}</Notice>}
+      {done && <PageNotice floating>{done}</PageNotice>}
 
       <div className="mt-4 space-y-4">
         {place.notes && (

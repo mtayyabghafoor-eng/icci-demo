@@ -5,10 +5,9 @@
 // later until the admin changes it).
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { KIND_LABEL, MAX_RENEWAL_YEARS, RENEWAL_KINDS, suggestedUntil, type RenewalKind } from "@/lib/vehicles/rules";
-import { fieldClass } from "../items/ui";
 import { addVehicle, recordRenewal, saveVehicle, type VehicleFormState } from "./actions";
 
 export type Choice = { id: string; name: string };

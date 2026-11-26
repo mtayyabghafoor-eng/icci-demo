@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { FindLabel } from "../../items/find-label";
-import { SecondaryLink } from "../../items/ui";
+import { SecondaryLink } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Label not recognised | ICCI Control Dashboard" };
 
 export default function UnknownLabelPage(props: PageProps<"/labels/unknown">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
       <h1 className="page-title text-[28px] md:text-[34px]">Label Not Recognised</h1>
       <Suspense fallback={null}>
         <Message searchParams={props.searchParams} />

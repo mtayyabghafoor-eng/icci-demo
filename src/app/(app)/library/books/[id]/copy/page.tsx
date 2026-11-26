@@ -7,17 +7,16 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { parseLabelNumber } from "@/lib/items/rules";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeLibrary } from "../../../cannot-see";
 import { loadBook } from "../../../data";
 import { NewCopyForm } from "../../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Add a Copy | ICCI Control Dashboard" };
 
 export default function NewCopyPage(props: PageProps<"/library/books/[id]/copy">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -26,7 +25,7 @@ export default function NewCopyPage(props: PageProps<"/library/books/[id]/copy">
 
 async function Content({ params, searchParams }: Pick<PageProps<"/library/books/[id]/copy">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const { id } = await params;
   const sp = await searchParams;
   const label = parseLabelNumber(typeof sp.label === "string" ? sp.label : "") ?? "";

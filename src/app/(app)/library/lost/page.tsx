@@ -7,10 +7,9 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayDownloadLibraryCsv } from "@/lib/library/lists";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeLibrary } from "../cannot-see";
 import { loadCopyList } from "../data";
 import { CsvButton, FlaggedList } from "../list-parts";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Lost and Withdrawn | ICCI Control Dashboard" };
@@ -28,7 +27,7 @@ export default function Page() {
       <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Lost and withdrawn</h1>
       <p className="mt-2">Copies marked lost (they can be found again) and copies withdrawn for good.</p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -37,7 +36,7 @@ export default function Page() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const supabase = await createClient();
   const rows = await loadCopyList(supabase, ["lost", "withdrawn"], FLAGGED_ORDER);
   const lost = rows.filter((r) => r.status === "lost").length;

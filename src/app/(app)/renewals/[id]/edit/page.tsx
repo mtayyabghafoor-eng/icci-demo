@@ -7,10 +7,9 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_RENEWALS } from "@/lib/renewals/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeRenewals } from "../../cannot-see";
 import { ownerChoices } from "../../data";
 import { RenewalForm, type RenewalDetails } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Change renewal | ICCI Control Dashboard" };
@@ -18,7 +17,7 @@ export const metadata: Metadata = { title: "Change renewal | ICCI Control Dashbo
 export default function EditRenewalPage(props: PageProps<"/renewals/[id]/edit">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -27,7 +26,7 @@ export default function EditRenewalPage(props: PageProps<"/renewals/[id]/edit">)
 
 async function Content({ params }: { params: PageProps<"/renewals/[id]/edit">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSeeRenewals />;
+  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSee area="renewals" />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();

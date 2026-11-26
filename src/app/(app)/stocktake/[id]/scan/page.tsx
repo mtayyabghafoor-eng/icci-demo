@@ -12,18 +12,17 @@ import { locationAndInside, parseLabelNumber } from "@/lib/items/rules";
 import { parseStocktakeId } from "@/lib/stocktake/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../../../items/data";
-import { ItemStatus } from "../../../items/ui";
 import { stockLevelOf } from "../../../stock/data";
 import { ITEM_BRIEF, type ItemBrief, loadStocktake } from "../../data";
 import { ScanForm } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, ItemStatus, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Stocktake scan | ICCI Control Dashboard" };
 
 export default function ScanPage(props: PageProps<"/stocktake/[id]/scan">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Opening label…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>

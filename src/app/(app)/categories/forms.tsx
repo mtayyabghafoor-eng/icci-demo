@@ -4,11 +4,10 @@
 // on. Nothing is ever deleted.
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { CATEGORY_ICON_KEYS, CATEGORY_ICON_WORDS } from "@/lib/categories/icons";
 import { MAX_CATEGORY_NAME } from "@/lib/categories/rules";
-import { fieldClass } from "../items/ui";
 import { addCategory, saveCategory, setCategoryActive, type CategoryFormState } from "./actions";
 import { CategoryIcon } from "./category-icon";
 
@@ -68,7 +67,7 @@ export function CategoryForm({
             {CATEGORY_ICON_KEYS.map((key) => (
               <label
                 key={key}
-                className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border border-[#87948f] bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50"
+                className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border border-icci-field bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50"
               >
                 <input type="radio" name="icon" value={key} defaultChecked={(category?.icon ?? "other") === key} className="accent-icci-green-dark" />
                 <CategoryIcon icon={key} size={20} className="text-icci-green-dark" />

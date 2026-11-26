@@ -8,10 +8,10 @@ import { formatDateTime, locationOptions } from "@/lib/items/rules";
 import { decisionSummary, type DifferenceStatus, STOCKTAKE_STATUS } from "@/lib/stocktake/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../items/data";
-import { StatusBadge } from "../items/ui";
 import { adminNames } from "../stock/data";
 import { STOCKTAKE_COLUMNS, type Stocktake } from "./data";
 import { StartForm } from "./forms";
+import { Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Stocktake | ICCI Control Dashboard" };
 
@@ -23,7 +23,7 @@ export default function StocktakesPage() {
         Scan everything in one room. The stocktake lists what was expected but not found, and every difference waits
         for a <strong>different admin</strong> to approve it.
       </p>
-      <Suspense fallback={<p className="mt-4">Loading stocktakes…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>

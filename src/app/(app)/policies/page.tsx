@@ -10,9 +10,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
 import { MAY_SEE_POLICIES, POLICY_ROW_COLUMNS, REVIEW_DUE_DAYS, REVIEW_STATUS, worstFirst, type PolicyRow } from "@/lib/policies/rules";
 import { createClient } from "@/lib/supabase/server";
-import { PrimaryLink, SecondaryLink, StatusBadge } from "../items/ui";
-import { CannotSeePolicies } from "./cannot-see";
 import { loadGridSquares } from "./grid/data";
+import { CannotSee, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Policies | ICCI Control Dashboard" };
 
@@ -27,7 +26,7 @@ export default function PoliciesPage() {
         Each policy, its current version and when it is next reviewed, worst first. &ldquo;Review due soon&rdquo; means within{" "}
         {REVIEW_DUE_DAYS} days.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List />
       </Suspense>
     </main>
@@ -45,7 +44,7 @@ function signLine(p: PolicyRow, counts: Counts): string {
 
 async function List() {
   const me = await requireAdmin();
-  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
+  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSee area="policies" />;
   const supabase = await createClient();
   // Switched-on policies in full; only the most recently changed switched-off
   // ones (there can be many), with a count of them all.

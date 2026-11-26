@@ -5,8 +5,8 @@ import Link from "next/link";
 import { formatDate } from "@/lib/items/rules";
 import { days } from "@/lib/library/loans";
 import { statusWord, type CopyRow } from "@/lib/library/lists";
-import { StatusBadge } from "../items/ui";
 import type { Borrower } from "./data";
+import { StatusBadge } from "@/components/ui";
 
 export function CsvButton({ href }: { href: string }) {
   return (

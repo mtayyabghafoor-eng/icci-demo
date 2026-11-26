@@ -8,9 +8,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_POLICIES } from "@/lib/policies/rules";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeePolicies } from "../../../cannot-see";
 import { VersionForm } from "../../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Change draft | ICCI Control Dashboard" };
@@ -20,7 +19,7 @@ const note = "mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(-
 export default function ChangeDraftPage(props: PageProps<"/policies/[id]/versions/[versionId]">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -29,7 +28,7 @@ export default function ChangeDraftPage(props: PageProps<"/policies/[id]/version
 
 async function Content({ params }: { params: PageProps<"/policies/[id]/versions/[versionId]">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
+  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSee area="policies" />;
   const { id, versionId } = await params;
   if (!UUID.test(id) || !UUID.test(versionId)) notFound();
   const supabase = await createClient();

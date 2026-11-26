@@ -4,7 +4,7 @@
 // cannot be printed inside a page reliably, so it is listed with a link to
 // download it on its own. Super Admin, Centre Admin and Finance.
 import type { Metadata } from "next";
-import { BackLink, Notice, PageHeader, PageShell } from "@/components/ui";
+import { BackLink, CannotSee, Notice, PageHeader, PageShell } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { claimNumber, monthName, monthRange, RECEIPT_BUCKET, receiptFileName, todayInDublin } from "@/lib/expenses/claims";
 import { MAY_HANDLE_EXPENSES } from "@/lib/expenses/rules";
@@ -12,7 +12,6 @@ import { formatDate, formatEuro } from "@/lib/items/rules";
 import { allRows } from "@/lib/supabase/all-rows";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "../../../categories/call-sheet/print-button";
-import { CannotSeeExpenses } from "../../cannot-see";
 import { loadMonthExport } from "../data";
 
 export const metadata: Metadata = { title: "Receipts pack | ICCI Control Dashboard" };
@@ -27,7 +26,7 @@ export default function ReceiptsPackPage(props: PageProps<"/expenses/export/rece
 
 async function Content({ searchParams }: { searchParams: PageProps<"/expenses/export/receipts">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses title="Receipts Pack" />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" title="Receipts Pack" />;
   const { month: raw } = await searchParams;
   const month = typeof raw === "string" && monthRange(raw) ? raw : todayInDublin().slice(0, 7);
   const supabase = await createClient();

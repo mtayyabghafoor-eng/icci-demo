@@ -3,7 +3,7 @@ import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { PackagePlus, PackageSearch } from "lucide-react";
 import { Suspense } from "react";
-import { LinkButton, PageHeader, Pagination, Skeleton, EmptyState } from "@/components/ui";
+import { EmptyState, ItemStatus, LinkButton, PageHeader, Pagination, Skeleton } from "@/components/ui";
 import { matchCategories, NO_COUNT } from "@/lib/categories/counts";
 import { categoryAndInside, categoryGroups } from "@/lib/categories/rules";
 import { CONDITION_STATUS, CONDITIONS, KIND_LABEL, cleanSearch, locationAndInside, locationOptions } from "@/lib/items/rules";
@@ -16,7 +16,6 @@ import { CategoryTile, CountLine } from "../categories/tile";
 import { companyFilter, itemsWithOpenTickets, searchFilter, WORKING } from "./search";
 import { loadLookups, type ItemRow } from "./data";
 import { FindLabel } from "./find-label";
-import { ItemStatus } from "./ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Items | ICCI Control Dashboard" };
@@ -112,7 +111,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
     return s ? `/items?${s}` : "/items";
   };
 
-  const select = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const select = "mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
   return (
     <>
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="search" aria-label="Search items">

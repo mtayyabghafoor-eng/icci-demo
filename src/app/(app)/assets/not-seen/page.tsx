@@ -11,8 +11,7 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { cleanSearch, formatDate, formatEuro, locationAndInside, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups, type ItemRow } from "../../items/data";
-import { ItemStatus } from "../../items/ui";
-import { CannotSeeAssets } from "../cannot-see";
+import { CannotSee, fieldClass, ItemStatus, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Not seen in 12 months | ICCI Control Dashboard" };
 
@@ -27,7 +26,7 @@ export default function NotSeenPage(props: PageProps<"/assets/not-seen">) {
         reported damaged, marked repaired or found, or scanned in a stocktake. Opening its page or editing its details
         does not count. Disposed assets are not listed.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading assets…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -43,7 +42,7 @@ type Row = Pick<ItemRow, "id" | "label_serial" | "kind" | "name" | "location_id"
 
 async function List({ searchParams }: { searchParams: PageProps<"/assets/not-seen">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_ASSET_LISTS.includes(me.roleCode)) return <CannotSeeAssets />;
+  if (!MAY_SEE_ASSET_LISTS.includes(me.roleCode)) return <CannotSee area="assets" />;
 
   const params = await searchParams;
   const q = cleanSearch(one(params.q));
@@ -70,7 +69,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/not-see
   }));
 
   const filtered = Boolean(q || location);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const seenText = (r: Seen) => `${formatDate(r.last_seen_at)} · ${SEEN_HOW_LABEL[r.last_seen_how] ?? r.last_seen_how}`;
 
   return (

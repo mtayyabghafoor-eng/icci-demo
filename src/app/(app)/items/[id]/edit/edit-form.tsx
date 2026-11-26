@@ -8,7 +8,7 @@ import { CategoryOptions } from "../../../categories/options";
 import { updateItem, type ItemFormState } from "../../actions";
 import type { ItemRow } from "../../data";
 import { PhotoInput } from "../../photo-input";
-import { fieldClass } from "../../ui";
+import { fieldClass } from "@/components/ui";
 
 type Choice = { id: string; name: string };
 

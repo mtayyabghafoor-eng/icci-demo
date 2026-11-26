@@ -6,13 +6,14 @@ import { MOVEMENT_LABEL } from "@/lib/stock/rules";
 import { adminNames, MOVEMENT_COLUMNS, type Movement } from "../../../stock/data";
 import { CorrectionForm } from "../../../stock/forms";
 import { loadConsumable, StockHeader } from "../../../stock/item-page";
+import { Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Correct an entry | ICCI Control Dashboard" };
 
 export default function CorrectPage(props: PageProps<"/items/[id]/correct">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading entry…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>

@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { BackLink, Card, CardTitle, FactGrid, LinkButton, Notice, PageHeader, PageShell, StatusPill, Timeline, type TimelineEntry } from "@/components/ui";
+import { BackLink, CannotSee, Card, CardTitle, FactGrid, LinkButton, Notice, PageHeader, PageShell, StatusPill, Timeline, type TimelineEntry } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import {
   claimNumber,
@@ -23,7 +23,6 @@ import {
 import { MAY_HANDLE_EXPENSES } from "@/lib/expenses/rules";
 import { formatDate, formatDateTime, formatEuro } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeExpenses } from "../cannot-see";
 import { loadExpenseNames, paidByText, paidToText } from "../data";
 import { ApproveForm, ReasonForm, WithdrawRepaymentForm } from "../forms";
 
@@ -62,7 +61,7 @@ type Repayment = {
 
 async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; searchParams: PageProps<"/expenses/[id]">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses title="Expense Claim" />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" title="Expense Claim" />;
   const { id } = await props.params;
   const { done } = await props.searchParams;
   if (!/^\d{1,12}$/.test(id)) notFound();

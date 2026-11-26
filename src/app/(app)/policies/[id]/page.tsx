@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { BackLink, buttonClass, ConfirmSubmit } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, ConfirmSubmit, PageNotice, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatDateTime } from "@/lib/items/rules";
 import {
@@ -33,9 +33,7 @@ import {
   type Square,
 } from "@/lib/policies/signoffs";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, SecondaryLink, StatusBadge } from "../../items/ui";
 import { publishVersion, saveRequiredRoles, setPolicyActive } from "../actions";
-import { CannotSeePolicies } from "../cannot-see";
 import { withdrawSignoff } from "../signoff-actions";
 import { roleChoices } from "../data";
 import { RoleBoxes } from "../forms";
@@ -68,7 +66,7 @@ export default function PolicyPage(props: PageProps<"/policies/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/policies">Policies</BackLink>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -77,7 +75,7 @@ export default function PolicyPage(props: PageProps<"/policies/[id]">) {
 
 async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
+  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSee area="policies" />;
   const { id } = await params;
   const { done, n } = await searchParams;
   if (!UUID.test(id)) notFound();
@@ -140,7 +138,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
         {!p.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating tone={messageTone(done)} testId="notice">{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</Notice>
+        <PageNotice floating tone={messageTone(done)} testId="notice">{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</PageNotice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[11rem_1fr]">
@@ -303,10 +301,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
                             name="reason"
                             required
                             maxLength={500}
-                            className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+                            className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
                           />
                         </label>
-                        <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                        <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                           Withdraw
                         </button>
                       </form>

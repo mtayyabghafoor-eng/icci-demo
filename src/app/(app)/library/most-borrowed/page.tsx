@@ -9,10 +9,8 @@ import { mayDownloadLibraryCsv, PERIODS, periodQuery, readPeriod, type MostBorro
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { fieldClass } from "../../items/ui";
-import { CannotSeeLibrary } from "../cannot-see";
 import { CsvButton } from "../list-parts";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, fieldClass, Skeleton } from "@/components/ui";
 import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Most Borrowed | ICCI Control Dashboard" };
@@ -24,7 +22,7 @@ export default function Page(props: PageProps<"/library/most-borrowed">) {
       <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Most borrowed</h1>
       <p className="mt-2">Books that were lent most often, counting every loan in the period.</p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -33,7 +31,7 @@ export default function Page(props: PageProps<"/library/most-borrowed">) {
 
 async function Content({ searchParams }: Pick<PageProps<"/library/most-borrowed">, "searchParams">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const period = readPeriod(await searchParams, todayInDublin());
   const supabase = await createClient();
   const { data } = await supabase.rpc("library_most_borrowed", { p_since: period.since, p_until: period.until });

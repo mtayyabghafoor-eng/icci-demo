@@ -4,9 +4,8 @@
 // prayer time are chosen once, when it is added. Errors show beside the form.
 import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { SLOT_GROUP_LABEL, SLOT_GROUPS, TIME_LABEL, TIMES_FOR_GROUP, type SlotGroup, type SlotType } from "@/lib/rota/rules";
-import { fieldClass } from "../../items/ui";
 import { addSlotType, saveSlotType, type SlotFormState } from "../actions";
 
 function VettingTick({ id, checked }: { id: string; checked?: boolean }) {

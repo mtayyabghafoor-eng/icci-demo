@@ -3,9 +3,8 @@
 // the date, and add a scan if there is one. Saved together or not at all.
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
-import { fieldClass } from "../../../items/ui";
 import { recordSignoffs, type SignoffFormState } from "../../signoff-actions";
 
 export type Candidate = { id: string; name: string; note: string | null; isMe: boolean };

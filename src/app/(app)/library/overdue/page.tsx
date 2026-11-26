@@ -6,10 +6,9 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayDownloadLibraryCsv } from "@/lib/library/lists";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeLibrary } from "../cannot-see";
 import { loadBorrowers, loadCopyList } from "../data";
 import { CsvButton, LoanTable } from "../list-parts";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Overdue | ICCI Control Dashboard" };
@@ -21,7 +20,7 @@ export default function Page() {
       <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Overdue</h1>
       <p className="mt-2">Books past their due date, most overdue first, with the borrower’s contact so you can phone them. There are no fines.</p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -30,7 +29,7 @@ export default function Page() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const supabase = await createClient();
   const rows = await loadCopyList(supabase, ["overdue"], [{ column: "days_overdue", ascending: false }, { column: "title", ascending: true }]);
   const borrowers = await loadBorrowers(supabase, rows.flatMap((r) => (r.borrower_id ? [r.borrower_id] : [])));

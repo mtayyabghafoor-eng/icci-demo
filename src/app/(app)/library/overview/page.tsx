@@ -9,13 +9,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AlarmClock, ArrowRight, BookMarked, BookX, Library, type LucideIcon } from "lucide-react";
 import { Suspense } from "react";
-import { HeadlineCard, Skeleton, type HeadlineTone } from "@/components/ui";
+import { CannotSee, HeadlineCard, Skeleton, type HeadlineTone } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import type { Counters } from "@/lib/library/lists";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeeLibrary } from "../cannot-see";
 import { loadBorrowers, loadCopyList } from "../data";
 import { FlaggedList, LoanTable } from "../list-parts";
 
@@ -38,7 +37,7 @@ export default function Page() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const supabase = await createClient();
   const today = todayInDublin();
   const soon = addDays(today, 3);

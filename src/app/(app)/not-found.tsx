@@ -6,7 +6,7 @@ import { EmptyState, LinkButton } from "@/components/ui";
 
 export default function NotFound() {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10" data-testid="not-found">
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10" data-testid="not-found">
       <EmptyState
         icon={SearchX}
         title="This page could not be found"

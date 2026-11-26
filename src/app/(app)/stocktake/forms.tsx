@@ -6,7 +6,6 @@ import { Stepper } from "@/components/ui/stepper";
 import { labelFromScan } from "@/lib/items/scan";
 import { startTransition, useActionState, type FormEvent } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { fieldClass } from "../items/ui";
 import {
   decideDifference,
   openLabel,
@@ -15,6 +14,7 @@ import {
   submitStocktake,
   type StocktakeFormState,
 } from "./actions";
+import { fieldClass } from "@/components/ui";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 min-h-12 w-full px-6 text-lg sm:w-auto";
@@ -171,7 +171,7 @@ export function DecideDifferenceForm({
           </legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {(["good", "fair"] as const).map((c) => (
-              <label key={c} className="flex min-h-11 items-center gap-2 px-4 rounded-xl border border-[#87948f] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold">
+              <label key={c} className="flex min-h-11 items-center gap-2 px-4 rounded-xl border border-icci-field bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold">
                 <input type="radio" name="found_condition" value={c} />
                 {c === "good" ? "Good" : "Fair"}
               </label>

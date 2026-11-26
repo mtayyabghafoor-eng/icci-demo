@@ -80,7 +80,6 @@ export function PageHeader({
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </div>
-      <div aria-hidden className="h-px w-16 bg-icci-gold" />
     </header>
   );
 }

@@ -5,11 +5,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { MapPin, Plus } from "lucide-react";
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { KIND_WORD, placeCode } from "@/lib/places/rules";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge } from "../items/ui";
 import { allPlaces, childrenOf, type Place } from "./data";
 
 export const metadata: Metadata = { title: "Places | ICCI Control Dashboard" };
@@ -19,7 +18,7 @@ export const MAY_SEE_PLACES = ["super_admin", "centre_admin"];
 export default function PlacesPage(props: PageProps<"/places">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading places…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

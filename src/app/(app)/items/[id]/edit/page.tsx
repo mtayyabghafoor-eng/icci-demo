@@ -7,15 +7,15 @@ import { createClient } from "@/lib/supabase/server";
 import { allCompanies, allModels, companyChoices, modelChoices } from "../../../companies/data";
 import { ITEM_COLUMNS, loadLookups, type ItemRow } from "../../data";
 import { EditForm } from "./edit-form";
-import { BackLink } from "@/components/ui";
+import { BackLink, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Edit item | ICCI Control Dashboard" };
 
 export default function EditItemPage(props: PageProps<"/items/[id]/edit">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading item…</p>}>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>

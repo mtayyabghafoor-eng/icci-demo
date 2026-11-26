@@ -3,7 +3,7 @@
 // a phone. Super Admin and Centre Admin only.
 import { UserSearch } from "lucide-react";
 import type { Metadata } from "next";
-import { Pagination, EmptyState, LinkButton } from "@/components/ui";
+import { CannotSee, EmptyState, fieldClass, LinkButton, Pagination, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -14,8 +14,6 @@ import { createClient } from "@/lib/supabase/server";
 import { pageRows } from "@/lib/supabase/page-rows";
 import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { VETTING_STATUS, type VettingStatus } from "@/lib/vetting/rules";
-import { PrimaryLink, StatusBadge } from "../items/ui";
-import { CannotSeePeople } from "./cannot-see";
 import { loadPeopleLists, PERSON_COLUMNS, type PersonRow } from "./data";
 
 export const metadata: Metadata = { title: "People | ICCI Control Dashboard" };
@@ -27,7 +25,7 @@ export default function PeoplePage(props: PageProps<"/people">) {
         <h1 className="page-title text-[28px] md:text-[34px]">People</h1>
       </div>
       <p className="mt-2">Staff, imams, volunteers and contractors. They are records here, not users: they cannot sign in.</p>
-      <Suspense fallback={<p className="mt-6">Loading people…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -40,7 +38,7 @@ function one(v: string | string[] | undefined) {
 
 async function List({ searchParams }: { searchParams: PageProps<"/people">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
 
   const params = await searchParams;
   const q = cleanSearch(one(params.q));
@@ -85,7 +83,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
   };
 
   const filtered = Boolean(q || role || section || show || vetting);
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const status = (p: PersonRow) => (p.active ? PERSON_STATUS.active : PERSON_STATUS.off);
   const contact = (p: PersonRow) => [p.phone, p.email].filter(Boolean).join(" · ") || "No contact recorded";
 

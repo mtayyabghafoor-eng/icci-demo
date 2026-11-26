@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { suggestedExpiry, usualLengthText, type TrainingType } from "@/lib/training/rules";
-import { fieldClass } from "../../../items/ui";
 import { recordTraining, type TrainingFormState } from "../../training-actions";
+import { fieldClass } from "@/components/ui";
 
 export function TrainingForm({ personId, today, types }: { personId: string; today: string; types: TrainingType[] }) {
   const [state, action, pending] = useActionState<TrainingFormState, FormData>(recordTraining.bind(null, personId), { error: null });

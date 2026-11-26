@@ -9,7 +9,7 @@
 import { Receipt } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { EmptyState, LinkButton, Notice, PageHeader, PageShell, Pagination, StatusPill } from "@/components/ui";
+import { CannotSee, EmptyState, LinkButton, Notice, PageHeader, PageShell, Pagination, StatusPill } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import {
   claimNumber,
@@ -28,7 +28,6 @@ import { formatDate, formatEuro } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_SIZE, pageOf, readPage } from "@/lib/ui/text";
 import { cx } from "@/lib/ui/text";
-import { CannotSeeExpenses } from "./cannot-see";
 import { loadClaims, loadCorrectedBy, loadExpenseNames, loadWaiting, paidByText, type ExpenseNames } from "./data";
 import { RepaymentForm } from "./forms";
 import { ExpenseLinkNote } from "./link-note";
@@ -57,7 +56,7 @@ export default function ExpensesPage(props: PageProps<"/expenses">) {
 
 async function Content({ searchParams }: { searchParams: PageProps<"/expenses">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" />;
   const params = await searchParams;
   const tab: Tab = TABS.some((t) => t.key === params.tab) ? (params.tab as Tab) : "waiting";
   const supabase = await createClient();
@@ -269,7 +268,7 @@ async function All({ names, month: rawMonth, page }: { names: ExpenseNames; mont
         <input type="hidden" name="tab" value="all" />
         <label className="min-w-52">
           <span className="font-semibold">Entered in</span>
-          <select name="month" defaultValue={month} className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2">
+          <select name="month" defaultValue={month} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2">
             {months.map((m) => (
               <option key={m} value={m}>
                 {monthName(m)}

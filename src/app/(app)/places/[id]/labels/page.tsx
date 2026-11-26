@@ -6,7 +6,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PageHeader } from "@/components/ui";
+import { fieldClass, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { labelOrigin } from "@/lib/labels/origin";
 import { labelsAreTest, labelTag, qrMatrix, qrSvgPath } from "@/lib/labels/sheet";
@@ -21,7 +21,6 @@ import {
 } from "@/lib/places/rules";
 import { createClient } from "@/lib/supabase/server";
 import { PrintNowButton } from "../../../labels/forms";
-import { fieldClass } from "../../../items/ui";
 import { allPlaces, lineOf, placeAndInside, UUID, type Place } from "../../data";
 import { MAY_SEE_PLACES } from "../../page";
 
@@ -32,7 +31,7 @@ const QR_MARGIN = 2;
 export default function PlaceLabelsPage(props: PageProps<"/places/[id]/labels">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:m-0 print:max-w-none print:p-0">
-      <Suspense fallback={<p>Loading the labels…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>

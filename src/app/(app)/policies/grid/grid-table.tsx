@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/items/rules";
 import { arrangeGrid, SIGNOFF_STATUS, type Square } from "@/lib/policies/signoffs";
-import { StatusBadge } from "../../items/ui";
+import { StatusBadge } from "@/components/ui";
 
 /** A7: the header row stays at the top of the scrolling grid. */
 const STICKY_TOP = "sticky top-0 bg-[var(--icci-green-50)]";

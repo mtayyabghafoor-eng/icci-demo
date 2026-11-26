@@ -9,6 +9,7 @@ import { serialOf } from "@/lib/labels/sheet";
 import { createClient } from "@/lib/supabase/server";
 import { adminNames } from "../stock/data";
 import { PrintAgainButton, PrintLabelsForm } from "./forms";
+import { Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Print labels | ICCI Control Dashboard" };
 
@@ -30,7 +31,7 @@ export default function PrintLabelsPage() {
         Prints QR labels on A4 sheets of 21 (63.5 × 38.1 mm, the Avery L7160 size). Each code holds only a link with
         the label number.
       </p>
-      <Suspense fallback={<p className="mt-4">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>

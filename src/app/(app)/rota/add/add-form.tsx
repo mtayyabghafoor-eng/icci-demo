@@ -3,9 +3,8 @@
 // call only; prayers take theirs from Prayer times) and a short note.
 import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import type { SlotGroup } from "@/lib/rota/rules";
-import { fieldClass } from "../../items/ui";
 import { addSlot, type AddSlotState } from "../week-actions";
 
 export type Option = { value: string; label: string };

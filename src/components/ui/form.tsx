@@ -9,7 +9,7 @@ const CONTROL =
   "transition-colors duration-150 focus:border-icci-green focus:outline-3 focus:outline-offset-2 focus:outline-icci-focus";
 
 const controlClass = (invalid?: boolean, extra?: string) =>
-  cx(CONTROL, invalid ? "border-icci-error" : "border-[#87948f] hover:border-icci-green/60", extra);
+  cx(CONTROL, invalid ? "border-icci-error" : "border-icci-field hover:border-icci-green/60", extra);
 
 export function Field({
   id,

@@ -7,17 +7,15 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
 import { MAY_SEE_TICKETS, shortDescription, STATUS_LABEL, ticketNumber, type TicketStatus } from "@/lib/tickets/rules";
-import { StatusBadge } from "../../../items/ui";
-import { CannotSeeTickets } from "../../cannot-see";
 import { CloseTicketForm } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Close a ticket | ICCI Control Dashboard" };
 
 export default function CloseTicketPage(props: PageProps<"/tickets/[id]/close">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading ticket…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -26,7 +24,7 @@ export default function CloseTicketPage(props: PageProps<"/tickets/[id]/close">)
 
 async function Content({ params }: { params: PageProps<"/tickets/[id]/close">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_TICKETS.includes(me.roleCode)) return <CannotSeeTickets />;
+  if (!MAY_SEE_TICKETS.includes(me.roleCode)) return <CannotSee area="tickets" />;
   const { id } = await params;
   if (!/^\d{1,12}$/.test(id)) notFound();
 

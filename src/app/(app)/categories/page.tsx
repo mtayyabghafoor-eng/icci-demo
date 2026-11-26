@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FolderTree, Plus } from "lucide-react";
-import { EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { EmptyState, LinkButton, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { categoryGroups } from "@/lib/categories/rules";
 import { createClient } from "@/lib/supabase/server";
@@ -17,8 +17,8 @@ export const metadata: Metadata = { title: "Categories | ICCI Control Dashboard"
 
 export default function CategoriesPage(props: PageProps<"/categories">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">
-      <Suspense fallback={<p>Loading categories…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

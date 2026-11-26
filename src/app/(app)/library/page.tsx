@@ -8,9 +8,8 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { BOOK_COLUMNS, formatIsbn, LANGUAGE_LABEL, mayUseLibrary, searchTerm, type BookRow } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { PrimaryLink } from "../items/ui";
-import { CannotSeeLibrary } from "./cannot-see";
 import { DeskTabs } from "./desk-tabs";
+import { CannotSee, PrimaryLink, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Library | ICCI Control Dashboard" };
 
@@ -23,7 +22,7 @@ export default function LibraryPage(props: PageProps<"/library">) {
       <DeskTabs />
       <h1 className="page-title text-[28px] md:text-[34px]">Library</h1>
       <p className="mt-2">Every book in the lending library, and how many copies of each.</p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -32,7 +31,7 @@ export default function LibraryPage(props: PageProps<"/library">) {
 
 async function List({ searchParams }: { searchParams: PageProps<"/library">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const params = await searchParams;
   const q = searchTerm(typeof params.q === "string" ? params.q : "");
   const supabase = await createClient();
@@ -58,7 +57,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/library">["sea
               defaultValue={q}
               dir="auto"
               placeholder="Title, author or ISBN"
-              className="block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+              className="block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
             />
           </label>
           <button type="submit" className="inline-flex min-h-11 items-center rounded-[10px] border border-icci-green/40 bg-white px-4 font-semibold text-icci-green hover:bg-icci-green-50">

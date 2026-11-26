@@ -4,10 +4,9 @@
 // a building, or the next kind down inside the place it is added to.
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { MAX_PLACE_NAME, MAX_PLACE_NOTES } from "@/lib/places/rules";
-import { fieldClass } from "../items/ui";
 import { addPlace, savePlace, setPlaceActive, type PlaceFormState } from "./actions";
 
 const box = "mt-4 space-y-5 rounded-2xl border border-icci-line bg-white p-5 shadow-card";

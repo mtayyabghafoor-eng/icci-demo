@@ -5,8 +5,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import type { CategoryCount } from "@/lib/categories/counts";
-import { StatusBadge } from "../items/ui";
 import { CategoryBadge } from "./category-icon";
+import { StatusBadge } from "@/components/ui";
 
 export function CategoryTile({
   href,

@@ -11,9 +11,7 @@ import { copyStatus, LOAN_DAYS, MAX_BOOKS_OUT, nameSearch } from "@/lib/library/
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, todayInDublin } from "@/lib/vetting/rules";
-import { BackLink, buttonClass } from "@/components/ui";
-import { StatusBadge } from "../../../../items/ui";
-import { CannotSeeLibrary } from "../../../cannot-see";
+import { BackLink, buttonClass, CannotSee, Skeleton, StatusBadge } from "@/components/ui";
 import { BORROWER_COLUMNS, loadBook, loadBorrower, loadCopyTitles, loadLoansOfBorrower, loadLoansOfCopies, UUID, type Borrower } from "../../../data";
 import { LendForm, NewBorrowerLendForm } from "../../../loan-forms";
 
@@ -22,7 +20,7 @@ export const metadata: Metadata = { title: "Lend a Book | ICCI Control Dashboard
 export default function LendPage(props: PageProps<"/library/copies/[id]/lend">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -31,7 +29,7 @@ export default function LendPage(props: PageProps<"/library/copies/[id]/lend">) 
 
 async function Content({ params, searchParams }: Pick<PageProps<"/library/copies/[id]/lend">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const { id } = await params;
   const sp = await searchParams;
   if (!UUID.test(id)) notFound();
@@ -152,7 +150,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/copies
             dir="auto"
             autoComplete="off"
             placeholder="Borrower's name"
-            className="block min-h-12 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 text-lg focus:border-icci-green"
+            className="block min-h-12 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 text-lg focus:border-icci-green"
           />
         </label>
         <button type="submit" className={buttonClass("outline", "lg")}>

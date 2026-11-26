@@ -5,13 +5,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BackLink, Notice, PageHeader, PageShell } from "@/components/ui";
+import { BackLink, CannotSee, Notice, PageHeader, PageShell } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { claimNumber, todayInDublin, type ClaimRow } from "@/lib/expenses/claims";
 import { MAY_HANDLE_EXPENSES } from "@/lib/expenses/rules";
 import { formatEuro } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeExpenses } from "../../cannot-see";
 import { loadExpenseNames } from "../../data";
 import { CorrectionForm } from "../../forms";
 
@@ -29,7 +28,7 @@ const euros = (cents: number | null) => (cents == null ? "" : (cents / 100).toFi
 
 async function Content({ params }: { params: PageProps<"/expenses/[id]/correct">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses title="Correct a Claim" />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" title="Correct a Claim" />;
   const { id } = await params;
   if (!/^\d{1,12}$/.test(id)) notFound();
   const supabase = await createClient();

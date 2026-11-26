@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Open a Label | ICCI Control Dashboar
 
 export default function ScanPage() {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6 md:py-10">
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6 md:py-10">
       <PageHeader title="Open a Label" subtitle="Scan the QR code on an ICCI label, or type its number." />
       {/* The role check waits for the sign-in; the heading shows straight away. */}
       <Suspense fallback={<Skeleton lines={3} label="Loading" />}>

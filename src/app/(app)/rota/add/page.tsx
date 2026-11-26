@@ -3,13 +3,12 @@
 // is picked afterwards, on the slot itself. Not for a week that has ended.
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Card, Notice, PageHeader } from "@/components/ui";
+import { CannotSee, Card, Notice, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, SLOT_GROUPS } from "@/lib/rota/rules";
 import { readWeek, slotOptionLabel, weekDays, weekEnded, weekTitle } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeeRota } from "../cannot-see";
 import { loadPlaces, loadSlotTypes } from "../week-data";
 import { AddSlotForm } from "./add-form";
 
@@ -17,8 +16,8 @@ export const metadata: Metadata = { title: "Add a rota slot | ICCI Control Dashb
 
 export default function AddSlotPage(props: PageProps<"/rota/add">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -31,7 +30,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/add">[
     return (
       <>
         <PageHeader title="Add a Slot" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

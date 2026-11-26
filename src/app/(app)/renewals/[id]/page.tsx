@@ -12,10 +12,8 @@ import { formatDate, formatDateTime } from "@/lib/items/rules";
 import { dueLine, MAY_SEE_RENEWALS, REGISTER_COLUMNS, REGISTER_STATUS, type RegisterRow } from "@/lib/renewals/rules";
 import { createClient } from "@/lib/supabase/server";
 import { daysBetween, todayInDublin } from "@/lib/vetting/rules";
-import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui";
 import { setRenewalActive, withdrawDueDate } from "../actions";
-import { CannotSeeRenewals } from "../cannot-see";
-import { BackLink, buttonClass } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Renewal | ICCI Control Dashboard" };
@@ -58,7 +56,7 @@ export default function RenewalPage(props: PageProps<"/renewals/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/renewals">Renewals</BackLink>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -67,7 +65,7 @@ export default function RenewalPage(props: PageProps<"/renewals/[id]">) {
 
 async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSeeRenewals />;
+  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSee area="renewals" />;
   const { id } = await params;
   const { done } = await searchParams;
   if (!UUID.test(id)) notFound();
@@ -106,7 +104,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
         {!r.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
+        <PageNotice floating tone={messageTone(done)} testId="notice">{DONE[done]}</PageNotice>
       )}
 
       {current && (
@@ -192,10 +190,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
                           name="reason"
                           required
                           maxLength={500}
-                          className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+                          className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
                         />
                       </label>
-                      <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                      <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                         Withdraw
                       </button>
                     </form>

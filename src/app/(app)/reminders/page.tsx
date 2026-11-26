@@ -4,13 +4,12 @@
 import { messageTone } from "@/lib/ui/messages";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BackLink, buttonClass } from "@/components/ui";
+import { BackLink, buttonClass, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatDateTime } from "@/lib/items/rules";
 import { emailSettings } from "@/lib/reminders/deliver";
 import { emailServiceReady, MAY_RUN_REMINDERS, MAY_SEE_REMINDERS, OUTCOME, STAGE_HEADING, TRIGGER_LABEL, type Stage } from "@/lib/reminders/rules";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, StatusBadge } from "../items/ui";
 import { runRemindersNow, sendTestEmail } from "./actions";
 
 export const metadata: Metadata = { title: "Email reminders | ICCI Control Dashboard" };
@@ -38,7 +37,7 @@ export default function RemindersPage(props: PageProps<"/reminders">) {
         Each morning, Super Admins and Centre Admins get one email listing the renewals that have just reached 60, 30 or 7 days before they are due.
         Nothing is sent on a quiet day, and the names of people are never put in an email.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading reminders…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -77,10 +76,10 @@ async function Content({ searchParams }: Pick<PageProps<"/reminders">, "searchPa
   return (
     <>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating tone={messageTone(done)} testId="notice">
+        <PageNotice floating tone={messageTone(done)} testId="notice">
             {DONE[done]}
             {done === "ran" && typeof n === "string" ? ` ${n} ${n === "1" ? "renewal" : "renewals"} reminded.` : ""}
-          </Notice>
+          </PageNotice>
       )}
 
       <section className="mt-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card" data-testid="reminder-setup">

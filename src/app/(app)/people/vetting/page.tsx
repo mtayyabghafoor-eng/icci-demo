@@ -3,7 +3,7 @@
 // Filter by status and section; CSV download. Designed for a PC first; one
 // card per person on a phone. Super Admin and Centre Admin only.
 import type { Metadata } from "next";
-import { Pagination } from "@/components/ui";
+import { CannotSee, fieldClass, Pagination, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -12,8 +12,6 @@ import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 import { statusLine, todayInDublin, VETTING_STATUS, VETTING_YEARS, type VettingStatus } from "@/lib/vetting/rules";
-import { SecondaryLink, StatusBadge } from "../../items/ui";
-import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists } from "../data";
 import { loadVettingPage, readVettingFilter } from "./data";
 
@@ -29,7 +27,7 @@ export default function VettingListPage(props: PageProps<"/people/vetting">) {
         Everyone who needs vetting, worst first. A vetting is valid for {VETTING_YEARS} years unless a different expiry was
         entered. &ldquo;Due soon&rdquo; means it expires within 60 days.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -38,7 +36,7 @@ export default function VettingListPage(props: PageProps<"/people/vetting">) {
 
 async function List({ searchParams }: { searchParams: PageProps<"/people/vetting">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
   const params = await searchParams;
   const supabase = await createClient();
   const lists = await loadPeopleLists(supabase);
@@ -47,7 +45,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/vetting
   const shown = await loadVettingPage(supabase, filter, readPage(params.page), PAGE_SIZE);
   const rows = shown.rows;
   const today = todayInDublin();
-  const field = "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  const field = fieldClass;
   const filtered = Boolean(filter.status || filter.section || filter.showNotRequired);
   const filterParams = {
     ...(filter.status && { status: filter.status }),

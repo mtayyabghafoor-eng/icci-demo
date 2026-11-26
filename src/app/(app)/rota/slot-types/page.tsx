@@ -6,13 +6,11 @@
 import type { Metadata } from "next";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, CannotSee, Card, CardTitle, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_ROTA, SLOT_GROUP_LABEL, SLOT_GROUPS, SLOT_TYPE_COLUMNS, timeTakenText, type SlotType } from "@/lib/rota/rules";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge } from "../../items/ui";
 import { moveSlotType, setSlotTypeActive } from "../actions";
-import { CannotSeeRota } from "../cannot-see";
 import { AddSlotTypeForm, EditSlotTypeForm } from "./forms";
 
 export const metadata: Metadata = { title: "Slot types | ICCI Control Dashboard" };
@@ -33,7 +31,7 @@ export default function SlotTypesPage(props: PageProps<"/rota/slot-types">) {
         title="Slot Types"
         subtitle="The slots a rota week is built from. Ticking “Needs Garda vetting” makes the rota warn when someone without valid vetting is put on that slot."
       />
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -42,7 +40,7 @@ export default function SlotTypesPage(props: PageProps<"/rota/slot-types">) {
 
 async function Content({ searchParams }: { searchParams: PageProps<"/rota/slot-types">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSeeRota />;
+  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSee area="rota" />;
   const { done } = await searchParams;
   const supabase = await createClient();
   const { data } = await supabase.from("rota_slot_types").select(SLOT_TYPE_COLUMNS).order("display_order");
@@ -101,7 +99,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/slot-t
 
 function SlotCard({ t, first, last }: { t: SlotType; first: boolean; last: boolean }) {
   const button = "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[10px] border px-3 py-2 font-semibold transition-colors duration-150";
-  const quiet = `${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[#87948f] disabled:hover:bg-white`;
+  const quiet = `${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-icci-field disabled:hover:bg-white`;
   return (
     <li
       id={`slot-${t.id}`}

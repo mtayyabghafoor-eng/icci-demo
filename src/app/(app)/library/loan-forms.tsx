@@ -4,11 +4,10 @@
 // changeable. Names are shown as typed, Arabic included (dir="auto").
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass, ConfirmSubmit } from "@/components/ui";
+import { buttonClass, ConfirmSubmit, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import type { MarkKind } from "@/lib/library/lists";
 import { CONTACT_KIND_LABEL, type ContactKind } from "@/lib/library/loans";
-import { fieldClass } from "../items/ui";
 import type { LibraryFormState } from "./actions";
 import {
   addBorrower,
@@ -80,7 +79,7 @@ function BorrowerFields({ borrower, typed }: { borrower?: BorrowerDetails; typed
           {(Object.keys(CONTACT_KIND_LABEL) as ContactKind[]).map((k) => (
             <label
               key={k}
-              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#87948f] bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
+              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-icci-field bg-white px-2 font-semibold has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:text-icci-green-dark"
             >
               <input type="radio" name="contact_kind" value={k} required defaultChecked={kind === k} className="h-4 w-4" />
               {CONTACT_KIND_LABEL[k]}

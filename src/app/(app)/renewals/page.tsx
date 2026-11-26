@@ -24,10 +24,8 @@ import {
 } from "@/lib/renewals/rules";
 import { createClient } from "@/lib/supabase/server";
 import { daysBetween, todayInDublin } from "@/lib/vetting/rules";
-import { fieldClass, PrimaryLink, SecondaryLink, StatusBadge } from "../items/ui";
-import { CannotSeeRenewals } from "./cannot-see";
 import { loadRegisterPage, ownerNames } from "./data";
-import { Pagination } from "@/components/ui";
+import { CannotSee, fieldClass, Pagination, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Renewals | ICCI Control Dashboard" };
@@ -48,7 +46,7 @@ export default function RenewalsPage(props: PageProps<"/renewals">) {
         Everything that must be renewed, worst first. &ldquo;Due soon&rdquo; means within {DUE_WITHIN_DAYS} days. Vehicle dates, Garda vetting, policy
         reviews and warranties appear here by themselves.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -57,7 +55,7 @@ export default function RenewalsPage(props: PageProps<"/renewals">) {
 
 async function List({ searchParams }: Pick<PageProps<"/renewals">, "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSeeRenewals />;
+  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSee area="renewals" />;
   const params = await searchParams;
   const filter = readRegisterFilter(params);
   const supabase = await createClient();

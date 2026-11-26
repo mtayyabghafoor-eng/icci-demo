@@ -12,16 +12,15 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { PrintNowButton } from "../../../labels/forms";
 import { loadPeopleLists } from "../../../people/data";
-import { CannotSeePolicies } from "../../cannot-see";
 import { GridTable } from "../grid-table";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Policy grid (print) | ICCI Control Dashboard" };
 
 export default function PolicyGridPrintPage(props: PageProps<"/policies/grid/print">) {
   return (
-    <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 print:m-0 print:max-w-none print:p-0">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:m-0 print:max-w-none print:p-0">
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -30,7 +29,7 @@ export default function PolicyGridPrintPage(props: PageProps<"/policies/grid/pri
 
 async function Content({ searchParams }: { searchParams: PageProps<"/policies/grid/print">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
+  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSee area="policies" />;
   const params = await searchParams;
   const supabase = await createClient();
   const [lists, all] = await Promise.all([loadPeopleLists(supabase), loadGridSquares(supabase)]);

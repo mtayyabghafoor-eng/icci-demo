@@ -4,9 +4,9 @@
 import Link from "next/link";
 import { startTransition, useActionState } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { fieldClass } from "../items/ui";
 import { savePerson, type PersonFormState } from "./actions";
 import type { ListEntry, PersonRow } from "./data";
+import { fieldClass } from "@/components/ui";
 
 type Props = { person: PersonRow | null; roles: ListEntry[]; sections: ListEntry[] };
 

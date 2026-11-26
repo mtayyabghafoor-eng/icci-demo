@@ -13,10 +13,9 @@ import { parseLabelNumber } from "@/lib/items/rules";
 import { lookupIsbn } from "@/lib/library/lookup";
 import { BOOK_COLUMNS, formatIsbn, LANGUAGE_LABEL, mayUseLibrary, normaliseIsbn, searchTerm, type BookRow } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeLibrary } from "../cannot-see";
 import { NewBookForm } from "../forms";
 import { IsbnCamera } from "../isbn-camera";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "Add a Book | ICCI Control Dashboard" };
@@ -27,7 +26,7 @@ export default function NewBookPage(props: PageProps<"/library/new">) {
       <DeskTabs />
       <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Add a Book</h1>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -45,7 +44,7 @@ function Problem({ children }: { children: React.ReactNode }) {
 
 async function Content({ searchParams }: { searchParams: PageProps<"/library/new">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const params = await searchParams;
   const label = parseLabelNumber(typeof params.label === "string" ? params.label : "") ?? "";
   const mode = params.mode === "copy" ? "copy" : "new";
@@ -79,7 +78,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/library/new
             href={withLabel(m === "copy" ? "mode=copy" : "")}
             aria-current={mode === m ? "page" : undefined}
             className={`flex min-h-12 items-center justify-center rounded-xl border px-3 text-center font-semibold no-underline ${
-              mode === m ? "border-icci-green-dark bg-icci-green-dark text-white!" : "border-[#87948f] bg-white text-icci-green!"
+              mode === m ? "border-icci-green-dark bg-icci-green-dark text-white!" : "border-icci-field bg-white text-icci-green!"
             }`}
           >
             {m === "new" ? "A new book" : "Another copy of a book we have"}
@@ -123,7 +122,7 @@ async function FindBook({ label, q }: { label: string; q: string }) {
             defaultValue={q}
             dir="auto"
             required
-            className="mt-1.5 block min-h-12 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 text-lg transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+            className="mt-1.5 block min-h-12 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 text-lg transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
           />
         </label>
         <button type="submit" className="inline-flex min-h-12 w-full items-center justify-center rounded-[10px] border border-icci-green/40 bg-white px-4 font-semibold text-icci-green hover:bg-icci-green-50">
@@ -173,7 +172,7 @@ function IsbnStep({ label, problem }: { label: string; problem?: string }) {
             inputMode="numeric"
             maxLength={30}
             aria-describedby="isbn_step_hint"
-            className="mt-1.5 block min-h-12 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 font-mono text-lg transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+            className="mt-1.5 block min-h-12 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 font-mono text-lg transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
           />
         </label>
         {problem && (

@@ -7,13 +7,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Card, Notice, PageHeader } from "@/components/ui";
+import { CannotSee, Card, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_ROTA, type SlotGroup } from "@/lib/rota/rules";
 import { groupCounts, KIND_TEXT, slotsText, TEMPLATE_COLUMNS, type RotaTemplate } from "@/lib/rota/templates";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge } from "../../items/ui";
-import { CannotSeeRota } from "../cannot-see";
 
 export const metadata: Metadata = { title: "Rota templates | ICCI Control Dashboard" };
 
@@ -24,7 +22,7 @@ export default function TemplatesPage() {
         title="Rota Templates"
         subtitle="Each template adds empty slots to a week: shifts, on call and extra people on a prayer. The five prayers and Jumu'ah come by themselves in every week."
       />
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -33,7 +31,7 @@ export default function TemplatesPage() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSeeRota />;
+  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSee area="rota" />;
   const supabase = await createClient();
   const [{ data: t }, { data: s }, { data: types }] = await Promise.all([
     supabase.from("rota_templates").select(TEMPLATE_COLUMNS).eq("active", true).order("display_order").order("name"),

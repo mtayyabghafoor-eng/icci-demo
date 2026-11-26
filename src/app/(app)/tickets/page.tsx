@@ -6,7 +6,7 @@ import { ClipboardCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Pagination, EmptyState, LinkButton } from "@/components/ui";
+import { CannotSee, EmptyState, fieldClass, LinkButton, Pagination, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
@@ -24,8 +24,6 @@ import {
   type TicketCsvRow,
 } from "@/lib/tickets/rules";
 import { PAGE_SIZE, readPage } from "@/lib/ui/text";
-import { PrimaryLink, StatusBadge } from "../items/ui";
-import { CannotSeeTickets } from "./cannot-see";
 import { filterChoices, loadTicketPage } from "./data";
 
 export const metadata: Metadata = { title: "Tickets | ICCI Control Dashboard" };
@@ -35,19 +33,18 @@ export default function TicketsPage(props: PageProps<"/tickets">) {
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
       <h1 className="page-title text-[28px] md:text-[34px]">Maintenance Tickets</h1>
       <p className="mt-2">Problems reported around the Centre. Tickets not yet closed come first, urgent ones at the top.</p>
-      <Suspense fallback={<p className="mt-6">Loading tickets…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
   );
 }
 
-const field =
-  "mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+const field = fieldClass;
 
 async function List({ searchParams }: { searchParams: PageProps<"/tickets">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_TICKETS.includes(me.roleCode)) return <CannotSeeTickets />;
+  if (!MAY_SEE_TICKETS.includes(me.roleCode)) return <CannotSee area="tickets" />;
 
   const params = await searchParams;
   const f = readFilters(params);

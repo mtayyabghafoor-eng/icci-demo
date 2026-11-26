@@ -11,10 +11,8 @@ import { loanOutcome } from "@/lib/library/loans";
 import { statusWord } from "@/lib/library/lists";
 import { formatIsbn, LANGUAGE_LABEL, mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../../items/ui";
-import { CannotSeeLibrary } from "../../cannot-see";
 import { loadBook, loadBorrowers, loadCopies, loadCopyRows, loadLoansOfCopies } from "../../data";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Book | ICCI Control Dashboard" };
 
@@ -28,7 +26,7 @@ export default function BookPage(props: PageProps<"/library/books/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/library">Library</BackLink>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -37,7 +35,7 @@ export default function BookPage(props: PageProps<"/library/books/[id]">) {
 
 async function Content({ params, searchParams }: Pick<PageProps<"/library/books/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const { id } = await params;
   const { done } = await searchParams;
   const supabase = await createClient();
@@ -64,7 +62,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/books/
         </p>
       )}
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">{DONE[done]}</Notice>
+        <PageNotice floating testId="notice">{DONE[done]}</PageNotice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">

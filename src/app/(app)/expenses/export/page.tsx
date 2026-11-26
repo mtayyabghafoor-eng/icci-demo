@@ -4,13 +4,12 @@
 // open the printable receipts pack. Super Admin, Centre Admin and Finance.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card, CardTitle, LinkButton, Notice, PageHeader, PageShell } from "@/components/ui";
+import { CannotSee, Card, CardTitle, LinkButton, Notice, PageHeader, PageShell } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { claimNumber, monthName, monthRange, recentMonths, todayInDublin } from "@/lib/expenses/claims";
 import { MAY_HANDLE_EXPENSES } from "@/lib/expenses/rules";
 import { formatEuro } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeExpenses } from "../cannot-see";
 import { loadMonthExport } from "./data";
 
 export const metadata: Metadata = { title: "Monthly export | ICCI Control Dashboard" };
@@ -26,7 +25,7 @@ export default function ExportPage(props: PageProps<"/expenses/export">) {
 
 async function Content({ searchParams }: { searchParams: PageProps<"/expenses/export">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" />;
   const { month: raw } = await searchParams;
   const months = recentMonths();
   const month = typeof raw === "string" && monthRange(raw) ? raw : months[0];
@@ -40,7 +39,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/expenses/ex
       <form method="get" className="flex flex-wrap items-end gap-3" aria-label="Choose a month">
         <label className="min-w-52">
           <span className="font-semibold">Month</span>
-          <select name="month" defaultValue={month} className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2">
+          <select name="month" defaultValue={month} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2">
             {months.map((m) => (
               <option key={m} value={m}>
                 {monthName(m)}

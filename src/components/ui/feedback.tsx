@@ -73,7 +73,7 @@ export function Skeleton({ lines = 3, label = "Loading" }: { lines?: number; lab
   return (
     <div role="status" aria-label={label} className="flex flex-col gap-3">
       {/* Read out by screen readers; also how the browser tests know a page is still loading. */}
-      <span className="sr-only">{label}…</span>
+      <span className="sr-only">{label.replace(/…$/, "")}…</span>
       {Array.from({ length: lines }, (_, i) => (
         <div key={i} className="h-11 animate-pulse rounded-xl bg-icci-panel" style={{ width: `${100 - (i % 3) * 12}%` }} />
       ))}

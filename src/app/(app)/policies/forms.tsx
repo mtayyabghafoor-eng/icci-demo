@@ -5,10 +5,9 @@
 // in as one year after approval until the admin changes it.
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { MAX_REVIEW_YEARS, REVIEW_YEARS, suggestedReview } from "@/lib/policies/rules";
-import { fieldClass } from "../items/ui";
 import { addPolicy, savePolicy, saveDraft, uploadVersion, type PolicyFormState } from "./actions";
 
 export type Choice = { id: string; name: string };

@@ -1,8 +1,11 @@
-// Small building blocks shared by the item screens.
+// Round C1: small parts first made for the item screens (the old
+// src/app/(app)/items/ui.tsx), now shared by every screen from here.
 import Link from "next/link";
-import { buttonClass, ForgetDone, Notice as SharedNotice } from "@/components/ui";
 import { CONDITION_STATUS, type Condition, type Tone } from "@/lib/items/rules";
 import { STOCK_STATUS, type StockStatus } from "@/lib/stock/rules";
+import { buttonClass } from "./button";
+import { Notice } from "./feedback";
+import { ForgetDone } from "./toast";
 
 const TONE_CLASS: Record<Tone, string> = {
   green: "bg-[var(--icci-ok-fill)] text-[var(--icci-ok-text)]",
@@ -33,8 +36,9 @@ export function ItemStatus({ kind, condition, stock }: { kind: string; condition
   return <StatusBadge word={s.word} tone={s.tone} />;
 }
 
+/** The look of every form box (the same as the shared Input and Select). */
 export const fieldClass =
-  "mt-1.5 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green";
 
 export function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -53,11 +57,12 @@ export function SecondaryLink({ href, children }: { href: string; children: Reac
 }
 
 /**
- * The old item-screen message box, now the shared one (slice A1): green and
- * fading for a success, red and staying for a refusal. Pass the tone from
- * messageTone() when the words come from a "?done=" list.
+ * A message on a page (slice A1): green and fading for a success, red and
+ * staying for a refusal. Pass the tone from messageTone() when the words
+ * come from a "?done=" list. In the page, it keeps its gap above, and a
+ * success also tidies the address so a reload does not show it again.
  */
-export function Notice({
+export function PageNotice({
   children,
   floating = false,
   testId,
@@ -69,14 +74,11 @@ export function Notice({
   tone?: "success" | "error";
 }) {
   const box = (
-    <SharedNotice tone={tone} floating={floating} testId={testId}>
+    <Notice tone={tone} floating={floating} testId={testId}>
       {children}
-    </SharedNotice>
+    </Notice>
   );
   if (floating && tone === "success") return box;
-  // A message in the page (not floating, or a refusal that stays) keeps its gap
-  // above. A saved message in the page also tidies the address, so a reload
-  // does not show it again.
   return (
     <div className="mt-4">
       {box}

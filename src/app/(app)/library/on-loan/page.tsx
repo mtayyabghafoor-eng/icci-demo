@@ -10,10 +10,9 @@ import { addDays, todayInDublin } from "@/lib/vetting/rules";
 import { mayDownloadLibraryCsv } from "@/lib/library/lists";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeLibrary } from "../cannot-see";
 import { loadBorrowers, loadCopyList } from "../data";
 import { CsvButton, LoanTable } from "../list-parts";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { DeskTabs } from "../desk-tabs";
 
 export const metadata: Metadata = { title: "On Loan | ICCI Control Dashboard" };
@@ -24,7 +23,7 @@ export default function Page(props: PageProps<"/library/on-loan">) {
       <DeskTabs />
       <BackLink href="/library">Library</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">On loan</h1>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -34,7 +33,7 @@ export default function Page(props: PageProps<"/library/on-loan">) {
 async function Content({ searchParams }: Pick<PageProps<"/library/on-loan">, "searchParams">) {
   const soonOnly = (await searchParams).due === "3";
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const supabase = await createClient();
   const all = await loadCopyList(supabase, ["on_loan", "overdue"], [{ column: "due_on", ascending: true }, { column: "title", ascending: true }]);
   const soon = addDays(todayInDublin(), 3);

@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { defaultExpiry, isDate, VETTING_KIND_LABEL, VETTING_YEARS, type VettingKind } from "@/lib/vetting/rules";
-import { fieldClass } from "../../../items/ui";
 import { recordVetting, type VettingFormState } from "../../vetting-actions";
+import { fieldClass } from "@/components/ui";
 
 const KINDS: VettingKind[] = ["vetted", "applied", "not_required"];
 

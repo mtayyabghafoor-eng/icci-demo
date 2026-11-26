@@ -20,8 +20,7 @@ import { listOrder, PRIORITY_LABEL, shortDescription, STATUS_LABEL, TICKET_COLUM
 import { Reporter, reporterNames } from "../../people/reporter";
 import { adminNames, MOVEMENT_COLUMNS, stockLevelOf, type Movement } from "../../stock/data";
 import { ITEM_COLUMNS, loadLookups, PHOTO_BUCKET, type ItemRow } from "../data";
-import { ItemStatus, Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../ui";
-import { BackLink } from "@/components/ui";
+import { BackLink, ItemStatus, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { allCompanies, allModels } from "../../companies/data";
 import { ContactCard } from "../../companies/contact-card";
 import { DocumentsCard } from "../../documents/documents-card";
@@ -31,8 +30,8 @@ export const metadata: Metadata = { title: "Item | ICCI Control Dashboard" };
 
 export default function ItemPage(props: PageProps<"/items/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading item…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -134,16 +133,16 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
         <h1 className="page-title text-[28px] md:text-[34px]">{item.name}</h1>
         <ItemStatus kind={item.kind} condition={item.condition} stock={level?.status} />
       </div>
-      {done === "registered" && <Notice floating>Item registered. Label {item.label_serial} now opens this page.</Notice>}
-      {done === "saved" && <Notice floating>Changes saved. The history below shows what changed.</Notice>}
-      {done === "counted" && <Notice floating>Count saved.</Notice>}
-      {done === "restocked" && <Notice floating>Stock added.</Notice>}
-      {done === "correction" && <Notice floating>Correction sent. It counts once a different admin approves it.</Notice>}
-      {done === "document-added" && <Notice floating>Document added.</Notice>}
-      {done === "document-hidden" && <Notice floating>Document hidden. It stays in the record.</Notice>}
+      {done === "registered" && <PageNotice floating>Item registered. Label {item.label_serial} now opens this page.</PageNotice>}
+      {done === "saved" && <PageNotice floating>Changes saved. The history below shows what changed.</PageNotice>}
+      {done === "counted" && <PageNotice floating>Count saved.</PageNotice>}
+      {done === "restocked" && <PageNotice floating>Stock added.</PageNotice>}
+      {done === "correction" && <PageNotice floating>Correction sent. It counts once a different admin approves it.</PageNotice>}
+      {done === "document-added" && <PageNotice floating>Document added.</PageNotice>}
+      {done === "document-hidden" && <PageNotice floating>Document hidden. It stays in the record.</PageNotice>}
       {typeof done === "string" && isAssetAction(done) && (
         // A damage report offers "Open a ticket for this": that link must stay on the page.
-        <Notice floating={!(done === "damage" && latestDamage && !tickets.some((t) => t.asset_event_id === latestDamage.id))}>
+        <PageNotice floating={!(done === "damage" && latestDamage && !tickets.some((t) => t.asset_event_id === latestDamage.id))}>
           {ASSET_ACTIONS[done].done}
           {/* P3.6: a damage report can become a maintenance ticket that remembers it. */}
           {done === "damage" && latestDamage && !tickets.some((t) => t.asset_event_id === latestDamage.id) && (
@@ -154,7 +153,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
               </Link>
             </>
           )}
-        </Notice>
+        </PageNotice>
       )}
 
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_280px]">

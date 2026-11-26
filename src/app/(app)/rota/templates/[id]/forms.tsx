@@ -4,10 +4,9 @@
 // people, place and a short note. A one-day (Eid) template has no day.
 import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { buttonClass } from "@/components/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import type { SlotGroup } from "@/lib/rota/rules";
 import { DAY_CHOICES, type TemplateKind } from "@/lib/rota/templates";
-import { fieldClass } from "../../../items/ui";
 import { addTemplateSlot, type TemplateSlotState } from "../actions";
 
 export type Option = { value: string; label: string };

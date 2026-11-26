@@ -7,7 +7,7 @@
 // phone numbers (owner's choice, 15 Nov 2026).
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BackLink, Logo, Notice } from "@/components/ui";
+import { BackLink, CannotSee, Logo, Notice, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { changesSentence, personText, printRows, PUBLICATION_COLUMNS, publishedAtText, removedText, type FrozenEntry, type Publication } from "@/lib/rota/publish";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
@@ -16,7 +16,6 @@ import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { PrintNowButton } from "../../../labels/forms";
 import { adminNames } from "../../../stock/data";
-import { CannotSeeRota } from "../../cannot-see";
 import { loadPublishState } from "../../week-data";
 import Link from "next/link";
 
@@ -25,7 +24,7 @@ export const metadata: Metadata = { title: "Rota (print) | ICCI Control Dashboar
 export default function RotaPrintPage(props: PageProps<"/rota/print/[id]">) {
   return (
     <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 print:m-0 print:max-w-none print:p-0">
-      <Suspense fallback={<p>Loading the rota…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -34,7 +33,7 @@ export default function RotaPrintPage(props: PageProps<"/rota/print/[id]">) {
 
 async function Content({ params, searchParams }: { params: PageProps<"/rota/print/[id]">["params"]; searchParams: PageProps<"/rota/print/[id]">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSeeRota />;
+  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSee area="rota" />;
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const pubId = /^\d{1,12}$/.test(id) ? Number(id) : null;
   const supabase = await createClient();

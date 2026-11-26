@@ -258,7 +258,7 @@ export function ClaimForm({
           {(["personal", "centre_card", "centre_direct"] as Payment[]).map((p) => (
             <label
               key={p}
-              className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-[#87948f] bg-white px-4 py-2 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
+              className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-icci-field bg-white px-4 py-2 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
             >
               <input type="radio" name="payment" value={p} checked={payment === p} onChange={() => setPayment(p)} className="h-5 w-5 accent-icci-green-dark" />
               {PAYMENT_LABEL[p]}

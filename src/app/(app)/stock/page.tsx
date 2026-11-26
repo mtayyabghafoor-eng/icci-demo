@@ -7,8 +7,8 @@ import { STOCK_STATUS } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
 import { must } from "@/lib/supabase/must";
 import { loadLookups } from "../items/data";
-import { PrimaryLink, SecondaryLink, StatusBadge } from "../items/ui";
 import type { StockLevel } from "./data";
+import { PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Low stock | ICCI Control Dashboard" };
 
@@ -24,7 +24,7 @@ export default function StockPage() {
           </Suspense>
         </div>
       </div>
-      <Suspense fallback={<p className="mt-6">Loading stock…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List />
       </Suspense>
     </main>

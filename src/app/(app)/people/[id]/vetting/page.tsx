@@ -8,9 +8,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeePeople } from "../../cannot-see";
 import { VettingForm } from "./vetting-form";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Record vetting | ICCI Control Dashboard" };
@@ -18,7 +17,7 @@ export const metadata: Metadata = { title: "Record vetting | ICCI Control Dashbo
 export default function RecordVettingPage(props: PageProps<"/people/[id]/vetting">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -27,7 +26,7 @@ export default function RecordVettingPage(props: PageProps<"/people/[id]/vetting
 
 async function Content({ params }: { params: PageProps<"/people/[id]/vetting">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();

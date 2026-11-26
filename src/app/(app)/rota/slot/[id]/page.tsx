@@ -10,7 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, Card, CardTitle, FactGrid, Notice, PageHeader, ConfirmSubmit } from "@/components/ui";
+import { buttonClass, CannotSee, Card, CardTitle, ConfirmSubmit, FactGrid, fieldClass, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
 import {
@@ -28,8 +28,6 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { fieldClass, StatusBadge } from "../../../items/ui";
-import { CannotSeeRota } from "../../cannot-see";
 import { ENTRY_COLUMNS, loadPlaces, loadSlotTypes, peopleNames, type RotaEntry } from "../../week-data";
 import { assignMore, assignPerson, removeSlot } from "../../week-actions";
 
@@ -49,7 +47,7 @@ const SHOWN = 25;
 export default function RotaSlotPage(props: PageProps<"/rota/slot/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -64,7 +62,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
     return (
       <>
         <PageHeader title="Rota Slot" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

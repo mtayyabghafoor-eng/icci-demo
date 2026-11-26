@@ -9,8 +9,7 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { DATE_STATUS, dateOf, DUE_WITHIN_DAYS, KIND_LABEL, MAY_SEE_VEHICLES, RENEWAL_KINDS, VEHICLE_COLUMNS, worstFirst, type VehicleRow } from "@/lib/vehicles/rules";
-import { PrimaryLink, StatusBadge } from "../items/ui";
-import { CannotSeeVehicles } from "./cannot-see";
+import { CannotSee, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Vehicles | ICCI Control Dashboard" };
 
@@ -24,7 +23,7 @@ export default function VehiclesPage() {
       <p className="mt-2">
         Motor tax, insurance and NCT for each vehicle, worst first. &ldquo;Due soon&rdquo; means within {DUE_WITHIN_DAYS} days.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List />
       </Suspense>
     </main>
@@ -33,7 +32,7 @@ export default function VehiclesPage() {
 
 async function List() {
   const me = await requireAdmin();
-  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSeeVehicles />;
+  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSee area="vehicles" />;
   const supabase = await createClient();
   // Switched-on vehicles in full; only some switched-off ones (there can be
   // many), with a count of them all.

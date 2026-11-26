@@ -5,7 +5,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Notice, PageHeader } from "@/components/ui";
+import { CannotSee, Notice, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import {
   fullDayLabel,
@@ -24,7 +24,6 @@ import {
 } from "@/lib/rota/rules";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeeRota } from "../cannot-see";
 import { MonthForm, type GridDay } from "./month-form";
 
 export const metadata: Metadata = { title: "Prayer times | ICCI Control Dashboard" };
@@ -36,7 +35,7 @@ export default function PrayerTimesPage(props: PageProps<"/rota/prayer-times">) 
         title="Prayer Times"
         subtitle="Typed in from the Centre's timetable, a month at a time. The rota takes each prayer's time from here."
       />
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -49,7 +48,7 @@ function plural(n: number, word: string) {
 
 async function Content({ searchParams }: { searchParams: PageProps<"/rota/prayer-times">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSeeRota />;
+  if (!MAY_SEE_ROTA.includes(me.roleCode)) return <CannotSee area="rota" />;
   const params = await searchParams;
   const today = todayInDublin();
   const month = readMonth(params.month, today);

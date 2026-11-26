@@ -10,15 +10,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, Card, EmptyState, LinkButton, Notice, PageHeader } from "@/components/ui";
+import { buttonClass, CannotSee, Card, EmptyState, LinkButton, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL, SLOT_GROUPS, type SlotType } from "@/lib/rota/rules";
 import { readWeek, shiftWeek, timeText, WEEK_STATUS, warningText, warningTone, weekDays, weekEnded, weekStartOf, weekTitle, type RotaWarning } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { StatusBadge } from "../items/ui";
-import { CannotSeeRota } from "./cannot-see";
 import { adminNames } from "../stock/data";
 import { changesSentence, publishedAtText } from "@/lib/rota/publish";
 import { loadPlaces, loadPublishState, loadSlotTypes, loadWeek, peopleNames, type PublishState, type RotaEntry } from "./week-data";
@@ -41,7 +39,7 @@ const DONE: Record<string, { text: string; tone: "success" | "error" }> = {
 export default function RotaWeekPage(props: PageProps<"/rota">) {
   return (
     <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -63,7 +61,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
     return (
       <>
         <PageHeader title="Rota Week" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

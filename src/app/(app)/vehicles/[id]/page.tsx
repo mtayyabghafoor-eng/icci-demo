@@ -21,10 +21,8 @@ import {
   type VehicleRow,
 } from "@/lib/vehicles/rules";
 import { todayInDublin, daysBetween } from "@/lib/vetting/rules";
-import { Notice, PrimaryLink, SecondaryLink, StatusBadge } from "../../items/ui";
 import { setVehicleActive, withdrawRenewal } from "../actions";
-import { CannotSeeVehicles } from "../cannot-see";
-import { BackLink, buttonClass } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Vehicle | ICCI Control Dashboard" };
@@ -45,7 +43,7 @@ export default function VehiclePage(props: PageProps<"/vehicles/[id]">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/vehicles">Vehicles</BackLink>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -63,7 +61,7 @@ function untilLine(until: string | null, status: string, today: string): string 
 
 async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSeeVehicles />;
+  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSee area="vehicles" />;
   const { id } = await params;
   const { done } = await searchParams;
   if (!UUID.test(id)) notFound();
@@ -91,7 +89,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
         {v.condition === "disposed" && <StatusBadge word="Disposed of" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
+        <PageNotice floating tone={messageTone(done)} testId="notice">{DONE[done]}</PageNotice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
@@ -188,10 +186,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
                           name="reason"
                           required
                           maxLength={500}
-                          className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+                          className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
                         />
                       </label>
-                      <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                      <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                         Withdraw
                       </button>
                     </form>

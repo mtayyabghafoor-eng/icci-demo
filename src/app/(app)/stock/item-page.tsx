@@ -5,9 +5,8 @@ import { notFound } from "next/navigation";
 import { STOCK_STATUS } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../items/data";
-import { StatusBadge } from "../items/ui";
 import { stockLevelOf, type StockLevel } from "./data";
-import { BackLink } from "@/components/ui";
+import { BackLink, StatusBadge } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export async function loadConsumable(id: string) {

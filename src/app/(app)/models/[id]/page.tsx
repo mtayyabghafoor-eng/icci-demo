@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Pencil } from "lucide-react";
-import { Card, CardTitle, FactGrid, LinkButton, PageHeader, PageShell } from "@/components/ui";
+import { Card, CardTitle, FactGrid, ItemStatus, LinkButton, PageHeader, PageNotice, PageShell, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { categoryPath } from "@/lib/categories/rules";
 import { UUID } from "@/lib/forms";
@@ -14,7 +14,6 @@ import { allCategories, MAY_SEE_CATEGORIES } from "../../categories/data";
 import { allCompanies, allModels, DONE } from "../../companies/data";
 import { SwitchActive } from "../../companies/forms";
 import { DocumentsCard } from "../../documents/documents-card";
-import { ItemStatus, Notice, StatusBadge } from "../../items/ui";
 
 export const metadata: Metadata = { title: "Make and model | ICCI Control Dashboard" };
 
@@ -50,7 +49,7 @@ async function Content({ params, searchParams }: PageProps<"/models/[id]">) {
           </LinkButton>
         }
       />
-      {done && <Notice floating>{done}</Notice>}
+      {done && <PageNotice floating>{done}</PageNotice>}
       <div className="mt-4 space-y-4">
         <Card>
           <FactGrid

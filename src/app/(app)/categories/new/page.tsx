@@ -2,7 +2,7 @@
 // for a sub-category inside it.
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageHeader } from "@/components/ui";
+import { PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
 import { allCategories, MAY_SEE_CATEGORIES, UUID } from "../data";
@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Add a category | ICCI Control Dashbo
 export default function NewCategoryPage(props: PageProps<"/categories/new">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

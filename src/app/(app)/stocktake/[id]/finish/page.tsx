@@ -10,14 +10,14 @@ import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../../../items/data";
 import { loadItems, loadScans, loadStocktake } from "../../data";
 import { SendForm } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Check and finish | ICCI Control Dashboard" };
 
 export default function FinishPage(props: PageProps<"/stocktake/[id]/finish">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Working out the differences…</p>}>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>

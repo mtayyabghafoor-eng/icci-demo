@@ -9,12 +9,10 @@ import { formatDate } from "@/lib/items/rules";
 import { CONTACT_KIND_LABEL, days, loanOutcome, MAX_BOOKS_OUT } from "@/lib/library/loans";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, SecondaryLink, StatusBadge } from "../../../items/ui";
-import { CannotSeeLibrary } from "../../cannot-see";
 import { loadBorrower, loadCopyTitles, loadLoansOfBorrower } from "../../data";
 import { ContactLink } from "../../list-parts";
 import { SwitchBorrowerForm } from "../../loan-forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, PageNotice, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Borrower | ICCI Control Dashboard" };
 
@@ -27,9 +25,9 @@ const DONE: Record<string, string> = {
 
 export default function BorrowerPage(props: PageProps<"/library/borrowers/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/library/borrowers">Borrowers</BackLink>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -38,7 +36,7 @@ export default function BorrowerPage(props: PageProps<"/library/borrowers/[id]">
 
 async function Content({ params, searchParams }: Pick<PageProps<"/library/borrowers/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const { id } = await params;
   const { done } = await searchParams;
   const supabase = await createClient();
@@ -78,7 +76,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/borrow
         {!b.active && <StatusBadge word="Switched off" tone="grey" />}
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating testId="notice">{DONE[done]}</Notice>
+        <PageNotice floating testId="notice">{DONE[done]}</PageNotice>
       )}
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
         <dt className="text-sm font-semibold text-icci-ink-60">{CONTACT_KIND_LABEL[b.contact_kind]}</dt>

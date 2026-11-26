@@ -10,12 +10,10 @@ import { allRows } from "@/lib/supabase/all-rows";
 import { createClient } from "@/lib/supabase/server";
 import { MAY_SEE_TICKETS } from "@/lib/tickets/rules";
 import { loadLookups } from "../../items/data";
-import { ItemStatus } from "../../items/ui";
-import { CannotSeeTickets } from "../cannot-see";
 import { reportPlaces } from "../data";
 import { ContactCard } from "../../companies/contact-card";
 import { ReportProblemForm } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, ItemStatus, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 import { cleanSearch } from "@/lib/items/rules";
 
@@ -23,8 +21,8 @@ export const metadata: Metadata = { title: "Report a problem | ICCI Control Dash
 
 export default function ReportPage(props: PageProps<"/tickets/new">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -37,7 +35,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/tickets/new
     return (
       <>
         <h1 className="page-title text-[28px] md:text-[34px]">Report a Problem</h1>
-        <CannotSeeTickets />
+        <CannotSee area="tickets" />
       </>
     );
   }
@@ -102,7 +100,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/tickets/new
               type="search"
               defaultValue={find}
               placeholder="e.g. lawnmower or ICCI-000123"
-              className="block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2"
+              className="block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2"
               dir="auto"
             />
             <button type="submit" className="min-h-11 shrink-0 rounded-[10px] bg-icci-green-dark px-4 font-semibold text-white">

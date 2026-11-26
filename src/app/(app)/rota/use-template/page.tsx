@@ -6,15 +6,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Card, Notice, PageHeader } from "@/components/ui";
+import { CannotSee, Card, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, type SlotGroup } from "@/lib/rota/rules";
 import { groupCounts, KIND_TEXT, slotsText, TEMPLATE_COLUMNS, TEMPLATE_USE_COLUMNS, type RotaTemplate, type TemplateUse } from "@/lib/rota/templates";
 import { readWeek, weekDays, weekEnded, weekTitle } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { StatusBadge } from "../../items/ui";
-import { CannotSeeRota } from "../cannot-see";
 import { UseTemplateForm } from "./use-form";
 
 export const metadata: Metadata = { title: "Use a rota template | ICCI Control Dashboard" };
@@ -22,7 +20,7 @@ export const metadata: Metadata = { title: "Use a rota template | ICCI Control D
 export default function UseTemplatePage(props: PageProps<"/rota/use-template">) {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -35,7 +33,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/use-te
     return (
       <>
         <PageHeader title="Use a Template" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

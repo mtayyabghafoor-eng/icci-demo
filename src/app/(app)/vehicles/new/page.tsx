@@ -7,10 +7,9 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
 import { MAY_SEE_VEHICLES } from "@/lib/vehicles/rules";
-import { CannotSeeVehicles } from "../cannot-see";
 import { assetChoices, keeperChoices } from "../data";
 import { VehicleForm } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Register a vehicle | ICCI Control Dashboard" };
 
@@ -19,7 +18,7 @@ export default function NewVehiclePage() {
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
       <BackLink href="/vehicles">Vehicles</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Register a Vehicle</h1>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -28,7 +27,7 @@ export default function NewVehiclePage() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSeeVehicles />;
+  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSee area="vehicles" />;
   const supabase = await createClient();
   const [assets, people] = await Promise.all([assetChoices(supabase), keeperChoices(supabase)]);
   return (

@@ -6,7 +6,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Card, PageHeader, Skeleton } from "@/components/ui";
+import { Card, fieldClass, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { addCounts, isEmptyCount, NO_COUNT } from "@/lib/categories/counts";
 import { categoryGroups } from "@/lib/categories/rules";
@@ -17,13 +17,12 @@ import { allCategories, categoryCounts, MAY_SEE_CATEGORIES, UUID } from "../../c
 import { CategoryBadge } from "../../categories/category-icon";
 import { CategoryTile, CountLine } from "../../categories/tile";
 import { loadLookups } from "../../items/data";
-import { fieldClass } from "../../items/ui";
 
 export const metadata: Metadata = { title: "What we own | ICCI Control Dashboard" };
 
 export default function OverviewPage(props: PageProps<"/assets/overview">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
       <Suspense fallback={<Skeleton lines={6} label="Counting" />}>
         <Content searchParams={props.searchParams} />
       </Suspense>

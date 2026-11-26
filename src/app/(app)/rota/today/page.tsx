@@ -9,7 +9,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { CannotSee, Card, EmptyState, LinkButton, PageHeader, Skeleton } from "@/components/ui";
 import { CalendarDays, CircleAlert, Phone, TriangleAlert } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, SLOT_GROUP_LABEL, SLOT_GROUPS } from "@/lib/rota/rules";
@@ -17,7 +17,6 @@ import { timeText, WARNING_COLUMNS, warningText, warningTone, type RotaWarning }
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeeRota } from "../cannot-see";
 import { RotaNotes } from "../notes";
 import { ENTRY_COLUMNS, loadPlaces, loadSlotTypes, peopleNames, type RotaEntry } from "../week-data";
 
@@ -25,8 +24,8 @@ export const metadata: Metadata = { title: "Today's rota | ICCI Control Dashboar
 
 export default function TodayRotaPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -39,7 +38,7 @@ async function Content() {
     return (
       <>
         <PageHeader title="Today's Rota" />
-        <CannotSeeRota />
+        <CannotSee area="rota" />
       </>
     );
   }

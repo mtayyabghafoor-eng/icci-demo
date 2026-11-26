@@ -20,11 +20,12 @@ import { parseStocktakeId, SCANNING_COOKIE } from "@/lib/stocktake/rules";
 import { parseRoomCookie, ROOM_COOKIE } from "@/lib/places/room-register";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
+import { Skeleton } from "@/components/ui";
 
 export default function ScanPage(props: PageProps<"/l/[serial]">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Opening label…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Forward params={props.params} />
       </Suspense>
     </main>

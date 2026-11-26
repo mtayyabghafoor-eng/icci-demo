@@ -3,8 +3,7 @@
 // which day of the week is Eid. The database checks everything again.
 import { useActionState } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { buttonClass } from "@/components/ui";
-import { fieldClass } from "../../items/ui";
+import { buttonClass, fieldClass } from "@/components/ui";
 import { applyTemplate, type UseTemplateState } from "../templates/actions";
 
 export function UseTemplateForm({

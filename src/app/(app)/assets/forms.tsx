@@ -1,12 +1,11 @@
 "use client";
 // The asset forms. Phone-first: big boxes, a one-tap camera button.
 import { startTransition, useActionState, useRef, useState, type FormEvent } from "react";
-import { ConfirmSubmit } from "@/components/ui";
+import { ConfirmSubmit, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { DISPOSAL_ROUTES, ROUTE_LABEL, type DisposalRoute } from "@/lib/assets/disposal";
 import { ASSET_ACTIONS, type AssetAction } from "@/lib/assets/rules";
 import { PhotoInput } from "../items/photo-input";
-import { fieldClass } from "../items/ui";
 import { decideDisposal, recordAssetEvent, type AssetFormState } from "./actions";
 
 const none: AssetFormState = { error: null };
@@ -77,7 +76,7 @@ export function AssetEventForm({
             {(["good", "fair"] as const).map((c) => (
               <label
                 key={c}
-                className="flex min-h-11 flex-1 cursor-pointer items-center gap-2 px-3 rounded-xl border border-[#87948f] bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
+                className="flex min-h-11 flex-1 cursor-pointer items-center gap-2 px-3 rounded-xl border border-icci-field bg-white transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
               >
                 <input type="radio" name="to_condition" value={c} required defaultChecked={c === "good"} />
                 {c === "good" ? "Good" : "Fair"}
@@ -93,7 +92,7 @@ export function AssetEventForm({
             {DISPOSAL_ROUTES.map((r) => (
               <label
                 key={r}
-                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[#87948f] bg-white px-3 py-2 transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
+                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-icci-field bg-white px-3 py-2 transition-colors duration-150 hover:border-icci-green/60 has-[:checked]:border-icci-green has-[:checked]:bg-icci-green-50 has-[:checked]:font-semibold"
               >
                 <input type="radio" name="disposal_route" value={r} required checked={route === r} onChange={() => setRoute(r)} />
                 {ROUTE_LABEL[r]}

@@ -5,12 +5,11 @@
 // and Finance.
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BackLink, Notice, PageHeader, PageShell } from "@/components/ui";
+import { BackLink, CannotSee, Notice, PageHeader, PageShell } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { claimNumber, todayInDublin, type EntryRow } from "@/lib/expenses/claims";
 import { MAY_HANDLE_EXPENSES } from "@/lib/expenses/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeeExpenses } from "../cannot-see";
 import { loadExpenseNames, type ExpenseTicket } from "../data";
 import { ClaimForm, type ClaimStart } from "../forms";
 import Link from "next/link";
@@ -29,7 +28,7 @@ const euros = (cents: number | null | undefined) => (cents == null ? undefined :
 
 async function Content({ searchParams }: { searchParams: PageProps<"/expenses/new">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSeeExpenses title="New Claim" />;
+  if (!MAY_HANDLE_EXPENSES.includes(me.roleCode)) return <CannotSee area="expenses" title="New Claim" />;
   const { ticket: rawTicket, again: rawAgain, done, last } = await searchParams;
   const supabase = await createClient();
   const [names, ticketRes, settings] = await Promise.all([

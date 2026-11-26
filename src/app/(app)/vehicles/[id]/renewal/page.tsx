@@ -7,9 +7,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
 import { MAY_SEE_VEHICLES, RENEWAL_KINDS, type RenewalKind } from "@/lib/vehicles/rules";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeeVehicles } from "../../cannot-see";
 import { RenewalForm } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Record a renewal | ICCI Control Dashboard" };
@@ -19,7 +18,7 @@ const note = "mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(-
 export default function RenewalPage(props: PageProps<"/vehicles/[id]/renewal">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -28,7 +27,7 @@ export default function RenewalPage(props: PageProps<"/vehicles/[id]/renewal">) 
 
 async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]/renewal">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSeeVehicles />;
+  if (!MAY_SEE_VEHICLES.includes(me.roleCode)) return <CannotSee area="vehicles" />;
   const { id } = await params;
   const { kind } = await searchParams;
   if (!UUID.test(id)) notFound();

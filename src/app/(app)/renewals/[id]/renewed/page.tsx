@@ -7,9 +7,8 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_RENEWALS } from "@/lib/renewals/rules";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeeRenewals } from "../../cannot-see";
 import { RenewedForm } from "../../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Mark renewed | ICCI Control Dashboard" };
@@ -19,7 +18,7 @@ const note = "mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(-
 export default function RenewedPage(props: PageProps<"/renewals/[id]/renewed">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -28,7 +27,7 @@ export default function RenewedPage(props: PageProps<"/renewals/[id]/renewed">) 
 
 async function Content({ params }: { params: PageProps<"/renewals/[id]/renewed">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSeeRenewals />;
+  if (!MAY_SEE_RENEWALS.includes(me.roleCode)) return <CannotSee area="renewals" />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();

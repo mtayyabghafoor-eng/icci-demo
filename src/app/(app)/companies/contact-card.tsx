@@ -10,14 +10,13 @@
 //   * the manuals and documents, and how many tickets it has had
 import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
-import { Card, CardTitle } from "@/components/ui";
+import { Card, CardTitle, StatusBadge } from "@/components/ui";
 import { contactPerson, telLink, warrantyStatus, whoToCall, type CallSource, type CompanyRow } from "@/lib/companies/rules";
 import { formatDate } from "@/lib/items/rules";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { createClient } from "@/lib/supabase/server";
 import { allCategories } from "../categories/data";
 import { DocumentList, documentsOf } from "../documents/documents-card";
-import { StatusBadge } from "../items/ui";
 import { allCompanies, allModels } from "./data";
 
 const FROM: Record<CallSource, string> = {

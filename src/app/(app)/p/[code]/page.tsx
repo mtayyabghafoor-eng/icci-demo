@@ -9,11 +9,12 @@ import { safeDecode } from "@/lib/items/rules";
 import { parsePlaceCode } from "@/lib/places/rules";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { createClient } from "@/lib/supabase/server";
+import { Skeleton } from "@/components/ui";
 
 export default function PlaceLabelPage(props: PageProps<"/p/[code]">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Opening place…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Forward params={props.params} />
       </Suspense>
     </main>

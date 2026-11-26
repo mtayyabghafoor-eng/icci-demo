@@ -5,18 +5,17 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
-import { CannotSeePeople } from "../../cannot-see";
 import { loadPeopleLists, PERSON_COLUMNS, type PersonRow } from "../../data";
 import { PersonForm } from "../../person-form";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Edit person | ICCI Control Dashboard" };
 
 export default function EditPersonPage(props: PageProps<"/people/[id]/edit">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} />
       </Suspense>
     </main>
@@ -25,7 +24,7 @@ export default function EditPersonPage(props: PageProps<"/people/[id]/edit">) {
 
 async function Content({ params }: { params: PageProps<"/people/[id]/edit">["params"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();

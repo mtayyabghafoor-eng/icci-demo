@@ -8,7 +8,7 @@ import { buttonClass } from "@/components/ui/button";
 export default function AppError({ error, retry }: { error: unknown; retry: () => void }) {
   const digest = error instanceof Error ? (error as Error & { digest?: string }).digest : undefined;
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-16 text-center" data-testid="page-error">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center" data-testid="page-error">
       <Logo size={88} />
       <h1 className="page-title mt-6 text-[32px]">Something Went Wrong</h1>
       <p className="mt-3 text-icci-ink-60">The dashboard could not be loaded just now, usually for a moment only. Nothing has been changed.</p>

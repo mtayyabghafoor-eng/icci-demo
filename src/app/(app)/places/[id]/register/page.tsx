@@ -9,7 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Check } from "lucide-react";
-import { Button, Card, CardTitle, Notice, PageHeader } from "@/components/ui";
+import { Button, Card, CardTitle, Notice, PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { categoryGroups, type CategoryRow } from "@/lib/categories/rules";
 import { parseLabelNumber } from "@/lib/items/rules";
@@ -27,8 +27,8 @@ const SHOWN = 50;
 
 export default function RoomRegisterPage(props: PageProps<"/places/[id]/register">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>

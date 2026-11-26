@@ -53,7 +53,11 @@ docs/security-review-2026-11-26.md: 2 medium, 3 low findings, nothing
 fixed yet). Findings 1 and 2 are fixed (migration 0052), 3 and 4 too
 (migration 0053) and 5 (migration 0054), all 26 Nov 2026. 0050 to 0054
 are on ICCI Staging, main is pushed and the demo has 60 made-up claims
-(26 Nov 2026). Next: Round C (docs/IMPROVEMENT-PLAN.md section 4). Before real use: Resend as Supabase's mail sender, then switch
+(26 Nov 2026). Round C (docs/IMPROVEMENT-PLAN.md section 4): C4, C3, C2
+and C1 are done (26 Nov 2026, migrations 0055 to 0057, local only, not yet
+on ICCI Staging or pushed). C5 (accounts and audit log screens) waits for
+the owner's answer on where the account-making power lives (Open
+questions). The two paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -459,8 +463,30 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 - Phase 5 choices made overnight 26 Nov 2026 (see Decisions): the owner to
   confirm, especially repayments counted by the day recorded.
+- C5, accounts screen (26 Nov 2026): creating an account and resetting
+  someone's authenticator need the database's master key, which is kept off
+  the website today. Where should that power live? Options set out in the
+  session 48 summary. Nothing built until the owner chooses.
+- C3 Library sign-in check (migration 0056): anyone can ask the database
+  whether an address is the Library Operator's (yes or no only, nothing
+  about admins). Accepted as the price of never emailing a code to an
+  admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 26 Nov 2026, session 48 (Round C, owner: "Finish and harden steps",
+  then "Go, as recommended"). C4: test companies and models tidied, failed
+  reminder emails retried (0055), walkthrough fails on a failed step, two
+  weak tests fixed, CSV downloads tested per role, exact database
+  description (npm run db:types). C3: every action checks its inputs first,
+  uploads checked by content, documents in their own folder, /sign-out only
+  when due, secure activity cookie, Library code never to an admin, number
+  counters closed (0056), label address from SITE_URL, stricter content
+  rule. C2: long lists read one page at a time (0057), npm run
+  db:load-many, speed check with thousands of records: every page under
+  1.3 s. C1: shared parts everywhere, one "cannot see" note, grey loading
+  bars, three page widths, gold rule under every title. Next: owner's C5
+  answer; push 0055 to 0057 to ICCI Staging, then main.
 
 - 26 Nov 2026, session 47 end (owner: "Yes, Staging then push", then
   "refill the demo with made-up expense claims"). 0050 to 0054 applied to

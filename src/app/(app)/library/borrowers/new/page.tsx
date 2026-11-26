@@ -4,9 +4,8 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { mayUseLibrary } from "@/lib/library/rules";
-import { CannotSeeLibrary } from "../../cannot-see";
 import { BorrowerForm } from "../../loan-forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Add a Borrower | ICCI Control Dashboard" };
 
@@ -16,7 +15,7 @@ export default function NewBorrowerPage() {
       <BackLink href="/library/borrowers">Borrowers</BackLink>
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Add a Borrower</h1>
       <p className="mt-1">A name and one way to contact them. Adults only: a child&apos;s book is lent to their parent.</p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content />
       </Suspense>
     </main>
@@ -25,6 +24,6 @@ export default function NewBorrowerPage() {
 
 async function Content() {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   return <BorrowerForm />;
 }

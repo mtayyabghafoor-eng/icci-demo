@@ -5,21 +5,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Plus, Tags } from "lucide-react";
-import { DataTable, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { DataTable, EmptyState, fieldClass, LinkButton, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { categoryPath } from "@/lib/categories/rules";
 import type { ModelRow } from "@/lib/companies/rules";
 import { createClient } from "@/lib/supabase/server";
 import { allCategories, MAY_SEE_CATEGORIES } from "../categories/data";
 import { allCompanies, allModels } from "../companies/data";
-import { StatusBadge, fieldClass } from "../items/ui";
 
 export const metadata: Metadata = { title: "Makes and models | ICCI Control Dashboard" };
 
 export default function ModelsPage(props: PageProps<"/models">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

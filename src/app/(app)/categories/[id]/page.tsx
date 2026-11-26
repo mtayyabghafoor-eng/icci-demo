@@ -7,12 +7,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Pencil, Plus } from "lucide-react";
-import { Card, CardTitle, LinkButton, PageHeader } from "@/components/ui";
+import { Card, CardTitle, LinkButton, PageHeader, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { NO_COUNT } from "@/lib/categories/counts";
 import { categoryGroups } from "@/lib/categories/rules";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, StatusBadge } from "../../items/ui";
 import { allCategories, categoryCounts, MAY_SEE_CATEGORIES, UUID } from "../data";
 import { SwitchCategory } from "../forms";
 import { CategoryBadge } from "../category-icon";
@@ -30,8 +29,8 @@ const DONE: Record<string, string> = {
 
 export default function CategoryPage(props: PageProps<"/categories/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -92,7 +91,7 @@ async function Content({
           </LinkButton>
         }
       />
-      {done && <Notice floating>{done}</Notice>}
+      {done && <PageNotice floating>{done}</PageNotice>}
 
       <div className="mt-4 space-y-4">
         <Card>

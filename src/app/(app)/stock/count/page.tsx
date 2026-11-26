@@ -6,19 +6,18 @@ import { Suspense } from "react";
 import { locationAndInside, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../../items/data";
-import { fieldClass, Notice } from "../../items/ui";
 import type { StockLevel } from "../data";
 import { WeeklyCountForm, type CountRow } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, fieldClass, PageNotice, Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Weekly count | ICCI Control Dashboard" };
 
 export default function WeeklyCountPage(props: PageProps<"/stock/count">) {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
       <BackLink href="/stock">Low stock</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Weekly Count</h1>
-      <Suspense fallback={<p className="mt-4">Loading store rooms…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -60,10 +59,10 @@ async function Content({ searchParams }: { searchParams: PageProps<"/stock/count
   return (
     <>
       {saved > 0 && chosen && (
-        <Notice>
+        <PageNotice>
           Count saved: {saved} shelf {saved === 1 ? "entry" : "entries"} in {chosen.path}.{" "}
           <Link href="/stock">See the low-stock list</Link>
-        </Notice>
+        </PageNotice>
       )}
       <form method="get" className="mt-4 flex flex-wrap items-end gap-2 rounded-2xl border border-icci-line bg-white shadow-card p-5">
         <label className="block min-w-0 flex-1">

@@ -10,6 +10,7 @@
   --icci-green: #006b54; /* Green 600: links, active states, secondary buttons */
   --icci-gold: #b8985a; /* Gold 500: accents, dividers, large headings only */
   --icci-panel: #eaf2ef; /* Green 100: panels, table header tint, hover */
+  --icci-field: #87948f; /* Round C1: the border of every form box (at least 3:1 on white) */
   --icci-page: #faf8f3; /* cream page background */
   --icci-text: #1f2a27; /* ink: body text */
   --icci-error: #b3261e; /* errors, overdue, red status */
@@ -44,6 +45,7 @@
   --color-icci-green: var(--icci-green);
   --color-icci-gold: var(--icci-gold);
   --color-icci-panel: var(--icci-panel);
+  --color-icci-field: var(--icci-field);
   --color-icci-page: var(--icci-page);
   --color-icci-text: var(--icci-text);
   --color-icci-error: var(--icci-error);
@@ -97,6 +99,17 @@ a {
   color: var(--icci-green-dark);
 }
 
+/* Round C1: every page title has the short gold rule under it (UI-PLAN),
+   the same everywhere, whether or not the page uses PageHeader. */
+h1.page-title::after {
+  content: "";
+  display: block;
+  width: 4rem;
+  height: 1px;
+  margin-top: 0.75rem;
+  background: var(--icci-gold);
+}
+
 /*
   The star pattern laid over a dark green surface. The element must already
   be positioned (relative, fixed or a dialog); this rule does not set it, so
@@ -137,7 +150,7 @@ a {
 .list-filters :is(input:not([type="hidden"]), select) {
   margin-top: 0.375rem;
   min-height: 2.75rem;
-  border: 1px solid #87948f;
+  border: 1px solid var(--icci-field);
   border-radius: 0.75rem;
   background-color: #fff;
   padding-left: 0.875rem;

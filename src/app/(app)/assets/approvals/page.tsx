@@ -10,11 +10,10 @@ import { CONDITION_STATUS, formatDateTime, formatEuro } from "@/lib/items/rules"
 import { createClient } from "@/lib/supabase/server";
 import { must } from "@/lib/supabase/must";
 import { loadLookups, PHOTO_BUCKET } from "../../items/data";
-import { Notice, StatusBadge } from "../../items/ui";
 import { adminNames } from "../../stock/data";
 import { Reporter, reporterNames } from "../../people/reporter";
 import { DecideDisposalForm } from "../forms";
-import { BackLink } from "@/components/ui";
+import { BackLink, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Disposals waiting | ICCI Control Dashboard" };
 
@@ -26,7 +25,7 @@ export default function DisposalApprovalsPage(props: PageProps<"/assets/approval
       <p className="mt-2">
         An asset is disposed of only after a <strong>different admin</strong> approves. Until then it stays as it is.
       </p>
-      <Suspense fallback={<p className="mt-4">Loading disposals…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -66,8 +65,8 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
 
   return (
     <>
-      {done === "approved" && <Notice>Disposal approved. The asset is now marked disposed.</Notice>}
-      {done === "rejected" && <Notice>Disposal rejected. The asset stays as it was.</Notice>}
+      {done === "approved" && <PageNotice>Disposal approved. The asset is now marked disposed.</PageNotice>}
+      {done === "rejected" && <PageNotice>Disposal rejected. The asset stays as it was.</PageNotice>}
       <p className="mt-4" data-testid="pending-count">
         {pending.length === 0 ? "Nothing is waiting for approval." : `${pending.length} waiting.`}
       </p>

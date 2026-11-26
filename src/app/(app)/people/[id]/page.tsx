@@ -32,14 +32,12 @@ import {
   type VettingRecord,
   type VettingRow,
 } from "@/lib/vetting/rules";
-import { Notice, SecondaryLink, StatusBadge } from "../../items/ui";
 import { loadLookups } from "../../items/data";
 import { setPersonAccount, setPersonActive } from "../actions";
 import { withdrawVetting } from "../vetting-actions";
 import { withdrawTraining } from "../training-actions";
-import { CannotSeePeople } from "../cannot-see";
 import { loadPeopleLists, PERSON_COLUMNS, type PersonRow } from "../data";
-import { BackLink, buttonClass, ConfirmSubmit } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, ConfirmSubmit, PageNotice, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Person | ICCI Control Dashboard" };
@@ -74,9 +72,9 @@ const ROLE_LABEL: Record<string, string> = {
 
 export default function PersonPage(props: PageProps<"/people/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/people">People</BackLink>
-      <Suspense fallback={<p className="mt-4">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -85,7 +83,7 @@ export default function PersonPage(props: PageProps<"/people/[id]">) {
 
 async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
   const { id } = await params;
   const { done } = await searchParams;
   if (!UUID.test(id)) notFound();
@@ -162,7 +160,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
         </span>
       </div>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
+        <PageNotice floating tone={messageTone(done)} testId="notice">{DONE[done]}</PageNotice>
       )}
 
       <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
@@ -246,9 +244,9 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
                       <form action={withdrawVetting.bind(null, p.id, r.id)} className="mt-2 flex flex-wrap items-end gap-3">
                         <label className="min-w-64 flex-1">
                           <span className="font-semibold">Why is it wrong?</span>
-                          <input name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
+                          <input name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
                         </label>
-                        <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                        <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                           Withdraw
                         </button>
                       </form>
@@ -317,9 +315,9 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
                         <form action={withdrawTraining.bind(null, p.id, r.id)} className="mt-2 flex flex-wrap items-end gap-3">
                           <label className="min-w-64 flex-1">
                             <span className="font-semibold">Why is it wrong?</span>
-                            <input name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
+                            <input name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
                           </label>
-                          <button type="submit" className={`${button} border-[#87948f] bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
+                          <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                             Withdraw
                           </button>
                         </form>
@@ -385,7 +383,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
           <form action={setPersonAccount.bind(null, p.id)} className="mt-3 flex flex-wrap items-end gap-3">
             <label className="min-w-64 flex-1">
               <span className="font-semibold">Admin account</span>
-              <select name="app_user_id" required defaultValue="" className="mt-1 block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green">
+              <select name="app_user_id" required defaultValue="" className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green">
                 <option value="" disabled>
                   Pick an account
                 </option>

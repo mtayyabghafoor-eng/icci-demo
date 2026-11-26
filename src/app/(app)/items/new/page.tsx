@@ -7,14 +7,15 @@ import { locationOptions, parseLabelNumber } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../data";
 import { RegisterForm } from "./register-form";
+import { Skeleton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Register an item | ICCI Control Dashboard" };
 
 export default function RegisterPage(props: PageProps<"/items/new">) {
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
       <h1 className="page-title text-[28px] md:text-[34px]">Register an Item</h1>
-      <Suspense fallback={<p className="mt-4">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

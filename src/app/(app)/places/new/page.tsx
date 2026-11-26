@@ -2,7 +2,7 @@
 // down (a room in a building, a store room in a room, a shelf in a store room).
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageHeader } from "@/components/ui";
+import { PageHeader, Skeleton } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { CHILD_KIND, KIND_WORD } from "@/lib/places/rules";
 import { createClient } from "@/lib/supabase/server";
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Add a place | ICCI Control Dashboard
 export default function NewPlacePage(props: PageProps<"/places/new">) {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>

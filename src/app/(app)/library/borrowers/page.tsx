@@ -8,10 +8,9 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { nameSearch } from "@/lib/library/loans";
 import { mayUseLibrary } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
-import { PrimaryLink, StatusBadge } from "../../items/ui";
-import { CannotSeeLibrary } from "../cannot-see";
 import { BORROWER_COLUMNS, type Borrower } from "../data";
 import { DeskTabs } from "../desk-tabs";
+import { CannotSee, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Borrowers | ICCI Control Dashboard" };
 
@@ -23,7 +22,7 @@ export default function BorrowersPage(props: PageProps<"/library/borrowers">) {
       <DeskTabs />
       <h1 className="page-title text-[28px] md:text-[34px]">Borrowers</h1>
       <p className="mt-2">Everyone who borrows from the library: a name and one way to contact them.</p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -32,7 +31,7 @@ export default function BorrowersPage(props: PageProps<"/library/borrowers">) {
 
 async function List({ searchParams }: { searchParams: PageProps<"/library/borrowers">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!mayUseLibrary(me.roleCode)) return <CannotSeeLibrary />;
+  if (!mayUseLibrary(me.roleCode)) return <CannotSee area="library" />;
   const params = await searchParams;
   const q = nameSearch(typeof params.q === "string" ? params.q : "");
   const showOff = params.off === "1";
@@ -69,7 +68,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/library/borrow
               dir="auto"
               autoComplete="off"
               placeholder="Name"
-              className="block min-h-11 w-full rounded-xl border border-[#87948f] bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
+              className="block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
             />
           </label>
           <button type="submit" className="inline-flex min-h-11 items-center rounded-[10px] border border-icci-green/40 bg-white px-4 font-semibold text-icci-green hover:bg-icci-green-50">

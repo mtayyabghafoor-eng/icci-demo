@@ -9,12 +9,10 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { MAY_SEE_PEOPLE } from "@/lib/people/rules";
 import { createClient } from "@/lib/supabase/server";
 import { MAX_YEARS, usualLengthText, type TrainingType } from "@/lib/training/rules";
-import { Notice, StatusBadge } from "../../../items/ui";
-import { CannotSeePeople } from "../../cannot-see";
 import { setTrainingTypeActive } from "../../training-actions";
 import { loadTrainingTypes } from "../data";
 import { AddTypeForm, EditTypeForm } from "./type-forms";
-import { BackLink, buttonClass } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Training types | ICCI Control Dashboard" };
 
@@ -28,14 +26,14 @@ const DONE: Record<string, string> = {
 
 export default function TrainingTypesPage(props: PageProps<"/people/training/types">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">
       <BackLink href="/people/training">Training</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">Training Types</h1>
       <p className="mt-2">
         The courses that can be recorded. The usual length fills in the expiry date when training is recorded; it can
         still be changed each time. Leave it empty for training that does not expire.
       </p>
-      <Suspense fallback={<p className="mt-6">Loading…</p>}>
+      <Suspense fallback={<Skeleton />}>
         <Content searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -44,7 +42,7 @@ export default function TrainingTypesPage(props: PageProps<"/people/training/typ
 
 async function Content({ searchParams }: { searchParams: PageProps<"/people/training/types">["searchParams"] }) {
   const me = await requireAdmin();
-  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSeePeople />;
+  if (!MAY_SEE_PEOPLE.includes(me.roleCode)) return <CannotSee area="people" />;
   const { done } = await searchParams;
   const supabase = await createClient();
   const types = await loadTrainingTypes(supabase);
@@ -54,7 +52,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/people/trai
   return (
     <>
       {typeof done === "string" && DONE[done] && (
-        <Notice floating tone={messageTone(done)} testId="notice">{DONE[done]}</Notice>
+        <PageNotice floating tone={messageTone(done)} testId="notice">{DONE[done]}</PageNotice>
       )}
       <p id="years-hint" className="sr-only">
         A whole number of years from 1 to {MAX_YEARS}, or empty for no expiry.

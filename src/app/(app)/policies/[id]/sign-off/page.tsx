@@ -12,9 +12,8 @@ import { MAY_SEE_POLICIES, POLICY_ROW_COLUMNS, type PolicyRow } from "@/lib/poli
 import { readGridBack, SIGNOFF_STATUS, SQUARE_COLUMNS, type Square } from "@/lib/policies/signoffs";
 import { createClient } from "@/lib/supabase/server";
 import { todayInDublin } from "@/lib/vetting/rules";
-import { CannotSeePolicies } from "../../cannot-see";
 import { SignoffForm, type Candidate } from "./signoff-form";
-import { BackLink } from "@/components/ui";
+import { BackLink, CannotSee, Skeleton } from "@/components/ui";
 import { UUID } from "@/lib/forms";
 
 export const metadata: Metadata = { title: "Record sign-off | ICCI Control Dashboard" };
@@ -23,8 +22,8 @@ const note = "mt-4 rounded-xl border border-[var(--icci-none-text)]/20 bg-[var(-
 
 export default function RecordSignoffPage(props: PageProps<"/policies/[id]/sign-off">) {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-      <Suspense fallback={<p>Loading…</p>}>
+    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+      <Suspense fallback={<Skeleton />}>
         <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </main>
@@ -33,7 +32,7 @@ export default function RecordSignoffPage(props: PageProps<"/policies/[id]/sign-
 
 async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]/sign-off">, "params" | "searchParams">) {
   const me = await requireAdmin();
-  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSeePolicies />;
+  if (!MAY_SEE_POLICIES.includes(me.roleCode)) return <CannotSee area="policies" />;
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const sp = await searchParams;
