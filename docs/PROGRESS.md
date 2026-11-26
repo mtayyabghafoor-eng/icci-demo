@@ -52,7 +52,8 @@ P5.7, the security review, is done (26 Nov 2026,
 docs/security-review-2026-11-26.md: 2 medium, 3 low findings, nothing
 fixed yet). Findings 1 and 2 are fixed (migration 0052), 3 and 4 too
 (migration 0053) and 5 (migration 0054), all 26 Nov 2026. 0050 to 0054
-are not on ICCI Staging yet. Before real use: Resend as Supabase's mail sender, then switch
+are on ICCI Staging, main is pushed and the demo has 60 made-up claims
+(26 Nov 2026). Next: Round C (docs/IMPROVEMENT-PLAN.md section 4). Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -460,6 +461,12 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   confirm, especially repayments counted by the day recorded.
 
 ## Session log
+
+- 26 Nov 2026, session 47 end (owner: "Yes, Staging then push", then
+  "refill the demo with made-up expense claims"). 0050 to 0054 applied to
+  ICCI Staging, main pushed, demo refilled after a local trial fill (60
+  claims, 5 repayments, no test wording). Demo accounts pair their phone
+  again. Next: Round C.
 
 - 26 Nov 2026, session 47 continued (security fix 5; owner chose a Board
   report count). Migration 0054: the receipt store takes only
