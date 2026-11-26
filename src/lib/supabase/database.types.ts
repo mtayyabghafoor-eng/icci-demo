@@ -9,7 +9,27 @@ export type Database = {
   
   "public": {
           Tables: {
-            "app_setting_changes": {
+            "account_events": {
+                  Row: {
+                    "account_id": string,"created_at": string,"created_by": string | null,"id": number,"kind": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: never,"kind"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "account_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: never,"kind"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "account_events_account_id_fkey"
+      columns: ["account_id"]
+isOneToOne: false
+      referencedRelation: "app_users"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"app_setting_changes": {
                   Row: {
                     "amount_cents": number,"created_at": string,"created_by": string | null,"decided_at": string | null,"decided_by": string | null,"id": number,"key": string,"note": string | null,"status": string,"updated_at": string,"updated_by": string | null
                   }
@@ -45,14 +65,14 @@ isOneToOne: false
                   ]
                 },"app_users": {
                   Row: {
-                    "active": boolean,"created_at": string,"created_by": string | null,"display_name": string,"id": string,"role": string,"updated_at": string,"updated_by": string | null
+                    "active": boolean,"created_at": string,"created_by": string | null,"display_name": string,"id": string,"role": string,"temporary_password_until": string | null,"updated_at": string,"updated_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "active"?: boolean,"created_at"?: string,"created_by"?: string | null,"display_name"?: string,"id"?: string,"role"?: string,"updated_at"?: string,"updated_by"?: string | null
+                    "active"?: boolean,"created_at"?: string,"created_by"?: string | null,"display_name"?: string,"id"?: string,"role"?: string,"temporary_password_until"?: string | null,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Update: {
-                    "active"?: boolean,"created_at"?: string,"created_by"?: string | null,"display_name"?: string,"id"?: string,"role"?: string,"updated_at"?: string,"updated_by"?: string | null
+                    "active"?: boolean,"created_at"?: string,"created_by"?: string | null,"display_name"?: string,"id"?: string,"role"?: string,"temporary_password_until"?: string | null,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -2240,6 +2260,14 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"audit_log_list": {
+                  Row: {
+                    "action": string,"changed_at": string,"changed_by": string | null,"changed_by_name": string | null,"id": number,"new_values": NonNullable<Json>,"old_values": Json | null,"record_id": string,"table_name": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
                 },"expense_claim_list": {
                   Row: {
                     "amount_cents": number,"approved_at": string | null,"category_id": string,"closed_at": string | null,"closed_by": string | null,"closed_note": string | null,"copied_from_id": number | null,"correction_id": number | null,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"current_amount_cents": number | null,"current_category_id": string | null,"current_fund_id": string | null,"current_receipt_date": string | null,"current_vat_cents": number | null,"description": string,"file_count": number | null,"first_at": string | null,"first_by": string | null,"first_fund_id": string | null,"fund_id": string | null,"id": number,"kind": string,"needs_second": boolean | null,"owed_cents": number | null,"paid_by_person_id": string | null,"paid_to_company_id": string | null,"paid_to_text": string | null,"payment": string,"receipt_date": string,"receipt_lost_reason": string | null,"repaid_cents": number | null,"second_at": string | null,"second_by": string | null,"second_fund_id": string | null,"state": string | null,"suggested_fund_id": string | null,"ticket_id": number | null,"updated_at": string,"updated_by": string | null,"vat_cents": number | null
@@ -3123,7 +3151,12 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "add_book_and_copy":
+            "account_list":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "active": boolean,"created_at": string,"display_name": string,"email": string,"has_authenticator": boolean,"id": string,"last_sign_in_at": string,"person_id": string,"person_name": string,"role": string,"role_label": string,"sign_in_method": string,"temporary_password_until": string
+            }[]
+                           },
+"add_book_and_copy":
 { Args: { "p_author": string | null,"p_copy_note": string | null,"p_entered_by"?: string | null,"p_isbn": string | null,"p_label": string | null,"p_language": string | null,"p_publisher": string | null,"p_title": string | null,"p_year": number | null }; Returns: Json
                            },
 "add_renewal":
@@ -3158,6 +3191,9 @@ isOneToOne: false
 "close_maintenance_ticket":
 { Args: { "p_cost_cents"?: number | null,"p_note": string | null,"p_repaired_condition"?: string | null,"p_ticket_id": number | null }; Returns: number
                            },
+"create_account":
+{ Args: { "p_account": string | null,"p_display_name": string | null,"p_role": string | null }; Returns: undefined
+                           },
 "enter_expense_claim":
 { Args: { "p_amount_cents": number | null,"p_category_id": string | null,"p_copied_from_id"?: number | null,"p_correction_reason"?: string | null,"p_corrects_id"?: number | null,"p_description": string | null,"p_files"?: (string)[] | null,"p_paid_by_person_id"?: string | null,"p_paid_to_company_id"?: string | null,"p_paid_to_text"?: string | null,"p_payment": string | null,"p_receipt_date": string | null,"p_receipt_lost_reason"?: string | null,"p_suggested_fund_id"?: string | null,"p_ticket_id"?: number | null,"p_vat_cents"?: number | null }; Returns: number
                            },
@@ -3185,6 +3221,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "closed_at": string,"cost_cents": number,"description": string,"id": number,"status": string
             }[]
+                           },
+"finish_first_set_up":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "home_counters":
 { Args: Record<PropertyKey, never>; Returns: {
@@ -3224,6 +3263,9 @@ isOneToOne: false
 "mark_copy":
 { Args: { "p_copy_id": string | null,"p_kind": string | null }; Returns: undefined
                            },
+"may_manage_accounts":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
 "move_due_date":
 { Args: { "p_due_on": string | null,"p_loan_id": number | null }; Returns: undefined
                            },
@@ -3234,6 +3276,15 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "linked": boolean,"person_name": string
             }[]
+                           },
+"my_set_up_state":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"note_temporary_password":
+{ Args: { "p_account": string | null }; Returns: undefined
+                           },
+"note_two_factor_reset":
+{ Args: { "p_account": string | null }; Returns: undefined
                            },
 "print_new_labels":
 { Args: { "p_count": number | null }; Returns: {
@@ -3313,6 +3364,9 @@ isOneToOne: false
                            },
 "set_reminder_timer_key":
 { Args: { "p_key_hash": string | null }; Returns: undefined
+                           },
+"sign_in_without_account":
+{ Args: { "p_email": string | null }; Returns: string
                            },
 "signoff_status":
 { Args: { "p_published_on": string | null,"p_signed": boolean | null,"p_today": string | null }; Returns: string

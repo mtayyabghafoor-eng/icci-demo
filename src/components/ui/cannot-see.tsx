@@ -13,6 +13,9 @@ const AREAS = {
   rota: "Your account cannot see the rota. Only a Super Admin or Centre Admin can.",
   tickets: "Your account cannot see maintenance tickets. Only a Super Admin or Centre Admin can.",
   vehicles: "Your account cannot see vehicles. Only a Super Admin or Centre Admin can.",
+  // Round C5.
+  accounts: "Your account cannot manage accounts. Only a Super Admin can.",
+  "audit-log": "Your account cannot see the audit log. Only a Super Admin can.",
 } as const;
 
 export type CannotSeeArea = keyof typeof AREAS;

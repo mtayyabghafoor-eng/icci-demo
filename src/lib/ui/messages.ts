@@ -11,6 +11,7 @@ const REFUSALS = new Set([
   "own-signoff",
   "own-version",
   "pick-account",
+  "pick-person",
   "link-refused",
   "roles-refused",
   "publish-refused",

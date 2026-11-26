@@ -12,7 +12,7 @@ export async function tidyUpTestRun(): Promise<void> {
   const r = await switchOffTestLeftovers(db);
   console.log(
     `Tidy-up: moved ${r.chairsMoved} test chairs to the Test storage room, counted ${r.stockCounted} test stock items to zero, ` +
-      `switched off ${r.people} test people, ${r.trainingTypes} test training types, ${r.slotTypes} test rota slot types, ${r.rotaTemplates} test rota templates, ${r.policies} test policies, ${r.vehicles} test vehicles, ${r.renewals} test renewals, ${r.books} test library books, ${r.borrowers} test borrowers, ${r.categories} test categories (cleared ${r.warrantiesCleared} test warranties), ${r.expenseLists} test spend categories and funds, ${r.models} test makes and models, ${r.companies} test companies and ${r.places} test places` +
+      `switched off ${r.people} test people, ${r.trainingTypes} test training types, ${r.slotTypes} test rota slot types, ${r.rotaTemplates} test rota templates, ${r.policies} test policies, ${r.vehicles} test vehicles, ${r.renewals} test renewals, ${r.books} test library books, ${r.borrowers} test borrowers, ${r.categories} test categories (cleared ${r.warrantiesCleared} test warranties), ${r.expenseLists} test spend categories and funds, ${r.models} test makes and models, ${r.companies} test companies, ${r.accounts} test accounts and ${r.places} test places` +
       (r.placesLeftOn ? ` (${r.placesLeftOn} stay on: a disposal or stocktake is still waiting there).` : "."),
   );
 }

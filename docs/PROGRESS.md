@@ -54,10 +54,11 @@ fixed yet). Findings 1 and 2 are fixed (migration 0052), 3 and 4 too
 (migration 0053) and 5 (migration 0054), all 26 Nov 2026. 0050 to 0054
 are on ICCI Staging, main is pushed and the demo has 60 made-up claims
 (26 Nov 2026). Round C (docs/IMPROVEMENT-PLAN.md section 4): C4, C3, C2
-and C1 are done (26 Nov 2026, migrations 0055 to 0057, local only, not yet
-on ICCI Staging or pushed). C5 (accounts and audit log screens) waits for
-the owner's answer on where the account-making power lives (Open
-questions). The two paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
+and C1 are done (26 Nov 2026, migrations 0055 to 0057), and so is C5, the accounts and
+audit log screens (owner chose option A; migration 0058). 0055 to 0058 are
+local only, not yet on ICCI Staging or pushed; ICCI Staging also needs
+SUPABASE_SECRET_KEY in Vercel's settings for the accounts screen. The two
+paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
 Real reminder emails still need the owner to create the Resend account
 (project mailbox) and put RESEND_API_KEY, REMINDER_FROM and
@@ -68,6 +69,15 @@ Not yet checked in real life (Phase 1): a real label printer, a real phone
 camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
+
+- C5 accounts screen (26 Nov 2026, owner chose option A): the website's
+  server holds the master key, used only by the accounts screen's actions
+  and only after the database confirms a signed-in Super Admin is asking.
+  Choices Claude made where the plans were silent: a Super Admin can also
+  give a new temporary password (forgotten password, or the 24 hours ran
+  out); the temporary password is four groups of four easy-to-read
+  characters; "Switch off" has no "Are you sure?" (as agreed for switching
+  off everywhere), while a new password and a two-factor reset do.
 
 - P5.2 to P5.6, built overnight 26 Nov 2026 (owner: "do all the remaining
   steps"). Choices Claude made where docs/PHASE-5.md was silent, for the
@@ -463,10 +473,6 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 - Later phases still marked "to confirm" in PLAN.md: restricted fund list, second-approver threshold, bookkeeper CSV format.
 - Phase 5 choices made overnight 26 Nov 2026 (see Decisions): the owner to
   confirm, especially repayments counted by the day recorded.
-- C5, accounts screen (26 Nov 2026): creating an account and resetting
-  someone's authenticator need the database's master key, which is kept off
-  the website today. Where should that power live? Options set out in the
-  session 48 summary. Nothing built until the owner chooses.
 - C3 Library sign-in check (migration 0056): anyone can ask the database
   whether an address is the Library Operator's (yes or no only, nothing
   about admins). Accepted as the price of never emailing a code to an
@@ -485,8 +491,12 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   rule. C2: long lists read one page at a time (0057), npm run
   db:load-many, speed check with thousands of records: every page under
   1.3 s. C1: shared parts everywhere, one "cannot see" note, grey loading
-  bars, three page widths, gold rule under every title. Next: owner's C5
-  answer; push 0055 to 0057 to ICCI Staging, then main.
+  bars, three page widths, gold rule under every title. Owner chose A for
+  C5: accounts screen (add with a 24-hour temporary password shown once;
+  new temporary password; two-factor reset; switch off; link to a person),
+  "choose your password" as the last first-sign-in step, read-only audit
+  log screen, Administration menu for Super Admins (0058). Next: 0055 to
+  0058 to ICCI Staging (plus SUPABASE_SECRET_KEY in Vercel), then main.
 
 - 26 Nov 2026, session 47 end (owner: "Yes, Staging then push", then
   "refill the demo with made-up expense claims"). 0050 to 0054 applied to

@@ -49,7 +49,9 @@ export type IconKey =
   | "newClaim"
   | "monthlyExport"
   | "boardReport"
-  | "repay";
+  | "repay"
+  | "accounts"
+  | "auditLog";
 
 export type MenuLink = {
   href: string;
@@ -71,6 +73,8 @@ const ADMINS = ["super_admin", "centre_admin"] as const;
  * reach the same pages through the "Library desk" tab bar.
  */
 const OPERATOR = ["library_operator"] as const;
+/** Round C5: accounts and the audit log (PLAN.md 3). */
+const SUPER = ["super_admin"] as const;
 /** Expense claims, the monthly file and the Board report (docs/PHASE-5.md section 5). */
 const EXPENSES = ["super_admin", "centre_admin", "finance"] as const;
 
@@ -165,6 +169,14 @@ export const MENU: MenuGroup[] = [
       { href: "/library/lost", label: "Lost and withdrawn", icon: "lostBooks", roles: OPERATOR },
       { href: "/library/overview", label: "Library overview", icon: "libraryOverview", roles: ADMINS },
       { href: "/library", label: "Library desk", icon: "library", roles: ADMINS },
+    ],
+  },
+  {
+    // Round C5: Super Admins only.
+    title: "Administration",
+    links: [
+      { href: "/accounts", label: "Accounts", icon: "accounts", roles: SUPER },
+      { href: "/audit-log", label: "Audit log", icon: "auditLog", roles: SUPER },
     ],
   },
 ];

@@ -11,6 +11,8 @@ const NOTICES: Record<string, { text: string; isProblem: boolean }> = {
   idle: { text: "You were signed out after 15 minutes of inactivity. Please sign in again.", isProblem: false },
   "signed-out": { text: "You have signed out.", isProblem: false },
   "no-access": { text: "This account does not have access. Please ask a Super Admin.", isProblem: true },
+  // Round C5: a new account's temporary password works for 24 hours.
+  "temporary-expired": { text: "That temporary password has run out (it works for 24 hours). Ask a Super Admin for a new one.", isProblem: true },
   // An emailed code worked, but the account may not sign in that way (an
   // admin), or is switched off. The database refused it (slice P4.1).
   "email-code-refused": {

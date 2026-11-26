@@ -58,6 +58,8 @@ const ACTIONS: Record<string, string[]> = {
   "@/app/(app)/tickets/actions": ["reportProblem", "recordTicketStep"],
   "@/app/(app)/vehicles/actions": ["saveVehicle", "setVehicleActive", "recordRenewal", "withdrawRenewal"],
   "@/app/(app)/board-report/actions": ["makeFinalCopy"],
+  // Round C5.
+  "@/app/(app)/accounts/actions": ["giveTemporaryPassword", "resetTwoFactor", "setAccountActive", "linkPerson"],
 };
 
 /** What a tampering browser might send instead of a record id, a yes/no or a kind. */

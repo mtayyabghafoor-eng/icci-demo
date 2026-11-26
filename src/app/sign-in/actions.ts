@@ -2,7 +2,8 @@
 // What happens when each sign-in form is sent. Runs on the web server only.
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { activityCookieOptions, LAST_ACTIVE_COOKIE, LIBRARY_PENDING_COOKIE, safeNextPath } from "@/lib/auth/rules";
+import { activityCookieOptions, LAST_ACTIVE_COOKIE, LIBRARY_PENDING_COOKIE, NEW_PASSWORD_PATH, safeNextPath } from "@/lib/auth/rules";
+import { meetsPasswordRule, MIN_PASSWORD_LENGTH } from "@/lib/auth/password-rule";
 import { createClient } from "@/lib/supabase/server";
 
 export type FormState = { error: string | null };
@@ -34,6 +35,14 @@ function codeError(message: string | undefined): string {
  */
 async function finishSignIn(next: string, refused = "no-access"): Promise<never> {
   const supabase = await createClient();
+  // Round C5: a new account's temporary password: choose your own first.
+  const { data: state } = await supabase.rpc("my_set_up_state");
+  if (state === "choose_password") redirect(withNext(NEW_PASSWORD_PATH, next));
+  if (state === "expired") {
+    await supabase.auth.signOut({ scope: "local" });
+    (await cookies()).delete(LAST_ACTIVE_COOKIE);
+    redirect("/sign-in?reason=temporary-expired");
+  }
   const { data: claims } = await supabase.auth.getClaims();
   const { data: me } = await supabase
     .from("app_users")
@@ -64,6 +73,12 @@ export async function signIn(_state: FormState, form: FormData): Promise<FormSta
     }
     // Deliberately does not say which part was wrong.
     return { error: "That email and password do not match. Please try again." };
+  }
+  // Round C5: a temporary password works for 24 hours only.
+  const { data: state } = await supabase.rpc("my_set_up_state");
+  if (state === "expired") {
+    await supabase.auth.signOut({ scope: "local" });
+    return { error: "This temporary password has run out (it works for 24 hours). Ask a Super Admin for a new one." };
   }
   await markActive();
 
@@ -214,4 +229,29 @@ export async function resendLibraryCode(): Promise<FormState & { sent?: boolean 
   if (problem) return { error: problem };
   (await cookies()).set(LIBRARY_PENDING_COOKIE, email, PENDING_COOKIE_OPTIONS);
   return { error: null, sent: true };
+}
+
+// ---------------------------------------------------------------------------
+// Round C5: the last step of a first sign-in with a temporary password.
+
+/** Choose your own password, then go in. The database checks it really is new. */
+export async function chooseOwnPassword(_state: FormState, form: FormData): Promise<FormState> {
+  const password = String(form.get("password") ?? "");
+  const again = String(form.get("again") ?? "");
+  const next = safeNextPath(String(form.get("next") ?? ""));
+  if (!meetsPasswordRule(password)) {
+    return { error: `Choose a password of at least ${MIN_PASSWORD_LENGTH} characters, with at least one letter and one number.` };
+  }
+  if (password !== again) return { error: "The two passwords are not the same. Please type them again." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    if (/different from the old|same_password/i.test(error.message)) return { error: "Choose a password different from the temporary one." };
+    if (/weak|pwned|leaked/i.test(error.message)) return { error: "That password is too easy to guess. Please choose another." };
+    return { error: "The password could not be saved. Please try again." };
+  }
+  const { error: finishError } = await supabase.rpc("finish_first_set_up");
+  if (finishError) return { error: /run out/.test(finishError.message) ? finishError.message : "The password could not be saved. Please try again." };
+  return finishSignIn(next);
 }

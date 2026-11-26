@@ -10,7 +10,10 @@ describe("menuFor: each role sees only what it can use", () => {
     const all = MENU.flatMap((g) => g.links.map((l) => l.label)).filter((l) => !deskOnly.includes(l));
     expect(labels("super_admin")).toEqual(all);
     // P5.1: only Super Admin and Finance keep the expense lists and amounts.
-    expect(labels("centre_admin")).toEqual(all.filter((l) => l !== "Expense settings"));
+    // Round C5: Accounts and the Audit log are for Super Admins only.
+    expect(labels("centre_admin")).toEqual(all.filter((l) => !["Expense settings", "Accounts", "Audit log"].includes(l)));
+    expect(menuFor("super_admin").at(-1)).toMatchObject({ title: "Administration" });
+    expect(menuFor("centre_admin").map((g) => g.title)).not.toContain("Administration");
   });
   it("Finance sees Home, the Board report, the asset register and the Expenses group (P5.1, P5.2); the Library Operator also sees the library (P4.2)", () => {
     expect(labels("finance")).toEqual(["Home", "Board report", "Asset register", "Expenses", "New claim", "Monthly export", "Expense settings"]);

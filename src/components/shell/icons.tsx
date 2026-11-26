@@ -1,6 +1,8 @@
 // Which Lucide icon each menu link uses (docs/UI-PLAN.md 3.6).
 import {
   Inbox,
+  ScrollText,
+  UserCog,
   BellRing,
   ClipboardCheck,
   CalendarClock,
@@ -97,4 +99,6 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   monthlyExport: FileSpreadsheet,
   boardReport: Presentation,
   repay: HandCoins,
+  accounts: UserCog,
+  auditLog: ScrollText,
 };

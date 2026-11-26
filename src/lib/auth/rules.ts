@@ -47,6 +47,13 @@ export function assuranceOf(claims: { aal?: unknown; amr?: unknown } | null | un
  */
 export const LIBRARY_PENDING_COOKIE = "icci_library_pending";
 
+/**
+ * Round C5: the last step of a first sign-in (a new account's temporary
+ * password): with the authenticator just set up, the person chooses their
+ * own password here. The database still gives them nothing until they have.
+ */
+export const NEW_PASSWORD_PATH = "/sign-in/new-password";
+
 /** The two pages a signed-out visitor may open for the emailed-code sign-in. */
 export const LIBRARY_SIGN_IN_PATHS = ["/sign-in/library", "/sign-in/library/code"];
 
@@ -145,6 +152,7 @@ export function decideRoute({ pathname, search, aal, lastActive, now }: RouteInp
   }
 
   // Fully signed in: password and authenticator, or an emailed code.
+  if (aal === "aal2" && pathname === NEW_PASSWORD_PATH) return { kind: "allow" };
   if (isSignInArea(pathname)) {
     return redirect(safeNextPath(new URLSearchParams(search).get("next")));
   }

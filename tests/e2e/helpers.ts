@@ -38,7 +38,8 @@ export function shot(page: Page, name: string, project: string, slice = "03") {
     // over 15 seconds to save. PC screenshots are the same either way.
     scale: "css",
     timeout: 60_000,
-    mask: [page.getByTestId("setup-key"), page.getByRole("img", { name: /authenticator app/ })],
+    // Round C5: temporary passwords are blacked out too (made up, but never committed).
+    mask: [page.getByTestId("setup-key"), page.getByRole("img", { name: /authenticator app/ }), page.getByTestId("temporary-password")],
     maskColor: "#1F2A27",
     // Do not let the screenshot tool restyle the text cursor (React notices the change).
     caret: "initial",

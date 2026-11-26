@@ -23,7 +23,7 @@ const SEED_BUILDING = "Test Building A";
 const WHO = "Test run tidy-up";
 const NOTE = "Test run tidy-up: moved out of a test place so the place can be switched off.";
 
-export type TidyResult = { companies: number; models: number; categories: number; expenseLists: number; books: number; borrowers: number; people: number; trainingTypes: number; slotTypes: number; rotaTemplates: number; policies: number; vehicles: number; renewals: number; warrantiesCleared: number; places: number; placesLeftOn: number; chairsMoved: number; stockCounted: number };
+export type TidyResult = { accounts: number; companies: number; models: number; categories: number; expenseLists: number; books: number; borrowers: number; people: number; trainingTypes: number; slotTypes: number; rotaTemplates: number; policies: number; vehicles: number; renewals: number; warrantiesCleared: number; places: number; placesLeftOn: number; chairsMoved: number; stockCounted: number };
 
 function inGroups<T>(all: T[], size: number): T[][] {
   const groups: T[][] = [];
@@ -217,6 +217,11 @@ export async function switchOffTestLeftovers(db: SupabaseClient, prefix = "Test 
     companies += r.data?.length ?? 0;
   }
 
+  // Round C5: made-up accounts added through the accounts screen in a test.
+  const accountsOff = await db.from("app_users").update({ active: false }).eq("active", true).like("display_name", `${prefix}%`).select("id");
+  if (accountsOff.error) throw new Error(accountsOff.error.message);
+  const accounts = accountsOff.data?.length ?? 0;
+
   let left = await activeTestPlaces(db, prefix);
   const emptied = await emptyPlaces(db, left.map((l) => l.id));
 
@@ -239,5 +244,5 @@ export async function switchOffTestLeftovers(db: SupabaseClient, prefix = "Test 
     left = await activeTestPlaces(db, prefix);
     if (done === 0) break;
   }
-  return { companies, models, categories, expenseLists, books: books.data?.length ?? 0, borrowers: borrowers.data?.length ?? 0, people: people.data?.length ?? 0, trainingTypes: trainingTypes.data?.length ?? 0, slotTypes: slotTypes.data?.length ?? 0, rotaTemplates: rotaTemplates.data?.length ?? 0, policies: policies.data?.length ?? 0, vehicles, renewals: renewals.data?.length ?? 0, warrantiesCleared: warranties.data?.length ?? 0, places, placesLeftOn: left.length, ...emptied };
+  return { accounts, companies, models, categories, expenseLists, books: books.data?.length ?? 0, borrowers: borrowers.data?.length ?? 0, people: people.data?.length ?? 0, trainingTypes: trainingTypes.data?.length ?? 0, slotTypes: slotTypes.data?.length ?? 0, rotaTemplates: rotaTemplates.data?.length ?? 0, policies: policies.data?.length ?? 0, vehicles, renewals: renewals.data?.length ?? 0, warrantiesCleared: warranties.data?.length ?? 0, places, placesLeftOn: left.length, ...emptied };
 }

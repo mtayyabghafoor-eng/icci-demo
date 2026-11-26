@@ -89,6 +89,7 @@ describe("tidy-up after a test run", () => {
 
     const result = await switchOffTestLeftovers(masterKeyClient(), prefix);
     expect(result).toEqual({
+      accounts: 0,
       categories: 0,
       companies: 0,
       models: 0,
