@@ -396,7 +396,7 @@ function SlotCard({ e, ctx, compact = false }: { e: RotaEntry; ctx: Ctx; compact
           Changed
         </span>
       )}
-      {!compact && <span className="block font-semibold text-icci-green-dark">{type?.name}</span>}
+      {!compact && <span dir="auto" className="block font-semibold text-icci-green-dark">{type?.name}</span>}
       <span className={cx("block font-semibold", !person && "font-semibold text-icci-green")} dir="auto" data-testid="slot-person">
         {person ?? (ctx.ended ? "Nobody" : "+ Fill")}
       </span>

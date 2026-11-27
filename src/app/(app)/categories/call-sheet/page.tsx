@@ -91,7 +91,7 @@ async function Content({ searchParams }: PageProps<"/categories/call-sheet">) {
                 </tr>,
                 ...own.map((s) => (
                   <tr key={s.id} className="border-b border-icci-line align-top text-[14px]" data-testid="call-row">
-                    <th scope="row" className="py-2 pl-7 pr-3 font-normal">
+                    <th dir="auto" scope="row" className="py-2 pl-7 pr-3 font-normal">
                       {s.name}
                     </th>
                     <td className="py-2">

@@ -54,7 +54,7 @@ async function Content({ params }: { params: PageProps<"/items/[id]/asset/[actio
     <>
       <BackLink href={`/items/${item.id}`}>Back to the item</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">{titleCase(ASSET_ACTIONS[action].title)}</h1>
-      <p className="mt-2 text-lg font-semibold">{item.name}</p>
+      <p dir="auto" className="mt-2 text-lg font-semibold">{item.name}</p>
       <p className="text-sm">
         {item.label_serial} · {lookups.locationName.get(item.location_id)}
       </p>

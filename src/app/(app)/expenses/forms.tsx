@@ -567,7 +567,7 @@ export function RepaymentForm({
               <span className={label}>
                 Reference <span className="font-normal text-icci-ink-60">(optional)</span>
               </span>
-              <Input name="reference" maxLength={100} className="mt-1" placeholder="As on the bank statement" />
+              <Input dir="auto" name="reference" maxLength={100} className="mt-1" placeholder="As on the bank statement" />
             </label>
           </div>
           <FormError message={state.error} />

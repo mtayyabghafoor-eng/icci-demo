@@ -107,7 +107,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/companies
             <ul className="mt-3 divide-y divide-icci-line" data-testid="company-models">
               {theirModels.map((m) => (
                 <li key={m.id} className="py-2">
-                  <Link href={`/models/${m.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/models/${m.id}`} className="font-semibold">
                     {m.model_name}
                   </Link>{" "}
                   <span className="text-sm text-icci-ink-60">

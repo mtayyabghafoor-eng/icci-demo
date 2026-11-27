@@ -54,9 +54,9 @@ async function Content({ params, searchParams }: PageProps<"/models/[id]">) {
         <Card>
           <FactGrid
             facts={[
-              { label: "Maker", value: maker ? <Link href={`/companies/${maker.id}`}>{maker.name}</Link> : "Unknown" },
+              { label: "Maker", value: maker ? <Link dir="auto" href={`/companies/${maker.id}`}>{maker.name}</Link> : "Unknown" },
               { label: "Category", value: categoryPath(model.category_id, new Map(categories.map((c) => [c.id, c]))) },
-              { label: "Serviced by", value: service ? <Link href={`/companies/${service.id}`}>{service.name}</Link> : "Not set" },
+              { label: "Serviced by", value: service ? <Link dir="auto" href={`/companies/${service.id}`}>{service.name}</Link> : "Not set" },
               { label: "Usual warranty", value: model.warranty_months ? `${model.warranty_months} months` : "Not recorded" },
               { label: "Notes", value: <span className="whitespace-pre-line">{model.notes || "None"}</span> },
             ]}
@@ -74,7 +74,7 @@ async function Content({ params, searchParams }: PageProps<"/models/[id]">) {
               {list.map((i) => (
                 <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
                   <span>
-                    <Link href={`/items/${i.id}`} className="font-semibold">
+                    <Link dir="auto" href={`/items/${i.id}`} className="font-semibold">
                       {i.name}
                     </Link>{" "}
                     <span className="font-mono text-sm text-icci-ink-60">{i.label_serial}</span>

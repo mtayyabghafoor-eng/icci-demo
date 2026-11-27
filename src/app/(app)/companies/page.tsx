@@ -67,7 +67,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/companies">
       <form method="get" className="mb-4 grid gap-3 sm:grid-cols-[2fr_1fr_auto]" role="search" aria-label="Find a company">
         <label>
           <span className="font-semibold">Name</span>
-          <input name="q" defaultValue={q} className={fieldClass} />
+          <input dir="auto" name="q" defaultValue={q} className={fieldClass} />
         </label>
         <label>
           <span className="font-semibold">What they do</span>
@@ -104,7 +104,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/companies">
               header: "Company",
               cell: (c) => (
                 <span>
-                  <Link href={`/companies/${c.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/companies/${c.id}`} className="font-semibold">
                     {c.name}
                   </Link>{" "}
                   {!c.active && <StatusBadge word="Switched off" tone="grey" />}

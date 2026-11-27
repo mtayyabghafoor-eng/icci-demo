@@ -21,7 +21,7 @@ export function AddDocumentForm({ owner, returnTo, defaultKind }: { owner: Docum
           </Select>
         </Field>
         <Field id="doc-title" label="Title" optional help="For example “User manual (English)”.">
-          <Input id="doc-title" name="title" maxLength={120} />
+          <Input dir="auto" id="doc-title" name="title" maxLength={120} />
         </Field>
       </div>
       <Field id="doc-file" label="File" help={`A PDF, or a photo (JPEG, PNG or WebP), up to ${DOCUMENT_MAX_MB} MB.`}>
@@ -44,7 +44,7 @@ export function HideDocumentForm({ id, title, returnTo }: { id: number; title: s
       <summary className="inline-flex min-h-10 cursor-pointer items-center text-sm font-semibold text-icci-green">Hide this document</summary>
       <form action={action} className="mt-2 space-y-3" aria-label={`Hide ${title}`}>
         <Field id={`hide-${id}`} label="Why is it being hidden?" help="It stays in the record, but is no longer listed.">
-          <Input id={`hide-${id}`} name="reason" maxLength={500} required />
+          <Input dir="auto" id={`hide-${id}`} name="reason" maxLength={500} required />
         </Field>
         <FormError message={state.error} />
         <button type="submit" disabled={pending} className={buttonClass("danger")}>

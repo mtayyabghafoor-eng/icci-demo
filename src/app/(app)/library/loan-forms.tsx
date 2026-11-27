@@ -54,7 +54,7 @@ export function FindCopyForm({ purpose }: { purpose: "lend" | "return" }) {
         <label htmlFor="label" className="font-semibold">
           Label number
         </label>
-        <input
+        <input dir="auto"
           id="label"
           name="label"
           required
@@ -109,7 +109,7 @@ function BorrowerFields({ borrower, typed }: { borrower?: BorrowerDetails; typed
         <label htmlFor="contact" className="sr-only">
           Phone number or email address
         </label>
-        <input
+        <input dir="auto"
           id="contact"
           name="contact"
           required

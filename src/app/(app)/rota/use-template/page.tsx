@@ -113,7 +113,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/use-te
             <li key={template.id} data-testid="use-template-card">
               <Card className="h-full">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <h2 className="text-lg font-bold text-icci-green-dark">{template.name}</h2>
+                  <h2 dir="auto" className="text-lg font-bold text-icci-green-dark">{template.name}</h2>
                   <StatusBadge word={KIND_TEXT[template.kind]} tone={template.kind === "day" ? "amber" : "grey"} />
                 </div>
                 <p className="mt-2 text-[15px] text-icci-ink-60">

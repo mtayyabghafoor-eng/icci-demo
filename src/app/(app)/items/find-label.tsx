@@ -4,7 +4,7 @@ export function FindLabel() {
     <form action="/l" method="get" className="flex gap-2" role="search" aria-label="Find a label">
       <label className="flex-1">
         <span className="sr-only">Label number</span>
-        <input
+        <input dir="auto"
           name="number"
           required
           placeholder="e.g. ICCI-000123"

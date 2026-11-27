@@ -27,7 +27,7 @@ export function CompanyForm({ company, cancelHref }: { company?: CompanyRow; can
   return (
     <form action={action} className={box} aria-label={company ? "Change this company" : "Add a company"}>
       <Field id="name" label="Name" help="As on their invoices or van, for example “Demo Gates and Barriers Ltd”.">
-        <Input id="name" name="name" required maxLength={120} defaultValue={company?.name} autoComplete="off" />
+        <Input dir="auto" id="name" name="name" required maxLength={120} defaultValue={company?.name} autoComplete="off" />
       </Field>
       <fieldset>
         <legend className="text-[15px] font-semibold">What they do for us</legend>
@@ -49,10 +49,10 @@ export function CompanyForm({ company, cancelHref }: { company?: CompanyRow; can
         </Field>
       </div>
       <Field id="website" label="Website" optional>
-        <Input id="website" name="website" maxLength={200} defaultValue={company?.website ?? ""} placeholder="www.example.ie" />
+        <Input dir="auto" id="website" name="website" maxLength={200} defaultValue={company?.website ?? ""} placeholder="www.example.ie" />
       </Field>
       <Field id="notes" label="Notes" optional help="For example an account number, or “ask for the service desk”. No personal details.">
-        <Textarea id="notes" name="notes" maxLength={1000} defaultValue={company?.notes ?? ""} />
+        <Textarea dir="auto" id="notes" name="notes" maxLength={1000} defaultValue={company?.notes ?? ""} />
       </Field>
       <FormError message={state.error} />
       <Buttons pending={pending} editing={Boolean(company)} add="Add company" cancelHref={cancelHref} />
@@ -89,7 +89,7 @@ export function ModelForm({
         </Select>
       </Field>
       <Field id="model_name" label="Model" help="As written on the maker's plate, for example “WX-200”.">
-        <Input id="model_name" name="model_name" required maxLength={120} defaultValue={model?.model_name} autoComplete="off" />
+        <Input dir="auto" id="model_name" name="model_name" required maxLength={120} defaultValue={model?.model_name} autoComplete="off" />
       </Field>
       <Field id="category_id" label="Category">
         <Select id="category_id" name="category_id" required defaultValue={model?.category_id ?? ""}>
@@ -113,7 +113,7 @@ export function ModelForm({
         <Input id="warranty_months" name="warranty_months" type="number" min={1} max={240} inputMode="numeric" defaultValue={model?.warranty_months ?? ""} />
       </Field>
       <Field id="notes" label="Notes" optional>
-        <Textarea id="notes" name="notes" maxLength={1000} defaultValue={model?.notes ?? ""} />
+        <Textarea dir="auto" id="notes" name="notes" maxLength={1000} defaultValue={model?.notes ?? ""} />
       </Field>
       <FormError message={state.error} />
       <Buttons pending={pending} editing={Boolean(model)} add="Add make and model" cancelHref={cancelHref} />

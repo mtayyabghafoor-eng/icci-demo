@@ -315,7 +315,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
                       <span className="block font-semibold" dir="auto">
                         {p.full_name}
                       </span>
-                      <span className="block text-sm text-icci-ink-60">{role?.name}</span>
+                      <span dir="auto" className="block text-sm text-icci-ink-60">{role?.name}</span>
                       <span className="mt-1 flex flex-wrap items-center gap-2">
                         <StatusBadge {...vet} />
                         {busy && (

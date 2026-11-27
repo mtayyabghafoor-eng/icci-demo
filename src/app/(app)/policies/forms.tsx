@@ -22,7 +22,7 @@ export function RoleBoxes({ roles, picked, quiet = false }: { roles: Choice[]; p
         {roles.map((r) => (
           <label key={r.id} className="flex min-h-11 items-center gap-3">
             <input type="checkbox" name="roles" value={r.id} defaultChecked={picked.has(r.id)} className="h-5 w-5" />
-            <span>{r.name}</span>
+            <span dir="auto">{r.name}</span>
           </label>
         ))}
       </div>
@@ -102,7 +102,7 @@ export function VersionForm({
         <p id="label_hint" className="text-sm">
           For example &ldquo;v2&rdquo; or &ldquo;2026&rdquo;.
         </p>
-        <input id="version_label" name="version_label" required maxLength={20} aria-describedby="label_hint" defaultValue={draft?.version_label} className={fieldClass} />
+        <input dir="auto" id="version_label" name="version_label" required maxLength={20} aria-describedby="label_hint" defaultValue={draft?.version_label} className={fieldClass} />
       </div>
       <div>
         <label htmlFor="approved_on" className="font-semibold">

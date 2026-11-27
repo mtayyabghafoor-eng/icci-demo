@@ -63,7 +63,7 @@ export function CorrectionForm({ itemId, entryId, unit }: { itemId: string; entr
       <NumberBox name="quantity" label="What should the number have been?" unit={unit} autoFocus />
       <label className="block">
         <span className="font-semibold">Reason</span>
-        <textarea name="reason" required rows={3} maxLength={1000} placeholder="e.g. Typed 10 instead of 12" className={fieldClass} />
+        <textarea dir="auto" name="reason" required rows={3} maxLength={1000} placeholder="e.g. Typed 10 instead of 12" className={fieldClass} />
       </label>
       <FormError message={state.error} />
       <SaveBar cancelHref={`/items/${itemId}`}>
@@ -81,7 +81,7 @@ export function DecideForm({ adjustmentId }: { adjustmentId: number }) {
     <form onSubmit={keep(action)} className="mt-3 space-y-3">
       <label className="block">
         <span className="font-semibold">Note</span> <span className="text-sm">(needed if you reject)</span>
-        <input name="note" maxLength={1000} className={fieldClass} />
+        <input dir="auto" name="note" maxLength={1000} className={fieldClass} />
       </label>
       <FormError message={state.error} />
       <div className="flex flex-wrap gap-2">
@@ -139,7 +139,7 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
             <li key={r.itemId} id={`row-${r.label}`} className="rounded-2xl border border-icci-line bg-white shadow-card p-4">
               <label className="grid items-center gap-x-3 gap-y-1 sm:grid-cols-[1fr_auto]">
                 <span>
-                  <span className="block font-semibold">{r.name}</span>
+                  <span dir="auto" className="block font-semibold">{r.name}</span>
                   <span className="block text-sm">
                     {r.label} · {r.place} · now: {r.lastQuantity == null ? "not counted yet" : quantityWord(r.lastQuantity, r.unit)}
                   </span>

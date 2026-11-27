@@ -30,7 +30,7 @@ function CompanyLine({ company, why, testId }: { company: CompanyRow; why: strin
   return (
     <div className="rounded-xl border border-icci-line bg-white p-3" data-testid={testId}>
       <p className="font-semibold">
-        <Link href={`/companies/${company.id}`}>{company.name}</Link> <span className="text-sm font-normal text-icci-ink-60">· {why}</span>
+        <Link dir="auto" href={`/companies/${company.id}`}>{company.name}</Link> <span className="text-sm font-normal text-icci-ink-60">· {why}</span>
       </p>
       <p className="mt-1.5 flex flex-wrap gap-2">
         {company.phone ? (
@@ -136,7 +136,7 @@ export async function ContactCard({ itemId, showDocuments = true }: { itemId: st
           Staff contact for this kind of thing:{" "}
           {person ? (
             <>
-              <strong>{person.full_name}</strong>
+              <strong dir="auto">{person.full_name}</strong>
               {person.phone ? (
                 <>
                   {" "}

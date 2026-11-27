@@ -80,10 +80,10 @@ async function Content() {
           {open.length === 0 ? (
             <p className="mt-3">No stocktake is under way.</p>
           ) : (
-            <ul className="mt-3 space-y-2">
+            <ul dir="auto" className="mt-3 space-y-2">
               {open.map((s) => (
                 <li key={s.id} className="list-card" data-testid="open-stocktake">
-                  <Link href={`/stocktake/${s.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/stocktake/${s.id}`} className="font-semibold">
                     {lookups.locationName.get(s.location_id)}
                   </Link>
                   <span className="block text-sm">
@@ -103,14 +103,14 @@ async function Content() {
         ) : (
           <>
           {/* A2: on a phone, cards instead of a wide table. */}
-          <ul className="mt-3 space-y-2 md:hidden">
+          <ul dir="auto" className="mt-3 space-y-2 md:hidden">
             {sent.map((s) => {
               const statuses = statusesOf.get(s.id) ?? [];
               const waiting = statuses.some((x) => x === "pending");
               return (
                 <li key={s.id} className="list-card" data-testid="sent-stocktake-card">
                   <span className="flex items-start justify-between gap-2">
-                    <Link href={`/stocktake/${s.id}`} className="font-semibold">
+                    <Link dir="auto" href={`/stocktake/${s.id}`} className="font-semibold">
                       {lookups.locationName.get(s.location_id)}
                     </Link>
                     <StatusBadge word={decisionSummary(statuses)} tone={waiting ? "amber" : STOCKTAKE_STATUS.submitted.tone} />
@@ -132,14 +132,14 @@ async function Content() {
                   <th className="py-2">Differences</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody dir="auto">
                 {sent.map((s) => {
                   const statuses = statusesOf.get(s.id) ?? [];
                   const waiting = statuses.some((x) => x === "pending");
                   return (
                     <tr key={s.id} className="border-b border-icci-panel" data-testid="sent-stocktake">
                       <td className="py-2 pr-3">
-                        <Link href={`/stocktake/${s.id}`}>{lookups.locationName.get(s.location_id)}</Link>
+                        <Link dir="auto" href={`/stocktake/${s.id}`}>{lookups.locationName.get(s.location_id)}</Link>
                       </td>
                       <td className="py-2 pr-3">{s.submitted_at ? formatDateTime(s.submitted_at) : ""}</td>
                       <td className="py-2 pr-3">{nameOf(s.submitted_by)}</td>

@@ -50,8 +50,19 @@ export function Field({
 
 type Invalid = { invalid?: boolean };
 
-export function Input({ invalid, className, ...rest }: Invalid & ComponentProps<"input">) {
-  return <input aria-invalid={invalid || undefined} className={controlClass(invalid, cx("min-h-12 md:min-h-11", className))} {...rest} />;
+/** E9: boxes for fixed formats stay left-to-right; everything else follows what is typed. */
+const LEFT_TO_RIGHT = new Set(["email", "password", "number", "date", "datetime-local", "time", "month", "week", "tel", "url"]);
+
+export function Input({ invalid, className, dir, ...rest }: Invalid & ComponentProps<"input">) {
+  const fixed = LEFT_TO_RIGHT.has(rest.type ?? "") || rest.inputMode === "numeric" || rest.inputMode === "decimal";
+  return (
+    <input
+      aria-invalid={invalid || undefined}
+      dir={dir ?? (fixed ? undefined : "auto")}
+      className={controlClass(invalid, cx("min-h-12 md:min-h-11", className))}
+      {...rest}
+    />
+  );
 }
 
 export function Select({ invalid, className, children, ...rest }: Invalid & ComponentProps<"select">) {
@@ -62,6 +73,6 @@ export function Select({ invalid, className, children, ...rest }: Invalid & Comp
   );
 }
 
-export function Textarea({ invalid, className, ...rest }: Invalid & ComponentProps<"textarea">) {
-  return <textarea aria-invalid={invalid || undefined} className={controlClass(invalid, cx("min-h-28 py-3", className))} {...rest} />;
+export function Textarea({ invalid, className, dir = "auto", ...rest }: Invalid & ComponentProps<"textarea">) {
+  return <textarea aria-invalid={invalid || undefined} dir={dir} className={controlClass(invalid, cx("min-h-28 py-3", className))} {...rest} />;
 }

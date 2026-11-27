@@ -79,7 +79,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/tickets/new
       <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Report a Problem</h1>
       {item ? (
         <>
-          <p className="mt-2 text-lg font-semibold">{item.name}</p>
+          <p dir="auto" className="mt-2 text-lg font-semibold">{item.name}</p>
           <p className="text-sm">
             {item.label_serial} · {lookups.locationName.get(item.location_id)}
           </p>
@@ -108,16 +108,16 @@ async function Content({ searchParams }: { searchParams: PageProps<"/tickets/new
             </button>
           </form>
           {find && (
-            <div className="mt-3" data-testid="found-items">
+            <div dir="auto" className="mt-3" data-testid="found-items">
               {found.length === 0 ? (
                 <p className="text-[15px]">No registered item matches &ldquo;{find}&rdquo;. Pick the place below instead.</p>
               ) : (
-                <ul className="space-y-2">
+                <ul dir="auto" className="space-y-2">
                   {found.map((i) => (
                     <li key={i.id}>
                       <Link href={`/tickets/new?item=${i.id}`} className="list-card">
                         <span className="flex items-start justify-between gap-2">
-                          <span className="font-semibold text-icci-green">{i.name}</span>
+                          <span dir="auto" className="font-semibold text-icci-green">{i.name}</span>
                           <ItemStatus kind="fixed_asset" condition={i.condition} />
                         </span>
                         <span className="block text-sm">

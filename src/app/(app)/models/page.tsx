@@ -57,7 +57,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/models">["s
       <form method="get" className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]" role="search" aria-label="Find a make and model">
         <label>
           <span className="font-semibold">Maker or model</span>
-          <input name="q" defaultValue={q} className={fieldClass} />
+          <input dir="auto" name="q" defaultValue={q} className={fieldClass} />
         </label>
         <div className="flex items-end">
           <button type="submit" className="inline-flex min-h-11 items-center rounded-[10px] bg-icci-green-dark px-4 font-semibold text-white!">
@@ -80,7 +80,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/models">["s
               header: "Model",
               cell: (m) => (
                 <span>
-                  <Link href={`/models/${m.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/models/${m.id}`} className="font-semibold">
                     {m.model_name}
                   </Link>{" "}
                   {!m.active && <StatusBadge word="Switched off" tone="grey" />}

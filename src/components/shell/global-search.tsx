@@ -137,7 +137,7 @@ export function GlobalSearch({ placeholder, big = false, slashKey = false }: { p
             !o.group && "font-semibold text-icci-green",
           )}
         >
-          <span className={cx("truncate", o.group && "text-icci-ink")}>{o.title}</span>
+          <span dir="auto" className={cx("truncate", o.group && "text-icci-ink")}>{o.title}</span>
           {o.detail && <span className="truncate text-sm text-icci-ink-60">{o.detail}</span>}
         </a>
       </li>

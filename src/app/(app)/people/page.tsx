@@ -101,7 +101,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="search" aria-label="Search people">
         <label className="lg:col-span-2">
           <span className="font-semibold">Search</span>
-          <input name="q" defaultValue={q} placeholder="Name, phone or email" className={field} />
+          <input dir="auto" name="q" defaultValue={q} placeholder="Name, phone or email" className={field} />
         </label>
         <label>
           <span className="font-semibold">Role</span>
@@ -189,16 +189,16 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
             {mixed && <th className="px-3 py-2">Status</th>}
           </tr>
         </thead>
-        <tbody>
+        <tbody dir="auto">
           {rows.map((p) => (
             <tr key={p.id} data-testid="person-row" className="border-b border-icci-panel align-top">
               <td className="px-3 py-2" dir="auto">
-                <Link href={`/people/${p.id}`} className="font-semibold">
+                <Link dir="auto" href={`/people/${p.id}`} className="font-semibold">
                   {p.full_name}
                 </Link>
               </td>
-              <td className="px-3 py-2">{lists.roleName.get(p.person_role_id)}</td>
-              <td className="px-3 py-2">{lists.sectionName.get(p.section_id)}</td>
+              <td dir="auto" className="px-3 py-2">{lists.roleName.get(p.person_role_id)}</td>
+              <td dir="auto" className="px-3 py-2">{lists.sectionName.get(p.section_id)}</td>
               {/* D3: on a PC the number and address can be clicked (a softphone or the mail program). */}
               <td className="px-3 py-2 text-sm">
                 {p.phone || p.email ? (
@@ -230,7 +230,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
         </tbody>
       </table>
       </div>
-      <ul className="mt-3 space-y-3 md:hidden">
+      <ul dir="auto" className="mt-3 space-y-3 md:hidden">
         {rows.map((p) => (
           <li key={p.id}>
             <Link

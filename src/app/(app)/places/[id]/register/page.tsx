@@ -128,7 +128,7 @@ async function Content({
         )}
         {used && (
           <Notice tone="warning" testId="label-in-use">
-            {scanned} is already on <Link href={`/items/${used.id}`}>{used.name}</Link>, recorded in{" "}
+            {scanned} is already on <Link dir="auto" href={`/items/${used.id}`}>{used.name}</Link>, recorded in{" "}
             {lineOf(used.location_id, byId)
               .map((p) => p.name)
               .join(" › ")}
@@ -155,7 +155,7 @@ async function Content({
               {registered.map((i) => (
                 <li key={i.id} className="flex items-center gap-2 py-2">
                   <Check aria-hidden size={18} className="shrink-0 text-icci-green" />
-                  <Link href={`/items/${i.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/items/${i.id}`} className="font-semibold">
                     {i.name}
                   </Link>
                   <span className="ml-auto whitespace-nowrap font-mono text-sm text-icci-ink-60">{i.label_serial}</span>

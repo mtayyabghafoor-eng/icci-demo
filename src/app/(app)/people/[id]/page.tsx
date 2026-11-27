@@ -170,7 +170,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
           {lists.roles.find((r) => r.id === p.person_role_id)?.needs_vetting ? " (needs Garda vetting)" : ""}
         </dd>
         <dt>Section</dt>
-        <dd>{lists.sectionName.get(p.section_id)}</dd>
+        <dd dir="auto">{lists.sectionName.get(p.section_id)}</dd>
         <dt>Phone</dt>
         {/* D3: tap to call or email from a phone. */}
         <dd>
@@ -261,7 +261,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
                       <form action={withdrawVetting.bind(null, p.id, r.id)} className="mt-2 flex flex-wrap items-end gap-3">
                         <label className="min-w-64 flex-1">
                           <span className="font-semibold">Why is it wrong?</span>
-                          <input name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
+                          <input dir="auto" name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
                         </label>
                         <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                           Withdraw
@@ -284,11 +284,11 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
             No training recorded.
           </p>
         ) : (
-          <ul className="mt-2 space-y-2" data-testid="training-now">
+          <ul dir="auto" className="mt-2 space-y-2" data-testid="training-now">
             {training.map((t) => (
               <li key={t.training_type_id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-icci-panel bg-icci-panel p-3">
                 <span>
-                  <span className="block font-semibold">{typeName.get(t.training_type_id) ?? "Training"}</span>
+                  <span dir="auto" className="block font-semibold">{typeName.get(t.training_type_id) ?? "Training"}</span>
                   <span className="block text-sm">{trainingLine(t, today)}</span>
                 </span>
                 <StatusBadge {...TRAINING_STATUS[t.status]} />
@@ -308,7 +308,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
         {trainingPast.length > 0 && (
           <>
             <h3 className="mt-4 font-semibold">History</h3>
-            <ol className="mt-2 space-y-2" data-testid="training-history">
+            <ol dir="auto" className="mt-2 space-y-2" data-testid="training-history">
               {trainingPast.map((r) => (
                 <li key={r.id} className={`rounded-md border p-3 ${r.withdrawn_at ? "border-dashed border-icci-text/40 bg-[#F0F0EE]" : "border-icci-panel bg-icci-panel"}`}>
                   <span className="flex flex-wrap items-center gap-2">
@@ -332,7 +332,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
                         <form action={withdrawTraining.bind(null, p.id, r.id)} className="mt-2 flex flex-wrap items-end gap-3">
                           <label className="min-w-64 flex-1">
                             <span className="font-semibold">Why is it wrong?</span>
-                            <input name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
+                            <input dir="auto" name="reason" required maxLength={500} className="mt-1 block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green" />
                           </label>
                           <button type="submit" className={`${button} border-icci-field bg-white text-icci-text hover:border-icci-green hover:bg-icci-green-50`}>
                             Withdraw
@@ -425,10 +425,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
             None picked from the directory yet. (Older entries have names typed in.)
           </p>
         ) : (
-          <ol className="mt-2 space-y-2" data-testid="reported-entries">
+          <ol dir="auto" className="mt-2 space-y-2" data-testid="reported-entries">
             {entries.map((e) => (
               <li key={e.id} className="rounded-xl border border-icci-line bg-white p-4 shadow-card">
-                <Link href={`/items/${e.item_id}`} className="font-semibold">
+                <Link dir="auto" href={`/items/${e.item_id}`} className="font-semibold">
                   {itemName.get(e.item_id) ?? "An item"}
                 </Link>
                 <span className="block">{describeEvent(e, places?.locationName ?? new Map())}</span>

@@ -70,7 +70,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
       <p className="mt-4" data-testid="pending-count">
         {pending.length === 0 ? "Nothing is waiting for approval." : `${pending.length} waiting.`}
       </p>
-      <ul className="mt-3 space-y-3">
+      <ul dir="auto" className="mt-3 space-y-3">
         {pending.map((p) => {
           const item = itemOf.get(p.item_id);
           const mine = p.created_by === me.id;
@@ -79,7 +79,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
             <li key={p.id} className="list-card" data-testid="pending-disposal">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <p>
-                  <Link href={`/items/${p.item_id}`} className="font-semibold">
+                  <Link dir="auto" href={`/items/${p.item_id}`} className="font-semibold">
                     {item?.name}
                   </Link>
                   <span className="block text-sm">

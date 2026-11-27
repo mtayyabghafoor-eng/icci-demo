@@ -47,7 +47,7 @@ export function CategoryForm({
             ? "The kind of thing, in plain words, for example “Lawnmowers” or “Air conditioners”. Each name is used once in the whole list."
             : "A broad group, for example “Kitchen and catering”. Each name is used once in the whole list."}
         </p>
-        <input
+        <input dir="auto"
           id="name"
           name="name"
           required

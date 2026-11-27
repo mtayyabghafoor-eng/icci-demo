@@ -280,7 +280,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
         {signoffs.length > 0 && (
           <>
             <h3 className="mt-5 font-semibold">Entries for this version</h3>
-            <ol className="mt-2 space-y-3" data-testid="signoff-history">
+            <ol dir="auto" className="mt-2 space-y-3" data-testid="signoff-history">
               {signoffs.map((x) => (
                 <li key={x.id} className={`rounded-xl border p-4 ${x.withdrawn_at ? "border-dashed border-icci-text/40 bg-[#F0F0EE]" : "border-icci-line"}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -310,7 +310,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
                       <form action={withdrawSignoff.bind(null, p.id, x.id)} className="mt-2 flex flex-wrap items-end gap-3">
                         <label className="min-w-64 flex-1">
                           <span className="font-semibold">Why is it wrong?</span>
-                          <input
+                          <input dir="auto"
                             name="reason"
                             required
                             maxLength={500}

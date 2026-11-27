@@ -41,7 +41,7 @@ export function PlaceFinder() {
         <span className="sr-only">Find a place</span>
         <span className="relative block">
           <Search aria-hidden size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-icci-ink-60" />
-          <input
+          <input dir="auto"
             type="search"
             value={find}
             onChange={(e) => setFind(e.target.value)}

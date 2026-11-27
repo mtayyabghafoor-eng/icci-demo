@@ -83,7 +83,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/audit-log">["s
       <form method="get" className="mt-4 flex flex-wrap items-end gap-3" aria-label="Filter the audit log">
         <label className="min-w-64">
           <span className="font-semibold">Table</span>
-          <input name="table" defaultValue={table} placeholder="for example items" className={fieldClass} />
+          <input dir="auto" name="table" defaultValue={table} placeholder="for example items" className={fieldClass} />
         </label>
         <button type="submit" className="inline-flex min-h-11 items-center justify-center rounded-[10px] bg-icci-green-dark px-4 py-2 font-semibold text-white!">
           Show

@@ -194,7 +194,7 @@ function NoteBox({ label, required = false, hint }: { label: string; required?: 
 function Fold({ title, children, testId }: { title: string; children: React.ReactNode; testId: string }) {
   return (
     <details className="rounded-xl border border-icci-line bg-white px-4 py-1" data-testid={testId}>
-      <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-icci-green">{title}</summary>
+      <summary dir="auto" className="flex min-h-11 cursor-pointer items-center font-semibold text-icci-green">{title}</summary>
       <div className="pb-4 pt-1">{children}</div>
     </details>
   );
@@ -322,7 +322,7 @@ export function TicketActions({
           </label>
           <label className="block">
             <span className="font-semibold">Their job number (optional)</span>
-            <input name="job_ref" maxLength={60} className={fieldClass} placeholder="e.g. the number they gave on the phone" />
+            <input dir="auto" name="job_ref" maxLength={60} className={fieldClass} placeholder="e.g. the number they gave on the phone" />
           </label>
           <NoteBox label="Note (optional)" hint="e.g. Engineer coming Thursday morning" />
         </StepForm>

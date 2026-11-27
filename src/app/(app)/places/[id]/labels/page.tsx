@@ -171,7 +171,7 @@ function PlaceLabel({ cell, link, tag }: { cell: Cell; link: string; tag: "TEST 
           {/* eslint-disable-next-line @next/next/no-img-element -- printed at a fixed size; the whole round logo, never cropped */}
           <img src="/brand/icci-logo-160.png" alt="" className="place-label-logo" />
         </div>
-        <span className="place-label-name" style={{ fontSize: nameSize(cell.place.name) }}>
+        <span dir="auto" className="place-label-name" style={{ fontSize: nameSize(cell.place.name) }}>
           {cell.place.name}
         </span>
         {cell.where && <span className="place-label-where">{cell.where}</span>}

@@ -209,7 +209,7 @@ function Rows({ rows }: { rows: TicketCsvRow[] }) {
                   </Link>
                   {t.asset && <span className="block text-sm">{t.asset}</span>}
                 </td>
-                <td className="px-3 py-2 text-sm">{t.place}</td>
+                <td dir="auto" className="px-3 py-2 text-sm">{t.place}</td>
                 <td className="px-3 py-2 text-sm" dir="auto">
                   {t.assignee || "Nobody yet"}
                 </td>

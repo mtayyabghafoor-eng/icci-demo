@@ -100,7 +100,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/expenses/se
 
       <Card>
         <CardTitle>Second approver</CardTitle>
-        <ul className="space-y-5" data-testid="expense-amounts">
+        <ul dir="auto" className="space-y-5" data-testid="expense-amounts">
           {SETTING_KEYS.map((key) => {
             const s = byKey.get(key);
             const text = SETTING_TEXT[key];

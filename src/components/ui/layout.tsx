@@ -74,7 +74,7 @@ export function PageHeader({
       {crumbs && crumbs.length > 0 && <Breadcrumb items={crumbs} />}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="page-title text-[26px] md:text-[34px]">{title}</h1>
+          <h1 dir="auto" className="page-title text-[26px] md:text-[34px]">{title}</h1>
           {subtitle && <p className="mt-1.5 text-icci-ink-60">{subtitle}</p>}
           {status && <div className="mt-3">{status}</div>}
         </div>

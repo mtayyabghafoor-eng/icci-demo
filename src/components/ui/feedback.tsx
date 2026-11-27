@@ -47,7 +47,7 @@ export function Notice({
     >
       <Icon aria-hidden size={toast ? 22 : 20} className="mt-0.5 shrink-0" />
       <div className="text-[15px] leading-relaxed">
-        {title && <p className="font-bold">{title}</p>}
+        {title && <p dir="auto" className="font-bold">{title}</p>}
         {children && <div className={cx(title && "mt-0.5", "text-icci-text")}>{children}</div>}
       </div>
     </div>
@@ -61,7 +61,7 @@ export function EmptyState({ icon: Icon, title, children, action }: { icon: Luci
       <span className="flex h-14 w-14 items-center justify-center rounded-full bg-icci-gold-100 text-icci-green-dark">
         <Icon aria-hidden size={26} strokeWidth={1.75} />
       </span>
-      <p className="mt-4 text-lg font-bold">{title}</p>
+      <p dir="auto" className="mt-4 text-lg font-bold">{title}</p>
       {children && <p className="mt-1 max-w-md text-icci-ink-60">{children}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>

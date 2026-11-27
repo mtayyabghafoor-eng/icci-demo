@@ -33,7 +33,7 @@ export function PlaceForm({
           As it is called in the Centre, for example &ldquo;Main hall&rdquo;, &ldquo;Store 2&rdquo; or &ldquo;Shelf B3&rdquo;. It is printed large on the
           label.
         </p>
-        <input
+        <input dir="auto"
           id="name"
           name="name"
           required
@@ -48,7 +48,7 @@ export function PlaceForm({
         <label htmlFor="notes" className="font-semibold">
           Notes (optional)
         </label>
-        <textarea id="notes" name="notes" rows={3} maxLength={MAX_PLACE_NOTES} defaultValue={place?.notes ?? ""} className={fieldClass} />
+        <textarea dir="auto" id="notes" name="notes" rows={3} maxLength={MAX_PLACE_NOTES} defaultValue={place?.notes ?? ""} className={fieldClass} />
       </div>
       <FormError message={state.error} />
       <SaveBar cancelHref={cancelHref}>

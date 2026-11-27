@@ -24,7 +24,7 @@ export function AccountBlock({
       <div className="flex items-center gap-3">
         <Avatar name={name} />
         <p className={cx("min-w-0 leading-tight", word)}>
-          <span className="block truncate font-semibold text-white" data-testid={testIds ? "signed-in-name" : undefined}>
+          <span dir="auto" className="block truncate font-semibold text-white" data-testid={testIds ? "signed-in-name" : undefined}>
             {name}
           </span>
           <span className="block text-[13px] text-white/70" data-testid={testIds ? "signed-in-role" : undefined}>

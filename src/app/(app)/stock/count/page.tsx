@@ -118,7 +118,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/stock/count
         </PageNotice>
       )}
       <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-semibold text-icci-green-dark">{chosen.path}</span>
+        <span dir="auto" className="font-semibold text-icci-green-dark">{chosen.path}</span>
         <Link href="/stock/count" className="inline-flex min-h-11 items-center text-sm font-semibold">
           Another store room
         </Link>

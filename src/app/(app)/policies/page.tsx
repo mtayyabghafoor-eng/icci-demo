@@ -110,11 +110,11 @@ function Rows({ rows, ownerName, counts, testId }: { rows: PolicyRow[]; ownerNam
               <th className="px-3 py-2">Signed</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody dir="auto">
             {rows.map((p) => (
               <tr key={p.id} data-testid={testId} className="border-b border-icci-panel align-top">
                 <td className="px-3 py-2" dir="auto">
-                  <Link href={`/policies/${p.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/policies/${p.id}`} className="font-semibold">
                     {p.title}
                   </Link>
                   {p.has_draft && <span className="block text-sm">A draft is waiting to be published.</span>}
@@ -133,7 +133,7 @@ function Rows({ rows, ownerName, counts, testId }: { rows: PolicyRow[]; ownerNam
           </tbody>
         </table>
       </div>
-      <ul className="mt-3 space-y-3 md:hidden">
+      <ul dir="auto" className="mt-3 space-y-3 md:hidden">
         {rows.map((p) => (
           <li key={p.id}>
             <Link href={`/policies/${p.id}`} data-testid={testId} className="list-card">

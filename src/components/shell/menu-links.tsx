@@ -94,13 +94,13 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
                 />
               </button>
             ) : (
-              <p className={cx("px-3 pb-1.5 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3]", compact && "hidden lg:block group-data-[open=true]/rail:block")}>
+              <p dir="auto" className={cx("px-3 pb-1.5 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3]", compact && "hidden lg:block group-data-[open=true]/rail:block")}>
                 {group.title}
               </p>
             )}
             {/* D2: the opened-out tablet rail names each group (every group stays open there). */}
             {foldable && compact && (
-              <p aria-hidden className="hidden px-3 pb-1 pt-1 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3] max-lg:group-data-[open=true]/rail:block">
+              <p dir="auto" aria-hidden className="hidden px-3 pb-1 pt-1 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3] max-lg:group-data-[open=true]/rail:block">
                 {group.title}
               </p>
             )}

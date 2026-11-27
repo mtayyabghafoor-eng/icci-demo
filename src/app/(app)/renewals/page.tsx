@@ -165,12 +165,12 @@ function Rows({ rows, owners, today }: { rows: RegisterRow[]; owners: Map<string
                   <Due r={r} today={today} />
                 </td>
                 <td className="px-3 py-2" dir="auto">
-                  <Link href={hrefOf(r)} className="font-semibold">
+                  <Link dir="auto" href={hrefOf(r)} className="font-semibold">
                     {r.title}
                   </Link>
                   {r.note && <span className="block text-sm">{r.note}</span>}
                 </td>
-                <td className="px-3 py-2">{r.category}</td>
+                <td dir="auto" className="px-3 py-2">{r.category}</td>
                 <td className="px-3 py-2" dir="auto">
                   {owner(r)}
                 </td>

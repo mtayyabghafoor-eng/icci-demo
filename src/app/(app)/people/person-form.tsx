@@ -79,7 +79,7 @@ export function PersonForm({ person, roles, sections }: Props) {
           <ul className="mt-1 list-disc pl-6">
             {state.sameName.map((p) => (
               <li key={p.id}>
-                <Link href={`/people/${p.id}`}>{p.full_name}</Link>
+                <Link dir="auto" href={`/people/${p.id}`}>{p.full_name}</Link>
                 {p.active ? "" : " (switched off)"}
               </li>
             ))}

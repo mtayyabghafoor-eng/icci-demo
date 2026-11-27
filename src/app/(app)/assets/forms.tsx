@@ -130,7 +130,7 @@ export function AssetEventForm({
       )}
       <label className="block">
         <span className="font-semibold">Note</span>
-        <textarea name="note" required rows={3} maxLength={2000} placeholder={NOTE_HINT[action]} className={fieldClass} />
+        <textarea dir="auto" name="note" required rows={3} maxLength={2000} placeholder={NOTE_HINT[action]} className={fieldClass} />
       </label>
       <label className="block">
         <span className="font-semibold">Reported by</span>
@@ -185,7 +185,7 @@ export function DecideDisposalForm({ eventId }: { eventId: number }) {
     >
       <label className="block">
         <span className="font-semibold">Note</span> <span className="text-sm">(needed if you reject)</span>
-        <input name="note" maxLength={1000} className={fieldClass} />
+        <input dir="auto" name="note" maxLength={1000} className={fieldClass} />
       </label>
       <FormError message={state.error} />
       <div className="flex flex-wrap gap-2">

@@ -182,7 +182,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
                     <form action={withdrawRenewal.bind(null, v.id, r.id)} className="mt-2 flex flex-wrap items-end gap-3">
                       <label className="min-w-64 flex-1">
                         <span className="font-semibold">Why is it wrong?</span>
-                        <input
+                        <input dir="auto"
                           name="reason"
                           required
                           maxLength={500}

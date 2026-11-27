@@ -117,7 +117,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
 
       <dl className="facts">
         <dt>Category</dt>
-        <dd>{r.category}</dd>
+        <dd dir="auto">{r.category}</dd>
         <dt>Owner</dt>
         <dd dir="auto" data-testid="owner">
           {o ? (
@@ -186,7 +186,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
                     <form action={withdrawDueDate.bind(null, r.id, d.id)} className="mt-2 flex flex-wrap items-end gap-3">
                       <label className="min-w-64 flex-1">
                         <span className="font-semibold">Why is it wrong?</span>
-                        <input
+                        <input dir="auto"
                           name="reason"
                           required
                           maxLength={500}

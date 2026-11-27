@@ -33,7 +33,7 @@ function LabelField({ label, hint, typed }: { label: string; hint: string; typed
       <p id="label_hint" className="text-sm">
         {hint}
       </p>
-      <input
+      <input dir="auto"
         id="label"
         name="label"
         required

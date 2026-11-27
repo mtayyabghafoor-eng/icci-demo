@@ -62,7 +62,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/accounts/[id]"
   return (
     <>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="page-title text-[28px] md:text-[34px]">{a.display_name}</h1>
+        <h1 dir="auto" className="page-title text-[28px] md:text-[34px]">{a.display_name}</h1>
         <StatusBadge word={s.word} tone={s.tone} />
       </div>
       {typeof done === "string" && DONE[done] && (
@@ -144,7 +144,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/accounts/[id]"
           History
         </h2>
         <p className="text-sm">Every account action is kept. Newest first.</p>
-        <ol className="mt-3 space-y-3 border-l-2 border-icci-gold pl-4" data-testid="account-history">
+        <ol dir="auto" className="mt-3 space-y-3 border-l-2 border-icci-gold pl-4" data-testid="account-history">
           {(events ?? []).map((e) => (
             <li key={e.id} className="rounded-xl border border-icci-line bg-white p-4 shadow-card">
               <span className="font-semibold">{EVENT_WORDS[e.kind] ?? e.kind}</span> · {formatDateTime(e.created_at)} ·{" "}

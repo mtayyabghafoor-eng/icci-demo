@@ -59,7 +59,7 @@ export function RegisterForm(props: {
         <legend className="sr-only">What is it?</legend>
         <label className="block">
           <span className="font-semibold">Label number</span>
-          <input name="label" data-step="1" required defaultValue={props.label} placeholder="ICCI-000123" className={fieldClass} />
+          <input dir="auto" name="label" data-step="1" required defaultValue={props.label} placeholder="ICCI-000123" className={fieldClass} />
         </label>
         <div>
           <span className="font-semibold">Kind of item</span>
@@ -84,7 +84,7 @@ export function RegisterForm(props: {
                   checked={kind === value}
                   onChange={() => setKind(value)}
                 />
-                <span className="font-semibold">{title}</span>
+                <span dir="auto" className="font-semibold">{title}</span>
                 <span className="text-sm">{hint}</span>
               </label>
             ))}
@@ -92,7 +92,7 @@ export function RegisterForm(props: {
         </div>
         <label className="block">
           <span className="font-semibold">Name</span>
-          <input name="name" data-step="1" required maxLength={200} className={fieldClass} />
+          <input dir="auto" name="name" data-step="1" required maxLength={200} className={fieldClass} />
         </label>
       </fieldset>
 
@@ -135,7 +135,7 @@ export function RegisterForm(props: {
           <legend className="sr-only">How is it counted?</legend>
           <label className="block">
             <span className="font-semibold">Counted in (unit)</span>
-            <input name="unit" data-step="3" required maxLength={40} placeholder="box, roll, bottle…" className={fieldClass} />
+            <input dir="auto" name="unit" data-step="3" required maxLength={40} placeholder="box, roll, bottle…" className={fieldClass} />
           </label>
           <label className="block">
             <span className="font-semibold">Minimum level</span>

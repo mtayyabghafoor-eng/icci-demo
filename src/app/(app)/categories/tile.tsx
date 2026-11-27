@@ -30,7 +30,7 @@ export function CategoryTile({
       <CategoryBadge icon={icon} />
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-2">
-          <span className="text-[17px] leading-snug font-bold text-icci-green-dark">{name}</span>
+          <span dir="auto" className="text-[17px] leading-snug font-bold text-icci-green-dark">{name}</span>
           {!active && <StatusBadge word="Switched off" tone="grey" />}
         </span>
         {children && <span className="mt-1.5 block text-sm text-icci-ink-60">{children}</span>}

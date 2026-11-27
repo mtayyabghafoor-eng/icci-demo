@@ -55,7 +55,7 @@ export function EditForm({
     >
       <label className="block sm:col-span-2">
         <span className="font-semibold">Name</span>
-        <input name="name" required maxLength={200} defaultValue={item.name} className={fieldClass} />
+        <input dir="auto" name="name" required maxLength={200} defaultValue={item.name} className={fieldClass} />
       </label>
       <label className="block">
         <span className="font-semibold">Category</span>
@@ -89,7 +89,7 @@ export function EditForm({
         <>
           <label className="block">
             <span className="font-semibold">Counted in (unit)</span>
-            <input name="unit" required maxLength={40} defaultValue={item.unit ?? ""} className={fieldClass} />
+            <input dir="auto" name="unit" required maxLength={40} defaultValue={item.unit ?? ""} className={fieldClass} />
           </label>
           <label className="block">
             <span className="font-semibold">Minimum level</span>
@@ -113,7 +113,7 @@ export function EditForm({
           <Pick name="model_id" label="Make and model" choices={models} value={item.model_id} empty="Not recorded" />
           <label className="block">
             <span className="font-semibold">Maker&apos;s serial number</span>
-            <input name="maker_serial" maxLength={80} defaultValue={item.maker_serial ?? ""} className={fieldClass} placeholder="From the maker's plate" />
+            <input dir="auto" name="maker_serial" maxLength={80} defaultValue={item.maker_serial ?? ""} className={fieldClass} placeholder="From the maker's plate" />
           </label>
         </>
       )}
@@ -124,7 +124,7 @@ export function EditForm({
 
       <label className="block sm:col-span-2">
         <span className="font-semibold">Notes</span>
-        <textarea name="notes" rows={3} maxLength={2000} defaultValue={item.notes ?? ""} className={fieldClass} />
+        <textarea dir="auto" name="notes" rows={3} maxLength={2000} defaultValue={item.notes ?? ""} className={fieldClass} />
       </label>
       <div className="sm:col-span-2">
         <PhotoInput label={item.photo_path ? "Replace the photo (the old one is kept)" : "Add a photo"} onPhoto={(f) => (photo.current = f)} />

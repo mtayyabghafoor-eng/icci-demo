@@ -140,7 +140,7 @@ export function BarcodeCamera({ target }: { target: ScanTarget }) {
   if (!supported) return null;
   return (
     <section className="rounded-2xl border border-icci-gold-300 bg-white p-5 shadow-card" data-testid={target.testId}>
-      <h2 className="text-lg font-bold">{target.title}</h2>
+      <h2 dir="auto" className="text-lg font-bold">{target.title}</h2>
       <p className="mt-1 text-[15px] text-icci-ink-60">{target.hint}</p>
       <div className={on ? "mt-4 overflow-hidden rounded-xl bg-icci-green-900" : "hidden"}>
         <video ref={video} muted playsInline aria-label="Camera view" className="aspect-square w-full object-cover" />

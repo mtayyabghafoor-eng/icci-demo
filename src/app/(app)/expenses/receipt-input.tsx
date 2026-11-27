@@ -111,7 +111,7 @@ export function ReceiptInput({ onChange, disabled = false }: { onChange: (files:
               ) : (
                 <span className="flex h-28 w-24 flex-col items-center justify-center gap-1 rounded-xl border border-icci-line bg-icci-panel px-1 text-center text-xs">
                   <FileText aria-hidden size={22} />
-                  <span className="line-clamp-3 break-all">{p.file.name}</span>
+                  <span dir="auto" className="line-clamp-3 break-all">{p.file.name}</span>
                 </span>
               )}
               <button

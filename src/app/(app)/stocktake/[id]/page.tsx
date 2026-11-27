@@ -182,10 +182,10 @@ async function Content({
                 <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-icci-green [&::-webkit-details-marker]:hidden">
                   Still to find ({stillToFind.length})
                 </summary>
-                <ul className="mt-1 divide-y divide-icci-line">
+                <ul dir="auto" className="mt-1 divide-y divide-icci-line">
                   {stillToFind.map((e) => (
                     <li key={e.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2">
-                      <span className="font-semibold">{e.name}</span>
+                      <span dir="auto" className="font-semibold">{e.name}</span>
                       <span className="text-sm text-icci-ink-60">
                         <span className="font-mono">{e.label_serial}</span> · {(lookups.locationName.get(e.location_id) ?? "").replace(`${room} › `, "")}
                       </span>
@@ -204,7 +204,7 @@ async function Content({
               ? "Nothing scanned yet."
               : `${props.scans.length} label${props.scans.length === 1 ? "" : "s"} scanned.`}
           </p>
-          <ul className="mt-2 divide-y divide-icci-line rounded-2xl border border-icci-line bg-white shadow-card">
+          <ul dir="auto" className="mt-2 divide-y divide-icci-line rounded-2xl border border-icci-line bg-white shadow-card">
             {props.scans.map((s) => {
               const item = s.item_id ? items.get(s.item_id) : null;
               return (
@@ -259,7 +259,7 @@ async function Content({
             You took part in this stocktake, so a different admin must decide on its differences.
           </p>
         )}
-        <ul className="mt-3 space-y-3">
+        <ul dir="auto" className="mt-3 space-y-3">
           {diffs.map((d) => {
             const item = items.get(d.item_id);
             const s = DIFFERENCE_STATUS[d.status];
@@ -275,14 +275,14 @@ async function Content({
                     <span className="block text-sm font-semibold text-icci-green">
                       {DIFFERENCE_TITLE[d.kind]}
                     </span>
-                    <Link href={`/items/${d.item_id}`} className="font-semibold">
+                    <Link dir="auto" href={`/items/${d.item_id}`} className="font-semibold">
                       {item?.name}
                     </Link>
                     <span className="block text-sm">{item?.label_serial}</span>
                   </p>
                   <StatusBadge word={s.word} tone={s.tone} />
                 </div>
-                <p className="mt-2">
+                <p dir="auto" className="mt-2">
                   {d.kind === "quantity"
                     ? describeQuantity(d.expected_quantity, d.found_quantity ?? 0, item?.unit ?? "")
                     : describeAssetDifference(d.kind, lookups.locationName.get(d.expected_location_id ?? "") ?? "")}

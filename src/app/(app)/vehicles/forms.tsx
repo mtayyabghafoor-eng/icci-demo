@@ -50,7 +50,7 @@ export function VehicleForm({
         <label htmlFor="registration" className="font-semibold">
           Registration
         </label>
-        <input
+        <input dir="auto"
           id="registration"
           name="registration"
           required
@@ -64,7 +64,7 @@ export function VehicleForm({
         <label htmlFor="make_model" className="font-semibold">
           Make and model (optional)
         </label>
-        <input id="make_model" name="make_model" maxLength={100} defaultValue={vehicle?.make_model ?? ""} className={fieldClass} />
+        <input dir="auto" id="make_model" name="make_model" maxLength={100} defaultValue={vehicle?.make_model ?? ""} className={fieldClass} />
       </div>
       <div>
         <label htmlFor="keeper_person_id" className="font-semibold">

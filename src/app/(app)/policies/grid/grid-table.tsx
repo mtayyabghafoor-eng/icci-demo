@@ -39,7 +39,7 @@ export function GridTable({
                 {print ? (
                   p.title
                 ) : (
-                  <Link href={`/policies/${p.id}`} className="inline-flex min-h-11 items-center font-semibold">
+                  <Link dir="auto" href={`/policies/${p.id}`} className="inline-flex min-h-11 items-center font-semibold">
                     {p.title}
                   </Link>
                 )}
@@ -48,14 +48,14 @@ export function GridTable({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody dir="auto">
           {people.map((person) => (
             <tr key={person.id} data-testid="grid-person" className="border-b border-icci-panel align-top">
               <td className={print ? "px-3 py-2" : "sticky left-0 z-[5] bg-white px-3 py-2 shadow-[1px_0_0_var(--icci-line)]"} dir="auto">
                 {print ? (
-                  <span className="font-semibold">{person.full_name}</span>
+                  <span dir="auto" className="font-semibold">{person.full_name}</span>
                 ) : (
-                  <Link href={`/people/${person.id}`} className="font-semibold">
+                  <Link dir="auto" href={`/people/${person.id}`} className="font-semibold">
                     {person.full_name}
                   </Link>
                 )}

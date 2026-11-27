@@ -65,7 +65,7 @@ async function Content() {
               <Card className="h-full">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h2 className="text-lg font-bold text-icci-green-dark">
-                    <Link href={`/rota/templates/${template.id}`} className="text-icci-green-dark">
+                    <Link dir="auto" href={`/rota/templates/${template.id}`} className="text-icci-green-dark">
                       {template.name}
                     </Link>
                   </h2>

@@ -118,7 +118,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="search" aria-label="Search items">
         <label className="lg:col-span-2">
           <span className="font-semibold">Search</span>
-          <input name="q" defaultValue={q} placeholder="Name, label, kind, make, model or company" className={select} />
+          <input dir="auto" name="q" defaultValue={q} placeholder="Name, label, kind, make, model or company" className={select} />
         </label>
         <label>
           <span className="font-semibold">Kind</span>
@@ -187,7 +187,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
       )}
 
       {matched.length > 0 && matchedCounts && (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2" data-testid="matching-categories" aria-label="Matching categories">
+        <ul dir="auto" className="mt-4 grid gap-3 sm:grid-cols-2" data-testid="matching-categories" aria-label="Matching categories">
           {matched.map((c) => {
             const main = c.parent_id ? lookups.categories.find((m) => m.id === c.parent_id) : c;
             return (
@@ -233,17 +233,17 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
             <th className="px-3 py-2">Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody dir="auto">
           {items.map((i) => (
             <tr key={i.id} className="border-b border-icci-panel align-top">
               <td className="px-3 py-2 font-mono text-sm whitespace-nowrap">{i.label_serial}</td>
               <td className="px-3 py-2">
-                <Link href={`/items/${i.id}`} className="font-semibold">
+                <Link dir="auto" href={`/items/${i.id}`} className="font-semibold">
                   {i.name}
                 </Link>
               </td>
               <td className="px-3 py-2">{KIND_LABEL[i.kind]}</td>
-              <td className="px-3 py-2">{lookups.categoryName.get(i.category_id)}</td>
+              <td dir="auto" className="px-3 py-2">{lookups.categoryName.get(i.category_id)}</td>
               <td className="px-3 py-2 text-sm">
                 <Place path={lookups.locationName.get(i.location_id)} />
               </td>
@@ -255,12 +255,12 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
         </tbody>
       </table>
       </div>
-      <ul className="mt-3 space-y-3 md:hidden">
+      <ul dir="auto" className="mt-3 space-y-3 md:hidden">
         {items.map((i) => (
           <li key={i.id}>
             <Link href={`/items/${i.id}`} className="list-card">
               <span className="flex items-start justify-between gap-2">
-                <span className="font-semibold text-icci-green">{i.name}</span>
+                <span dir="auto" className="font-semibold text-icci-green">{i.name}</span>
                 <ItemStatus kind={i.kind} condition={i.condition} stock={stockOf.get(i.id)} labelled testId="item-status" />
               </span>
               <span className="mt-1 block text-sm">
@@ -283,7 +283,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
 function Place({ path }: { path: string | undefined }) {
   if (!path) return null;
   return (
-    <span title={path} data-testid="place">
+    <span dir="auto" title={path} data-testid="place">
       {shortPlace(path)}
     </span>
   );

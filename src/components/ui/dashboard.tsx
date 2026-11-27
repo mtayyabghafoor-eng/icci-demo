@@ -50,7 +50,7 @@ export function CounterCard({
           </span>
           {t.word && <span className={cx("text-[13px] font-semibold sm:hidden", t.number)}>{t.word}</span>}
         </span>
-        <span className="mt-1.5 font-semibold leading-snug sm:mt-2">{title}</span>
+        <span dir="auto" className="mt-1.5 font-semibold leading-snug sm:mt-2">{title}</span>
         {detail && <span className="mt-0.5 text-sm text-icci-ink-60">{detail}</span>}
         <span className="mt-auto hidden items-center gap-1 pt-4 text-sm font-semibold text-icci-green sm:flex">
           Open the list
@@ -201,7 +201,7 @@ export function AttentionRow({
         <Icon aria-hidden size={20} strokeWidth={1.9} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-semibold leading-snug">{title}</span>
+        <span dir="auto" className="block font-semibold leading-snug">{title}</span>
         {detail && <span className="block text-sm text-icci-ink-60">{detail}</span>}
       </span>
       <span

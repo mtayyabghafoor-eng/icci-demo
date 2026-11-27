@@ -127,7 +127,7 @@ function Totals({ rows, total, testId }: { rows: [string, number][]; total: numb
       <tbody>
         {rows.map(([name, cents]) => (
           <tr key={name} className="border-b border-icci-panel">
-            <td className="py-1.5 pr-3">{name}</td>
+            <td dir="auto" className="py-1.5 pr-3">{name}</td>
             <td className="py-1.5 text-right tabular-nums">{formatEuro(cents)}</td>
           </tr>
         ))}

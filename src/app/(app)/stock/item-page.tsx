@@ -24,7 +24,7 @@ export function StockHeader({ level, place, title }: { level: StockLevel; place:
     <>
       <BackLink href={`/items/${level.item_id}`}>Back to the item</BackLink>
       <h1 className="page-title text-[28px] md:text-[34px] mt-2">{titleCase(title)}</h1>
-      <p className="mt-2 text-lg font-semibold">{level.name}</p>
+      <p dir="auto" className="mt-2 text-lg font-semibold">{level.name}</p>
       <p className="text-sm">
         {level.label_serial} · {place}
       </p>

@@ -87,12 +87,12 @@ async function List() {
                   <StatusBadge word={s.word} tone={s.tone} />
                 </td>
                 <td className="px-3 py-2">
-                  <Link href={`/items/${r.item_id}`} className="font-semibold">
+                  <Link dir="auto" href={`/items/${r.item_id}`} className="font-semibold">
                     {r.name}
                   </Link>
                   <span className="block font-mono text-sm">{r.label_serial}</span>
                 </td>
-                <td className="px-3 py-2 text-sm">{place(r.location_id)}</td>
+                <td dir="auto" className="px-3 py-2 text-sm">{place(r.location_id)}</td>
                 <td className="px-3 py-2 text-right whitespace-nowrap">
                   {r.quantity} {r.unit}
                 </td>
@@ -115,7 +115,7 @@ async function List() {
           return (
             <li key={r.item_id} className="list-card">
               <span className="flex items-start justify-between gap-2">
-                <Link href={`/items/${r.item_id}`} className="font-semibold">
+                <Link dir="auto" href={`/items/${r.item_id}`} className="font-semibold">
                   {r.name}
                 </Link>
                 <StatusBadge word={s.word} tone={s.tone} />

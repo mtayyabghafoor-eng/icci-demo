@@ -415,7 +415,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
           {lines.map((line) => (
             <li key={line.id} className="rounded-xl border border-icci-line bg-white p-4 shadow-card">
               <p>
-                <span className="font-semibold">{line.title}</span> · {formatDateTime(line.when)} · {line.who}
+                <span dir="auto" className="font-semibold">{line.title}</span> · {formatDateTime(line.when)} · {line.who}
               </p>
               <ul className="mt-1 list-disc pl-5 text-sm">
                 {line.changes.map((c) => (

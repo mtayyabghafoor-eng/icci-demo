@@ -118,7 +118,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/places/[i
               <ul className="divide-y divide-icci-line" data-testid="places-inside">
                 {inside.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5">
-                    <Link href={`/places/${p.id}`} className="font-semibold">
+                    <Link dir="auto" href={`/places/${p.id}`} className="font-semibold">
                       {p.name}
                     </Link>
                     <span className="font-mono text-sm text-icci-ink-60">{placeCode(p.code)}</span>
@@ -159,7 +159,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/places/[i
                 {items.map((i) => (
                   <li key={i.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2.5">
                     <span className="min-w-0">
-                      <Link href={`/items/${i.id}`} className="font-semibold">
+                      <Link dir="auto" href={`/items/${i.id}`} className="font-semibold">
                         {i.name}
                       </Link>{" "}
                       <span className="text-sm text-icci-ink-60">

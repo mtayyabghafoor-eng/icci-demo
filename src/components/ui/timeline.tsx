@@ -23,7 +23,7 @@ export function Timeline({ entries }: { entries: TimelineEntry[] }) {
             className={cx("absolute -left-[7px] top-1.5 h-3 w-3 rounded-full ring-4 ring-white", DOT[e.tone ?? "grey"])}
           />
           <p className="text-[13px] font-semibold text-icci-ink-60">{e.when}</p>
-          <div className="mt-0.5 font-semibold">{e.title}</div>
+          <div dir="auto" className="mt-0.5 font-semibold">{e.title}</div>
           {e.detail && <div className="mt-0.5 text-sm text-icci-ink-60">{e.detail}</div>}
         </li>
       ))}

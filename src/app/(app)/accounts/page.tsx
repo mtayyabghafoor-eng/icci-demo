@@ -57,7 +57,7 @@ async function List() {
               return (
                 <tr key={a.id} className="border-b border-icci-panel align-top" data-testid="account-row">
                   <td className="px-3 py-2">
-                    <Link href={`/accounts/${a.id}`} className="font-semibold">
+                    <Link dir="auto" href={`/accounts/${a.id}`} className="font-semibold">
                       {a.display_name}
                     </Link>
                     <span className="block text-sm text-icci-ink-60">{a.email}</span>
@@ -81,7 +81,7 @@ async function List() {
             <li key={a.id}>
               <Link href={`/accounts/${a.id}`} className="list-card" data-testid="account-row">
                 <span className="flex items-start justify-between gap-2">
-                  <span className="font-semibold text-icci-green">{a.display_name}</span>
+                  <span dir="auto" className="font-semibold text-icci-green">{a.display_name}</span>
                   <StatusBadge word={s.word} tone={s.tone} />
                 </span>
                 <span className="mt-1 block text-sm">

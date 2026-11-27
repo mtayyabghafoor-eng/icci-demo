@@ -135,7 +135,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/assets/over
               .map((s) => (
                 <li key={s.id} data-testid="overview-sub">
                   <Card>
-                    <h2 className="text-[17px] font-bold text-icci-green-dark">{s.name}</h2>
+                    <h2 dir="auto" className="text-[17px] font-bold text-icci-green-dark">{s.name}</h2>
                     <p className="mt-1 text-sm text-icci-ink-60">
                       <CountLine count={countOf(s.id)} />
                     </p>

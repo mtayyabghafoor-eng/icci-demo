@@ -56,13 +56,13 @@ export function LoanTable({ rows, borrowers, showContact }: { rows: CopyRow[]; b
               return (
                 <tr key={r.id} data-testid="loan-list-row" className="border-b border-icci-panel align-top">
                   <td className="px-3 py-2" dir="auto">
-                    <Link href={`/library/copies/${r.id}`} className="font-semibold">
+                    <Link dir="auto" href={`/library/copies/${r.id}`} className="font-semibold">
                       {r.title}
                     </Link>
                     <span className="block font-mono text-sm text-icci-ink-60">{r.label_serial}</span>
                   </td>
                   <td className="px-3 py-2" dir="auto">
-                    {b ? <Link href={`/library/borrowers/${b.id}`}>{b.full_name}</Link> : "Not found"}
+                    {b ? <Link dir="auto" href={`/library/borrowers/${b.id}`}>{b.full_name}</Link> : "Not found"}
                   </td>
                   {showContact && (
                     <td className="px-3 py-2" dir="auto">

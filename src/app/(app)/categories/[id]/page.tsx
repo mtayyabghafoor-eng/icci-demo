@@ -77,7 +77,7 @@ async function Content({
               <>
                 {" "}
                 inside{" "}
-                <Link href={`/categories/${main.id}`} data-testid="category-main">
+                <Link dir="auto" href={`/categories/${main.id}`} data-testid="category-main">
                   {main.name}
                 </Link>
               </>

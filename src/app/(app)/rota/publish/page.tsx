@@ -123,7 +123,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/publis
         ) : (
           <>
             <p className="mb-3">Warnings do not stop publishing. Check them, then tick the box below.</p>
-            <ul className="divide-y divide-icci-line" data-testid="publish-warnings">
+            <ul dir="auto" className="divide-y divide-icci-line" data-testid="publish-warnings">
               {sorted.map((w, i) => {
                 const e = byId.get(w.assignment_id);
                 const red = warningTone(w.kind) === "red";
@@ -132,7 +132,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/publis
                   <li key={i} className="flex items-start gap-2 py-2">
                     <Icon aria-hidden size={18} className={cx("mt-0.5 shrink-0", red ? "text-icci-error" : "text-[var(--icci-warn-text)]")} />
                     <span>
-                      <Link href={`/rota/slot/${w.assignment_id}`} className="font-semibold">
+                      <Link dir="auto" href={`/rota/slot/${w.assignment_id}`} className="font-semibold">
                         {e ? `${typeName.get(e.slot_type_id)}, ${fullDayLabel(e.assignment_date)}` : fullDayLabel(w.assignment_date)}
                       </Link>
                       {w.person_id && names.get(w.person_id) && <span dir="auto">: {names.get(w.person_id)}</span>}

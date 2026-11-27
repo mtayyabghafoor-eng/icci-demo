@@ -77,7 +77,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/not-see
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="search" aria-label="Search assets not seen">
         <label className="lg:col-span-2">
           <span className="font-semibold">Search</span>
-          <input name="q" defaultValue={q} placeholder="Name or label number" className={field} />
+          <input dir="auto" name="q" defaultValue={q} placeholder="Name or label number" className={field} />
         </label>
         <label className="lg:col-span-2">
           <span className="font-semibold">Location</span>
@@ -125,16 +125,16 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/not-see
                 <th className="px-3 py-2">Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody dir="auto">
               {rows.map((r) => (
                 <tr key={r.item_id} className="border-b border-icci-panel align-top">
                   <td className="px-3 py-2 font-mono text-sm whitespace-nowrap">{r.items.label_serial}</td>
                   <td className="px-3 py-2">
-                    <Link href={`/items/${r.item_id}`} className="font-semibold">
+                    <Link dir="auto" href={`/items/${r.item_id}`} className="font-semibold">
                       {r.items.name}
                     </Link>
                   </td>
-                  <td className="px-3 py-2 text-sm">{lookups.locationName.get(r.items.location_id)}</td>
+                  <td dir="auto" className="px-3 py-2 text-sm">{lookups.locationName.get(r.items.location_id)}</td>
                   <td className="px-3 py-2 whitespace-nowrap">{formatEuro(r.items.value_cents)}</td>
                   <td className="px-3 py-2 text-sm">{seenText(r)}</td>
                   <td className="px-3 py-2">
@@ -145,18 +145,18 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/not-see
             </tbody>
           </table>
           </div>
-          <ul className="mt-3 space-y-3 md:hidden">
+          <ul dir="auto" className="mt-3 space-y-3 md:hidden">
             {rows.map((r) => (
               <li key={r.item_id}>
                 <Link href={`/items/${r.item_id}`} className="list-card">
                   <span className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-icci-green">{r.items.name}</span>
+                    <span dir="auto" className="font-semibold text-icci-green">{r.items.name}</span>
                     <ItemStatus kind={r.items.kind} condition={r.items.condition} />
                   </span>
                   <span className="mt-1 block text-sm">
                     {r.items.label_serial} · {formatEuro(r.items.value_cents)}
                   </span>
-                  <span className="block text-sm">{lookups.locationName.get(r.items.location_id)}</span>
+                  <span dir="auto" className="block text-sm">{lookups.locationName.get(r.items.location_id)}</span>
                   <span className="block text-sm">Last seen {seenText(r)}</span>
                 </Link>
               </li>

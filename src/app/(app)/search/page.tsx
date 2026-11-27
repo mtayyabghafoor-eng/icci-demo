@@ -73,7 +73,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
                 {g.hits.map((h) => (
                   <li key={h.href}>
                     <Link href={h.href} className="flex min-h-12 flex-col justify-center py-2 no-underline hover:bg-icci-green-50/60">
-                      <span className="font-semibold text-icci-ink">{h.title}</span>
+                      <span dir="auto" className="font-semibold text-icci-ink">{h.title}</span>
                       {h.detail && <span className="text-sm text-icci-ink-60">{h.detail}</span>}
                     </Link>
                   </li>

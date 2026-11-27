@@ -91,14 +91,14 @@ async function Content() {
       {onCall.length > 0 && (
         <Card tone="gold" padded={false} className="mb-4 p-4">
           <h2 className="text-[15px] font-bold text-icci-green-dark">On call today</h2>
-          <ul className="mt-1 divide-y divide-icci-gold-300" data-testid="on-call-today">
+          <ul dir="auto" className="mt-1 divide-y divide-icci-gold-300" data-testid="on-call-today">
             {onCall.map((e) => {
               const person = e.person_id ? names.get(e.person_id) : null;
               const phone = e.person_id ? phones.get(e.person_id) : null;
               return (
                 <li key={e.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
                   <span>
-                    <span className="font-semibold">{typeName.get(e.slot_type_id)}</span>
+                    <span dir="auto" className="font-semibold">{typeName.get(e.slot_type_id)}</span>
                     <span className="ml-2 text-[15px] text-icci-ink-60">{timeText(e.slot_group, e.starts_at, e.ends_at)}</span>
                   </span>
                   {person ? (
@@ -131,21 +131,21 @@ async function Content() {
         {warnings.length > 0 && ` · ${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"} (shown beside each slot; they do not stop anything)`}
       </p>
       <RotaNotes warnings={allWarnings} period="today" />
-      <div className="space-y-4">
+      <div dir="auto" className="space-y-4">
         {SLOT_GROUPS.map((g) => {
           const inGroup = entries.filter((e) => e.slot_group === g);
           if (inGroup.length === 0) return null;
           return (
             <Card key={g} padded={false} className="p-4">
               <h2 className="text-[15px] font-bold text-icci-ink-60">{SLOT_GROUP_LABEL[g]}</h2>
-              <ul className="mt-1 divide-y divide-icci-line">
+              <ul dir="auto" className="mt-1 divide-y divide-icci-line">
                 {inGroup.map((e) => {
                   const person = e.person_id ? names.get(e.person_id) : null;
                   return (
                     <li key={e.id} data-testid="today-slot">
                       <Link href={`/rota/slot/${e.id}`} className="flex min-h-11 flex-wrap items-baseline justify-between gap-x-4 py-2 text-icci-text no-underline hover:text-icci-green">
                         <span>
-                          <span className="font-semibold">{typeName.get(e.slot_type_id)}</span>
+                          <span dir="auto" className="font-semibold">{typeName.get(e.slot_type_id)}</span>
                           <span className="ml-2 text-[15px] text-icci-ink-60">
                             {timeText(e.slot_group, e.starts_at, e.ends_at)}
                             {e.location_id && ` · ${placeName.get(e.location_id)}`}

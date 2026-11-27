@@ -107,7 +107,7 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
           {totals.map((g) => (
             <tr key={g.location_id} className="border-b border-icci-panel align-top">
               <td className="px-3 py-2">
-                <Link href={`/assets/register?place=${encodeURIComponent(g.location_id)}`} className="font-semibold">
+                <Link dir="auto" href={`/assets/register?place=${encodeURIComponent(g.location_id)}`} className="font-semibold">
                   {g.place}
                 </Link>
               </td>
@@ -154,9 +154,9 @@ async function Register({ searchParams }: { searchParams: PageProps<"/assets/reg
                     <td className="px-3 py-2 font-mono text-sm whitespace-nowrap">
                       {opensItems ? <Link href={`/items/${r.id}`}>{r.label_serial}</Link> : r.label_serial}
                     </td>
-                    <td className="px-3 py-2">{r.name}</td>
-                    <td className="px-3 py-2 text-sm">{r.place}</td>
-                    <td className="px-3 py-2 text-sm">{r.category}</td>
+                    <td dir="auto" className="px-3 py-2">{r.name}</td>
+                    <td dir="auto" className="px-3 py-2 text-sm">{r.place}</td>
+                    <td dir="auto" className="px-3 py-2 text-sm">{r.category}</td>
                     <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(r.purchase_date)}</td>
                     <td className="px-3 py-2 text-right whitespace-nowrap">{formatEuro(r.value_cents)}</td>
                     <td className="px-3 py-2">
@@ -193,7 +193,7 @@ function RegisterCard({ r }: { r: RegisterRow }) {
   return (
     <>
       <span className="flex items-start justify-between gap-2">
-        <span className="font-semibold text-icci-green">{r.name}</span>
+        <span dir="auto" className="font-semibold text-icci-green">{r.name}</span>
         <ItemStatus kind="fixed_asset" condition={r.condition as never} />
       </span>
       <span className="mt-1 block text-sm">

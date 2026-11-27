@@ -17,7 +17,7 @@ function ShownOnce({ shown }: { shown: NonNullable<AccountFormState["shown"]> })
       <h2 className="text-lg font-bold text-icci-green-dark">{shown.password ? "Temporary password, shown only once" : "Account added"}</h2>
       <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-[10rem_1fr]">
         <dt className="font-semibold">Name</dt>
-        <dd>{shown.name}</dd>
+        <dd dir="auto">{shown.name}</dd>
         <dt className="font-semibold">Email</dt>
         <dd>{shown.email}</dd>
         {shown.password && (
@@ -55,7 +55,7 @@ export function AddAccountForm() {
         <label htmlFor="display_name" className="font-semibold">
           Name to show
         </label>
-        <input id="display_name" name="display_name" required maxLength={80} autoComplete="off" className={fieldClass} />
+        <input dir="auto" id="display_name" name="display_name" required maxLength={80} autoComplete="off" className={fieldClass} />
       </div>
       <div>
         <label htmlFor="email" className="font-semibold">

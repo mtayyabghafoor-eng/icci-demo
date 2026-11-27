@@ -88,7 +88,7 @@ export function LabelBox({ stocktakeId }: { stocktakeId: number }) {
       <label className="block">
         <span className="font-semibold">Or type a label number</span>
         <span className="mt-1 flex gap-2">
-          <input name="label" required autoComplete="off" placeholder="e.g. ICCI-000123 or 123" className={`${fieldClass} mt-0!`} />
+          <input dir="auto" name="label" required autoComplete="off" placeholder="e.g. ICCI-000123 or 123" className={`${fieldClass} mt-0!`} />
           <button
             type="submit"
             disabled={pending}
@@ -182,7 +182,7 @@ export function DecideDifferenceForm({
       )}
       <label className="block">
         <span className="font-semibold">Note</span> <span className="text-sm">(needed if you reject)</span>
-        <input name="note" maxLength={1000} className={fieldClass} />
+        <input dir="auto" name="note" maxLength={1000} className={fieldClass} />
       </label>
       <FormError message={state.error} />
       <div className="flex flex-wrap gap-2">

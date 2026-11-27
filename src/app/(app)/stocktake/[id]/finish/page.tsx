@@ -83,12 +83,12 @@ async function Content({ params }: { params: PageProps<"/stocktake/[id]/finish">
             {list.length === 0 ? (
               <p className="text-sm">None.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-icci-line rounded-2xl border border-icci-line bg-white shadow-card">
+              <ul dir="auto" className="mt-2 divide-y divide-icci-line rounded-2xl border border-icci-line bg-white shadow-card">
                 {list.map((f) => {
                   const item = items.get(f.item_id);
                   return (
                     <li key={f.item_id} className="px-3 py-2" data-testid="finding">
-                      <span className="block font-semibold">{item?.name}</span>
+                      <span dir="auto" className="block font-semibold">{item?.name}</span>
                       <span className="block text-sm">
                         {item?.label_serial} ·{" "}
                         {kind === "quantity"

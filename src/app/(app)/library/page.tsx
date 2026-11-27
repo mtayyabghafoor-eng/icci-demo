@@ -92,7 +92,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/library">["sea
                 {books.map((b) => (
                   <tr key={b.id} data-testid="book-row" className="border-b border-icci-panel align-top">
                     <td className="px-3 py-2" dir="auto">
-                      <Link href={`/library/books/${b.id}`} className="font-semibold">
+                      <Link dir="auto" href={`/library/books/${b.id}`} className="font-semibold">
                         {b.title}
                       </Link>
                     </td>

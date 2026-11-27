@@ -55,10 +55,10 @@ export function RoomForm(props: {
     >
       <BarcodeCamera target={camera} />
       <Field id="room-label" label="Label number" help="Scan it, or type the number printed under the code.">
-        <Input id="room-label" name="label" required defaultValue={props.label} placeholder="ICCI-000123" autoComplete="off" className="font-mono" />
+        <Input dir="auto" id="room-label" name="label" required defaultValue={props.label} placeholder="ICCI-000123" autoComplete="off" className="font-mono" />
       </Field>
       <Field id="room-name" label="Name">
-        <Input id="room-name" name="name" required maxLength={200} autoFocus={Boolean(props.label)} placeholder="e.g. Stacking chair 12" />
+        <Input dir="auto" id="room-name" name="name" required maxLength={200} autoFocus={Boolean(props.label)} placeholder="e.g. Stacking chair 12" />
       </Field>
       <PhotoInput label="Photo (optional)" onPhoto={(f) => (photo.current = f)} />
 
@@ -89,7 +89,7 @@ export function RoomForm(props: {
                 .map(([value, title]) => (
                   <label key={value} className="flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-icci-field bg-white px-3 has-[:checked]:border-icci-green-dark has-[:checked]:bg-icci-green-50">
                     <input type="radio" name="kind" value={value} defaultChecked={defaults.kind === value} className="accent-icci-green-dark" />
-                    <span className="font-semibold">{title}</span>
+                    <span dir="auto" className="font-semibold">{title}</span>
                   </label>
                 ))}
             </div>
@@ -106,7 +106,7 @@ export function RoomForm(props: {
           {props.stockAllowed && (
             <div className="grid grid-cols-2 gap-3">
               <Field id="room-unit" label="Counted in (unit)" help="Only for consumables.">
-                <Input id="room-unit" name="unit" maxLength={40} defaultValue={defaults.unit} placeholder="box, roll…" />
+                <Input dir="auto" id="room-unit" name="unit" maxLength={40} defaultValue={defaults.unit} placeholder="box, roll…" />
               </Field>
               <Field id="room-minimum" label="Minimum level" help="Only for consumables.">
                 <Input id="room-minimum" name="minimum_level" type="number" min={0} step={1} inputMode="numeric" defaultValue={defaults.minimum_level} />

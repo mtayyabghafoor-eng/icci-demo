@@ -44,11 +44,11 @@ export function DocumentList({
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <Icon aria-hidden size={18} className="text-icci-green-dark" />
               {d.url ? (
-                <a href={d.url} target="_blank" rel="noopener noreferrer" className="font-semibold">
+                <a dir="auto" href={d.url} target="_blank" rel="noopener noreferrer" className="font-semibold">
                   {d.title}
                 </a>
               ) : (
-                <span className="font-semibold">{d.title}</span>
+                <span dir="auto" className="font-semibold">{d.title}</span>
               )}
               <span className="text-sm text-icci-ink-60">
                 · {DOCUMENT_KINDS[d.kind]}

@@ -119,7 +119,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
           [
             "Passed to",
             <span key="passed" data-testid="passed-to">
-              <Link href={`/companies/${lastReferral.company_id}`}>{companyName.get(lastReferral.company_id) ?? "A company"}</Link>
+              <Link dir="auto" href={`/companies/${lastReferral.company_id}`}>{companyName.get(lastReferral.company_id) ?? "A company"}</Link>
               {lastReferral.company_job_ref ? `, their job number ${lastReferral.company_job_ref}` : ""}
               {` (${formatDateTime(lastReferral.created_at)})`}
             </span>,

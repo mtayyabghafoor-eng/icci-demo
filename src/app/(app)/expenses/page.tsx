@@ -122,7 +122,7 @@ async function Waiting({ meId, names }: { meId: string; names: ExpenseNames }) {
 /** E2: hideState drops the badge every row would repeat (the Waiting tab says it already). */
 function EntryList({ rows, names, forMe, hideState }: { rows: EntryRow[]; names: ExpenseNames; forMe?: (e: EntryRow) => boolean; hideState?: EntryRow["state"] }) {
   return (
-    <ul className="space-y-3" data-testid="claim-list">
+    <ul dir="auto" className="space-y-3" data-testid="claim-list">
       {rows.map((e) => {
         const label = STATE_LABEL[e.state];
         return (
@@ -298,7 +298,7 @@ async function All({ names, month: rawMonth, page }: { names: ExpenseNames; mont
                   <th className="px-3 py-2">Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody dir="auto">
                 {rows.map((c) => (
                   <tr key={c.id} data-testid="claim-row" className="border-b border-icci-panel align-top">
                     <td className="whitespace-nowrap px-3 py-2 font-mono text-sm">
@@ -308,7 +308,7 @@ async function All({ names, month: rawMonth, page }: { names: ExpenseNames; mont
                       <Link href={`/expenses/${c.id}`} className="font-semibold">
                         {c.description}
                       </Link>
-                      <span className="block text-sm">{names.categoryName.get(c.current_category_id)}</span>
+                      <span dir="auto" className="block text-sm">{names.categoryName.get(c.current_category_id)}</span>
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-sm">{formatDate(c.current_receipt_date)}</td>
                     <td className="px-3 py-2 text-sm" dir="auto">

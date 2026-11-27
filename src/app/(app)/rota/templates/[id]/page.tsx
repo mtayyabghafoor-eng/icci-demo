@@ -100,14 +100,14 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/temp
         </div>
       )}
 
-      <div className={cx("grid gap-4", template.kind === "week" && "md:grid-cols-2")} data-testid="template-days">
+      <div dir="auto" className={cx("grid gap-4", template.kind === "week" && "md:grid-cols-2")} data-testid="template-days">
         {sections.map((sec) => (
           <Card key={sec.title} padded={false} className="p-4">
-            <h2 className="text-lg font-bold text-icci-green-dark">{sec.title}</h2>
+            <h2 dir="auto" className="text-lg font-bold text-icci-green-dark">{sec.title}</h2>
             {sec.list.length === 0 ? (
               <p className="mt-2 text-icci-ink-60">Nothing extra. The prayers come by themselves.</p>
             ) : (
-              <ul className="mt-1 divide-y divide-icci-line">
+              <ul dir="auto" className="mt-1 divide-y divide-icci-line">
                 {sec.list.map((x) => (
                   <SlotRow key={x.id} x={x} type={typeOf.get(x.slot_type_id)} place={x.location_id ? placeName.get(x.location_id) : undefined} />
                 ))}
@@ -125,7 +125,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/temp
       {off.length > 0 && (
         <details className="mt-6">
           <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-icci-green">Switched off ({off.length})</summary>
-          <ul className="mt-2 divide-y divide-icci-line rounded-2xl border border-dashed border-icci-text/40 bg-[#F0F0EE] px-4" data-testid="template-slots-off">
+          <ul dir="auto" className="mt-2 divide-y divide-icci-line rounded-2xl border border-dashed border-icci-text/40 bg-[#F0F0EE] px-4" data-testid="template-slots-off">
             {off.map((x) => (
               <SlotRow key={x.id} x={x} type={typeOf.get(x.slot_type_id)} place={x.location_id ? placeName.get(x.location_id) : undefined} showDay={template.kind === "week"} />
             ))}

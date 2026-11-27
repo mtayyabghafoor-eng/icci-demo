@@ -74,7 +74,7 @@ export function ConfirmSubmit({
           <div className="flex gap-3">
             <Icon aria-hidden size={24} className={cx("mt-0.5 shrink-0", danger ? "text-icci-error" : "text-icci-green")} />
             <div>
-              <h2 id={titleId} className="text-lg font-bold text-icci-green-dark">
+              <h2 dir="auto" id={titleId} className="text-lg font-bold text-icci-green-dark">
                 {title}
               </h2>
               <div className="mt-1 text-[15px] leading-relaxed">{children}</div>

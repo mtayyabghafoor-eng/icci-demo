@@ -137,16 +137,16 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody dir="auto">
             {rows.map((r) => (
               <tr key={`${r.person_id}-${r.training_type_id}`} data-testid="training-row" className="border-b border-icci-panel align-top">
                 <td className="px-3 py-2" dir="auto">
-                  <Link href={`/people/${r.person_id}`} className="font-semibold">
+                  <Link dir="auto" href={`/people/${r.person_id}`} className="font-semibold">
                     {r.full_name}
                   </Link>
                 </td>
-                <td className="px-3 py-2">{lists.sectionName.get(r.section_id)}</td>
-                <td className="px-3 py-2">{typeName.get(r.training_type_id)}</td>
+                <td dir="auto" className="px-3 py-2">{lists.sectionName.get(r.section_id)}</td>
+                <td dir="auto" className="px-3 py-2">{typeName.get(r.training_type_id)}</td>
                 <td className="px-3 py-2 whitespace-nowrap">
                   <StatusBadge {...TRAINING_STATUS[r.status]} />
                 </td>
@@ -162,7 +162,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
           </tbody>
         </table>
       </div>
-      <ul className="mt-3 space-y-3 md:hidden">
+      <ul dir="auto" className="mt-3 space-y-3 md:hidden">
         {rows.map((r) => (
           <li key={`${r.person_id}-${r.training_type_id}`}>
             <Link href={`/people/${r.person_id}`} data-testid="training-row" className="list-card">
