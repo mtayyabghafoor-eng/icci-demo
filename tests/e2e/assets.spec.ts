@@ -80,14 +80,14 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await actions.getByRole("link", { name: "Move" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Move this asset" })).toBeVisible();
   // Nothing is saved without the required boxes.
-  await page.getByRole("button", { name: "Move" }).click();
+  await page.getByRole("button", { name: "Move", exact: true }).click();
   await expect(page).toHaveURL(/\/asset\/move$/);
   await page.getByRole("combobox", { name: "Where is it going?" }).selectOption({ label: "Test Building B › Test Room B1" });
   await fillReport(page, "Test move: needed for the made-up open day");
   await page.getByTestId("photo-input").setInputFiles({ name: "test.png", mimeType: "image/png", buffer: TINY_PNG });
   await expect(page.getByAltText("Preview of the new photo")).toBeVisible();
   await s(page, "move", project);
-  await page.getByRole("button", { name: "Move" }).click();
+  await page.getByRole("button", { name: "Move", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Asset moved." })).toBeVisible();
   await expect(field(page, "Location")).toHaveText("Test Building B › Test Room B1");
   const events = page.getByTestId("asset-events");

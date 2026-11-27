@@ -172,9 +172,26 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
         <dt className="text-sm font-semibold text-icci-ink-60">Section</dt>
         <dd>{lists.sectionName.get(p.section_id)}</dd>
         <dt className="text-sm font-semibold text-icci-ink-60">Phone</dt>
-        <dd>{p.phone ?? "Not recorded"}</dd>
+        {/* D3: tap to call or email from a phone. */}
+        <dd>
+          {p.phone ? (
+            <a href={`tel:${p.phone.replace(/[^0-9+]/g, "")}`} dir="ltr" data-testid="person-phone">
+              {p.phone}
+            </a>
+          ) : (
+            "Not recorded"
+          )}
+        </dd>
         <dt className="text-sm font-semibold text-icci-ink-60">Email</dt>
-        <dd className="break-all">{p.email ?? "Not recorded"}</dd>
+        <dd className="break-all">
+          {p.email ? (
+            <a href={`mailto:${p.email}`} data-testid="person-email">
+              {p.email}
+            </a>
+          ) : (
+            "Not recorded"
+          )}
+        </dd>
         <dt className="text-sm font-semibold text-icci-ink-60">Start date</dt>
         <dd>{formatDate(p.start_date)}</dd>
         <dt className="text-sm font-semibold text-icci-ink-60">Added</dt>

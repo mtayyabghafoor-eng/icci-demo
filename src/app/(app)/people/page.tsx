@@ -193,7 +193,25 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
               </td>
               <td className="px-3 py-2">{lists.roleName.get(p.person_role_id)}</td>
               <td className="px-3 py-2">{lists.sectionName.get(p.section_id)}</td>
-              <td className="px-3 py-2 text-sm">{contact(p)}</td>
+              {/* D3: on a PC the number and address can be clicked (a softphone or the mail program). */}
+              <td className="px-3 py-2 text-sm">
+                {p.phone || p.email ? (
+                  <>
+                    {p.phone && (
+                      <a href={`tel:${p.phone.replace(/[^0-9+]/g, "")}`} dir="ltr" className="block">
+                        {p.phone}
+                      </a>
+                    )}
+                    {p.email && (
+                      <a href={`mailto:${p.email}`} className="block break-all">
+                        {p.email}
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  "No contact recorded"
+                )}
+              </td>
               <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(p.start_date)}</td>
               <td className="px-3 py-2 whitespace-nowrap">{vettingBadge(p)}</td>
               <td className="px-3 py-2">
