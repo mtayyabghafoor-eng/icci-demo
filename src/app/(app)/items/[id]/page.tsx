@@ -51,7 +51,23 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
   const item = data as ItemRow;
 
   const consumable = item.kind === "consumable";
-  const [lookups, history, photo, level, moves, nameOf, events, vehicleRes, companies, models] = await Promise.all([
+  // E5: everything else in one wait (it was four, one after another). The
+  // asset entries bring their reporters' names and photos with them.
+  const eventsWithExtras = consumable
+    ? null
+    : allRows<AssetEventRow>((from, to) => supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).range(from, to)).then(
+        async (rows) => {
+          const withPhoto = rows.filter((e) => e.photo_path);
+          const [names, signed] = await Promise.all([
+            reporterNames(supabase, rows),
+            withPhoto.length ? supabase.storage.from(PHOTO_BUCKET).createSignedUrls(withPhoto.map((e) => e.photo_path!), 600) : null,
+          ]);
+          const photos = new Map<number, string>();
+          (signed?.data ?? []).forEach((u, i) => u.signedUrl && photos.set(withPhoto[i].id, u.signedUrl));
+          return { rows, names, photos };
+        },
+      );
+  const [lookups, history, photo, level, moves, nameOf, eventData, vehicleRes, companies, models, ticketsRes] = await Promise.all([
     loadLookups(supabase),
     // Round C2: every entry, newest first (migration 0057), page by page.
     allRows<HistoryRow>((from, to) => supabase.rpc("item_history", { p_item_id: id }).range(from, to)),
@@ -61,35 +77,24 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       ? allRows<Movement>((from, to) => supabase.from("stock_movements").select(MOVEMENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).range(from, to))
       : null,
     adminNames(supabase),
-    consumable
-      ? null
-      : allRows<AssetEventRow>((from, to) => supabase.from("asset_events").select(ASSET_EVENT_COLUMNS).eq("item_id", id).order("id", { ascending: false }).range(from, to)),
+    eventsWithExtras,
     // P2.7: vehicle details, if this asset is a vehicle.
     consumable ? null : supabase.from("vehicles").select("id, registration").eq("item_id", id).maybeSingle(),
     // P1.19: company and make-and-model names for the details and the history.
     allCompanies(supabase),
     allModels(supabase),
+    // P3.5: this asset's maintenance tickets, not yet closed first.
+    consumable ? null : supabase.from("maintenance_tickets").select(TICKET_COLUMNS).eq("item_id", id).order("id", { ascending: false }).limit(100),
   ]);
   const companyName = new Map(companies.map((c) => [c.id, c.name]));
   const modelName = new Map(models.map((m) => [m.id, `${companyName.get(m.maker_company_id) ?? ""} ${m.model_name}`.trim()]));
-  // P3.5: this asset's maintenance tickets, not yet closed first.
-  const ticketsRes = consumable
-    ? null
-    : await supabase.from("maintenance_tickets").select(TICKET_COLUMNS).eq("item_id", id).order("id", { ascending: false }).limit(100);
   const tickets = ((ticketsRes?.data ?? []) as TicketRow[]).sort(listOrder);
   const vehicle = (vehicleRes?.data ?? null) as { id: string; registration: string } | null;
-  const assetEvents = events ?? [];
+  const assetEvents = eventData?.rows ?? [];
   // P3.6: the damage report just made (newest first), for "Open a ticket for this".
   const latestDamage = item.condition === "damaged" ? assetEvents.find((e) => e.kind === "damage") : undefined;
-  const reporters = await reporterNames(supabase, assetEvents);
-  const eventPhotos = new Map<number, string>();
-  const withPhoto = assetEvents.filter((e) => e.photo_path);
-  if (withPhoto.length) {
-    const { data: signed } = await supabase.storage
-      .from(PHOTO_BUCKET)
-      .createSignedUrls(withPhoto.map((e) => e.photo_path!), 600);
-    (signed ?? []).forEach((s, i) => s.signedUrl && eventPhotos.set(withPhoto[i].id, s.signedUrl));
-  }
+  const reporters = eventData?.names ?? new Map<string, string>();
+  const eventPhotos = eventData?.photos ?? new Map<number, string>();
   const disposalPending = assetEvents.some((e) => e.status === "pending");
   const assetActions = consumable ? [] : actionsFor(item.condition, disposalPending);
   const movements = moves ?? [];
@@ -225,7 +230,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
         <section aria-label="Photo">
           {photo?.data?.signedUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link
-            <img src={photo.data.signedUrl} alt={`Photo of ${item.name}`} className="w-full rounded-2xl border border-icci-line object-cover shadow-card" />
+            <img src={photo.data.signedUrl} alt={`Photo of ${item.name}`} className="aspect-[4/3] w-full rounded-2xl border border-icci-line bg-icci-panel object-cover shadow-card" />
           ) : (
             <div className="flex h-40 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-icci-gold-300 bg-white text-sm text-icci-ink-60 max-md:h-auto max-md:flex-row max-md:justify-between max-md:px-4 max-md:py-3">
               No photo yet
@@ -337,7 +342,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
                     </div>
                     {pic && (
                       // eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link
-                      <img src={pic} alt={`Photo with this entry`} className="h-20 w-20 shrink-0 rounded-xl border border-icci-line object-cover" />
+                      <img src={pic} alt={`Photo with this entry`} width={80} height={80} loading="lazy" decoding="async" className="h-20 w-20 shrink-0 rounded-xl border border-icci-line bg-icci-panel object-cover" />
                     )}
                   </li>
                 );

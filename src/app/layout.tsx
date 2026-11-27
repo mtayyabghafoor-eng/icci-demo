@@ -3,9 +3,10 @@ import { Cormorant_Garamond, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font
 import "./globals.css";
 
 // Fonts are bundled with the site at build time; visitors' browsers never contact Google.
-// Titles: Cormorant Garamond (serif, Title Case, 28 px and larger only).
+// Titles: Cormorant Garamond (serif, Title Case, 28 px and larger only). E5:
+// only the semi-bold weight is used (.page-title), so only it is loaded.
 // Everything else: Plus Jakarta Sans. Label numbers and codes: JetBrains Mono.
-const title = Cormorant_Garamond({ variable: "--font-title", subsets: ["latin"], weight: ["500", "600", "700"] });
+const title = Cormorant_Garamond({ variable: "--font-title", subsets: ["latin"], weight: ["600"] });
 const body = Plus_Jakarta_Sans({ variable: "--font-body", subsets: ["latin"] });
 const mono = JetBrains_Mono({ variable: "--font-code", subsets: ["latin"] });
 

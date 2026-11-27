@@ -14,10 +14,10 @@ export function Sidebar({ roleCode, account }: { roleCode: string; account: Reac
     >
       <Link href="/" className="flex items-center justify-center gap-3 px-3 pb-4 pt-6 lg:pb-5 text-white! no-underline lg:justify-start lg:px-6" aria-label="ICCI Control Dashboard, home">
         <span className="lg:hidden">
-          <Logo size={44} priority />
+          <Logo size={44} />
         </span>
         <span className="hidden lg:block">
-          <Logo size={56} priority />
+          <Logo size={56} />
         </span>
         <span className="hidden leading-tight lg:block">
           <span className="page-title block text-[26px] text-white!">ICCI</span>

@@ -102,7 +102,7 @@ export default function StyleSample() {
       <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
         <div className="icci-pattern relative overflow-hidden rounded-2xl bg-gradient-to-b from-icci-green-dark to-icci-green-900 p-5 text-white shadow-card" data-testid="sidebar-preview">
           <div className="flex items-center gap-3">
-            <Logo size={56} priority />
+            <Logo size={56} />
             <div>
               <p className="page-title text-[26px] text-white!">ICCI</p>
               <p className="text-[13px] text-[#e9e1cf]">Control Dashboard</p>
@@ -130,7 +130,7 @@ export default function StyleSample() {
         </div>
 
         <div className="relative min-h-72 overflow-hidden rounded-2xl shadow-card" data-testid="photo-preview">
-          <Image src="/brand/centre-front-1800.webp" alt="The Islamic Cultural Centre of Ireland, Clonskeagh" fill sizes="(min-width: 1024px) 800px, 100vw" className="object-cover" priority />
+          <Image src="/brand/centre-front-1800.webp" alt="The Islamic Cultural Centre of Ireland, Clonskeagh" fill sizes="(min-width: 1024px) 800px, 100vw" className="object-cover" preload />
           <div className="absolute inset-0 bg-gradient-to-r from-icci-green-900/90 via-icci-green-dark/70 to-icci-green-dark/10" />
           <div className="relative flex h-full flex-col justify-end p-6 text-white md:p-8">
             <p className="text-sm font-semibold text-[#e9e1cf]">Sunday 15 November</p>

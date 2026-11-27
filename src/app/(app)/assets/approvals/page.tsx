@@ -116,7 +116,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/assets/approva
                 </div>
                 {pic && (
                   // eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link
-                  <img src={pic} alt="Photo with this disposal" className="h-20 w-20 shrink-0 rounded-xl border border-icci-line object-cover" />
+                  <img src={pic} alt="Photo with this disposal" width={80} height={80} loading="lazy" decoding="async" className="h-20 w-20 shrink-0 rounded-xl border border-icci-line bg-icci-panel object-cover" />
                 )}
               </div>
               {(openTicketsOf.get(p.item_id) ?? 0) > 0 && (

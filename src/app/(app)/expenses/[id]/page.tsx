@@ -282,7 +282,7 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
                     {!pdf && shown.get(f.file_path) && (
                       <a href={shown.get(f.file_path)} target="_blank" rel="noreferrer">
                         {/* eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link */}
-                        <img src={shown.get(f.file_path)} alt={`Receipt ${f.position}`} className="max-h-[32rem] w-full rounded-xl border border-icci-line object-contain" />
+                        <img src={shown.get(f.file_path)} alt={`Receipt ${f.position}`} loading="lazy" decoding="async" className="h-[32rem] max-h-[70vh] w-full rounded-xl border border-icci-line bg-white object-contain" />
                       </a>
                     )}
                     <p className="mt-1 flex flex-wrap gap-x-4 text-sm">

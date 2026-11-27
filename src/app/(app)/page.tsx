@@ -396,7 +396,7 @@ function Greeting({ me, line }: { me: CurrentAdmin; line: string }) {
         src="/brand/centre-front-1800.webp"
         alt=""
         fill
-        priority
+        preload
         sizes="(min-width: 1024px) 950px, 100vw"
         className="-z-20 object-cover object-[50%_45%]"
       />

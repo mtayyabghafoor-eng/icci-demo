@@ -36,10 +36,10 @@ const coin = await sharp(masked)
   .png()
   .toBuffer();
 
+// E5: only the PNGs are used (the screens, the room labels and the guide);
+// the WebP copies were never shown, so they are no longer made.
 for (const px of [512, 160, 64]) {
-  const resized = sharp(coin).resize(px, px, { kernel: "lanczos3" });
-  await resized.clone().png({ compressionLevel: 9 }).toFile(`${OUT}/icci-logo-${px}.png`);
-  await resized.clone().webp({ quality: 90 }).toFile(`${OUT}/icci-logo-${px}.webp`);
+  await sharp(coin).resize(px, px, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toFile(`${OUT}/icci-logo-${px}.png`);
 }
 
 // ---- Photographs: gentle clean-up -------------------------------------------
@@ -54,16 +54,12 @@ async function enhance(file, name, { width, crop }) {
     .modulate({ saturation: 1.08, brightness: 1.02 })
     .linear(1.06, -6) // a touch more contrast
     .sharpen({ sigma: 0.8, m1: 0.6, m2: 1.2 });
+  // E5: one size only; Next.js makes the smaller sizes a screen needs.
   await img.clone().webp({ quality: 82 }).toFile(`${OUT}/${name}-${width}.webp`);
-  await img.clone().resize({ width: Math.round(width / 2) }).webp({ quality: 80 }).toFile(`${OUT}/${name}-${Math.round(width / 2)}.webp`);
 }
 
 // Straight-on view of the dome and minaret: sign-in panel and home strip.
+// (E5: the flowers view was never used on a screen, so it is no longer made.)
 await enhance("photo-front.webp", "centre-front", { width: 1800 });
-// The view with flowers in front, cropped to the building: phone sign-in band.
-await enhance("photo-flowers.jpg", "centre-flowers", {
-  width: 1600,
-  crop: { left: 0, top: 120, width: 1600, height: 760 },
-});
 
 console.log("Brand assets written to", OUT);

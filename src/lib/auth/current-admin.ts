@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { assuranceOf } from "@/lib/auth/rules";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,7 +18,15 @@ export type CurrentAdmin = {
  * (no authenticator code, the wrong way of signing in for their role,
  * switched off, or no access), they are sent away.
  */
-export async function requireAdmin(): Promise<CurrentAdmin> {
+export const requireAdmin = cache(checkAdmin);
+
+/**
+ * E5: the check itself. requireAdmin (above) runs it once per page, however
+ * many parts of the page ask (the frame and the page used to check twice).
+ * React forgets the answer when the page is sent, so the next page and
+ * every other visitor are checked afresh.
+ */
+async function checkAdmin(): Promise<CurrentAdmin> {
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   const id = claims?.claims.sub;

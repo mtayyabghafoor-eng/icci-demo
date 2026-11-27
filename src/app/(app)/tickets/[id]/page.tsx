@@ -185,7 +185,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
         <section aria-label="Photo">
           {reportPhoto ? (
             // eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link
-            <img src={reportPhoto} alt="Photo sent with the report" className="w-full rounded-2xl border border-icci-line object-cover shadow-card" />
+            <img src={reportPhoto} alt="Photo sent with the report" className="aspect-[4/3] w-full rounded-2xl border border-icci-line bg-icci-panel object-cover shadow-card" />
           ) : (
             <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-icci-gold-300 bg-white text-sm text-icci-ink-60">
               No photo sent
@@ -236,7 +236,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
                 </div>
                 {pic && (
                   // eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link
-                  <img src={pic} alt="Photo with this entry" className="h-20 w-20 shrink-0 rounded-xl border border-icci-line object-cover" />
+                  <img src={pic} alt="Photo with this entry" width={80} height={80} loading="lazy" decoding="async" className="h-20 w-20 shrink-0 rounded-xl border border-icci-line bg-icci-panel object-cover" />
                 )}
               </li>
             );

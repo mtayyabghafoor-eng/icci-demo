@@ -23,10 +23,10 @@ export default function SignInLayout({ children }: LayoutProps<"/sign-in">) {
           />
           <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-icci-green-dark/55 via-icci-green-dark/72 to-icci-green-900/92" />
           <span className="md:hidden">
-            <Logo size={72} priority />
+            <Logo size={72} />
           </span>
           <span className="hidden md:block">
-            <Logo size={150} priority />
+            <Logo size={150} />
           </span>
           <p className="page-title mt-3 text-[26px] text-white! md:mt-6 md:text-[38px]">Islamic Cultural Centre of Ireland</p>
           <p className="mt-1 text-[15px] text-[#e9e1cf] md:mt-2">Control Dashboard</p>
