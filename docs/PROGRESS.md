@@ -61,9 +61,11 @@ ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built and pushed;
 0059 is on ICCI Staging (27 Nov 2026). D8 (flip-book zoom and one search
 box for everything) is built, not pushed; no database change. Round E
 (docs/ROUND-E-PLAN.md, owner approved 27 Nov 2026): E1 (calm Home on PC
-and phone, honest whole-page screenshots) and E2 (list filters that fit,
-fold and apply) are built, not pushed; no database change. Next: E3 (rota
-week warnings said once). The online accounts
+and phone, honest whole-page screenshots) to E10 (Help link to the user
+guide) are all built and committed, not pushed; no database change in
+Round E. Next: owner review of the Round E report, then push (the demo
+redeploys from main), then retake the 41 user-guide pictures from the
+demo (the owner signs in for capture.mjs). The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -93,6 +95,19 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   card. Phone folds when there is a search box or two or more drop-downs.
   A badge every row would repeat is dropped (Active on "Active only",
   Open on tickets, Waiting on the Waiting tab); "No ... match" said once.
+  E3 to E10 (27 Nov 2026): the rota says "Prayer times missing for N days"
+  once; a Save bar (Save beside Cancel, in reach on a phone) on 25 forms;
+  requireAdmin is read once per page and the item page waits twice, not
+  four times; robots.txt and a "do not list" header keep search engines
+  and AI scrapers out, with tab and phone icons; every page starts at the
+  same left edge on a PC; facts read label over value; codes (ICCI-,
+  T-, EXP-) in the code font and in the browser tab; an item's documents
+  in one card; empty sections fold into "Nothing yet: ..."; "Approve
+  €43.21" with who was paid; a ticket on a phone shows one main button and
+  "More"; Lend has +7/+14 days and Cancel; library desk tabs wrap;
+  sentence-case table headings; text boxes and names follow Arabic
+  (dir="auto"); "Help: the user guide" opens public/help/ICCI-User-Guide.pdf
+  (behind the sign-in).
 
 - D8 (27 Nov 2026, owner: "I can't read the flip book, there is no zoom";
   "people don't want to search for labels, more for items, names,
@@ -528,6 +543,24 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 27 Nov 2026, session 50 (continued). Owner: "Complete all the remaining
+  steps, and then do final analysis and check and provide report". Built
+  and committed E3 to E10 (one commit each, plus a tidy-up that undid an
+  automatic re-wrap of tickets/forms.tsx). Speed (E5, phone, 37 pages):
+  median 423 to 415 ms, slowest 518 to 487 ms. Halfway full suite (E3 to
+  E6): unit and database 2098 passed, browser 439 passed, build passed.
+  Final full suite after db:reset: unit and database 2098 passed, browser
+  465 passed (17 skipped), build passed. Final speed check (37 pages,
+  production build): phone median 416 ms, slowest 480 ms (before Round E
+  423 and 518); PC median 409 ms, slowest 486 ms. Fresh design review of
+  the screenshots: about 30 of 40 (was 26). Still open: on a phone the
+  "Changes saved" message can cover the page title for a moment; the
+  receipt card on a claim stretches to the height of the Decide column;
+  on the item page a model manual's details wrap onto their own line.
+  Not done: the 41 guide pictures (they are taken from the online demo,
+  which only shows Round E once pushed, and need the owner's sign-in).
+  Not pushed.
 
 - 27 Nov 2026, session 50 (continued). Owner said "Go" to E2. Built:
   filter boxes fit the card (Items had two cut to "E" and "A..."); no
