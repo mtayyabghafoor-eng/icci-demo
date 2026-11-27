@@ -80,7 +80,7 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
                 aria-expanded={isOpen}
                 aria-controls={bodyId}
                 className={cx(
-                  "menu-group-title group flex min-h-10 w-full items-center justify-between rounded-lg px-3 text-left text-[11px] font-bold uppercase tracking-[0.14em] text-[#d9c9a3] transition-colors duration-150 hover:bg-white/6 hover:text-[#efe5cc]",
+                  "menu-group-title group flex min-h-10 w-full items-center justify-between rounded-lg px-3 text-left text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3] transition-colors duration-150 hover:bg-white/6 hover:text-[#efe5cc]",
                   compact && "hidden lg:flex",
                 )}
               >
@@ -93,7 +93,7 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
                 />
               </button>
             ) : (
-              <p className={cx("px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#d9c9a3]", compact && "hidden lg:block")}>
+              <p className={cx("px-3 pb-1.5 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3]", compact && "hidden lg:block")}>
                 {group.title}
               </p>
             )}

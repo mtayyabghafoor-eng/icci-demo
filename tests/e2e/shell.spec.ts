@@ -33,7 +33,8 @@ test("Centre Admin: every menu group, the current page marked, the page named in
     const bar = page.getByTestId("bottom-bar");
     for (const name of ["Home", "Items", "Scan", "People"]) await expect(bar.getByRole("link", { name, exact: true })).toBeVisible();
     await expect(bar.getByRole("button", { name: "Menu" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+    // D1: Sign out is in the Menu sheet only, not in the phone's top bar.
+    await expect(page.locator("header").getByRole("button", { name: "Sign out" })).toHaveCount(0);
     await s(page, "stock-with-bottom-bar", info.project.name);
   } else {
     await expect(page.getByTestId("bottom-bar")).toBeHidden();

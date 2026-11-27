@@ -480,6 +480,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Session log
 
+- 27 Nov 2026, session 49 (planning only, no code changed; owner asked
+  for design, ease-of-use and access improvements after three Gemini UI
+  reviews). Opened 31 screens on PC and phone and three on a tablet,
+  checked every page automatically and each Gemini claim in the code.
+  Wrote docs/UI-REVIEW-2026-11-27.md: the reviews predate Phase 5 and
+  Round C; rejected "Same as last count", one-tap Return from lists and
+  instant-reload filters; new findings (tablet menu has no words, Home
+  counts approvals twice, "No photo yet" dead end, cut-off filter words).
+  Proposed Round D (D1 to D6), 4 questions. Owner chose every recommended
+  answer and added D7: English and Arabic PDF flip book (pdfjs-dist
+  approved). Next: D1.
+
 - 26 Nov 2026, session 48 (Round C, owner: "Finish and harden steps",
   then "Go, as recommended"). C4: test companies and models tidied, failed
   reminder emails retried (0055), walkthrough fails on a failed step, two

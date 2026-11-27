@@ -39,7 +39,7 @@ async function SignedInShell({ children }: { children: React.ReactNode }) {
         Skip to the page
       </a>
       <Sidebar roleCode={admin.roleCode} account={account(true, true)} />
-      <TopBar canOpenLabels={canOpenLabels} roleCode={admin.roleCode} signOut={out} />
+      <TopBar canOpenLabels={canOpenLabels} roleCode={admin.roleCode} />
       {/* Room at the bottom on a phone so the bottom bar never covers a button. */}
       <div id="content" tabIndex={-1} className="flex flex-1 flex-col pb-24 outline-none md:pb-0 print:pb-0">
         {children}

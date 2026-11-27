@@ -71,11 +71,11 @@ describe("usage since the last count, in plain words", () => {
   });
 
   it("says how many were used", () => {
-    expect(describeUsage(3, "roll")).toBe("3 roll used since the count before");
+    expect(describeUsage(3, "roll")).toBe("3 rolls used since the count before");
     expect(describeUsage(0, "box")).toBe("None used since the count before");
   });
 
   it("explains when more was found than expected", () => {
-    expect(describeUsage(-2, "pack")).toBe("2 pack more found than expected (a restock may not have been entered)");
+    expect(describeUsage(-2, "pack")).toBe("2 packs more found than expected (a restock may not have been entered)");
   });
 });

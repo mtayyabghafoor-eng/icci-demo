@@ -33,7 +33,8 @@ export default function ItemsPage(props: PageProps<"/items">) {
           </LinkButton>
         }
       />
-      <div className="max-w-xl">
+      {/* D1: on a PC and tablet the top bar already has the label box. */}
+      <div className="max-w-xl md:hidden">
         <FindLabel />
       </div>
       <Suspense fallback={<div className="mt-6"><Skeleton lines={6} label="Loading items" /></div>}>

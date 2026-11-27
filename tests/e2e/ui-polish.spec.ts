@@ -31,11 +31,10 @@ test("Home: four headline numbers, slim Needs attention rows, big actions; the m
   const phone = info.project.name === "phone";
   await signIn(page, centre);
   await expect(page.getByRole("heading", { level: 1, name: "Home" })).toBeVisible();
-  for (const id of ["items", "low-stock", "missing", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
-  // The approvals headline adds up the "for you to approve" queues (P5.3: expense claims too).
-  const queues = ["corrections-for-me", "disposals-for-me", "stocktake-for-me", "expenses-for-me"];
-  let sum = 0;
-  for (const id of queues) sum += Number(await page.getByTestId(`counter-${id}`).getByTestId("count").textContent());
+  for (const id of ["items", "people", "books", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
+  // D1: the approvals box adds up its queues (P5.3: expense claims too).
+  const queueLines = await page.getByTestId("headline-approvals").getByRole("link").allTextContents();
+  const sum = queueLines.reduce((n, t) => n + Number(t.trim().match(/^\d+/)?.[0] ?? 0), 0);
   await expect(page.getByTestId("headline-approvals").getByTestId("headline-count")).toHaveText(String(sum));
   await view(page, "home", info.project.name);
 

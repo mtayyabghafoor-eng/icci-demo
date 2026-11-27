@@ -93,7 +93,10 @@ export function stocktakeLink(waitingIds: number[]): string {
  * A5: `stocktakeHref` opens the stocktake waiting for this admin (worked out by the page).
  */
 export function counterCards(c: HomeCounters, notCounted = 0, stocktakeHref = "/stocktake"): CounterCard[] {
-  const tone = (n: number): Tone => (n > 0 ? "red" : "green");
+  // D1 (owner, 27 Nov 2026: "it feels like a lot of attacking"): red only
+  // for safety and things legally overdue; stock, assets and approvals are
+  // jobs to do, so amber.
+  const tone = (n: number): Tone => (n > 0 ? "amber" : "green");
   return [
     {
       id: "low-stock",
@@ -151,6 +154,17 @@ export function counterCards(c: HomeCounters, notCounted = 0, stocktakeHref = "/
 
 /** P3.6: red when any ticket is not closed (docs/PHASE-2-AND-3.md 5.4), urgent ones named. */
 function ticketsCard(c: HomeCounters): CounterCard {
+  // D1: when some are urgent, the line counts the urgent ones, so "8 Urgent" is true.
+  if (c.tickets_urgent > 0) {
+    return {
+      id: "tickets",
+      title: "Urgent maintenance tickets",
+      count: c.tickets_urgent,
+      detail: `${plural(c.tickets_open, "ticket is", "tickets are")} open in all.`,
+      href: "/tickets",
+      tone: "red",
+    };
+  }
   return {
     id: "tickets",
     title: "Open maintenance tickets",
@@ -162,7 +176,8 @@ function ticketsCard(c: HomeCounters): CounterCard {
           ? `${plural(c.tickets_urgent, "is", "are")} urgent.`
           : "None is urgent.",
     href: "/tickets",
-    tone: c.tickets_open > 0 ? "red" : "green",
+    // D1: red only when a ticket is marked urgent.
+    tone: c.tickets_urgent > 0 ? "red" : c.tickets_open > 0 ? "amber" : "green",
   };
 }
 
@@ -266,10 +281,17 @@ export function splitCards(cards: CounterCard[]): { attention: CounterCard[]; cl
   return { attention, clear: cards.filter((c) => !attention.includes(c)) };
 }
 
-/** The sentence under the greeting: "3 things need attention." */
-export function attentionSentence(n: number): string {
-  if (n === 0) return "Nothing needs attention. Everything is clear.";
-  return n === 1 ? "1 thing needs attention." : `${n} things need attention.`;
+/**
+ * D1: the approval queues. On Home they live only in the "For you to
+ * approve" box, never also in the Needs attention list.
+ */
+export const APPROVAL_IDS = ["corrections-for-me", "disposals-for-me", "stocktake-for-me", "expenses-for-me"];
+
+/** The sentence under the greeting. D1: "2 urgent, 5 to do." */
+export function attentionSentence(urgent: number, toDo = 0): string {
+  if (urgent + toDo === 0) return "Nothing needs attention. Everything is clear.";
+  if (urgent === 0) return toDo === 1 ? "1 thing to do, nothing urgent." : `${toDo} things to do, nothing urgent.`;
+  return toDo === 0 ? `${urgent} urgent.` : `${urgent} urgent, ${toDo} to do.`;
 }
 
 /** "Good morning" by the clock in Dublin, whatever the computer's own clock zone. */
@@ -304,7 +326,7 @@ export function expenseCards(e: ExpenseCounters, euro: (cents: number) => string
           ? "All clear. Nothing waiting for you."
           : "Entered and paid by someone else.",
       href: "/expenses",
-      tone: e.for_me > 0 ? "red" : "green",
+      tone: e.for_me > 0 ? "amber" : "green",
     },
     {
       id: "awaiting-repayment",

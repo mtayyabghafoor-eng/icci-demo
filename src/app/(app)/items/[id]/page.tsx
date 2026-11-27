@@ -20,11 +20,13 @@ import { listOrder, PRIORITY_LABEL, shortDescription, STATUS_LABEL, TICKET_COLUM
 import { Reporter, reporterNames } from "../../people/reporter";
 import { adminNames, MOVEMENT_COLUMNS, stockLevelOf, type Movement } from "../../stock/data";
 import { ITEM_COLUMNS, loadLookups, PHOTO_BUCKET, type ItemRow } from "../data";
-import { BackLink, ItemStatus, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
+import { BackLink, FactGrid, ItemStatus, LinkButton, PageNotice, PrimaryLink, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
+import { Camera } from "lucide-react";
 import { allCompanies, allModels } from "../../companies/data";
 import { ContactCard } from "../../companies/contact-card";
 import { DocumentsCard } from "../../documents/documents-card";
 import { UUID } from "@/lib/forms";
+import { quantityWord } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Item | ICCI Control Dashboard" };
 
@@ -118,13 +120,16 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       : ([
           ["Counted in", item.unit ?? ""],
           ["Minimum level", String(item.minimum_level ?? "")],
-          ["Quantity now", level?.quantity == null ? "Not counted yet" : `${level.quantity} ${item.unit}`],
+          ["Quantity now", level?.quantity == null ? "Not counted yet" : quantityWord(level.quantity, item.unit ?? "")],
           ["Last counted", level?.last_counted_at ? formatDateTime(level.last_counted_at) : "Never"],
           ["Usage", describeUsage(level?.usage_since_previous_count ?? null, item.unit ?? "")],
           ["Supplied by", item.supplier_company_id ? (companyName.get(item.supplier_company_id) ?? "") : "Not recorded"],
         ] as [string, string][])),
     ["Notes", item.notes || "None"],
   ];
+  // D1: "Not recorded" details are listed once, in a single line.
+  const unknown = fields.filter(([, v]) => v === "Not recorded").map(([k]) => k);
+  const known = fields.filter(([k, v]) => v !== "Not recorded" && !(k === "Notes" && v === "None"));
 
   return (
     <>
@@ -159,33 +164,38 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_280px]">
         {/* A2: on a phone the buttons come first (after a scan the job is to act), then the details. */}
         <section className="flex flex-col rounded-2xl border border-icci-line bg-white shadow-card p-5 max-md:[&>*:nth-child(2)]:mt-0" aria-label="Details">
-          <dl className="grid gap-x-4 gap-y-2 sm:grid-cols-[160px_1fr] max-md:order-last max-md:mt-5 max-md:border-t max-md:border-icci-line max-md:pt-4">
-            {fields.map(([k, v]) => (
-              <div key={k} className="contents">
-                <dt className="text-sm font-semibold text-icci-ink-60">{k}</dt>
-                <dd className="mb-2 whitespace-pre-line sm:mb-0">{v}</dd>
-              </div>
-            ))}
-          </dl>
+          {/* D1: details in two columns; the ones not recorded yet are named once, not six times. */}
+          <div className="max-md:order-last max-md:mt-5 max-md:border-t max-md:border-icci-line max-md:pt-4">
+            <FactGrid facts={known.map(([label, value]) => ({ label, value: <span className="whitespace-pre-line">{value}</span> }))} />
+            {unknown.length > 0 && item.condition !== "disposed" && (
+              <p className="mt-5 rounded-xl bg-icci-green-50 px-4 py-3 text-[15px] text-icci-ink-60" data-testid="not-recorded">
+                Not recorded yet: {unknown.join(", ").toLowerCase()}.{" "}
+                <Link href={`/items/${item.id}/edit`} className="font-semibold">
+                  Add them
+                </Link>
+              </p>
+            )}
+          </div>
           {consumable && (
             <div className="mt-4 grid gap-2 sm:flex sm:flex-wrap">
               <PrimaryLink href={`/items/${item.id}/count`}>Count this shelf</PrimaryLink>
-              <PrimaryLink href={`/items/${item.id}/restock`}>Add stock</PrimaryLink>
+              <SecondaryLink href={`/items/${item.id}/restock`}>Add stock</SecondaryLink>
             </div>
           )}
           {assetActions.length > 0 && (
             <div className="mt-4 grid gap-2 sm:flex sm:flex-wrap" data-testid="asset-actions">
               {/* A4: one way to report: a fault, or (ticked) broken or damaged. */}
               <PrimaryLink href={`/tickets/new?item=${item.id}`}>Report a problem</PrimaryLink>
+              {/* D1 (UI-PLAN 5.4 and 5.5): one filled button; routine actions in outline; Mark missing and Dispose in red outline. */}
               {assetActions.map((a) =>
-                a === "dispose" ? (
+                a === "dispose" || a === "missing" ? (
+                  <LinkButton key={a} kind="danger" href={`/items/${item.id}/asset/${a}`}>
+                    {ASSET_ACTIONS[a].button}
+                  </LinkButton>
+                ) : (
                   <SecondaryLink key={a} href={`/items/${item.id}/asset/${a}`}>
                     {ASSET_ACTIONS[a].button}
                   </SecondaryLink>
-                ) : (
-                  <PrimaryLink key={a} href={`/items/${item.id}/asset/${a}`}>
-                    {ASSET_ACTIONS[a].button}
-                  </PrimaryLink>
                 ),
               )}
             </div>
@@ -217,8 +227,13 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
             // eslint-disable-next-line @next/next/no-img-element -- a private, short-lived link
             <img src={photo.data.signedUrl} alt={`Photo of ${item.name}`} className="w-full rounded-2xl border border-icci-line object-cover shadow-card" />
           ) : (
-            <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-icci-gold-300 bg-white text-sm text-icci-ink-60">
+            <div className="flex h-40 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-icci-gold-300 bg-white text-sm text-icci-ink-60 max-md:h-auto max-md:flex-row max-md:justify-between max-md:px-4 max-md:py-3">
               No photo yet
+              {item.condition !== "disposed" && (
+                <LinkButton kind="outline" icon={Camera} href={`/items/${item.id}/edit`}>
+                  Add a photo
+                </LinkButton>
+              )}
             </div>
           )}
         </section>
@@ -249,10 +264,10 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
                 const s = ADJUSTMENT_STATUS[m.status];
                 const what =
                   m.kind === "adjustment"
-                    ? `Correction: ${corrected ? MOVEMENT_LABEL[corrected.kind].toLowerCase() : "entry"} of ${corrected?.quantity ?? "?"} → ${m.quantity} ${item.unit}`
+                    ? `Correction: ${corrected ? MOVEMENT_LABEL[corrected.kind].toLowerCase() : "entry"} of ${corrected?.quantity ?? "?"} → ${quantityWord(m.quantity, item.unit ?? "")}`
                     : m.kind === "count"
-                      ? `Count: ${m.quantity} ${item.unit} found`
-                      : `Restock: +${m.quantity} ${item.unit}`;
+                      ? `Count: ${quantityWord(m.quantity, item.unit ?? "")} found`
+                      : `Restock: +${quantityWord(m.quantity, item.unit ?? "")}`;
                 return (
                   <li key={m.id} className="rounded-xl border border-icci-line bg-white p-4 shadow-card">
                     <p className="flex flex-wrap items-center gap-2">

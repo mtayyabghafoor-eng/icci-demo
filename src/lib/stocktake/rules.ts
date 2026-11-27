@@ -2,6 +2,7 @@
 // browser so they can be unit-tested. The differences themselves are worked
 // out by the database (migrations 0010 and 0011), never here.
 import type { Tone } from "@/lib/items/rules";
+import { quantityWord } from "@/lib/ui/text";
 
 export type DifferenceKind = "missing" | "move_here" | "found" | "quantity";
 export type DifferenceStatus = "pending" | "approved" | "rejected";
@@ -44,10 +45,10 @@ export const STOCKTAKE_STATUS: Record<"open" | "submitted", { word: string; tone
 
 /** "10 expected, 7 found (3 fewer)". */
 export function describeQuantity(expected: number | null, found: number, unit: string): string {
-  if (expected == null) return `Never counted before. ${found} ${unit} found.`;
+  if (expected == null) return `Never counted before. ${quantityWord(found, unit)} found.`;
   const diff = found - expected;
   const change = diff === 0 ? "the same" : diff < 0 ? `${-diff} fewer` : `${diff} more`;
-  return `${expected} ${unit} expected, ${found} ${unit} found (${change}).`;
+  return `${quantityWord(expected, unit)} expected, ${quantityWord(found, unit)} found (${change}).`;
 }
 
 /** "3 waiting" / "All decided" for a sent stocktake. */

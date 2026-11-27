@@ -46,10 +46,12 @@ describe("A5: Home puts people and safety first", () => {
   });
 
   it("still puts every red line before every amber one", () => {
-    const { attention } = splitCards(counterCards({ ...zero, vetting_due: 2, low_stock: 1 }));
+    // D1: low stock is amber now; an overdue renewal is red and comes first.
+    const { attention } = splitCards(counterCards({ ...zero, vetting_due: 2, low_stock: 1, renewals_overdue: 1 }));
     expect(attention.map((c) => [c.id, c.tone])).toEqual([
-      ["low-stock", "red"],
+      ["renewals", "red"],
       ["vetting", "amber"],
+      ["low-stock", "amber"],
     ]);
   });
 

@@ -2,6 +2,7 @@
 // be unit-tested. The quantity itself is worked out by the database
 // (the stock_levels view in migration 0007), never here.
 import type { Tone } from "@/lib/items/rules";
+import { quantityWord } from "@/lib/ui/text";
 
 export type StockStatus = "not_counted" | "out" | "low" | "in_stock";
 
@@ -46,8 +47,8 @@ export function parseReason(raw: string): Parsed<string> {
 export function describeUsage(usage: number | null, unit: string): string {
   if (usage == null) return "Needs two counts";
   if (usage === 0) return "None used since the count before";
-  if (usage < 0) return `${-usage} ${unit} more found than expected (a restock may not have been entered)`;
-  return `${usage} ${unit} used since the count before`;
+  if (usage < 0) return `${quantityWord(-usage, unit)} more found than expected (a restock may not have been entered)`;
+  return `${quantityWord(usage, unit)} used since the count before`;
 }
 
 export const MOVEMENT_LABEL: Record<string, string> = {

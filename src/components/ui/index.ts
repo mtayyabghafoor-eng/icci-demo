@@ -6,7 +6,7 @@ export { Field, Input, Select, Textarea } from "./form";
 export { StatusPill } from "./status";
 export { Breadcrumb, Card, CardTitle, FactGrid, PageHeader, type Crumb } from "./layout";
 export { EmptyState, Notice, Skeleton } from "./feedback";
-export { ActionTile, AttentionRow, Avatar, ClearChip, CounterCard, HeadlineCard, QuickAction, type HeadlineTone } from "./dashboard";
+export { ActionTile, ApprovalsBox, AttentionRow, Avatar, ClearChip, CounterCard, GlanceStrip, HeadlineCard, QuickAction, type HeadlineTone } from "./dashboard";
 export { Timeline, type TimelineEntry } from "./timeline";
 export { DataTable, Pagination, type Column } from "./table";
 export { Logo } from "./logo";

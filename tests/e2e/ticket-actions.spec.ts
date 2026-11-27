@@ -178,8 +178,8 @@ test("the Home page counts open tickets", async ({ page }, info) => {
   await signInAs(page, centre, "/");
   const card = page.getByTestId("counter-tickets");
   await expect(card).toBeVisible();
-  await expect(card).toContainText("Open maintenance tickets");
-  await expect(card).toContainText(/urgent/);
+  await expect(card).toContainText(/(Open|Urgent) maintenance tickets/);
+  await expect(card).toContainText(/urgent|open in all/);
   await card.scrollIntoViewIfNeeded();
   await s(page, "home-tickets", info.project.name);
 });

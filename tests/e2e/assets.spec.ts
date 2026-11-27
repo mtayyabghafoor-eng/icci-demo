@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet } from "./helpers";
+import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet, signOutHere } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -168,7 +168,7 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await mine.screenshot({ path: `docs/screens/slice-06-disposal-own-${project}.png`, caret: "initial" });
 
   // A different admin approves it.
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, second, "/assets/approvals");
   const theirs = page.getByTestId("pending-disposal").filter({ hasText: item.name });
@@ -199,7 +199,7 @@ test("consumables have no asset buttons; finance sees nothing on the missing and
   await expect(page.getByTestId("asset-actions")).toHaveCount(0);
   await page.goto(`/items/${consumable!.id}/asset/damage`);
   await expect(page.getByRole("heading", { level: 1, name: "Report damage" })).toHaveCount(0);
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
 
   await signInAs(page, seedAdmin("finance"), "/assets");

@@ -98,9 +98,9 @@ export type LibraryCard = { id: string; title: string; count: number; detail: st
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-/** Red when any book is overdue, amber when some are due in 3 days, else green. */
+/** D1: amber when any book is overdue or due in 3 days (a phone call, not an emergency), else green. */
 export function libraryCards(c: Counters): LibraryCard[] {
-  const tone: Tone = c.books_overdue > 0 ? "red" : c.due_soon > 0 ? "amber" : "green";
+  const tone: Tone = c.books_overdue > 0 || c.due_soon > 0 ? "amber" : "green";
   const detail =
     c.books_overdue > 0
       ? c.due_soon > 0

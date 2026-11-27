@@ -50,9 +50,12 @@ describe("home page counter cards", () => {
     }
   });
 
-  it("is red when something needs attention", () => {
-    const some = { ...zero, low_stock: 3, damaged: 1, corrections_for_me: 2, disposals_for_me: 1, stocktake_diffs_for_me: 4, vetting_expired: 1, signoffs_overdue: 1, renewals_overdue: 1, tickets_open: 2 };
-    for (const c of counterCards(some).filter((x) => x.id !== "rota-today")) expect(c.tone).toBe("red");
+  it("D1: red only for safety and things overdue; stock, assets, approvals and open tickets are amber", () => {
+    const some = { ...zero, low_stock: 3, damaged: 1, corrections_for_me: 2, disposals_for_me: 1, stocktake_diffs_for_me: 4, vetting_expired: 1, signoffs_overdue: 1, renewals_overdue: 1, tickets_open: 2, tickets_urgent: 1 };
+    const tones = Object.fromEntries(counterCards(some).map((c) => [c.id, c.tone]));
+    expect(tones).toMatchObject({ vetting: "red", signoffs: "red", renewals: "red", tickets: "red" });
+    expect(tones).toMatchObject({ "low-stock": "amber", "missing-damaged": "amber", "corrections-for-me": "amber", "disposals-for-me": "amber", "stocktake-for-me": "amber" });
+    expect(card({ ...zero, tickets_open: 3 }, "tickets").tone).toBe("amber");
   });
 
   it("UI-9: says plainly how many are out, how many are low, and how many are not counted yet", () => {
@@ -136,9 +139,9 @@ describe("home page layout (UI-4)", () => {
     const some = { ...zero, vetting_due: 1, damaged: 1, low_stock: 2 };
     const { attention, clear } = splitCards(counterCards(some));
     expect(attention.map((c) => [c.id, c.tone])).toEqual([
-      ["low-stock", "red"],
-      ["missing-damaged", "red"],
       ["vetting", "amber"],
+      ["low-stock", "amber"],
+      ["missing-damaged", "amber"],
     ]);
     expect(clear.map((c) => c.id)).toEqual(["corrections-for-me", "disposals-for-me", "stocktake-for-me", "signoffs", "renewals", "rota-today", "tickets"]);
   });
@@ -150,9 +153,11 @@ describe("home page layout (UI-4)", () => {
   });
 
   it("says how many things need attention in plain words", () => {
-    expect(attentionSentence(0)).toBe("Nothing needs attention. Everything is clear.");
-    expect(attentionSentence(1)).toBe("1 thing needs attention.");
-    expect(attentionSentence(4)).toBe("4 things need attention.");
+    expect(attentionSentence(0, 0)).toBe("Nothing needs attention. Everything is clear.");
+    expect(attentionSentence(0, 1)).toBe("1 thing to do, nothing urgent.");
+    expect(attentionSentence(0, 4)).toBe("4 things to do, nothing urgent.");
+    expect(attentionSentence(2, 0)).toBe("2 urgent.");
+    expect(attentionSentence(2, 5)).toBe("2 urgent, 5 to do.");
   });
 
   it("greets by the Dublin clock, summer time included", () => {
@@ -172,8 +177,9 @@ describe("home page layout (UI-4)", () => {
 
 describe("open tickets card (P3.6)", () => {
   it("is red with the urgent ones named, green 'All clear' at zero", () => {
-    expect(card({ ...zero, tickets_open: 5, tickets_urgent: 2 }, "tickets")).toMatchObject({ count: 5, tone: "red", detail: "2 are urgent." });
-    expect(card({ ...zero, tickets_open: 1, tickets_urgent: 1 }, "tickets").detail).toBe("1 is urgent.");
+    expect(card({ ...zero, tickets_open: 5, tickets_urgent: 2 }, "tickets")).toMatchObject({ count: 2, tone: "red", title: "Urgent maintenance tickets", detail: "5 tickets are open in all." });
+    expect(card({ ...zero, tickets_open: 5 }, "tickets")).toMatchObject({ count: 5, tone: "amber", detail: "None is urgent." });
+    expect(card({ ...zero, tickets_open: 1, tickets_urgent: 1 }, "tickets").detail).toBe("1 ticket is open in all.");
     expect(card({ ...zero, tickets_open: 3 }, "tickets").detail).toBe("None is urgent.");
     expect(card(zero, "tickets")).toMatchObject({ count: 0, tone: "green", detail: "All clear. Every ticket is closed." });
   });

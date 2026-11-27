@@ -207,3 +207,17 @@ export async function confirmSheet(page: Page) {
   await sheet.getByTestId("confirm-yes").click();
   await expect(page.locator("dialog[open]")).toHaveCount(0);
 }
+
+/**
+ * D1: Sign out. On a PC it is at the foot of the sidebar; on a phone it is
+ * only in the Menu sheet (no longer in the top bar).
+ */
+export async function signOutHere(page: Page) {
+  const sidebarButton = page.getByTestId("sidebar").getByRole("button", { name: "Sign out" });
+  if (await sidebarButton.isVisible()) {
+    await sidebarButton.click();
+    return;
+  }
+  await page.getByTestId("bottom-bar").getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("dialog", { name: "Menu" }).getByRole("button", { name: "Sign out" }).click();
+}

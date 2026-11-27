@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet } from "./helpers";
+import { completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet, signOutHere } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -67,7 +67,7 @@ test("a sale: price, buyer, date and who took the money; the approver sees it; h
   expect(ev!.sale_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
   // A different admin sees how it leaves, and approves.
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, second, "/assets/approvals");
   const theirs = page.getByTestId("pending-disposal").filter({ hasText: item.name });

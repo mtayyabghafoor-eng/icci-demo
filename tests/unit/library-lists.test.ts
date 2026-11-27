@@ -53,9 +53,9 @@ describe("who may download a list", () => {
 describe("the Home card", () => {
   const card = (c: Partial<{ books_overdue: number; due_soon: number }>) =>
     libraryCards({ books_overdue: 0, due_soon: 0, books_on_loan: 4, copies_lost: 0, ...c })[0];
-  it("is red with books overdue, and opens the Overdue list", () => {
+  it("D1: is amber (a phone call, not an emergency) with books overdue, and opens the Overdue list", () => {
     const c = card({ books_overdue: 3, due_soon: 2 });
-    expect(c.tone).toBe("red");
+    expect(c.tone).toBe("amber");
     expect(c.count).toBe(3);
     expect(c.href).toBe("/library/overdue");
     expect(c.detail).toMatch(/2 more are due in the next 3 days/);

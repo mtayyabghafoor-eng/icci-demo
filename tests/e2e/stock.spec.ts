@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot, signOutHere } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -102,7 +102,7 @@ test("count a shelf, add stock, correct an entry, a different admin approves it"
   await expect(mine.getByRole("button", { name: "Approve" })).toHaveCount(0);
 
   // A different admin approves it.
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, second, "/stock/approvals");
   const theirs = page.getByTestId("pending-correction").filter({ hasText: item.name });
@@ -169,7 +169,7 @@ test("the Stock menu link opens the low-stock list; finance cannot reach stock",
   await signInAs(page, centre, "/");
   await clickMenuLink(page, "Stock");
   await expect(page.getByRole("heading", { level: 1, name: "Low stock" })).toBeVisible();
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
 
   const finance = seedAdmin("finance");

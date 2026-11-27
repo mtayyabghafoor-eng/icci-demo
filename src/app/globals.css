@@ -157,6 +157,21 @@ h1.page-title::after {
   padding-right: 0.875rem;
   transition: border-color 150ms;
 }
+/*
+  D1: on a PC, filter boxes are never squeezed until their words are cut off
+  ("Any conditic"): each takes at least 12 rem and the row wraps instead.
+*/
+@media (width >= 64rem) {
+  .list-filters.grid {
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  }
+  .list-filters:not(.grid) select {
+    min-width: 12rem;
+  }
+}
+.list-filters :is(input, select) {
+  text-overflow: ellipsis;
+}
 .list-filters :is(input, select):hover {
   border-color: color-mix(in srgb, var(--icci-green) 60%, transparent);
 }

@@ -35,9 +35,10 @@ test("Home: red before amber, people and safety first, each line opens its filte
   // The vetting line (the seed has made-up people with expired vetting) opens only those people.
   const vetting = page.getByTestId("counter-vetting");
   await expect(vetting).toHaveAttribute("href", "/people/vetting?status=attention");
-  // Low stock has one colour: the headline matches its line.
+  // D1: low stock is a job (amber), never an alarm, and is counted once on Home.
   const low = page.getByTestId("counter-low-stock");
-  if ((await low.getAttribute("data-tone")) === "red") await expect(page.getByTestId("headline-low-stock")).toHaveClass(/icci-bad-fill/);
+  if (await low.getAttribute("data-tone")) await expect(low).not.toHaveAttribute("data-tone", "red");
+  await expect(page.getByTestId("headline-low-stock")).toHaveCount(0);
   await s(page, "home", info.project.name);
 
   await vetting.click();

@@ -71,3 +71,19 @@ export function pageOf<T>(all: T[], page: number, size: number) {
   const p = Math.min(page, pages);
   return { rows: all.slice((p - 1) * size, p * size), page: p, pages, total: all.length };
 }
+
+/**
+ * D1: a number with its unit in plain English: "1 roll", "13 rolls",
+ * "2 boxes", "3 batteries". A unit already plural ("scissors") or of two
+ * words ("pairs of gloves") is left alone after the first word's rule.
+ */
+export function quantityWord(n: number, unit: string): string {
+  const u = unit.trim();
+  if (!u || Math.abs(n) === 1) return `${n}${u ? ` ${u}` : ""}`.trim();
+  const [first, ...rest] = u.split(" ");
+  let many = first;
+  if (/(s|x|z|ch|sh)$/i.test(first)) many = /ss$|x$|z$|ch$|sh$/i.test(first) ? `${first}es` : first;
+  else if (/[^aeiou]y$/i.test(first)) many = `${first.slice(0, -1)}ies`;
+  else many = `${first}s`;
+  return [String(n), many, ...rest].join(" ");
+}

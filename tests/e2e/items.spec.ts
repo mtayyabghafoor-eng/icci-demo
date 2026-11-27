@@ -115,8 +115,14 @@ test("scan a new label, register, open, edit and see the history", async ({ page
   await s(page, "items-list-search", project);
 
   // A typed number that was never printed.
-  await page.getByPlaceholder("Label number, e.g. ICCI-000123").fill("ICCI-999999");
-  await page.getByRole("button", { name: "Open label" }).click();
+  // D1: on a PC the top bar's label box is the only one; on a phone the page has its own.
+  if (project === "desktop") {
+    await page.getByRole("textbox", { name: "Open a label by its number" }).fill("ICCI-999999");
+    await page.getByRole("button", { name: "Go to this label" }).click();
+  } else {
+    await page.getByPlaceholder("Label number, e.g. ICCI-000123").fill("ICCI-999999");
+    await page.getByRole("button", { name: "Open label" }).click();
+  }
   await expect(page.getByRole("heading", { level: 1, name: "Label not recognised" })).toBeVisible();
   await s(page, "label-unknown", project);
 

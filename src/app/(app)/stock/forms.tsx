@@ -5,6 +5,7 @@ import { FormError } from "@/app/sign-in/ui";
 import { decideCorrection, recordOne, recordWeeklyCount, requestCorrection, type StockFormState } from "./actions";
 import { Stepper } from "@/components/ui/stepper";
 import { fieldClass } from "@/components/ui";
+import { quantityWord } from "@/lib/ui/text";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 min-h-12 w-full px-6 text-lg sm:w-auto";
@@ -133,7 +134,7 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
                 <span>
                   <span className="block font-semibold">{r.name}</span>
                   <span className="block text-sm">
-                    {r.label} · {r.place} · now: {r.lastQuantity == null ? "not counted yet" : `${r.lastQuantity} ${r.unit}`}
+                    {r.label} · {r.place} · now: {r.lastQuantity == null ? "not counted yet" : quantityWord(r.lastQuantity, r.unit)}
                   </span>
                 </span>
                 <span className="flex items-center gap-2">

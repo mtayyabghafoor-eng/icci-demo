@@ -27,6 +27,7 @@ import { carryOn, stopScanning } from "../actions";
 import { type Difference, loadItems, loadScans, loadStocktake } from "../data";
 import { DecideDifferenceForm, LabelBox, StocktakeCamera } from "../forms";
 import { BackLink, PageNotice, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
+import { quantityWord } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Stocktake | ICCI Control Dashboard" };
 
@@ -164,7 +165,7 @@ async function Content({
                     </span>
                   </span>
                   <span>
-                    {item?.kind === "consumable" ? `${s.found_quantity} ${item.unit}` : item ? "Seen" : "Noted"}
+                    {item?.kind === "consumable" ? quantityWord(s.found_quantity ?? 0, item.unit ?? "") : item ? "Seen" : "Noted"}
                   </span>
                 </li>
               );

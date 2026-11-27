@@ -11,11 +11,11 @@ import {
 
 describe("describing a counted difference", () => {
   it("says how many fewer or more were found", () => {
-    expect(describeQuantity(10, 7, "roll")).toBe("10 roll expected, 7 roll found (3 fewer).");
-    expect(describeQuantity(4, 9, "box")).toBe("4 box expected, 9 box found (5 more).");
+    expect(describeQuantity(10, 7, "roll")).toBe("10 rolls expected, 7 rolls found (3 fewer).");
+    expect(describeQuantity(4, 9, "box")).toBe("4 boxes expected, 9 boxes found (5 more).");
   });
   it("says when a shelf was never counted before", () => {
-    expect(describeQuantity(null, 6, "pack")).toBe("Never counted before. 6 pack found.");
+    expect(describeQuantity(null, 6, "pack")).toBe("Never counted before. 6 packs found.");
   });
 });
 

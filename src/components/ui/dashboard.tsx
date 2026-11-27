@@ -5,8 +5,8 @@ import type { Tone } from "@/lib/items/rules";
 import { cx, initials } from "@/lib/ui/text";
 
 const COUNTER: Record<Tone, { badge: string; number: string; word: string }> = {
-  red: { badge: "bg-[var(--icci-bad-fill)] text-icci-error", number: "text-icci-error", word: "Needs attention" },
-  amber: { badge: "bg-[var(--icci-warn-fill)] text-[var(--icci-warn-text)]", number: "text-[var(--icci-warn-text)]", word: "Check" },
+  red: { badge: "bg-[var(--icci-bad-fill)] text-icci-error", number: "text-icci-error", word: "Urgent" },
+  amber: { badge: "bg-[var(--icci-warn-fill)] text-[var(--icci-warn-text)]", number: "text-[var(--icci-warn-text)]", word: "To do" },
   green: { badge: "bg-[var(--icci-ok-fill)] text-[var(--icci-ok-text)]", number: "text-icci-green-dark", word: "All clear" },
   grey: { badge: "bg-icci-panel text-icci-green-dark", number: "text-icci-green-dark", word: "" },
 };
@@ -201,14 +201,15 @@ export function AttentionRow({
       data-tone={tone}
       className="group flex min-h-16 items-center gap-3 px-4 py-3 text-icci-text! no-underline transition-colors duration-150 hover:bg-icci-green-50 md:gap-4 md:px-5"
     >
-      <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", t.badge)}>
+      {/* D1: a calm green icon on every row; the colour and its word sit only in the pill. */}
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-icci-green-50 text-icci-green-dark">
         <Icon aria-hidden size={20} strokeWidth={1.9} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-semibold leading-snug">{title}</span>
         {detail && <span className="block text-sm text-icci-ink-60">{detail}</span>}
       </span>
-      <span className={cx("inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold", t.pill)}>
+      <span className={cx("inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold", t.pill)} data-badge>
         <span data-testid="count">{count}</span>
         <span className="hidden font-semibold sm:inline">{COUNTER[tone].word}</span>
         <span className="sr-only sm:hidden">{COUNTER[tone].word}</span>
@@ -260,5 +261,75 @@ export function ActionTile({ href, icon: Icon, label, hint, primary = false }: {
         {hint && <span className={cx("mt-0.5 block text-[13px] leading-snug", primary ? "text-white/80" : "text-icci-ink-60")}>{hint}</span>}
       </span>
     </Link>
+  );
+}
+
+/**
+ * D1: plain facts in one slim white strip (never a number the Needs
+ * attention list also shows), each opening its list.
+ */
+export function GlanceStrip({ facts }: { facts: Array<{ href: string; icon: LucideIcon; label: string; count: number; testId?: string }> }) {
+  return (
+    <ul
+      aria-label="At a glance"
+      className="mt-5 grid grid-cols-3 divide-x divide-icci-line overflow-hidden rounded-2xl border border-icci-line bg-white shadow-card"
+    >
+      {facts.map((f) => (
+        <li key={f.label}>
+          <Link
+            href={f.href}
+            data-testid={f.testId}
+            className="group flex h-full flex-col items-start gap-1 px-3 py-3.5 text-icci-text! no-underline transition-colors duration-150 hover:bg-icci-green-50 sm:flex-row sm:items-center sm:gap-3 sm:px-5 sm:py-4"
+          >
+            <f.icon aria-hidden size={20} strokeWidth={1.9} className="hidden shrink-0 text-icci-gold sm:block" />
+            <span className="text-[24px] font-bold leading-none tracking-tight text-icci-green-dark sm:text-[28px]" data-testid="headline-count">
+              {f.count}
+            </span>
+            <span className="text-sm font-semibold leading-snug text-icci-ink-60">{f.label}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * D1: "For you to approve" in its own box: each queue with its number, or
+ * one calm line when nothing waits. Approvals are jobs, never alarms.
+ */
+export function ApprovalsBox({ total, queues, testId }: { total: number; queues: Array<{ href: string; label: string; count: number }>; testId?: string }) {
+  return (
+    <section aria-labelledby="approve-title" data-testid={testId} className="rounded-2xl border border-icci-gold-300 bg-icci-gold-100 p-4 shadow-card md:p-5">
+      <div className="flex items-center gap-3">
+        <span aria-hidden className="h-6 w-1 rounded-full bg-icci-gold" />
+        <h2 id="approve-title" className="text-lg font-bold text-icci-green-dark">
+          For you to approve
+        </h2>
+        <span className="ml-auto text-[26px] font-bold leading-none text-icci-green-dark" data-testid="headline-count">
+          {total}
+        </span>
+      </div>
+      {queues.length === 0 ? (
+        <p className="mt-3 flex items-center gap-2 text-[15px] text-[var(--icci-ok-text)]">
+          <CircleCheck aria-hidden size={18} />
+          Nothing is waiting for you.
+        </p>
+      ) : (
+        <ul className="mt-3 flex flex-col gap-1" data-testid="headline-links">
+          {queues.map((q) => (
+            <li key={q.href + q.label}>
+              <Link
+                href={q.href}
+                className="group flex min-h-11 items-center gap-3 rounded-xl bg-white/70 px-3 font-semibold text-icci-green-dark! no-underline transition-colors duration-150 hover:bg-white"
+              >
+                <span className="min-w-8 text-right font-mono text-base">{q.count}</span>
+                <span className="flex-1">{q.label}</span>
+                <ChevronRight aria-hidden size={18} className="text-icci-ink-60 transition-transform duration-150 group-hover:translate-x-0.5" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

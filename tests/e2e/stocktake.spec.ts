@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, newTestLabel, shot, signOutHere } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -157,7 +157,7 @@ test("run a stocktake of a room, and a different admin decides on each differenc
   await s(page, "stocktake-sent", project);
 
   // A different admin decides: approve the missing chair, reject the count.
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, second, stocktakeUrl);
   const missing = page.getByTestId("difference").filter({ hasText: room.lostChair.name });

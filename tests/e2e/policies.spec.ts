@@ -8,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { SEED_ADMINS, seedAdmin, samplePolicyPdf } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { addDays, addYears, todayInDublin } from "../../src/lib/vetting/rules";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, confirmSheet } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, confirmSheet, signOutHere } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -87,7 +87,7 @@ test("add a policy, upload a draft, and a different admin publishes it", async (
   expect((await pdf.body()).subarray(0, 5).toString()).toBe("%PDF-");
 
   // A different admin publishes it.
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, second, new URL(policyUrl).pathname);
   await s(page, "policy-draft-other-admin", project);
@@ -114,7 +114,7 @@ test("add a policy, upload a draft, and a different admin publishes it", async (
   await uploadDraft(page, "v2", todayInDublin(), title);
   await page.getByRole("button", { name: "Upload draft" }).click();
   await expect(page.getByTestId("notice")).toHaveText(/Draft uploaded/);
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, centre, new URL(policyUrl).pathname);
   await page.getByRole("button", { name: "Publish" }).click();
@@ -139,7 +139,7 @@ test("change a draft; whoever changed it cannot publish it; a published version 
   await expect(page.getByTestId("notice")).toHaveText(/Draft uploaded/);
   const policyPath = new URL(page.url()).pathname;
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expectSignInPage(page);
   await signInAs(page, centre, policyPath);
   // Centre Admin could publish it, but changes it first...

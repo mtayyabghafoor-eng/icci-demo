@@ -1,9 +1,9 @@
 // The people directory (PLAN.md 5.2; slice P2.1): search, and filter by
 // role, section, active and (P2.3) vetting status. Designed for a PC first; one card per person on
 // a phone. Super Admin and Centre Admin only.
-import { UserSearch } from "lucide-react";
+import { UserPlus, UserSearch } from "lucide-react";
 import type { Metadata } from "next";
-import { CannotSee, EmptyState, fieldClass, LinkButton, Pagination, PrimaryLink, Skeleton, StatusBadge } from "@/components/ui";
+import { CannotSee, EmptyState, fieldClass, LinkButton, PageHeader, Pagination, Skeleton, StatusBadge } from "@/components/ui";
 import { FilterFold } from "@/components/ui/filter-fold";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -21,10 +21,16 @@ export const metadata: Metadata = { title: "People | ICCI Control Dashboard" };
 export default function PeoplePage(props: PageProps<"/people">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="page-title text-[28px] md:text-[34px]">People</h1>
-      </div>
-      <p className="mt-2">Staff, imams, volunteers and contractors. They are records here, not users: they cannot sign in.</p>
+      {/* D1: the main button top right, as on every list. */}
+      <PageHeader
+        title="People"
+        subtitle="Staff, imams, volunteers and contractors. They are records here, not users: they cannot sign in."
+        actions={
+          <LinkButton href="/people/new" icon={UserPlus}>
+            Add a person
+          </LinkButton>
+        }
+      />
       <Suspense fallback={<Skeleton />}>
         <List searchParams={props.searchParams} />
       </Suspense>
@@ -89,9 +95,6 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
 
   return (
     <>
-      <div className="mt-4">
-        <PrimaryLink href="/people/new">Add a person</PrimaryLink>
-      </div>
       <form data-folded="true" method="get" className="list-filters grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="search" aria-label="Search people">
         <label className="lg:col-span-2">
           <span className="font-semibold">Search</span>

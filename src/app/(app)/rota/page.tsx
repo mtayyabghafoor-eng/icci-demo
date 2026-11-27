@@ -228,7 +228,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
               {days.map((d) => (
                 <th key={d} scope="col" className={cx("px-2 py-3", d === today && "text-icci-green")} title={fullDayLabel(d)}>
                   {shortDayLabel(d)}
-                  {d === today && <span className="block text-[11px] normal-case">Today</span>}
+                  {d === today && <span className="block text-[13px] normal-case">Today</span>}
                 </th>
               ))}
             </tr>
@@ -333,7 +333,7 @@ function SlotCard({ e, ctx, compact = false }: { e: RotaEntry; ctx: Ctx; compact
       )}
     >
       {changed && (
-        <span data-testid="slot-changed" className="mb-0.5 inline-block rounded bg-[var(--icci-warn-fill)] px-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--icci-warn-text)] ring-1 ring-[var(--icci-warn-text)]/40">
+        <span data-testid="slot-changed" className="mb-0.5 inline-block rounded bg-[var(--icci-warn-fill)] px-1.5 text-[12.5px] font-bold uppercase tracking-wide text-[var(--icci-warn-text)] ring-1 ring-[var(--icci-warn-text)]/40">
           Changed
         </span>
       )}

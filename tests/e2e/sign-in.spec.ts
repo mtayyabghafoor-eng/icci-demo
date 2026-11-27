@@ -3,7 +3,7 @@
 import { expect, test } from "@playwright/test";
 import { seedAdmin, SEED_ADMINS } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { createNewTestAdmin, enterCode, enterPassword, expectSignInPage, shot } from "./helpers";
+import { createNewTestAdmin, enterCode, enterPassword, expectSignInPage, shot, signOutHere } from "./helpers";
 
 const superAdmin = seedAdmin("super_admin");
 const centreAdmin = seedAdmin("centre_admin");
@@ -56,7 +56,7 @@ test("signing in needs the password and the authenticator code, then Sign out wo
   await expect(page.getByRole("img", { name: /Islamic Cultural Centre of Ireland logo/ })).toBeVisible();
   await shot(page, "home-signed-in", info.project.name);
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOutHere(page);
   await expect(page).toHaveURL(/\/sign-in\?reason=signed-out/);
   await expect(page.getByRole("status")).toHaveText("You have signed out.");
   await shot(page, "signed-out", info.project.name);

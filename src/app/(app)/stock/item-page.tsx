@@ -1,6 +1,6 @@
 // The shared frame of the "Count this shelf", "Add stock" and "Correct an
 // entry" screens for one consumable (phone-first).
-import { titleCase } from "@/lib/ui/text";
+import { titleCase, quantityWord } from "@/lib/ui/text";
 import { notFound } from "next/navigation";
 import { STOCK_STATUS } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +30,7 @@ export function StockHeader({ level, place, title }: { level: StockLevel; place:
       </p>
       <p className="mt-2 flex flex-wrap items-center gap-2">
         <span>
-          Now: {level.quantity == null ? "not counted yet" : `${level.quantity} ${level.unit}`} (minimum {level.minimum_level})
+          Now: {level.quantity == null ? "not counted yet" : quantityWord(level.quantity, level.unit ?? "")} (minimum {level.minimum_level})
         </span>
         <StatusBadge word={s.word} tone={s.tone} />
       </p>

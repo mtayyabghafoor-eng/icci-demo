@@ -24,7 +24,7 @@ import {
   MapPin,
   Package,
   PackagePlus,
-  PackageX,
+  Users,
   Printer,
   QrCode,
   ScanLine,
@@ -42,11 +42,11 @@ import {
   Presentation,
 } from "lucide-react";
 import { Suspense } from "react";
-import { ActionTile, AttentionRow, Card, CardTitle, ClearChip, CounterCard, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
+import { ActionTile, ApprovalsBox, AttentionRow, Card, CardTitle, ClearChip, CounterCard, GlanceStrip, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
 import { requireAdmin, type CurrentAdmin } from "@/lib/auth/current-admin";
 import { ExpenseLinkNote } from "./expenses/link-note";
 import {
-  approvalLinks,
+  APPROVAL_IDS,
   approvalsTotal,
   attentionSentence,
   counterCards,
@@ -113,7 +113,7 @@ async function HomeContent() {
   // Round C2: every counter is asked for at the same time (each worked out
   // in one pass by the database, migration 0057). The library and expense
   // counters stay separate calls, so a problem there never hides the rest.
-  const [{ data, error }, { data: lib }, { count: registered }, { count: notCounted }, { data: exp }] = await Promise.all([
+  const [{ data, error }, { data: lib }, { count: registered }, { count: notCounted }, { data: exp }, { count: peopleCount }, { count: bookCount }] = await Promise.all([
     supabase.rpc("home_counters").single<HomeCounters>(),
     supabase.rpc("library_counters").single<LibraryCounters>(),
     // UI-9: two plain counts the admins can already read: items still with the
@@ -122,6 +122,9 @@ async function HomeContent() {
     supabase.from("stock_levels").select("item_id", { count: "exact", head: true }).eq("status", "not_counted"),
     // P5.3: expense claims.
     supabase.rpc("expense_counters").single<ExpenseCounters>(),
+    // D1: two plain facts for the strip under the greeting.
+    supabase.from("people").select("id", { count: "exact", head: true }).eq("active", true),
+    supabase.from("library_books").select("id", { count: "exact", head: true }),
   ]);
   if (error || !data) {
     return (
@@ -138,84 +141,40 @@ async function HomeContent() {
 
   const stocktakeHref = stocktakeLink(data.stocktake_diffs_for_me > 0 ? await stocktakesWaitingFor(me.id) : []);
   const cards = [...counterCards(data, notCounted ?? 0, stocktakeHref), ...(lib ? libraryCards(lib) : []), ...(exp ? expenseCards(exp, formatEuro) : [])];
-  const { attention, clear } = splitCards(cards);
+  // D1 (owner, 27 Nov 2026): approval queues live only in their own box,
+  // never twice; the list splits into Urgent (red) and To do (amber).
+  const { attention, clear } = splitCards(cards.filter((c) => !APPROVAL_IDS.includes(c.id)));
+  const urgent = attention.filter((c) => c.tone === "red");
+  const toDo = attention.filter((c) => c.tone !== "red");
   const approvals = approvalsTotal(data) + (exp?.for_me ?? 0);
-  const toApprove = approvalLinks(data, stocktakeHref, exp?.for_me ?? 0);
-  const missing = data.damaged + data.missing;
+  const queues = [
+    { href: "/expenses", label: "Expense claims", count: exp?.for_me ?? 0 },
+    { href: "/stock/approvals", label: "Stock corrections", count: data.corrections_for_me },
+    { href: "/assets/approvals", label: "Disposals", count: data.disposals_for_me },
+    { href: stocktakeHref, label: "Stocktake differences", count: data.stocktake_diffs_for_me },
+  ].filter((q) => q.count > 0);
+  const row = (c: Counter) => (
+    <li key={c.id}>
+      <AttentionRow href={c.href} icon={ICON[c.id] ?? Inbox} title={c.title} count={c.count} detail={c.detail} tone={c.tone} testId={`counter-${c.id}`} />
+    </li>
+  );
   return (
     <>
-      <Greeting me={me} line={attentionSentence(attention.length)} />
+      <Greeting me={me} line={attentionSentence(urgent.length, toDo.length)} />
 
-      <ul className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" aria-label="At a glance">
-        <li>
-          <HeadlineCard href="/items" icon={Package} label="Items registered" count={registered ?? 0} tone="neutral" testId="headline-items" />
-        </li>
-        <li>
-          <HeadlineCard
-            href="/stock"
-            icon={TriangleAlert}
-            label="Low stock"
-            count={data.low_stock}
-            // A5: one colour for Low stock, the same red as its Needs attention line.
-            tone={data.low_stock > 0 ? "red" : "neutral"}
-            testId="headline-low-stock"
-          />
-        </li>
-        <li>
-          <HeadlineCard href="/assets" icon={PackageX} label="Missing or damaged" count={missing} tone={missing > 0 ? "red" : "neutral"} testId="headline-missing" />
-        </li>
-        <li>
-          <HeadlineCard
-            href={toApprove.href}
-            links={toApprove.links}
-            icon={ClipboardCheck}
-            label="For you to approve"
-            count={approvals}
-            tone={approvals > 0 ? "gold" : "neutral"}
-            testId="headline-approvals"
-          />
-        </li>
-      </ul>
+      <GlanceStrip
+        facts={[
+          { href: "/items", icon: Package, label: "Items registered", count: registered ?? 0, testId: "headline-items" },
+          { href: "/people", icon: Users, label: "People", count: peopleCount ?? 0, testId: "headline-people" },
+          { href: "/library", icon: BookOpen, label: "Library books", count: bookCount ?? 0, testId: "headline-books" },
+        ]}
+      />
 
+      {/* D1: on a phone, approvals and the quick actions come before the list; on a PC they sit on the right. */}
       <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_380px]">
-        <section aria-labelledby="attention-title" className="self-start overflow-hidden rounded-2xl border border-icci-line bg-white shadow-card">
-          <div className="flex items-center gap-3 border-b border-icci-line px-4 py-4 md:px-5">
-            <span aria-hidden className="h-6 w-1 rounded-full bg-icci-gold" />
-            <h2 id="attention-title" className="scroll-mt-24 text-lg font-bold text-icci-green-dark">
-              Needs attention
-            </h2>
-            {attention.length > 0 && (
-              <span className="ml-auto rounded-full bg-icci-panel px-2.5 py-0.5 text-sm font-semibold text-icci-green-dark">{attention.length}</span>
-            )}
-          </div>
-          {attention.length > 0 ? (
-            <ul className="divide-y divide-icci-line">
-              {attention.map((c) => (
-                <li key={c.id}>
-                  <AttentionRow
-                    href={c.href}
-                    icon={ICON[c.id] ?? Inbox}
-                    title={c.title}
-                    count={c.count}
-                    detail={c.detail}
-                    tone={c.tone}
-                    testId={`counter-${c.id}`}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div data-testid="all-clear" className="flex items-center gap-4 p-5">
-              <CircleCheck aria-hidden size={32} className="shrink-0 text-[var(--icci-ok-text)]" />
-              <div>
-                <p className="font-bold text-[var(--icci-ok-text)]">All clear</p>
-                <p className="text-[15px]">Nothing is low, missing, overdue or waiting for you.</p>
-              </div>
-            </div>
-          )}
-        </section>
+        <div className="flex flex-col gap-6 self-start xl:order-2">
+          <ApprovalsBox total={approvals} queues={queues} testId="headline-approvals" />
 
-        <div className="flex flex-col gap-6 self-start">
           <section aria-labelledby="actions-title" className="rounded-2xl border border-icci-line bg-white p-4 shadow-card md:p-5">
             <div className="mb-4 flex items-center gap-3">
               <span aria-hidden className="h-6 w-1 rounded-full bg-icci-gold" />
@@ -245,6 +204,44 @@ async function HomeContent() {
                 <QuickAction href="/labels" icon={Printer} label="Print labels" hint="A4 sheets of new labels" />
               </div>
             </details>
+          </section>
+        </div>
+
+        <div className="flex flex-col gap-6 self-start xl:order-1">
+          <section aria-labelledby="attention-title" className="overflow-hidden rounded-2xl border border-icci-line bg-white shadow-card">
+            <div className="flex items-center gap-3 border-b border-icci-line px-4 py-4 md:px-5">
+              <span aria-hidden className="h-6 w-1 rounded-full bg-icci-gold" />
+              <h2 id="attention-title" className="scroll-mt-24 text-lg font-bold text-icci-green-dark">
+                Needs attention
+              </h2>
+              {attention.length > 0 && (
+                <span className="ml-auto rounded-full bg-icci-panel px-2.5 py-0.5 text-sm font-semibold text-icci-green-dark">{attention.length}</span>
+              )}
+            </div>
+            {attention.length > 0 ? (
+              <>
+                {urgent.length > 0 && (
+                  <>
+                    <h3 className="bg-icci-green-50 px-4 py-1.5 text-[13px] font-bold uppercase tracking-wider text-icci-ink-60 md:px-5">Urgent</h3>
+                    <ul className="divide-y divide-icci-line">{urgent.map(row)}</ul>
+                  </>
+                )}
+                {toDo.length > 0 && (
+                  <>
+                    <h3 className="border-t border-icci-line bg-icci-green-50 px-4 py-1.5 text-[13px] font-bold uppercase tracking-wider text-icci-ink-60 md:px-5">To do</h3>
+                    <ul className="divide-y divide-icci-line">{toDo.map(row)}</ul>
+                  </>
+                )}
+              </>
+            ) : (
+              <div data-testid="all-clear" className="flex items-center gap-4 p-5">
+                <CircleCheck aria-hidden size={32} className="shrink-0 text-[var(--icci-ok-text)]" />
+                <div>
+                  <p className="font-bold text-[var(--icci-ok-text)]">All clear</p>
+                  <p className="text-[15px]">Nothing is low, missing or overdue.</p>
+                </div>
+              </div>
+            )}
           </section>
 
           {clear.length > 0 && (
@@ -371,7 +368,7 @@ async function LibraryHome({ me }: { me: CurrentAdmin }) {
   const { attention, clear } = splitCards(lib ? libraryCards(lib) : []);
   return (
     <>
-      <Greeting me={me} line={lib ? attentionSentence(attention.length) : "Welcome to the library."} />
+      <Greeting me={me} line={lib ? attentionSentence(attention.filter((c) => c.tone === "red").length, attention.filter((c) => c.tone !== "red").length) : "Welcome to the library."} />
       <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_340px]">
         <section aria-labelledby="library-title">
           <h2 id="library-title" className="mb-4 text-lg font-bold text-icci-green-dark">
@@ -434,9 +431,9 @@ function Greeting({ me, line }: { me: CurrentAdmin; line: string }) {
         className="-z-20 object-cover object-[50%_45%]"
       />
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-icci-green-900/92 via-icci-green-dark/78 to-icci-green-dark/25" />
-      <div className="px-6 py-7 text-white md:px-10 md:py-10">
+      <div className="px-6 py-6 text-white md:px-10 md:py-8">
         <h1 className="text-[13px] font-bold uppercase tracking-[0.16em] text-[#e9e1cf]">Home</h1>
-        <p className="page-title mt-2 text-[30px] text-white! md:text-[44px]">
+        <p className="page-title mt-2 text-[30px] text-white! md:text-[40px]">
           {greeting(me.serverNow)}, {me.displayName}
         </p>
         <p className="mt-2 text-[15px] text-white/85">

@@ -26,8 +26,12 @@ const count = async (page: Page, id: string) =>
 
 test("home page counters match their lists and open them", async ({ page }, info) => {
   await signInAtHome(page, centre);
-  for (const id of ["low-stock", "missing-damaged", "corrections-for-me", "disposals-for-me", "stocktake-for-me"]) {
+  for (const id of ["low-stock", "missing-damaged"]) {
     await expect(page.getByTestId(`counter-${id}`)).toBeVisible();
+  }
+  // D1: the approval queues are only in their own box, never also in the list.
+  for (const id of ["corrections-for-me", "disposals-for-me", "stocktake-for-me", "expenses-for-me"]) {
+    await expect(page.getByTestId(`counter-${id}`)).toHaveCount(0);
   }
   await s(page, "home-counters", info.project.name);
 
@@ -35,15 +39,25 @@ test("home page counters match their lists and open them", async ({ page }, info
   await expect(page.getByTestId("greeting")).toContainText(centre.displayName);
   await expect(page.getByTestId("greeting")).toContainText(/Good (morning|afternoon|evening)/);
   const attentionCards = page.getByRole("region", { name: "Needs attention" }).getByRole("link");
-  const n = await attentionCards.count();
+  // D1: "2 urgent, 5 to do."
+  const tones = await attentionCards.evaluateAll((els) => els.map((e) => e.getAttribute("data-tone")));
+  const urgent = tones.filter((t) => t === "red").length;
+  const toDo = tones.length - urgent;
   await expect(page.getByTestId("attention-line")).toHaveText(
-    n === 0 ? "Nothing needs attention. Everything is clear." : n === 1 ? "1 thing needs attention." : `${n} things need attention.`,
+    urgent + toDo === 0
+      ? "Nothing needs attention. Everything is clear."
+      : urgent === 0
+        ? `${toDo} ${toDo === 1 ? "thing" : "things"} to do, nothing urgent.`
+        : toDo === 0
+          ? `${urgent} urgent.`
+          : `${urgent} urgent, ${toDo} to do.`,
   );
-  // Every card in "Needs attention" says so in words, not colour alone.
-  for (const card of await attentionCards.all()) await expect(card).toContainText(/Needs attention|Check/);
+  // Every line in "Needs attention" says so in words, not colour alone.
+  for (const card of await attentionCards.all()) await expect(card).toContainText(/Urgent|To do/);
   // UI-9: four headline numbers at the top; four big actions, the rest behind "More actions".
-  for (const id of ["items", "low-stock", "missing", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
-  await expect(page.getByTestId("headline-low-stock").getByTestId("headline-count")).toHaveText(String(await count(page, "low-stock")));
+  // D1: plain facts in a slim strip (nothing the list also counts), and the approvals box.
+  for (const id of ["items", "people", "books", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
+  await expect(page.getByTestId("headline-low-stock")).toHaveCount(0);
   for (const action of ["Register an item", "Register a room", "Report a problem", "Move or report an asset"]) {
     await expect(page.getByRole("link", { name: new RegExp(`^${action}`) }).last()).toBeVisible();
   }
@@ -68,8 +82,11 @@ test("home page counters match their lists and open them", async ({ page }, info
 
   // Waiting for you: opens the approvals list.
   await page.goto("/");
-  await page.getByTestId("counter-disposals-for-me").click();
-  await expect(page.getByRole("heading", { level: 1, name: "Disposals waiting" })).toBeVisible();
+  const disposals = page.getByTestId("headline-approvals").getByRole("link", { name: /Disposals/ });
+  if (await disposals.count()) {
+    await disposals.click();
+    await expect(page.getByRole("heading", { level: 1, name: "Disposals waiting" })).toBeVisible();
+  }
 });
 
 test("finance sees its expense counters instead of the Centre's (P5.3)", async ({ page }, info) => {
