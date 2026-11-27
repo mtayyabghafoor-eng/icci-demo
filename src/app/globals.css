@@ -82,6 +82,12 @@ a {
   light backgrounds and light gold on dark green, so it always stands out at
   least 3 to 1 (tests/unit/contrast.test.ts).
 */
+/* D2: a box the server named in its problem message is outlined in red. */
+:is(input, select, textarea)[aria-invalid="true"] {
+  border-color: var(--icci-error) !important;
+  box-shadow: 0 0 0 1px var(--icci-error);
+}
+
 :focus-visible {
   outline: 3px solid var(--icci-focus);
   outline-offset: 2px;

@@ -39,7 +39,7 @@ export function GridTable({
                 {print ? (
                   p.title
                 ) : (
-                  <Link href={`/policies/${p.id}`} className="font-semibold">
+                  <Link href={`/policies/${p.id}`} className="inline-flex min-h-11 items-center font-semibold">
                     {p.title}
                   </Link>
                 )}

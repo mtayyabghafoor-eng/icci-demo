@@ -52,9 +52,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/places">["s
       {offCount > 0 && (
         <p className="mb-4 text-sm">
           {showOff ? (
-            <Link href="/places">Hide switched-off places</Link>
+            <Link href="/places" className="inline-flex min-h-11 items-center">Hide switched-off places</Link>
           ) : (
-            <Link href="/places?off=1">
+            <Link href="/places?off=1" className="inline-flex min-h-11 items-center">
               Show {offCount} switched-off {offCount === 1 ? "place" : "places"}
             </Link>
           )}

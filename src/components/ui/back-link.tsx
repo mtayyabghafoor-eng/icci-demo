@@ -77,7 +77,7 @@ export function BackLink({ href, children }: { href: string; children: ReactNode
     <Link
       href={target.href}
       data-testid="back-button"
-      className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl border border-icci-line bg-white px-3 text-sm font-semibold text-icci-green-dark! no-underline shadow-card transition-colors duration-150 hover:border-icci-gold-300 hover:bg-icci-green-50"
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border border-icci-line bg-white px-3 text-sm font-semibold text-icci-green-dark! no-underline shadow-card transition-colors duration-150 hover:border-icci-gold-300 hover:bg-icci-green-50"
     >
       <ArrowLeft aria-hidden size={17} strokeWidth={2.2} />
       Back

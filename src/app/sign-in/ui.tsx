@@ -1,7 +1,7 @@
 "use client";
 // Building blocks shared by the sign-in screens (docs/UI-PLAN.md 5.1).
 import { ArrowRight, CircleAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { buttonClass } from "@/components/ui";
 import { cx } from "@/lib/ui/text";
@@ -25,10 +25,53 @@ export function SecondaryButton({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * D2: when the server names a field in its message ("Enter the amount"),
+ * that field is outlined in red and the cursor goes to it; otherwise the
+ * message itself is brought into view. Typing in the field clears the mark.
+ */
+function useShowProblem(ref: React.RefObject<HTMLParagraphElement | null>, message: string | null) {
+  useEffect(() => {
+    const note = ref.current;
+    if (!message || !note) return;
+    const form = note.closest("form");
+    const said = message.toLowerCase();
+    let hit: HTMLElement | null = null;
+    for (const label of Array.from(form?.querySelectorAll("label") ?? [])) {
+      const words = (label.firstChild?.textContent ?? label.textContent ?? "").replace(/(optional)/i, "").trim().toLowerCase();
+      if (words.length < 3 || !said.includes(words)) continue;
+      const box = (label.htmlFor ? document.getElementById(label.htmlFor) : label.querySelector("input, select, textarea")) as HTMLElement | null;
+      if (box && !(box as HTMLInputElement).disabled && (box as HTMLInputElement).type !== "hidden") {
+        hit = box;
+        break;
+      }
+    }
+    if (hit) {
+      const box = hit;
+      box.setAttribute("aria-invalid", "true");
+      box.setAttribute("aria-errormessage", note.id);
+      box.focus({ preventScroll: true });
+      box.scrollIntoView({ block: "center", behavior: "smooth" });
+      const clear = () => {
+        box.removeAttribute("aria-invalid");
+        box.removeAttribute("aria-errormessage");
+      };
+      box.addEventListener("input", clear, { once: true });
+      return () => box.removeEventListener("input", clear);
+    }
+    note.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [ref, message]);
+}
+
 export function FormError({ message }: { message: string | null }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const id = useId();
+  useShowProblem(ref, message);
   if (!message) return null;
   return (
     <p
+      ref={ref}
+      id={id}
       role="alert"
       data-testid="form-error"
       className="flex gap-2.5 rounded-xl border border-icci-error/30 bg-[var(--icci-bad-fill)] px-4 py-3 text-[15px] text-icci-text"

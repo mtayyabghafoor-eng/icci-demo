@@ -59,7 +59,8 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
   }
 
   // On the rail, words are hidden on tablets and shown from PC width up.
-  const word = compact ? "sr-only lg:not-sr-only" : "";
+  // D2: the tablet rail opened out (RailToggle) shows the words too.
+  const word = compact ? "sr-only lg:not-sr-only group-data-[open=true]/rail:not-sr-only" : "";
   return (
     <div className={cx("flex flex-col", folds ? "gap-1.5" : "gap-5")}>
       {menuFor(roleCode).map((group, i) => {
@@ -93,7 +94,13 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
                 />
               </button>
             ) : (
-              <p className={cx("px-3 pb-1.5 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3]", compact && "hidden lg:block")}>
+              <p className={cx("px-3 pb-1.5 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3]", compact && "hidden lg:block group-data-[open=true]/rail:block")}>
+                {group.title}
+              </p>
+            )}
+            {/* D2: the opened-out tablet rail names each group (every group stays open there). */}
+            {foldable && compact && (
+              <p aria-hidden className="hidden px-3 pb-1 pt-1 text-[12.5px] font-bold uppercase tracking-[0.12em] text-[#d9c9a3] max-lg:group-data-[open=true]/rail:block">
                 {group.title}
               </p>
             )}
@@ -117,7 +124,7 @@ export function MenuLinks({ roleCode, compact = false, onNavigate }: { roleCode:
                           title={compact ? l.label : undefined}
                           className={cx(
                             "relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium no-underline transition-colors duration-150",
-                            compact && "justify-center lg:justify-start",
+                            compact && "justify-center lg:justify-start group-data-[open=true]/rail:justify-start",
                             active
                               ? "bg-white/12 text-white! before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-icci-gold"
                               : "text-white/78! hover:bg-white/6 hover:text-white!",

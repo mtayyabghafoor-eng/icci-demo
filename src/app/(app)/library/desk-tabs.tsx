@@ -40,7 +40,7 @@ export function DeskTabs() {
                 href={t.href}
                 aria-current={active ? "page" : undefined}
                 className={cx(
-                  "flex min-h-10 items-center whitespace-nowrap rounded-xl px-3.5 text-[14px] font-semibold no-underline transition-colors duration-150",
+                  "flex min-h-11 items-center whitespace-nowrap rounded-xl px-3.5 text-[14px] font-semibold no-underline transition-colors duration-150",
                   active ? "bg-icci-green-dark text-white!" : "text-icci-ink-60! hover:bg-icci-green-50 hover:text-icci-green-dark!",
                 )}
               >

@@ -17,7 +17,7 @@ export function TopBar({ canOpenLabels, roleCode }: { canOpenLabels: boolean; ro
   return (
     <header className="sticky top-0 z-20 border-b border-icci-line bg-white/92 backdrop-blur print:hidden">
       <div className="flex min-h-14 items-center gap-3 px-4 md:min-h-16 md:px-8">
-        <Link href="/" className="top-bar-logo shrink-0 md:hidden" aria-label="Home">
+        <Link href="/" className="top-bar-logo flex h-11 w-11 shrink-0 items-center justify-center md:hidden" aria-label="Home">
           <Logo size={36} />
         </Link>
         <span id={BACK_SLOT_ID} className="contents" />
