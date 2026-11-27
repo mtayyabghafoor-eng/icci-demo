@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -13,8 +13,11 @@ const mono = JetBrains_Mono({ variable: "--font-code", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "ICCI Control Dashboard",
   description: "Admin dashboard for the Islamic Cultural Centre of Ireland",
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false, noimageindex: true } },
 };
+
+/** E6: the dark green bar on phones (the browser's top bar and the home-screen app). */
+export const viewport: Viewport = { themeColor: "#004236" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

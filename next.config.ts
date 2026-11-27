@@ -41,7 +41,12 @@ const CONTENT_RULES = [
   "form-action 'self'",
 ].join("; ");
 
+// E6: a private site. Every reply (pages, pictures, downloads) tells search
+// engines not to list it, follow it, keep a copy or show a snippet.
+export const KEEP_OUT = "noindex, nofollow, noarchive, nosnippet, noimageindex";
+
 const SECURITY_HEADERS = [
+  { key: "X-Robots-Tag", value: KEEP_OUT },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Content-Security-Policy", value: CONTENT_RULES },
   { key: "X-Content-Type-Options", value: "nosniff" },

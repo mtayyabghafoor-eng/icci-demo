@@ -4,6 +4,7 @@
 // examples are made up.
 import type { Metadata } from "next";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import {
   ClipboardCheck,
   Download,
@@ -90,6 +91,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function StyleSample() {
+  // E6: a design sample for building the screens, not a page for the live
+  // site, so the production build answers "not found". The development
+  // server (and so the tests and screenshots) still shows it.
+  if (process.env.NODE_ENV === "production") notFound();
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 md:px-8" data-testid="style-sample">
       <PageHeader

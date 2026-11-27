@@ -46,6 +46,8 @@ export async function proxy(request: NextRequest) {
   if (decision.kind === "redirect") {
     if (decision.signOut) await supabase.auth.signOut({ scope: "local" });
     const redirect = NextResponse.redirect(new URL(decision.to, request.url));
+    // E6: the "do not list" label on a redirect too (next.config.ts adds it to everything else).
+    redirect.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet, noimageindex");
     for (const cookie of response.cookies.getAll()) redirect.cookies.set(cookie);
     if (decision.signOut) redirect.cookies.delete(LAST_ACTIVE_COOKIE);
     return redirect;
@@ -64,5 +66,7 @@ export const config = {
   // browser icon and the brand pictures in public/. Round C3: before, any
   // address ending like a picture name (".png") skipped the sign-in and
   // idle checks; now only these exact folders and files do.
-  matcher: ["/((?!_next/static/|_next/image|favicon\\.ico$|brand/|icci-logo\\.jpg$).*)"],
+  // E6: robots.txt, the icons and the phone manifest answer without sign-in
+  // (icci-logo.jpg is gone: it was never used).
+  matcher: ["/((?!_next/static/|_next/image|favicon\\.ico$|brand/|robots\\.txt$|icon\\.png$|apple-icon\\.png$|manifest\\.webmanifest$).*)"],
 };

@@ -42,6 +42,24 @@ for (const px of [512, 160, 64]) {
   await sharp(coin).resize(px, px, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toFile(`${OUT}/icci-logo-${px}.png`);
 }
 
+// ---- E6: icons for the browser tab and a phone's home screen ------------
+// The whole coin, never cropped. The tab icon keeps the clear background;
+// the home-screen icons sit the coin on dark green (#004236), because
+// phones fill a clear background with black or white.
+const GREEN = { r: 0, g: 66, b: 54, alpha: 1 };
+async function onGreen(px, file) {
+  const inner = Math.round(px * 0.84);
+  const coinPng = await sharp(coin).resize(inner, inner, { kernel: "lanczos3" }).png().toBuffer();
+  await sharp({ create: { width: px, height: px, channels: 4, background: GREEN } })
+    .composite([{ input: coinPng, gravity: "centre" }])
+    .png({ compressionLevel: 9 })
+    .toFile(file);
+}
+await sharp(coin).resize(48, 48, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toFile("src/app/icon.png");
+await onGreen(180, "src/app/apple-icon.png");
+await onGreen(192, `${OUT}/app-icon-192.png`);
+await onGreen(512, `${OUT}/app-icon-512.png`);
+
 // ---- Photographs: gentle clean-up -------------------------------------------
 // No larger originals exist, so: upscale with a high-quality filter, lift
 // contrast and colour a little, sharpen lightly. The screens then lay a dark
