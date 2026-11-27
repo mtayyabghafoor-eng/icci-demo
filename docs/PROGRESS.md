@@ -56,7 +56,9 @@ are on ICCI Staging, main is pushed and the demo has 60 made-up claims
 (26 Nov 2026). Round C (docs/IMPROVEMENT-PLAN.md section 4): C4, C3, C2
 and C1 are done (26 Nov 2026, migrations 0055 to 0057), and so is C5, the accounts and
 audit log screens (owner chose option A; migration 0058). 0055 to 0058 are
-on ICCI Staging and main is pushed (26 Nov 2026). The online accounts
+on ICCI Staging and main is pushed (26 Nov 2026). Round D (design and
+ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built (27 Nov
+2026, migration 0059, committed, not pushed). The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -69,6 +71,19 @@ Not yet checked in real life (Phase 1): a real label printer, a real phone
 camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
+
+- Round D (27 Nov 2026, owner chose every recommended answer in
+  docs/UI-REVIEW-2026-11-27.md): Home is calmer (red only for safety and
+  things overdue: vetting, sign-offs, renewals, urgent tickets; stock,
+  assets, library and approvals amber; approvals only in their own box);
+  no "same as last count" button; no one-tap Return from lists; PC filters
+  apply 0.6 s after a drop-down changes, phones keep the button; copy last
+  week's people onto an empty rota week. D7 (owner's request): every PDF
+  reads as a flip book inside the app (pdfjs-dist approved); a policy
+  version may hold an Arabic PDF (optional), read right to left. Choices
+  Claude made: Sign out left the phone top bar (still in the Menu); the
+  Home strip shows Items, People and Library books; documents get a
+  "Right to left (Arabic)" switch rather than a stored language.
 
 - C5 accounts screen (26 Nov 2026, owner chose option A): the website's
   server holds the master key, used only by the accounts screen's actions
@@ -490,7 +505,15 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   counts approvals twice, "No photo yet" dead end, cut-off filter words).
   Proposed Round D (D1 to D6), 4 questions. Owner chose every recommended
   answer and added D7: English and Arabic PDF flip book (pdfjs-dist
-  approved). Next: D1.
+  approved). Then built D1 to D7, one commit each: calmer Home (red only
+  for safety and overdue; approvals in their own box), item page buttons,
+  tablet menu with words, gallery photos, tap to call, filter pills, PC
+  filters apply on their own, weekly count room list and progress,
+  stocktake found/expected, rota copy last week, ready-first picker, phone
+  day tabs, prayer-times leave warning, sign-off filter, library pages,
+  places search, flip book for policies (English and Arabic, migration
+  0059) and documents. Not pushed; 0059 not on ICCI Staging. Next: owner
+  reviews on the local site, then Staging (0059 first), then push.
 
 - 26 Nov 2026, session 48 (Round C, owner: "Finish and harden steps",
   then "Go, as recommended"). C4: test companies and models tidied, failed

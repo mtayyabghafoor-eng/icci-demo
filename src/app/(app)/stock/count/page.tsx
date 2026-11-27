@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { locationAndInside, locationOptions } from "@/lib/items/rules";
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/current-admin";
 import { loadLookups } from "../../items/data";
 import type { StockLevel } from "../data";
 import { WeeklyCountForm, type CountRow } from "../forms";
@@ -43,7 +44,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/stock/count
   if (!chosen) {
     const { data: all } = await supabase.from("stock_levels").select("location_id, last_counted_at");
     const levels = (all ?? []) as Pick<StockLevel, "location_id" | "last_counted_at">[];
-    const now = Date.now();
+    const now = (await requireAdmin()).serverNow;
     const cards = rooms.map((r) => {
       const inside = new Set(locationAndInside(r.id, lookups.locations));
       const mine = levels.filter((l) => inside.has(l.location_id));
