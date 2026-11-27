@@ -19,7 +19,8 @@ describe("lists loaded in full", () => {
     // Make sure there are more than 1,000 (made-up, switched-off buildings).
     const short = 1001 - (await countOf("locations"));
     if (short > 0) {
-      const rows = Array.from({ length: short }, () => ({ name: testName("filler building"), kind: "building", active: false }));
+      // Numbered: about 900 names made in the same moment once clashed on their random part (E2 full run).
+      const rows = Array.from({ length: short }, (_, i) => ({ name: testName(`filler building ${i + 1}`), kind: "building", active: false }));
       const { error } = await masterKeyClient().from("locations").insert(rows);
       if (error) throw error;
     }

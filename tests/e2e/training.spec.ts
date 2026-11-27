@@ -9,7 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { addDays, addYears, todayInDublin } from "../../src/lib/vetting/rules";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -137,7 +137,7 @@ test("the training list, worst first, with filters and a CSV", async ({ page }, 
   await showFilters(page);
   await page.locator('select[name="type"]').selectOption({ label: "First aid" });
   await page.locator('select[name="status"]').selectOption({ label: "Due soon" });
-  await page.getByRole("button", { name: "Show" }).click();
+  await applyFilters(page);
   await expect(page).toHaveURL(/status=due/);
   await expect(rows.first()).toBeVisible();
   for (const text of await rows.allInnerTexts()) {

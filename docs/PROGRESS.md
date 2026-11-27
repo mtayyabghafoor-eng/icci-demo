@@ -61,8 +61,9 @@ ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built and pushed;
 0059 is on ICCI Staging (27 Nov 2026). D8 (flip-book zoom and one search
 box for everything) is built, not pushed; no database change. Round E
 (docs/ROUND-E-PLAN.md, owner approved 27 Nov 2026): E1 (calm Home on PC
-and phone, honest whole-page screenshots) is built, not pushed; no
-database change. Next: E2 (list filters). The online accounts
+and phone, honest whole-page screenshots) and E2 (list filters that fit,
+fold and apply) are built, not pushed; no database change. Next: E3 (rota
+week warnings said once). The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -87,6 +88,11 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   E1 (owner: "a lot of bombardment of information"): backlogs and the
   plain totals go to a quiet "Everything else" row, never red or amber;
   only red counters show in full, as "Urgent".
+  E2: on a PC a list updates by itself, so no Search or Show button (Enter
+  still searches); filter boxes are at least 14 rem and wrap inside the
+  card. Phone folds when there is a search box or two or more drop-downs.
+  A badge every row would repeat is dropped (Active on "Active only",
+  Open on tickets, Waiting on the Waiting tab); "No ... match" said once.
 
 - D8 (27 Nov 2026, owner: "I can't read the flip book, there is no zoom";
   "people don't want to search for labels, more for items, names,
@@ -522,6 +528,15 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 27 Nov 2026, session 50 (continued). Owner said "Go" to E2. Built:
+  filter boxes fit the card (Items had two cut to "E" and "A..."); no
+  Search/Show button on a PC; Tickets, Training, Vetting, Policy grid and
+  Renewals fold on a phone; Items places show two parts (full on hover)
+  and "Stock: Low" / "Condition: Damaged"; repeated badges gone.
+  Screenshots now wait for loading bars to go. Fixed a rare name clash in
+  tests/db/long-lists.test.ts. Full suite after db:reset: unit 2095
+  passed, browser 419 passed (17 skipped), build passed. Not pushed.
 
 - 27 Nov 2026, session 50. Owner approved docs/ROUND-E-PLAN.md ("All
   recommended, go E1"). E1 built: calm Home. Only red items sit under

@@ -9,7 +9,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin, samplePolicyPdf } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { addDays, addYears, todayInDublin } from "../../src/lib/vetting/rules";
-import { apiAs, completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters } from "./helpers";
+import { apiAs, completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -156,7 +156,7 @@ test("the policy grid: filters and the print view", async ({ page }, info) => {
   await showFilters(page);
   await page.locator('select[name="role"]').selectOption({ label: "Gardener" });
   await page.locator('select[name="status"]').selectOption({ label: "Signed" });
-  await page.getByRole("button", { name: "Show" }).click();
+  await applyFilters(page);
   await expect(page).toHaveURL(/status=signed/);
   const rows = page.getByTestId("grid-person").filter({ visible: true });
   await expect(rows.filter({ hasText: policy.names[0] })).toBeVisible();
@@ -167,7 +167,7 @@ test("the policy grid: filters and the print view", async ({ page }, info) => {
   await page.getByRole("link", { name: "Print view" }).click();
   await expect(page).toHaveURL(/\/policies\/grid\/print\?.*status=signed/);
   await expect(page.getByRole("heading", { level: 1, name: "ICCI policy sign-offs" })).toBeVisible();
-  await expect(page.getByText("Role: Gardener")).toBeVisible();
+  await expect(page.getByText("Role: Gardener").filter({ visible: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
   await expect(page.getByTestId("grid-person").filter({ visible: true }).filter({ hasText: policy.names[0] })).toBeVisible();
   await s(page, "policy-grid-print", project);

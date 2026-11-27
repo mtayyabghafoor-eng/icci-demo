@@ -133,7 +133,7 @@ test("the Library Operator scanning an item's label is told it is not a book", a
   await expect(page.getByRole("link", { name: "Back to the library" })).toBeVisible();
   // And cannot open the item itself.
   await page.goto("/items");
-  await expect(page.getByTestId("item-count")).toHaveText("No items match.");
+  await expect(page.getByTestId("empty-list")).toContainText("No items match");
 });
 
 test("an admin scanning an unused label can add a book instead of an item", async ({ page }, info) => {

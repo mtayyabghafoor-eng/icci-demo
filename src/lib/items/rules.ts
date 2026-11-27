@@ -103,6 +103,15 @@ export function locationPath(id: string, all: Map<string, LocationRow>): string 
   return parts.join(" › ") || "Unknown location";
 }
 
+/**
+ * E2: a list shows only the last two parts of a place ("Room A1 › Shelf
+ * A1-1-1"), so a row stays one or two lines; the full path goes on hover.
+ */
+export function shortPlace(path: string): string {
+  const parts = path.split(" › ");
+  return parts.length <= 2 ? path : parts.slice(-2).join(" › ");
+}
+
 /** A location and every location inside it (for "filter by location"). */
 export function locationAndInside(id: string, all: LocationRow[]): string[] {
   const found = new Set([id]);

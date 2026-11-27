@@ -5,7 +5,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -86,7 +86,7 @@ test("on a phone the list's drop-down filters fold away until asked for", async 
   await page.getByRole("button", { name: "More filters" }).click();
   await expect(kind).toBeVisible();
   await kind.selectOption({ label: "Consumables" });
-  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await applyFilters(page);
   await expect(page).toHaveURL(/kind=consumable/);
   // Folded again after the search, and the button says one filter is in use.
   await expect(page.getByRole("button", { name: "More filters (1 in use)" })).toBeVisible();

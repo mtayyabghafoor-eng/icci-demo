@@ -57,11 +57,17 @@ test("weekly count: Save stays above the bottom bar, and leaving unsaved asks fi
   await expect(page).toHaveURL(/\/$/);
 });
 
-test("a list with drop-downs only shows them on a phone, with no empty box", async ({ page }, info) => {
-  await signInAs(page, "/tickets");
-  await expect(page.getByLabel("Status")).toBeVisible();
+test("a list with one drop-down only shows it on a phone, with no empty box", async ({ page }, info) => {
+  // E2 (replaces A2): two or more drop-downs fold, so Tickets folds now; a lone drop-down does not.
+  await signInAs(page, "/assets/register");
+  await expect(page.getByRole("combobox", { name: "Place" })).toBeVisible();
   await expect(page.getByRole("button", { name: /More filters/ })).toHaveCount(0);
-  if (isPhone(page)) await shot(page, "tickets-filters-shown", info.project.name, "a2");
+  if (isPhone(page)) await shot(page, "register-filter-shown", info.project.name, "e2");
+  if (isPhone(page)) {
+    await page.goto("/tickets");
+    await expect(page.getByRole("button", { name: /More filters/ })).toBeVisible();
+    await expect(page.getByLabel("Status")).toBeHidden();
+  }
   // A list with a search box still folds its drop-downs on a phone.
   await page.goto("/items");
   if (isPhone(page)) {

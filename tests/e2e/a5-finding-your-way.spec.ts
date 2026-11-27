@@ -9,7 +9,7 @@ import { ATTENTION_ORDER } from "@/lib/home/counters";
 import { placeCode } from "@/lib/places/rules";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, mainMenu, openMenuGroups, shot } from "./helpers";
+import { completeSignIn, expectSignInPage, mainMenu, openMenuGroups, shot, showFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const isPhone = (page: Page) => (page.viewportSize()?.width ?? 1280) < 768;
@@ -44,6 +44,7 @@ test("Home: red before amber, people and safety first, each line opens its filte
 
   await vetting.click();
   await expect(page).toHaveURL(/\/people\/vetting\?status=attention$/);
+  await showFilters(page); // E2: on a phone, Garda vetting folds its two drop-downs
   await expect(page.getByRole("combobox", { name: "Status" })).toHaveValue("attention");
   for (const badge of await page.getByTestId("vetting-row").filter({ visible: true }).getByTestId("status").all()) {
     await expect(badge).toHaveText(/Expired|Not vetted|Due soon/);

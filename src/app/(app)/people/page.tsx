@@ -91,6 +91,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
   const filtered = Boolean(q || role || section || show || vetting);
   const field = fieldClass;
   const status = (p: PersonRow) => (p.active ? PERSON_STATUS.active : PERSON_STATUS.off);
+  // E2: "Active only" and "Switched off only" already say it, so only the
+  // mixed list (Everyone) gives each person an Active or Switched off badge.
+  const mixed = show === "all";
   const contact = (p: PersonRow) => [p.phone, p.email].filter(Boolean).join(" · ") || "No contact recorded";
 
   return (
@@ -154,9 +157,12 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
         <FilterFold />
       </form>
 
-      <p className="list-count" data-testid="people-count">
-        {shown.total === 0 ? "No people match." : `${shown.total} ${shown.total === 1 ? "person" : "people"}`}
-      </p>
+      {/* E2: an empty list is said once, by the card below. */}
+      {shown.total > 0 && (
+        <p className="list-count" data-testid="people-count">
+          {`${shown.total} ${shown.total === 1 ? "person" : "people"}`}
+        </p>
+      )}
 
       {/* A6: an empty list says so in one calm card, with a way out of the filters. */}
       {shown.total === 0 && (
@@ -180,7 +186,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
             <th className="px-3 py-2">Contact</th>
             <th className="px-3 py-2">Started</th>
             <th className="px-3 py-2">Vetting</th>
-            <th className="px-3 py-2">Status</th>
+            {mixed && <th className="px-3 py-2">Status</th>}
           </tr>
         </thead>
         <tbody>
@@ -214,9 +220,11 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
               </td>
               <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(p.start_date)}</td>
               <td className="px-3 py-2 whitespace-nowrap">{vettingBadge(p)}</td>
-              <td className="px-3 py-2">
-                <StatusBadge {...status(p)} />
-              </td>
+              {mixed && (
+                <td className="px-3 py-2">
+                  <StatusBadge {...status(p)} />
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -234,7 +242,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/people">["sear
                 <span className="font-semibold text-icci-green" dir="auto">
                   {p.full_name}
                 </span>
-                <StatusBadge {...status(p)} />
+                {mixed && <StatusBadge {...status(p)} />}
               </span>
               <span className="mt-1 block text-sm">
                 {lists.roleName.get(p.person_role_id)} · {lists.sectionName.get(p.section_id)}

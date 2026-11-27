@@ -8,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
 import { addDays, addYears, todayInDublin } from "../../src/lib/vetting/rules";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -116,7 +116,7 @@ test("the register, worst first, with dates from vehicles, vetting and elsewhere
   await showFilters(page);
   await page.getByLabel("Show").selectOption({ label: "Everything" });
   await page.getByLabel("From").selectOption({ label: "Typed in here" });
-  await page.getByRole("button", { name: "Show", exact: true }).click();
+  await applyFilters(page);
   await expect(page).toHaveURL(/show=all/);
   const typed = page.getByTestId("renewal-row").filter({ visible: true });
   await expect(typed.filter({ hasText: "Test website domain name (made up)" }).getByTestId("status")).toHaveText("Up to date");

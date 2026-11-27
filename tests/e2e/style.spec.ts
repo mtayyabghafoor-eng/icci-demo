@@ -43,5 +43,5 @@ test("the style sample shows the new look", async ({ page }, info) => {
   }
   await expect(main.getByText("1 to 50 of 487")).toBeVisible();
 
-  await shot(page, "style-sample", info.project.name, "ui-1");
+  await shot(page, "style-sample", info.project.name, "ui-1", { loadingOnPurpose: true });
 });

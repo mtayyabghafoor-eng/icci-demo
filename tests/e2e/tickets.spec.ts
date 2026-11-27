@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, newTestLabel, shot, showFilters } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, newTestLabel, shot, showFilters, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -123,7 +123,8 @@ test("the tickets list: urgent first, filters and CSV", async ({ page }, info) =
   const rows = page.getByTestId("ticket-row").filter({ visible: true });
   await expect(rows.first()).toBeVisible();
   // Not closed yet is the starting filter, urgent on top.
-  await expect(rows.first().getByTestId("status").nth(1)).toHaveText("Urgent");
+  // E2: an open ticket has no red "Open" badge, so Urgent is its only badge.
+  await expect(rows.first().getByTestId("status").filter({ hasText: /^Urgent$/ })).toBeVisible();
   await expect(rows.filter({ hasText: "Tap in the wudu area drips all the time (made up)" })).toHaveCount(1);
   await expect(rows.filter({ hasText: "Heater makes a loud clicking noise (made up)" })).toHaveCount(0);
   await s(page, "tickets-list", project);
@@ -131,7 +132,7 @@ test("the tickets list: urgent first, filters and CSV", async ({ page }, info) =
   // Closed ones only.
   await showFilters(page);
   await page.getByRole("combobox", { name: "Status" }).selectOption({ label: "Closed" });
-  await page.getByRole("button", { name: "Show" }).click();
+  await applyFilters(page);
   await expect(page).toHaveURL(/status=closed/);
   await expect(rows.filter({ hasText: "Heater makes a loud clicking noise (made up)" })).toHaveCount(1);
   for (const r of await rows.all()) await expect(r.getByTestId("status").first()).toHaveText("Closed");

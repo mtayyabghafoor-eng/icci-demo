@@ -27,13 +27,17 @@ export function StatusBadge({ word, tone, testId = "status" }: { word: string; t
   );
 }
 
-export function ItemStatus({ kind, condition, stock }: { kind: string; condition: string | null; stock?: StockStatus }) {
+/**
+ * An item's stock (consumables) or condition (fixed assets). E2: a list that
+ * mixes both says which it is ("Stock: Low", "Condition: Damaged").
+ */
+export function ItemStatus({ kind, condition, stock, labelled = false, testId }: { kind: string; condition: string | null; stock?: StockStatus; labelled?: boolean; testId?: string }) {
   if (kind === "consumable") {
     const s = STOCK_STATUS[stock ?? "not_counted"];
-    return <StatusBadge word={s.word} tone={s.tone} />;
+    return <StatusBadge word={labelled ? `Stock: ${s.word}` : s.word} tone={s.tone} testId={testId} />;
   }
   const s = CONDITION_STATUS[(condition ?? "good") as Condition];
-  return <StatusBadge word={s.word} tone={s.tone} />;
+  return <StatusBadge word={labelled ? `Condition: ${s.word}` : s.word} tone={s.tone} testId={testId} />;
 }
 
 /** The look of every form box (the same as the shared Input and Select). */

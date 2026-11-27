@@ -164,15 +164,42 @@ h1.page-title::after {
   transition: border-color 150ms;
 }
 /*
-  D1: on a PC, filter boxes are never squeezed until their words are cut off
-  ("Any conditic"): each takes at least 12 rem and the row wraps instead.
+  E2 (replaces D1): from a tablet up, the filter boxes share the width the
+  card really has (not the width of the screen). Each box is at least
+  14 rem, wide enough for its words ("Any condition", "Anyone or nobody");
+  a box that does not fit moves to the next line, never past the card. The
+  search box (and a drop-down marked data-wide, whose choices are long)
+  takes two places when there is room. Rows of buttons always
+  take a line of their own, so they never add columns.
 */
-@media (width >= 64rem) {
+@media (width >= 40rem) {
   .list-filters.grid {
-    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   }
-  .list-filters:not(.grid) select {
-    min-width: 12rem;
+  .list-filters.grid > * {
+    grid-column: auto;
+  }
+  .list-filters.grid > label:is(:has(> input:not([type]), > input[type="search"], > input[type="text"]), [data-wide]) {
+    grid-column: span 2;
+  }
+  .list-filters.grid > div {
+    grid-column: 1 / -1;
+  }
+  .list-filters:not(.grid) label:has(> select) {
+    min-width: 14rem;
+  }
+}
+/*
+  E2: on a PC every list updates by itself when a drop-down or tick box
+  changes (filter-fold.tsx), and a search runs on Enter, so the Search or
+  Show button is not shown. A row left with nothing else in it goes too.
+*/
+@media (width >= 48rem) {
+  .list-filters button[type="submit"] {
+    display: none;
+  }
+  .list-filters > div:has(> button[type="submit"]):not(:has(> a)) {
+    display: none;
   }
 }
 .list-filters :is(input, select) {
@@ -185,12 +212,15 @@ h1.page-title::after {
   border-color: var(--icci-green);
 }
 /*
-  Phone: drop-down filters fold behind "More filters" (filter-fold.tsx), but
-  only on a list that has a search box to show instead (A2). A list with
-  drop-downs only shows them straight away, never an empty box.
+  Phone: drop-down filters fold behind "More filters" (filter-fold.tsx) on a
+  list with a search box or with two or more drop-downs (E2, owner 27 Nov
+  2026; this replaces A2). A list with one drop-down and nothing else keeps
+  it in view. CSS cannot count, so "two or more" is read as "the second box
+  of the card is a drop-down", which holds for every list today. The same
+  test sits in filter-fold.tsx (FOLDS), so the button and the rule agree.
 */
 @media (width < 48rem) {
-  .list-filters[data-folded="true"]:has(input:not([type]), input[type="search"], input[type="text"]) label:has(> select) {
+  .list-filters[data-folded="true"]:has(input:not([type]), input[type="search"], input[type="text"], label:nth-of-type(2) > select) label:has(> select) {
     display: none;
   }
 }

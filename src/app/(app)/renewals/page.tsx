@@ -74,7 +74,7 @@ async function List({ searchParams }: Pick<PageProps<"/renewals">, "searchParams
   return (
     <>
       <form data-folded="true" method="get" className="list-filters mt-4 grid gap-3 sm:grid-cols-3" aria-label="Filter the renewals register">
-        <label>
+        <label data-wide>
           <span className="font-semibold">Show</span>
           <select name="show" defaultValue={filter.show === "attention" ? "" : filter.show} className={fieldClass}>
             {(Object.keys(SHOW_LABEL) as RegisterFilter["show"][]).map((s) => (

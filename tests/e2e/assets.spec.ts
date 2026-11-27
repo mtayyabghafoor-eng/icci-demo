@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet, signOutHere } from "./helpers";
+import { clickMenuLink, completeSignIn, expectSignInPage, newTestLabel, shot, confirmSheet, signOutHere, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -130,7 +130,7 @@ test("move, damage, repair, missing, found, then disposal approved by a differen
   await expect(page.getByTestId("asset-count")).toHaveText(/damaged · \d+ missing/); // loaded
   await s(page, "missing-damaged-list", project);
   await page.getByRole("textbox", { name: "Search" }).fill(item.name);
-  await page.getByRole("button", { name: "Search" }).click();
+  await applyFilters(page);
   await expect(page.getByTestId("asset-count")).toHaveText("0 damaged · 1 missing");
   const row = (project === "phone" ? page.locator("ul li") : page.locator("tbody tr")).filter({ hasText: item.name });
   await expect(row).toContainText("Missing");

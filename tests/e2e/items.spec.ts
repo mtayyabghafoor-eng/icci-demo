@@ -4,7 +4,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { completeSignIn, expectSignInPage, newTestLabel, shot, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const s = (page: Page, name: string, project: string) => shot(page, name, project, "04");
@@ -110,7 +110,7 @@ test("scan a new label, register, open, edit and see the history", async ({ page
   await expect(page.getByTestId("item-count")).toContainText(/\d+ items/);
   await s(page, "items-list", project);
   await page.getByRole("textbox", { name: "Search", exact: true }).fill(`${name} (oak)`);
-  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await applyFilters(page);
   await expect(page.getByTestId("item-count")).toHaveText("1 item");
   await s(page, "items-list-search", project);
 

@@ -36,7 +36,7 @@ test("an empty search shows one card with Clear filters", async ({ page }, info)
   await page.goto("/items?q=zzqqxx-nothing");
   const empty = page.getByTestId("empty-list");
   await expect(empty).toContainText("No items match");
-  await expect(page.getByTestId("item-count")).toHaveText("No items match.");
+  await expect(page.getByTestId("item-count")).toHaveCount(0); // E2: said once, by the card
   await shot(page, "empty-search", info.project.name, "a6");
   await empty.getByRole("link", { name: "Clear filters" }).click();
   await expect(page).toHaveURL(/\/items$/);

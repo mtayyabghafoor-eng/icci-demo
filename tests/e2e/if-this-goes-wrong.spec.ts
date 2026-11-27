@@ -8,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, mainMenu, shot, showFilters } from "./helpers";
+import { completeSignIn, expectSignInPage, mainMenu, shot, showFilters, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -61,7 +61,7 @@ test("a broken lawnmower: who to call, warranty and manual; report it; pass it t
   await page.goto("/tickets");
   await showFilters(page);
   await page.getByRole("combobox", { name: "Passed to" }).selectOption({ label: "Example Garden Machines Ltd" });
-  await page.getByRole("button", { name: "Show" }).click();
+  await applyFilters(page);
   await expect(page.getByRole("main")).toContainText("Lawnmower will not start");
 });
 

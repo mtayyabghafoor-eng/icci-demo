@@ -28,7 +28,12 @@ export async function apiAs(email: string): Promise<SupabaseClient> {
  * are blacked out, so no key (even a fictional one) is ever committed. Label
  * QR codes hold only a link with the label number, so they are shown.
  */
-export function shot(page: Page, name: string, project: string, slice = "03") {
+export async function shot(page: Page, name: string, project: string, slice = "03", { loadingOnPurpose = false } = {}) {
+  // E2: never a picture of grey loading bars (two Items pictures were). Wait
+  // until every part of the page has arrived; a part that never arrives
+  // fails the test, which is the honest result. The style sample page shows
+  // the loading bars on purpose, as an example, so it says so.
+  if (!loadingOnPurpose) await expect(page.locator(".animate-pulse")).toHaveCount(0, { timeout: 30_000 });
   // Tried up to three times if Windows briefly locks the file (see retry.ts).
   return withFileLockRetry(() => page.screenshot({
     path: `docs/screens/slice-${slice}-${name}-${project}.png`,
@@ -175,10 +180,11 @@ export async function showFilters(page: Page) {
   // Only phones fold the filters away (below 768 pixels wide, "md").
   const width = page.viewportSize()?.width ?? 1280;
   if (width >= 768) return;
-  // A2: a list with drop-downs only (no search box) shows them straight away.
+  // E2: only a list with a search box or two or more drop-downs folds them.
   const form = page.locator("form.list-filters").first();
   await expect(form).toBeVisible();
-  if ((await form.locator('input:not([type]), input[type="search"], input[type="text"]').count()) === 0) return;
+  const folds = await form.evaluate((f) => f.matches(':has(input:not([type]), input[type="search"], input[type="text"], label:nth-of-type(2) > select)'));
+  if (!folds) return;
   // Wait for the button, and click again if the first click came before the
   // page was ready to respond (seen once in a full run, session 32).
   const fold = page.getByRole("button", { name: /^(More|Fewer) filters/ });
@@ -186,6 +192,21 @@ export async function showFilters(page: Page) {
     if ((await fold.getAttribute("aria-expanded")) !== "true") await fold.click();
     await expect(fold).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
   }).toPass({ timeout: 20_000 });
+}
+
+/**
+ * Applies a list's filters. E2: a phone has a Search or Show button; a PC
+ * has none, because the list updates by itself, so the form is sent here
+ * the way pressing Enter would send it.
+ */
+export async function applyFilters(page: Page) {
+  const form = page.locator("form.list-filters").first();
+  const width = page.viewportSize()?.width ?? 1280;
+  if (width < 768) {
+    await form.locator('button[type="submit"]').click();
+    return;
+  }
+  await form.evaluate((f: HTMLFormElement) => f.requestSubmit());
 }
 
 /**

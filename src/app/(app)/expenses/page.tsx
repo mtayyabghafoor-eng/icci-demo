@@ -113,13 +113,14 @@ async function Waiting({ meId, names }: { meId: string; names: ExpenseNames }) {
           New claims wait here until another admin approves them.
         </EmptyState>
       ) : (
-        <EntryList rows={rows} names={names} forMe={mine} />
+        <EntryList rows={rows} names={names} forMe={mine} hideState="waiting" />
       )}
     </>
   );
 }
 
-function EntryList({ rows, names, forMe }: { rows: EntryRow[]; names: ExpenseNames; forMe?: (e: EntryRow) => boolean }) {
+/** E2: hideState drops the badge every row would repeat (the Waiting tab says it already). */
+function EntryList({ rows, names, forMe, hideState }: { rows: EntryRow[]; names: ExpenseNames; forMe?: (e: EntryRow) => boolean; hideState?: EntryRow["state"] }) {
   return (
     <ul className="space-y-3" data-testid="claim-list">
       {rows.map((e) => {
@@ -141,7 +142,7 @@ function EntryList({ rows, names, forMe }: { rows: EntryRow[]; names: ExpenseNam
                 <span dir="auto">· {paidByText(e, names)}</span>
               </span>
               <span className="mt-2 flex flex-wrap gap-1.5">
-                <StatusPill tone={label.tone}>{label.word}</StatusPill>
+                {e.state !== hideState && <StatusPill tone={label.tone}>{label.word}</StatusPill>}
                 {e.receipt_lost_reason && <StatusPill tone="amber">No receipt</StatusPill>}
                 {forMe?.(e) && (
                   <span data-testid="for-you">

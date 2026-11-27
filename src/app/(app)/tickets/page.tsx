@@ -134,7 +134,8 @@ async function List({ searchParams }: { searchParams: PageProps<"/tickets">["sea
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[15px] text-icci-ink-60" data-testid="ticket-count">
-          {total === 0 ? "No tickets match." : `${total} ${total === 1 ? "ticket" : "tickets"}`}
+          {/* E2: an empty list is said once, by the card below. */}
+          {total > 0 && `${total} ${total === 1 ? "ticket" : "tickets"}`}
           {urgent > 0 && ` · ${urgent} urgent`}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -167,10 +168,15 @@ async function List({ searchParams }: { searchParams: PageProps<"/tickets">["sea
   );
 }
 
-function Badges({ t }: { t: TicketCsvRow }) {
+/**
+ * E2: most tickets on the list are open, so "Open" is not a red badge on
+ * every row. On a PC the Status column says it in a quiet word; a phone card
+ * shows a badge only for the other states (In progress, Waiting, Closed).
+ */
+function Badges({ t, quietOpen = false }: { t: TicketCsvRow; quietOpen?: boolean }) {
   return (
     <span className="flex flex-wrap gap-1.5">
-      <StatusBadge {...STATUS_LABEL[t.status]} />
+      {t.status !== "open" ? <StatusBadge {...STATUS_LABEL[t.status]} /> : quietOpen && <span className="text-sm text-icci-ink-60">Open</span>}
       {t.priority !== "normal" && <StatusBadge {...PRIORITY_LABEL[t.priority]} />}
     </span>
   );
@@ -209,7 +215,7 @@ function Rows({ rows }: { rows: TicketCsvRow[] }) {
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-sm">{formatDate(t.created_at)}</td>
                 <td className="px-3 py-2">
-                  <Badges t={t} />
+                  <Badges t={t} quietOpen />
                 </td>
               </tr>
             ))}

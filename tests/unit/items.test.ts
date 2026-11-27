@@ -9,6 +9,7 @@ import {
   locationAndInside,
   locationOptions,
   locationPath,
+  shortPlace,
   parseEuro,
   parseLabelNumber,
   type LocationRow,
@@ -70,6 +71,11 @@ describe("locations", () => {
   ];
   const map = new Map(rows.map((r) => [r.id, r]));
 
+  it("E2: a list shows only the last two parts", () => {
+    expect(shortPlace("Building › Room › Store › Shelf")).toBe("Store › Shelf");
+    expect(shortPlace("Building › Room")).toBe("Building › Room");
+    expect(shortPlace("Unknown location")).toBe("Unknown location");
+  });
   it("shows the full path", () => expect(locationPath("h", map)).toBe("Building › Room › Store › Shelf"));
   it("finds everything inside a location", () => expect(locationAndInside("r", rows).sort()).toEqual(["h", "r", "s"]));
   it("lists only switched-on places of the right kind", () => {

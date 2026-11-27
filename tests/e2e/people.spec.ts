@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, shot, showFilters, applyFilters } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -29,7 +29,7 @@ test("people list: search and filter", async ({ page }, info) => {
   // Filter by role: only imams are shown.
   await showFilters(page);
   await page.getByLabel("Role").selectOption({ label: "Imam" });
-  await page.getByRole("button", { name: "Search" }).click();
+  await applyFilters(page);
   await expect(page).toHaveURL(/role=/);
   // Only the rows shown on this screen size (PC table or phone cards).
   const rows = page.getByTestId("person-row").filter({ visible: true });
@@ -37,9 +37,12 @@ test("people list: search and filter", async ({ page }, info) => {
   for (const text of await rows.allInnerTexts()) expect(text).toContain("Imam");
   await s(page, "people-list-imams", info.project.name);
 
-  // Switched-off people appear only when asked for.
+  // Switched-off people appear only when asked for. E2: that list does not
+  // repeat "Switched off" on every row; Everyone (the mixed list) says it.
   await page.goto("/people?show=off");
-  for (const text of await rows.allInnerTexts()) expect(text).toContain("Switched off");
+  for (const text of await rows.allInnerTexts()) expect(text).not.toContain("Active");
+  await page.goto("/people?show=all");
+  for (const text of await rows.allInnerTexts()) expect(text).toMatch(/Active|Switched off/);
 });
 
 /** At least `n` people in the directory: switched-off made-up ones are added if needed. */

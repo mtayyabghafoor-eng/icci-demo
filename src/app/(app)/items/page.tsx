@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { EmptyState, ItemStatus, LinkButton, PageHeader, Pagination, Skeleton } from "@/components/ui";
 import { matchCategories, NO_COUNT } from "@/lib/categories/counts";
 import { categoryAndInside, categoryGroups } from "@/lib/categories/rules";
-import { CONDITION_STATUS, CONDITIONS, KIND_LABEL, cleanSearch, locationAndInside, locationOptions } from "@/lib/items/rules";
+import { CONDITION_STATUS, CONDITIONS, KIND_LABEL, cleanSearch, locationAndInside, locationOptions, shortPlace } from "@/lib/items/rules";
 import type { StockStatus } from "@/lib/stock/rules";
 import { createClient } from "@/lib/supabase/server";
 import { must } from "@/lib/supabase/must";
@@ -201,9 +201,12 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
         </ul>
       )}
 
-      <p className="list-count" data-testid="item-count">
-        {total === 0 ? "No items match." : `${total} item${total === 1 ? "" : "s"}${pages > 1 ? ` · page ${page} of ${pages}` : ""}`}
-      </p>
+      {/* E2: an empty list is said once, by the card below, not also here. */}
+      {total > 0 && (
+        <p className="list-count" data-testid="item-count">
+          {`${total} item${total === 1 ? "" : "s"}${pages > 1 ? ` · page ${page} of ${pages}` : ""}`}
+        </p>
+      )}
 
       {/* PC: a table. Phone: one card per item. */}
       {/* A6: an empty list says so in one calm card, with a way out of the filters. */}
@@ -241,9 +244,11 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
               </td>
               <td className="px-3 py-2">{KIND_LABEL[i.kind]}</td>
               <td className="px-3 py-2">{lookups.categoryName.get(i.category_id)}</td>
-              <td className="px-3 py-2 text-sm">{lookups.locationName.get(i.location_id)}</td>
+              <td className="px-3 py-2 text-sm">
+                <Place path={lookups.locationName.get(i.location_id)} />
+              </td>
               <td className="px-3 py-2">
-                <ItemStatus kind={i.kind} condition={i.condition} stock={stockOf.get(i.id)} />
+                <ItemStatus kind={i.kind} condition={i.condition} stock={stockOf.get(i.id)} labelled testId="item-status" />
               </td>
             </tr>
           ))}
@@ -256,12 +261,14 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
             <Link href={`/items/${i.id}`} className="list-card">
               <span className="flex items-start justify-between gap-2">
                 <span className="font-semibold text-icci-green">{i.name}</span>
-                <ItemStatus kind={i.kind} condition={i.condition} stock={stockOf.get(i.id)} />
+                <ItemStatus kind={i.kind} condition={i.condition} stock={stockOf.get(i.id)} labelled testId="item-status" />
               </span>
               <span className="mt-1 block text-sm">
                 {i.label_serial} · {KIND_LABEL[i.kind]} · {lookups.categoryName.get(i.category_id)}
               </span>
-              <span className="block text-sm">{lookups.locationName.get(i.location_id)}</span>
+              <span className="block text-sm">
+                <Place path={lookups.locationName.get(i.location_id)} />
+              </span>
             </Link>
           </li>
         ))}
@@ -269,5 +276,15 @@ async function List({ searchParams }: { searchParams: PageProps<"/items">["searc
 
       {pages > 1 && <Pagination page={page} size={PAGE_SIZE} total={total} hrefFor={pageLink} />}
     </>
+  );
+}
+
+/** E2: the last two parts of a place, with the full path on hover. */
+function Place({ path }: { path: string | undefined }) {
+  if (!path) return null;
+  return (
+    <span title={path} data-testid="place">
+      {shortPlace(path)}
+    </span>
   );
 }
