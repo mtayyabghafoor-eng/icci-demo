@@ -53,7 +53,7 @@ function DataTableWide<Row>({ columns, rows, rowKey, caption }: { columns: Colum
                 key={c.key}
                 scope="col"
                 className={cx(
-                  "border-b border-icci-line px-4 py-3 text-[13px] font-bold uppercase tracking-wide text-icci-ink-60",
+                  "border-b border-icci-line px-4 py-3 text-sm font-semibold text-icci-ink-60",
                   c.align === "right" && "text-right",
                   c.wideOnly && "hidden md:table-cell",
                 )}

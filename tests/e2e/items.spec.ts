@@ -120,7 +120,7 @@ test("scan a new label, register, open, edit and see the history", async ({ page
     await page.getByTestId("search-box").fill("ICCI-999999");
     await page.getByTestId("search-box").press("Enter");
   } else {
-    await page.getByPlaceholder("Label number, e.g. ICCI-000123").fill("ICCI-999999");
+    await page.getByPlaceholder("e.g. ICCI-000123").fill("ICCI-999999");
     await page.getByRole("button", { name: "Open label" }).click();
   }
   await expect(page.getByRole("heading", { level: 1, name: "Label not recognised" })).toBeVisible();

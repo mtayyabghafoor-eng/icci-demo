@@ -174,9 +174,13 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/copies
           </li>
         ))}
       </ul>
-      <div className="mt-5">
+      <div className="mt-5 grid gap-2">
         <Link href={`${here}?new=1`} className={buttonClass("outline", "lg", "w-full")}>
           New borrower
+        </Link>
+        {/* E8: a way back on the first step too. */}
+        <Link href={`/library/copies/${copy.id}`} className="inline-flex min-h-11 items-center justify-center font-semibold" data-testid="lend-cancel">
+          Cancel
         </Link>
       </div>
     </>

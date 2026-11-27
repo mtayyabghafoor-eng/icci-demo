@@ -272,7 +272,7 @@ async function Content({
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p>
-                    <span className="block text-sm font-semibold uppercase tracking-wide text-icci-green">
+                    <span className="block text-sm font-semibold text-icci-green">
                       {DIFFERENCE_TITLE[d.kind]}
                     </span>
                     <Link href={`/items/${d.item_id}`} className="font-semibold">

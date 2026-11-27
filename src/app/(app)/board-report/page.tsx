@@ -288,7 +288,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/board-repor
 function Rows({ title, rows, testId }: { title: string; rows: [string, string][]; testId?: string }): ReactNode {
   return (
     <div className="mt-3 break-inside-avoid">
-      <p className="text-sm font-bold uppercase tracking-wide text-icci-ink-60">{title}</p>
+      <p className="text-sm font-bold text-icci-ink-60">{title}</p>
       {rows.length === 0 ? (
         <p className="text-[15px]">None.</p>
       ) : (

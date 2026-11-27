@@ -73,7 +73,7 @@ export function MonthForm({ month, days }: { month: string; days: GridDay[] }) {
       {/* D5: the table scrolls in its own box, so the prayer names stay in view over all 31 days. */}
       <div className="max-h-[70vh] overflow-auto rounded-2xl border border-icci-line bg-white shadow-card">
         <table className="w-full border-collapse text-left">
-          <thead className="sticky top-0 z-10 bg-icci-green-50 text-[13px] font-semibold uppercase tracking-wide text-icci-green-dark shadow-[0_1px_0_var(--icci-line)]">
+          <thead className="sticky top-0 z-10 bg-icci-green-50 text-sm font-semibold text-icci-green-dark shadow-[0_1px_0_var(--icci-line)]">
             <tr>
               <th scope="col" className="px-3 py-3">
                 Day

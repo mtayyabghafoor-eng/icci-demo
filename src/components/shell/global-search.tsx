@@ -115,7 +115,7 @@ export function GlobalSearch({ placeholder, big = false, slashKey = false }: { p
     return (
       <li key={o.id} role="presentation">
         {heading && (
-          <p aria-hidden className="px-3 pt-3 pb-1 text-[12.5px] font-semibold tracking-wide text-icci-ink-60 uppercase">
+          <p aria-hidden className="px-3 pt-3 pb-1 text-sm font-semibold text-icci-ink-60">
             {heading}
           </p>
         )}

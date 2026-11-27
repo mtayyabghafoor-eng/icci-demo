@@ -88,7 +88,7 @@ function Branch({ place, all, showOff, depth }: { place: Place; all: Place[]; sh
   return (
     <div data-branch className={depth > 0 ? "border-l-2 border-icci-line pl-4" : undefined}>
       <p className="flex flex-wrap items-center gap-x-3 gap-y-1 py-1.5" data-testid="place-row" data-code={placeCode(place.code)}>
-        <span className="text-[12.5px] font-bold uppercase tracking-wider text-icci-ink-60">{KIND_WORD[place.kind]}</span>
+        <span className="text-sm font-semibold text-icci-ink-60">{KIND_WORD[place.kind]}</span>
         <Link href={`/places/${place.id}`} className={depth === 0 ? "text-lg font-bold" : "font-semibold"}>
           {place.name}
         </Link>

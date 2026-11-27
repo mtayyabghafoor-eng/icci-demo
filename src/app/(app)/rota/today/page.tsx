@@ -90,7 +90,7 @@ async function Content() {
       {header}
       {onCall.length > 0 && (
         <Card tone="gold" padded={false} className="mb-4 p-4">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-icci-green-dark">On call today</h2>
+          <h2 className="text-[15px] font-bold text-icci-green-dark">On call today</h2>
           <ul className="mt-1 divide-y divide-icci-gold-300" data-testid="on-call-today">
             {onCall.map((e) => {
               const person = e.person_id ? names.get(e.person_id) : null;
@@ -137,7 +137,7 @@ async function Content() {
           if (inGroup.length === 0) return null;
           return (
             <Card key={g} padded={false} className="p-4">
-              <h2 className="text-[13px] font-semibold uppercase tracking-wide text-icci-ink-60">{SLOT_GROUP_LABEL[g]}</h2>
+              <h2 className="text-[15px] font-bold text-icci-ink-60">{SLOT_GROUP_LABEL[g]}</h2>
               <ul className="mt-1 divide-y divide-icci-line">
                 {inGroup.map((e) => {
                   const person = e.person_id ? names.get(e.person_id) : null;

@@ -5,7 +5,7 @@ import { FormError } from "@/app/sign-in/ui";
 import { decideCorrection, recordOne, recordWeeklyCount, requestCorrection, type StockFormState } from "./actions";
 import { Stepper } from "@/components/ui/stepper";
 import { fieldClass, SaveBar } from "@/components/ui";
-import { quantityWord } from "@/lib/ui/text";
+import { quantityWord, unitPlural } from "@/lib/ui/text";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 min-h-12 w-full px-6 text-lg sm:w-auto";
@@ -28,7 +28,7 @@ function NumberBox(props: { name: string; label: string; unit: string; autoFocus
       <span className="font-semibold">{props.label}</span>
       <span className="mt-2 flex flex-wrap items-center gap-3">
         <Stepper name={props.name} required min={props.min ?? 0} autoFocus={props.autoFocus} />
-        <span className="text-lg">{props.unit}</span>
+        <span className="text-lg">{unitPlural(props.unit)}</span>
       </span>
     </label>
   );
@@ -154,7 +154,7 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
                     aria-invalid={problem ? true : undefined}
                     className={problem ? "border-icci-error!" : undefined}
                   />
-                  <span className="w-14 text-sm">{r.unit}</span>
+                  <span className="min-w-14 text-[15px]">{unitPlural(r.unit)}</span>
                 </span>
               </label>
               {problem && <p className="mt-1 text-sm text-icci-error">{problem}</p>}

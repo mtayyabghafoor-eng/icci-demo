@@ -3,7 +3,7 @@
 // Admins have only two Library links in the menu (overview and desk), so
 // these tabs give one click to each desk page. The Library Operator sees
 // them too, which helps on a phone, where the menu is behind a button.
-// On a phone the bar scrolls sideways.
+// E8: on a phone the tabs wrap onto more lines, so the open one is always in view.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cx } from "@/lib/ui/text";
@@ -30,8 +30,8 @@ export function deskTab(pathname: string): string | null {
 export function DeskTabs() {
   const current = deskTab(usePathname());
   return (
-    <nav aria-label="Library desk" className="-mx-4 mb-5 overflow-x-auto px-4 print:hidden md:mx-0 md:px-0">
-      <ul className="flex w-max gap-1 rounded-2xl border border-icci-line bg-white p-1 shadow-card">
+    <nav aria-label="Library desk" className="mb-5 print:hidden">
+      <ul className="flex flex-wrap gap-1 rounded-2xl border border-icci-line bg-white p-1 shadow-card">
         {DESK_TABS.map((t) => {
           const active = t.href === current;
           return (

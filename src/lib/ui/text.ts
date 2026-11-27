@@ -77,6 +77,11 @@ export function pageOf<T>(all: T[], page: number, size: number) {
  * "2 boxes", "3 batteries". A unit already plural ("scissors") or of two
  * words ("pairs of gloves") is left alone after the first word's rule.
  */
+/** E8: the unit as it reads after a number other than one ("roll" → "rolls"). */
+export function unitPlural(unit: string): string {
+  return quantityWord(2, unit).replace(/^2 ?/, "");
+}
+
 export function quantityWord(n: number, unit: string): string {
   const u = unit.trim();
   if (!u || Math.abs(n) === 1) return `${n}${u ? ` ${u}` : ""}`.trim();

@@ -125,22 +125,46 @@ function BorrowerFields({ borrower, typed }: { borrower?: BorrowerDetails; typed
   );
 }
 
+/** A date as YYYY-MM-DD, n days after another (no time zones involved). */
+function plusDays(date: string, n: number): string {
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
 function DueField({ due, today, max, typed, label = "Due back" }: { due: string; today: string; max: string; typed?: Typed; label?: string }) {
+  const box = useRef<HTMLInputElement>(null);
+  // E8: one tap moves the date on by a week or two, from the date shown.
+  const add = (n: number) => {
+    if (!box.current) return;
+    const next = plusDays(box.current.value || due, n);
+    box.current.value = next > max ? max : next;
+  };
   return (
     <div>
       <label htmlFor="due_on" className="font-semibold">
         {label}
       </label>
-      <input
-        id="due_on"
-        name="due_on"
-        type="date"
-        required
-        min={today}
-        max={max}
-        defaultValue={typed?.due_on ?? due}
-        className={`${fieldClass} max-w-56`}
-      />
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <input
+          ref={box}
+          id="due_on"
+          name="due_on"
+          type="date"
+          required
+          min={today}
+          max={max}
+          defaultValue={typed?.due_on ?? due}
+          className={`${fieldClass} mt-0! max-w-56`}
+        />
+        <span className="flex gap-2">
+          {[7, 14].map((n) => (
+            <button key={n} type="button" onClick={() => add(n)} className={buttonClass("outline")} data-testid={`due-plus-${n}`}>
+              +{n} days
+            </button>
+          ))}
+        </span>
+      </div>
     </div>
   );
 }

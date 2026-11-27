@@ -7,7 +7,7 @@ export function FindLabel() {
         <input
           name="number"
           required
-          placeholder="Label number, e.g. ICCI-000123"
+          placeholder="e.g. ICCI-000123"
           className="block min-h-11 w-full rounded-xl border border-icci-field bg-white px-3.5 py-2 transition-colors duration-150 hover:border-icci-green/60 focus:border-icci-green"
         />
       </label>

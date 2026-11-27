@@ -249,7 +249,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
               <col key={d} />
             ))}
           </colgroup>
-          <thead className="bg-icci-green-50 text-[13px] font-semibold uppercase tracking-wide text-icci-green-dark">
+          <thead className="bg-icci-green-50 text-sm font-semibold text-icci-green-dark">
             <tr>
               <th scope="col" className="px-2 py-3">
                 Slot
@@ -329,7 +329,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
                 if (inGroup.length === 0) return null;
                 return (
                   <div key={g} className="mt-3">
-                    <h3 className="text-[13px] font-semibold uppercase tracking-wide text-icci-ink-60">{SLOT_GROUP_LABEL[g]}</h3>
+                    <h3 className="text-sm font-semibold text-icci-ink-60">{SLOT_GROUP_LABEL[g]}</h3>
                     <div className="mt-1.5 flex flex-col gap-2">
                       {inGroup.map((e) => (
                         <SlotCard key={e.id} e={e} ctx={ctx} />
