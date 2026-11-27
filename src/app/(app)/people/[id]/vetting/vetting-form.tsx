@@ -2,12 +2,11 @@
 // Record vetting: phone-friendly, three fields (what happened, the date, and
 // for a vetting the expiry). The expiry fills itself in as 3 years after the
 // vetted date; the admin can change it for this person.
-import Link from "next/link";
 import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { defaultExpiry, isDate, VETTING_KIND_LABEL, VETTING_YEARS, type VettingKind } from "@/lib/vetting/rules";
 import { recordVetting, type VettingFormState } from "../../vetting-actions";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 
 const KINDS: VettingKind[] = ["vetted", "applied", "not_required"];
 
@@ -84,14 +83,11 @@ export function VettingForm({ personId, today }: { personId: string; today: stri
 
       <p className="text-sm">Only the status and dates are kept. Do not write down or upload the disclosure itself.</p>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={`/people/${personId}`}>
         <button type="submit" disabled={pending} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 px-6">
           {pending ? "Saving…" : "Save"}
         </button>
-        <Link href={`/people/${personId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

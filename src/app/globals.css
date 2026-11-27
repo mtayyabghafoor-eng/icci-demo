@@ -241,6 +241,36 @@ h1.page-title::after {
     bottom: 0;
   }
 }
+/*
+  E4: the Save bar (save-bar.tsx) of every form that records or edits. On a
+  PC it is the usual row of buttons. On a phone it stays in view above the
+  bottom bar while the form scrolls: Save takes the width, Cancel beside it,
+  on the page colour with the gold line on top, edge to edge.
+*/
+.save-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+@media (width < 48rem) {
+  .save-bar {
+    position: sticky;
+    bottom: calc(5.25rem + env(safe-area-inset-bottom));
+    z-index: 20;
+    flex-wrap: nowrap;
+    margin-inline: -1rem;
+    padding: 0.75rem 1rem;
+    border-top: 2px solid var(--icci-gold);
+    background: var(--icci-page);
+  }
+  .save-bar > :is(button, a):first-child {
+    flex: 1 1 auto;
+  }
+  .save-bar > .save-bar-cancel {
+    flex: none;
+  }
+}
 .list-count {
   margin-top: 1.25rem;
   font-size: 0.9375rem;
@@ -360,10 +390,15 @@ header:has(#top-bar-back > *) .top-bar-logo {
   UI-9: a saved message floating over the page (toast.tsx): under the top
   bar on the right on a PC, just above the bottom bar on a phone.
 */
+/*
+  E4: the saved message never covers a page title, its badge or its
+  buttons: on a PC it sits at the bottom right; on a phone just under the
+  top bar, so the Save bar at the bottom stays free.
+*/
 .icci-toast {
   position: fixed;
   z-index: 40;
-  top: 5rem;
+  bottom: 1.5rem;
   right: 1.5rem;
   width: min(26rem, calc(100vw - 2rem));
   animation: icci-toast-in 200ms ease-out;
@@ -373,24 +408,21 @@ header:has(#top-bar-back > *) .top-bar-logo {
 }
 .icci-toast[data-state="out"] {
   opacity: 0;
-  transform: translateY(-0.5rem);
+  transform: translateY(0.5rem);
 }
 @media (width < 48rem) {
   .icci-toast {
-    top: auto;
+    top: 4rem;
     right: 1rem;
     left: 1rem;
+    bottom: auto;
     width: auto;
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
-  }
-  .icci-toast[data-state="out"] {
-    transform: translateY(0.5rem);
   }
 }
 @keyframes icci-toast-in {
   from {
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translateY(0.5rem);
   }
 }
 @media print {

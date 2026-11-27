@@ -3,7 +3,7 @@
 // which day of the week is Eid. The database checks everything again.
 import { useActionState } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { applyTemplate, type UseTemplateState } from "../templates/actions";
 
 export function UseTemplateForm({
@@ -44,9 +44,11 @@ export function UseTemplateForm({
       {disabledReason ? (
         <p className="text-[15px] text-icci-ink-60">{disabledReason}</p>
       ) : (
-        <button type="submit" disabled={pending} className={buttonClass("primary")}>
-          {pending ? "Adding the slots…" : `Use ${name}`}
-        </button>
+        <SaveBar cancelHref={`/rota?week=${monday}`}>
+          <button type="submit" disabled={pending} className={buttonClass("primary")}>
+            {pending ? "Adding the slots…" : `Use ${name}`}
+          </button>
+        </SaveBar>
       )}
     </form>
   );

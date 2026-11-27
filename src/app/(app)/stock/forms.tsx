@@ -4,7 +4,7 @@ import { startTransition, useActionState, useEffect, useRef, useState, type Form
 import { FormError } from "@/app/sign-in/ui";
 import { decideCorrection, recordOne, recordWeeklyCount, requestCorrection, type StockFormState } from "./actions";
 import { Stepper } from "@/components/ui/stepper";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 import { quantityWord } from "@/lib/ui/text";
 
 const primary =
@@ -47,9 +47,11 @@ export function QuantityForm({ itemId, kind, unit }: { itemId: string; kind: "co
         autoFocus
       />
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={primary}>
-        {pending ? "Saving…" : kind === "count" ? "Save count" : "Add stock"}
-      </button>
+      <SaveBar cancelHref={`/items/${itemId}`}>
+        <button type="submit" disabled={pending} className={primary}>
+          {pending ? "Saving…" : kind === "count" ? "Save count" : "Add stock"}
+        </button>
+      </SaveBar>
     </form>
   );
 }
@@ -64,9 +66,11 @@ export function CorrectionForm({ itemId, entryId, unit }: { itemId: string; entr
         <textarea name="reason" required rows={3} maxLength={1000} placeholder="e.g. Typed 10 instead of 12" className={fieldClass} />
       </label>
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={primary}>
-        {pending ? "Sending…" : "Send for approval"}
-      </button>
+      <SaveBar cancelHref={`/items/${itemId}`}>
+        <button type="submit" disabled={pending} className={primary}>
+          {pending ? "Sending…" : "Send for approval"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

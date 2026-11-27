@@ -2,9 +2,8 @@
 // The place forms (slice P1.12): add or rename a place (name and notes), and
 // switch it off or back on. The kind of place is never asked: a new place is
 // a building, or the next kind down inside the place it is added to.
-import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { MAX_PLACE_NAME, MAX_PLACE_NOTES } from "@/lib/places/rules";
 import { addPlace, savePlace, setPlaceActive, type PlaceFormState } from "./actions";
@@ -52,14 +51,11 @@ export function PlaceForm({
         <textarea id="notes" name="notes" rows={3} maxLength={MAX_PLACE_NOTES} defaultValue={place?.notes ?? ""} className={fieldClass} />
       </div>
       <FormError message={state.error} />
-      <div className="flex flex-wrap gap-3">
+      <SaveBar cancelHref={cancelHref}>
         <button type="submit" disabled={pending} className={buttonClass("primary")}>
           {pending ? "Saving…" : place ? "Save" : `Add ${kindWord.toLowerCase()}`}
         </button>
-        <Link href={cancelHref} className={buttonClass("outline")}>
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

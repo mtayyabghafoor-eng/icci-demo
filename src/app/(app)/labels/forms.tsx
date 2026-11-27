@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { LABELS_PER_SHEET, MAX_LABELS_PER_PRINT } from "@/lib/labels/sheet";
 import { createLabelSheet, reprintLabelSheet, type LabelFormState } from "./actions";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 
 const none: LabelFormState = { error: null };
 const primary =
@@ -37,9 +37,11 @@ export function PrintLabelsForm({ nextSerial }: { nextSerial: string }) {
         kept for these labels even if the sheet is never printed.
       </p>
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={primary}>
-        {pending ? "Creating…" : "Create and print"}
-      </button>
+      <SaveBar>
+        <button type="submit" disabled={pending} className={primary}>
+          {pending ? "Creating…" : "Create and print"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

@@ -3,7 +3,7 @@
 // on this screen only: it is never put in the address, an email or a log.
 import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass, ConfirmSubmit, fieldClass } from "@/components/ui";
+import { buttonClass, ConfirmSubmit, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { ROLE_CHOICES } from "@/lib/accounts/rules";
 import { addAccount, giveTemporaryPassword, resetTwoFactor, type AccountFormState } from "./actions";
@@ -80,9 +80,11 @@ export function AddAccountForm() {
           ))}
         </div>
       </fieldset>
-      <button type="submit" disabled={pending} className={buttonClass("primary", "md")}>
-        {pending ? "Adding…" : "Add the account"}
-      </button>
+      <SaveBar cancelHref="/accounts">
+        <button type="submit" disabled={pending} className={buttonClass("primary", "md")}>
+          {pending ? "Adding…" : "Add the account"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, CannotSee, Card, CardTitle, Notice, PageHeader, Skeleton } from "@/components/ui";
+import { buttonClass, CannotSee, Card, CardTitle, Notice, PageHeader, Skeleton, SaveBar } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { changesSentence, publishedAtText } from "@/lib/rota/publish";
 import { fullDayLabel, MAY_SEE_ROTA } from "@/lib/rota/rules";
@@ -155,14 +155,11 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota/publis
             <span className="font-semibold">I have seen the warnings and still want to publish this week.</span>
           </label>
         )}
-        <div className="flex flex-wrap items-center gap-3">
+        <SaveBar cancelHref={back}>
           <button type="submit" className={buttonClass("primary")}>
             {state.latest ? "Publish again and print" : "Publish and print"}
           </button>
-          <Link href={back} className={buttonClass("ghost")}>
-            Cancel
-          </Link>
-        </div>
+      </SaveBar>
       </form>
     </>
   );

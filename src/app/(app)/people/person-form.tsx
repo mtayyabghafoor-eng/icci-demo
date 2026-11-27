@@ -6,7 +6,7 @@ import { startTransition, useActionState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { savePerson, type PersonFormState } from "./actions";
 import type { ListEntry, PersonRow } from "./data";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 
 type Props = { person: PersonRow | null; roles: ListEntry[]; sections: ListEntry[] };
 
@@ -100,7 +100,7 @@ export function PersonForm({ person, roles, sections }: Props) {
       <div className="sm:col-span-2">
         <FormError message={state.error} />
       </div>
-      <div className="flex flex-wrap gap-3 sm:col-span-2">
+      <SaveBar cancelHref={person ? `/people/${person.id}` : "/people"} className="sm:col-span-2">
         <button
           type="submit"
           disabled={pending}
@@ -108,10 +108,7 @@ export function PersonForm({ person, roles, sections }: Props) {
         >
           {pending ? "Saving…" : "Save"}
         </button>
-        <Link href={person ? `/people/${person.id}` : "/people"} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

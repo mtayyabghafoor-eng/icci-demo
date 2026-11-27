@@ -1,9 +1,8 @@
 "use client";
 // The company and make-and-model forms (slice P1.19), and the switch
 // off / back on button they share. Nothing is ever deleted.
-import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass, Field, Input, Select, Textarea } from "@/components/ui";
+import { buttonClass, Field, Input, Select, Textarea, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import type { CategoryGroup } from "@/lib/categories/rules";
 import { COMPANY_KINDS, type CompanyRow, type ModelRow } from "@/lib/companies/rules";
@@ -15,14 +14,11 @@ type Choice = { id: string; name: string };
 
 function Buttons({ pending, editing, add, cancelHref }: { pending: boolean; editing: boolean; add: string; cancelHref: string }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <SaveBar cancelHref={cancelHref}>
       <button type="submit" disabled={pending} className={buttonClass("primary")}>
         {pending ? "Saving…" : editing ? "Save" : add}
       </button>
-      <Link href={cancelHref} className={buttonClass("outline")}>
-        Cancel
-      </Link>
-    </div>
+    </SaveBar>
   );
 }
 

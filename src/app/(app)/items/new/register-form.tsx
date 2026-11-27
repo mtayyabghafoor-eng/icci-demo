@@ -146,7 +146,7 @@ export function RegisterForm(props: {
       )}
 
       <FormError message={state.error} />
-      <div className="flex gap-2">
+      <div className="save-bar" data-testid="save-bar">
         {step > 1 && (
           <button
             type="button"

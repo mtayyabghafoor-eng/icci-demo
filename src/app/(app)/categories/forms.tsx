@@ -2,9 +2,8 @@
 // The category forms (slice P1.17): add or rename a category, move a
 // sub-category to another main category, and switch a category off or back
 // on. Nothing is ever deleted.
-import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { CATEGORY_ICON_KEYS, CATEGORY_ICON_WORDS } from "@/lib/categories/icons";
 import { MAX_CATEGORY_NAME } from "@/lib/categories/rules";
@@ -133,14 +132,11 @@ export function CategoryForm({
         </>
       )}
       <FormError message={state.error} />
-      <div className="flex flex-wrap gap-3">
+      <SaveBar cancelHref={cancelHref}>
         <button type="submit" disabled={pending} className={buttonClass("primary")}>
           {pending ? "Saving…" : category ? "Save" : `Add ${word}`}
         </button>
-        <Link href={cancelHref} className={buttonClass("outline")}>
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

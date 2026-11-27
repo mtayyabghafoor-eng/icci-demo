@@ -2,11 +2,10 @@
 // The lending forms (slice P4.4). Phone-first: big buttons (Return is one
 // tap), three fields or fewer, the due date filled in (21 days) and
 // changeable. Names are shown as typed, Arabic included (dir="auto").
-import Link from "next/link";
 import { useActionState, useRef } from "react";
 import { BarcodeCamera } from "@/components/shell/camera-scanner";
 import { labelFromScan } from "@/lib/items/scan";
-import { buttonClass, ConfirmSubmit, fieldClass } from "@/components/ui";
+import { buttonClass, ConfirmSubmit, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import type { MarkKind } from "@/lib/library/lists";
 import { CONTACT_KIND_LABEL, type ContactKind } from "@/lib/library/loans";
@@ -155,14 +154,11 @@ export function BorrowerForm({ borrower }: { borrower?: BorrowerDetails }) {
     <form key={state.attempt ?? 0} action={action} className={box} aria-label={borrower ? "Correct the details" : "Add a borrower"}>
       <BorrowerFields borrower={borrower} typed={state.values} />
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "w-full sm:w-auto sm:px-8")}>
+      <SaveBar cancelHref={cancel}>
+        <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "sm:px-8")}>
           {pending ? "Saving…" : borrower ? "Save" : "Add the borrower"}
         </button>
-        <Link href={cancel} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }
@@ -187,9 +183,11 @@ export function LendForm({ copyId, borrowerId, due, today, max }: { copyId: stri
     <form key={state.attempt ?? 0} action={action} className={box} aria-label="Lend the book">
       <DueField due={due} today={today} max={max} typed={state.values} />
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "w-full")}>
-        {pending ? "Lending…" : "Lend the book"}
-      </button>
+      <SaveBar cancelHref="/library">
+        <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "sm:px-8")}>
+          {pending ? "Lending…" : "Lend the book"}
+        </button>
+      </SaveBar>
     </form>
   );
 }
@@ -202,9 +200,11 @@ export function NewBorrowerLendForm({ copyId, due, today, max }: { copyId: strin
       <BorrowerFields typed={state.values} />
       <DueField due={due} today={today} max={max} typed={state.values} />
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "w-full")}>
-        {pending ? "Lending…" : "Add and lend the book"}
-      </button>
+      <SaveBar cancelHref="/library">
+        <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "sm:px-8")}>
+          {pending ? "Lending…" : "Add and lend the book"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

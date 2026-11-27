@@ -5,7 +5,7 @@
 // Warnings never block; the database has the final word on every rule.
 import { startTransition, useActionState, useMemo, useRef, useState, type FormEvent } from "react";
 import { FormError } from "@/app/sign-in/ui";
-import { buttonClass, ConfirmSubmit, Input, Notice, Select, Textarea } from "@/components/ui";
+import { buttonClass, ConfirmSubmit, Input, Notice, Select, Textarea, SaveBar } from "@/components/ui";
 import { claimNumber, METHOD_LABEL, PAYMENT_LABEL, type Payment } from "@/lib/expenses/claims";
 import { formatEuro, parseEuro } from "@/lib/items/rules";
 import { correctClaim, decideClaim, enterClaim, recordRepayment, withdrawRepayment, type ClaimFormState } from "./actions";
@@ -310,8 +310,8 @@ export function ClaimForm({
         </div>
       )}
       <FormError message={state.error} />
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <button type="submit" disabled={pending} onClick={() => (then.current = "")} className={buttonClass("primary", "lg", "max-sm:w-full")}>
+      <SaveBar cancelHref="/expenses">
+        <button type="submit" disabled={pending} onClick={() => (then.current = "")} className={buttonClass("primary", "lg")}>
           {pending ? "Saving…" : "Save claim"}
         </button>
         <span className="hidden md:block">
@@ -325,7 +325,7 @@ export function ClaimForm({
             Save and enter another
           </button>
         </span>
-      </div>
+      </SaveBar>
     </form>
   );
 }
@@ -470,9 +470,11 @@ export function CorrectionForm({
         <Textarea name="reason" required maxLength={500} dir="auto" className="mt-1 min-h-20" />
       </label>
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "max-sm:w-full")}>
-        {pending ? "Saving…" : "Send the correction for approval"}
-      </button>
+      <SaveBar cancelHref={`/expenses/${claimId}`}>
+        <button type="submit" disabled={pending} className={buttonClass("primary", "lg")}>
+          {pending ? "Saving…" : "Send the correction for approval"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

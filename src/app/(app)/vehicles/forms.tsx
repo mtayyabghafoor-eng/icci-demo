@@ -3,9 +3,8 @@
 // (registration, make and model, keeper, "NCT not needed yet"), and record a
 // renewal (what, renewed on, valid until; valid until fills itself in a year
 // later until the admin changes it).
-import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { KIND_LABEL, MAX_RENEWAL_YEARS, RENEWAL_KINDS, suggestedUntil, type RenewalKind } from "@/lib/vehicles/rules";
 import { addVehicle, recordRenewal, saveVehicle, type VehicleFormState } from "./actions";
@@ -88,14 +87,11 @@ export function VehicleForm({
         <span>NCT not needed yet (a newer vehicle)</span>
       </label>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={vehicle ? `/vehicles/${vehicle.id}` : "/vehicles"}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : vehicle ? "Save" : "Register vehicle"}
         </button>
-        <Link href={vehicle ? `/vehicles/${vehicle.id}` : "/vehicles"} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }
@@ -164,14 +160,11 @@ export function RenewalForm({ vehicleId, today, kind }: { vehicleId: string; tod
       </div>
       <p className="text-sm">Only the dates are kept. Do not upload the disc, certificate or policy document.</p>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={`/vehicles/${vehicleId}`}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : "Save"}
         </button>
-        <Link href={`/vehicles/${vehicleId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

@@ -16,7 +16,7 @@ import {
 } from "@/lib/tickets/rules";
 import { PhotoInput } from "../items/photo-input";
 import { recordTicketStep, reportProblem, type TicketFormState } from "./actions";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 
 const none: TicketFormState = { error: null };
 const primary =
@@ -127,9 +127,11 @@ export function ReportProblemForm({
         </label>
       )}
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={primary}>
-        {pending ? "Sending…" : "Report the problem"}
-      </button>
+      <SaveBar cancelHref={itemId ? `/items/${itemId}` : "/tickets"}>
+        <button type="submit" disabled={pending} className={primary}>
+          {pending ? "Sending…" : "Report the problem"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

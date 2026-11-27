@@ -7,7 +7,7 @@ import { useActionState, useState } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { suggestedExpiry, usualLengthText, type TrainingType } from "@/lib/training/rules";
 import { recordTraining, type TrainingFormState } from "../../training-actions";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 
 export function TrainingForm({ personId, today, types }: { personId: string; today: string; types: TrainingType[] }) {
   const [state, action, pending] = useActionState<TrainingFormState, FormData>(recordTraining.bind(null, personId), { error: null });
@@ -105,14 +105,11 @@ export function TrainingForm({ personId, today, types }: { personId: string; tod
 
       <p className="text-sm">Only the type and dates are kept. Do not upload the certificate itself.</p>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={`/people/${personId}`}>
         <button type="submit" disabled={pending} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-icci-green-dark font-semibold text-white! shadow-sm transition-colors duration-150 hover:bg-icci-green-900 disabled:opacity-60 px-6">
           {pending ? "Saving…" : "Save"}
         </button>
-        <Link href={`/people/${personId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

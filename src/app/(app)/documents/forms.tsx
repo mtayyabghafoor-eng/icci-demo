@@ -1,7 +1,7 @@
 "use client";
 // Add a document, and hide a wrong one with a reason (slice P1.20).
 import { useActionState } from "react";
-import { buttonClass, Field, Input, Select } from "@/components/ui";
+import { buttonClass, Field, Input, Select, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { DOCUMENT_KINDS, DOCUMENT_MAX_MB } from "@/lib/documents/rules";
 import { addDocument, hideDocument, type DocumentFormState, type DocumentOwner } from "./actions";
@@ -28,9 +28,11 @@ export function AddDocumentForm({ owner, returnTo, defaultKind }: { owner: Docum
         <input id="doc-file" name="file" type="file" required accept="application/pdf,image/jpeg,image/png,image/webp" className="block w-full text-sm" />
       </Field>
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={buttonClass("primary")}>
-        {pending ? "Adding…" : "Add document"}
-      </button>
+      <SaveBar>
+        <button type="submit" disabled={pending} className={buttonClass("primary")}>
+          {pending ? "Adding…" : "Add document"}
+        </button>
+      </SaveBar>
     </form>
   );
 }

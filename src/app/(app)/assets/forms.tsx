@@ -1,7 +1,7 @@
 "use client";
 // The asset forms. Phone-first: big boxes, a one-tap camera button.
 import { startTransition, useActionState, useRef, useState, type FormEvent } from "react";
-import { ConfirmSubmit, fieldClass } from "@/components/ui";
+import { ConfirmSubmit, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { DISPOSAL_ROUTES, ROUTE_LABEL, type DisposalRoute } from "@/lib/assets/disposal";
 import { ASSET_ACTIONS, type AssetAction } from "@/lib/assets/rules";
@@ -160,9 +160,12 @@ export function AssetEventForm({
         </p>
       )}
       <FormError message={state.error} />
-      <button type="submit" disabled={pending} className={primary}>
-        {pending ? "Saving…" : action === "dispose" ? "Send for approval" : ASSET_ACTIONS[action].button}
-      </button>
+      {/* E4: Cancel on every asset form, Dispose included (the review found none). */}
+      <SaveBar cancelHref={`/items/${itemId}`}>
+        <button type="submit" disabled={pending} className={primary}>
+          {pending ? "Saving…" : action === "dispose" ? "Send for approval" : ASSET_ACTIONS[action].button}
+        </button>
+      </SaveBar>
     </form>
   );
 }

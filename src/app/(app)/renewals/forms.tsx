@@ -3,9 +3,8 @@
 // (title, category, owner, documents needed, notes; a new one also has its
 // first due date), and "Mark renewed" (renewed on, next due; next due fills
 // itself in a year later until the admin changes it).
-import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { CATEGORIES, MAX_DUE_YEARS, suggestedNextDue } from "@/lib/renewals/rules";
 import { addRenewal, markRenewed, saveRenewal, type RenewalFormState } from "./actions";
@@ -104,14 +103,11 @@ export function RenewalForm({ people, renewal }: { people: Choice[]; renewal?: R
         <textarea id="notes" name="notes" rows={3} maxLength={2000} dir="auto" defaultValue={renewal?.notes ?? ""} className={fieldClass} />
       </div>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={renewal ? `/renewals/${renewal.id}` : "/renewals"}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : renewal ? "Save" : "Add renewal"}
         </button>
-        <Link href={renewal ? `/renewals/${renewal.id}` : "/renewals"} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }
@@ -164,14 +160,11 @@ export function RenewedForm({ renewalId, today }: { renewalId: string; today: st
         />
       </div>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={`/renewals/${renewalId}`}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : "Save"}
         </button>
-        <Link href={`/renewals/${renewalId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

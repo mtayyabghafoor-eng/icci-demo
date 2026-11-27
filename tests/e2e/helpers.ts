@@ -60,6 +60,7 @@ export const SHOT_STYLE = `
   body { position: relative !important; height: auto !important; min-height: 100% !important; }
   [data-testid="sidebar"] { position: absolute !important; top: 0 !important; bottom: 0 !important; height: auto !important; }
   [data-testid="bottom-bar"] { position: absolute !important; bottom: 0 !important; }
+  .save-bar, .sticky-actions { position: static !important; }
 `;
 
 export async function enterPassword(page: Page, email: string, password = PASSWORD()) {

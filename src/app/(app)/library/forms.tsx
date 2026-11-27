@@ -3,9 +3,8 @@
 // in from the scan, title, author and language up front; ISBN, publisher and
 // year folded away as optional. Arabic is typed and shown right to left
 // (dir="auto" follows what is typed).
-import Link from "next/link";
 import { useActionState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { LANGUAGE_LABEL, type Language } from "@/lib/library/rules";
 import { addBook, addCopy, saveBook, saveCopyNote, type LibraryFormState } from "./actions";
@@ -132,14 +131,11 @@ function BookFields({ book, typed }: { book?: BookDetails; typed?: Typed }) {
 
 function Buttons({ pending, saveText, cancel }: { pending: boolean; saveText: string; cancel: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "w-full sm:w-auto sm:px-8")}>
+    <SaveBar cancelHref={cancel}>
+      <button type="submit" disabled={pending} className={buttonClass("primary", "lg", "sm:px-8")}>
         {pending ? "Saving…" : saveText}
       </button>
-      <Link href={cancel} className="inline-flex min-h-11 items-center px-2 font-semibold">
-        Cancel
-      </Link>
-    </div>
+    </SaveBar>
   );
 }
 

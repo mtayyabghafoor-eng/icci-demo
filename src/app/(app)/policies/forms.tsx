@@ -3,9 +3,8 @@
 // when adding, who must sign), and upload or change a draft version (name,
 // approval date, next review date, PDF). The next review date fills itself
 // in as one year after approval until the admin changes it.
-import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { MAX_REVIEW_YEARS, REVIEW_YEARS, suggestedReview } from "@/lib/policies/rules";
 import { addPolicy, savePolicy, saveDraft, uploadVersion, type PolicyFormState } from "./actions";
@@ -70,14 +69,11 @@ export function PolicyForm({
       </div>
       {roles && <RoleBoxes roles={roles} picked={new Set()} />}
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={policy ? `/policies/${policy.id}` : "/policies"}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : policy ? "Save" : "Add policy"}
         </button>
-        <Link href={policy ? `/policies/${policy.id}` : "/policies"} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }
@@ -173,14 +169,11 @@ export function VersionForm({
       </div>
       <p className="text-sm">This is saved as a draft. Another admin then checks it and publishes it.</p>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={`/policies/${policyId}`}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : draft ? "Save draft" : "Upload draft"}
         </button>
-        <Link href={`/policies/${policyId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

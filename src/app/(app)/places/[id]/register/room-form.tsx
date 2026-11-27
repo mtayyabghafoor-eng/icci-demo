@@ -4,7 +4,7 @@
 // Kind and category are copied from the last item here and can be changed
 // under "Change kind or category". The place never changes.
 import { useActionState, useRef, startTransition } from "react";
-import { Button, Field, Input, Select } from "@/components/ui";
+import { Button, Field, Input, Select, SaveBar } from "@/components/ui";
 import { BarcodeCamera, type ScanTarget } from "@/components/shell/camera-scanner";
 import { FormError } from "@/app/sign-in/ui";
 import { codeFromScan } from "@/lib/items/scan";
@@ -117,9 +117,11 @@ export function RoomForm(props: {
       </details>
 
       <FormError message={state.error} />
-      <Button type="submit" kind="primary" size="lg" disabled={pending} className="w-full">
-        {pending ? "Saving…" : "Save and scan the next"}
-      </Button>
+      <SaveBar cancelHref={`/places/${props.placeId}`}>
+        <Button type="submit" kind="primary" size="lg" disabled={pending}>
+          {pending ? "Saving…" : "Save and scan the next"}
+        </Button>
+      </SaveBar>
     </form>
   );
 }

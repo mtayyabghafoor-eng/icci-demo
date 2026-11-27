@@ -1,9 +1,8 @@
 "use client";
 // Record sign-off: phone-friendly. Tick everyone on one signed sheet, enter
 // the date, and add a scan if there is one. Saved together or not at all.
-import Link from "next/link";
 import { useActionState, useState } from "react";
-import { buttonClass, fieldClass } from "@/components/ui";
+import { buttonClass, fieldClass, SaveBar } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { recordSignoffs, type SignoffFormState } from "../../signoff-actions";
 
@@ -108,14 +107,11 @@ export function SignoffForm({
         />
       </div>
       <FormError message={state.error} />
-      <div className="flex flex-wrap items-center gap-3">
+      <SaveBar cancelHref={grid !== null ? `/policies/grid${grid ? `?${grid}` : ""}` : `/policies/${policyId}`}>
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
           {pending ? "Saving…" : picked.size > 0 ? `Save (${picked.size} ${picked.size === 1 ? "person" : "people"} ticked)` : "Save"}
         </button>
-        <Link href={grid !== null ? `/policies/grid${grid ? `?${grid}` : ""}` : `/policies/${policyId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
-          Cancel
-        </Link>
-      </div>
+      </SaveBar>
     </form>
   );
 }

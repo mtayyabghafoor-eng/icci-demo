@@ -8,7 +8,7 @@ import { CategoryOptions } from "../../../categories/options";
 import { updateItem, type ItemFormState } from "../../actions";
 import type { ItemRow } from "../../data";
 import { PhotoInput } from "../../photo-input";
-import { fieldClass } from "@/components/ui";
+import { fieldClass, SaveBar } from "@/components/ui";
 
 type Choice = { id: string; name: string };
 
@@ -132,7 +132,7 @@ export function EditForm({
       <div className="sm:col-span-2">
         <FormError message={state.error} />
       </div>
-      <div className="sm:col-span-2">
+      <SaveBar className="sm:col-span-2" cancelHref={`/items/${item.id}`}>
         <button
           type="submit"
           disabled={pending}
@@ -140,7 +140,7 @@ export function EditForm({
         >
           {pending ? "Saving…" : "Save changes"}
         </button>
-      </div>
+      </SaveBar>
     </form>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 // UI-9: a saved message that floats over the page instead of pushing it
-// down: top right on a PC, just above the bottom bar on a phone. It stays 8
+// down: bottom right on a PC, just under the top bar on a phone (E4: never
+// over a page title or the Save bar). It stays 8
 // seconds (longer while the mouse or keyboard is on it), then slides away.
 // Closing it also takes "?done=" (and the numbers that go with it) out of the address, so reloading the page
 // does not show it again. Screen readers hear it once, politely.
