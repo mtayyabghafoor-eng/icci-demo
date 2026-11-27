@@ -30,6 +30,7 @@ import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
 import { ENTRY_COLUMNS, loadPlaces, loadSlotTypes, peopleNames, type RotaEntry } from "../../week-data";
 import { assignMore, assignPerson, removeSlot } from "../../week-actions";
+import { TickAll } from "./tick-all";
 
 export const metadata: Metadata = { title: "Rota slot | ICCI Control Dashboard" };
 
@@ -43,6 +44,7 @@ const PROBLEM: Record<string, string> = {
 
 /** How many names the picker shows at once. */
 const SHOWN = 25;
+const READ = 300;
 
 export default function RotaSlotPage(props: PageProps<"/rota/slot/[id]">) {
   return (
@@ -72,6 +74,8 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
   const sp = await searchParams;
   const q = (typeof sp.q === "string" ? sp.q : "").replace(/[%_\\,()]/g, " ").trim().slice(0, 100);
   const problem = typeof sp.problem === "string" ? PROBLEM[sp.problem] : undefined;
+  // D5: a role filter on the picker.
+  const roleFilter = typeof sp.role === "string" && /^[0-9a-f-]{36}$/.test(sp.role) ? sp.role : "";
 
   const supabase = await createClient();
   const { data: rowData } = await supabase
@@ -117,12 +121,14 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
   const warnings = (warnData ?? []) as RotaWarning[];
 
   // The picker: switched-on people, by name.
-  let peopleQuery = supabase.from("people").select("id, full_name, person_role_id").eq("active", true).order("full_name").limit(SHOWN + 1);
+  // D5: up to 300 are read so the people ready for this slot can be put first.
+  let peopleQuery = supabase.from("people").select("id, full_name, person_role_id").eq("active", true).order("full_name").limit(READ + 1);
   if (q) peopleQuery = peopleQuery.ilike("full_name", `%${q}%`);
+  if (roleFilter) peopleQuery = peopleQuery.eq("person_role_id", roleFilter);
   const { data: peopleData } = await peopleQuery;
   const found = (peopleData ?? []) as { id: string; full_name: string; person_role_id: string }[];
-  const shown = found.slice(0, SHOWN);
-  const ids = shown.map((p) => p.id);
+  const candidates = found.slice(0, READ);
+  const ids = candidates.map((p) => p.id);
   const [{ data: roles }, { data: vetting }, { data: sameDay }, current, places] = await Promise.all([
     supabase.from("person_roles").select("id, name, needs_vetting"),
     ids.length
@@ -142,6 +148,15 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
     busyOf.set(e.person_id, [...(busyOf.get(e.person_id) ?? []), what]);
   }
   const otherEntries = new Map(((sameDay ?? []) as RotaEntry[]).map((e) => [e.id, e]));
+  // D5: ready first (vetting fine for this day and not on another slot that
+  // day), then everyone else, each part by name. Anyone can still be picked.
+  const vetOf = (p: { id: string; person_role_id: string }) =>
+    VETTING_ON_DAY[vettingOnDay(recordsOf.get(p.id) ?? [], day, type.needs_vetting, roleOf.get(p.person_role_id)?.needs_vetting ?? false)];
+  const ready = (p: { id: string; person_role_id: string }) => !busyOf.has(p.id) && vetOf(p).tone !== "red" && vetOf(p).tone !== "amber";
+  const ordered = [...candidates.filter(ready), ...candidates.filter((p) => !ready(p))];
+  const shown = ordered.slice(0, SHOWN);
+  const readyCount = shown.filter(ready).length;
+  const roleChoices = ((roles ?? []) as { id: string; name: string }[]).sort((a, b) => a.name.localeCompare(b.name));
   const personName = row.person_id ? current.get(row.person_id) : null;
 
   return (
@@ -240,9 +255,12 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
                   </label>
                 ))}
               </div>
-              <button type="submit" className={cx(buttonClass("primary"), "mt-4")}>
-                Put {personName ?? "them"} on the ticked days
-              </button>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button type="submit" className={buttonClass("primary")}>
+                  Put {personName ?? "them"} on the ticked days
+                </button>
+                {emptyElsewhere.length > 1 && <TickAll />}
+              </div>
             </form>
           </Card>
         </div>
@@ -256,19 +274,40 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
                 <span className="font-semibold">Name</span>
                 <input name="q" defaultValue={q} maxLength={100} className={fieldClass} dir="auto" placeholder="Type part of a name" />
               </label>
+              <label className="min-w-48">
+                <span className="font-semibold">Role</span>
+                <select name="role" defaultValue={roleFilter} className={fieldClass}>
+                  <option value="">Any role</option>
+                  {roleChoices.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button type="submit" className={buttonClass("secondary")}>
                 Search
               </button>
             </form>
-            <ul className="mt-4 divide-y divide-icci-line" data-testid="person-picker">
+            <p className="mt-4 text-[15px] text-icci-ink-60" data-testid="picker-ready">
+              {readyCount === 0
+                ? "Nobody here is free with valid vetting for this day. You can still pick anyone; the warning shows on the week."
+                : `Ready for this slot first: ${readyCount} with vetting in order and free that day.`}
+            </p>
+            <ul className="mt-2 divide-y divide-icci-line" data-testid="person-picker">
               {shown.length === 0 && <li className="py-3 text-icci-ink-60">No switched-on person matches that name.</li>}
-              {shown.map((p) => {
+              {shown.map((p, i) => {
                 const role = roleOf.get(p.person_role_id);
                 const vet = VETTING_ON_DAY[vettingOnDay(recordsOf.get(p.id) ?? [], day, type.needs_vetting, role?.needs_vetting ?? false)];
                 const busy = busyOf.get(p.id);
                 const onIt = p.id === row.person_id;
                 return (
-                  <li key={p.id} data-testid="picker-person" className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <li
+                    key={p.id}
+                    data-testid="picker-person"
+                    data-ready={i < readyCount ? "yes" : undefined}
+                    className={cx("flex flex-wrap items-center justify-between gap-3 py-3", i === readyCount && readyCount > 0 && "border-t-2! border-icci-gold-300!")}
+                  >
                     <span className="min-w-0">
                       <span className="block font-semibold" dir="auto">
                         {p.full_name}
@@ -287,7 +326,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
                       <StatusBadge word="On this slot" tone="green" />
                     ) : (
                       <form action={assignPerson.bind(null, id, monday, p.id)}>
-                        <button type="submit" className={buttonClass("primary")} aria-label={`Put ${p.full_name} on this slot`}>
+                        <button type="submit" className={buttonClass(i < readyCount ? "outline" : "ghost")} aria-label={`Put ${p.full_name} on this slot`}>
                           Put on this slot
                         </button>
                       </form>

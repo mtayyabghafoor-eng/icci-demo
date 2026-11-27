@@ -133,3 +133,48 @@ export async function publishWeek(weekId: string, monday: string, form: FormData
   if (error || typeof data !== "number") redirect(`/rota/publish?week=${monday}&problem=${publishProblem(error?.message)}`);
   redirect(`/rota/print/${data}?new=1`);
 }
+
+/**
+ * D5 (owner, 27 Nov 2026): "Copy last week's people" onto a week nobody is
+ * on yet. Each empty slot here takes the person who had the same slot (same
+ * kind, same weekday, same place and start) last week. Every one is saved
+ * by the same database rule as a single slot, so the vetting and
+ * double-booking warnings still show; nothing already filled is changed and
+ * no slot is added.
+ */
+export async function copyLastWeek(monday: string): Promise<void> {
+  if (anyBad(isDate(monday))) notFound();
+  if (!DATE.test(monday)) redirect("/rota");
+  const supabase = await createClient();
+  const lastMonday = new Date(`${monday}T12:00:00Z`);
+  lastMonday.setUTCDate(lastMonday.getUTCDate() - 7);
+  const last = lastMonday.toISOString().slice(0, 10);
+  const [{ data: thisWeek }, { data: lastWeek }] = await Promise.all([
+    supabase.from("rota_weeks").select("id").eq("week_start", monday).maybeSingle(),
+    supabase.from("rota_weeks").select("id").eq("week_start", last).maybeSingle(),
+  ]);
+  if (!thisWeek || !lastWeek) redirect(`/rota?week=${monday}&done=copy-none`);
+  const cols = "id, assignment_date, slot_type_id, location_id, starts_at, person_id";
+  type Row = { id: number; assignment_date: string; slot_type_id: string; location_id: string | null; starts_at: string | null; person_id: string | null };
+  const [{ data: mine }, { data: theirs }] = await Promise.all([
+    supabase.from("rota_entries").select(cols).eq("week_id", thisWeek.id),
+    supabase.from("rota_entries").select(cols).eq("week_id", lastWeek.id).not("person_id", "is", null),
+  ]);
+  const day = (d: string) => (new Date(`${d}T12:00:00Z`).getUTCDay() + 6) % 7;
+  const key = (r: Row) => [day(r.assignment_date), r.slot_type_id, r.location_id ?? "", r.starts_at ?? ""].join("|");
+  const before = new Map<string, Row[]>();
+  for (const r of (theirs ?? []) as Row[]) before.set(key(r), [...(before.get(key(r)) ?? []), r]);
+  const empty = ((mine ?? []) as Row[]).filter((r) => !r.person_id);
+  if (((mine ?? []) as Row[]).some((r) => r.person_id)) redirect(`/rota?week=${monday}&done=copy-not-empty`);
+  let saved = 0;
+  let tried = 0;
+  for (const slot of empty) {
+    const match = before.get(key(slot))?.shift();
+    if (!match?.person_id) continue;
+    tried += 1;
+    const { error } = await supabase.rpc("assign_rota_person", { p_assignment_id: slot.id, p_person_id: match.person_id });
+    if (!error) saved += 1;
+  }
+  if (tried === 0) redirect(`/rota?week=${monday}&done=copy-none`);
+  redirect(`/rota?week=${monday}&done=copied&count=${saved}&failed=${tried - saved}`);
+}

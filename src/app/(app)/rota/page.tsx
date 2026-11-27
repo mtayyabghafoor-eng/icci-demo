@@ -8,7 +8,7 @@
 // listed one below the other. Super Admin and Centre Admin only.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CircleAlert, TriangleAlert } from "lucide-react";
+import { CircleAlert, Copy, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
 import { buttonClass, CannotSee, Card, EmptyState, LinkButton, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
@@ -21,7 +21,7 @@ import { adminNames } from "../stock/data";
 import { changesSentence, publishedAtText } from "@/lib/rota/publish";
 import { loadPlaces, loadPublishState, loadSlotTypes, loadWeek, peopleNames, type PublishState, type RotaEntry } from "./week-data";
 import { RotaNotes } from "./notes";
-import { startWeek } from "./week-actions";
+import { copyLastWeek, startWeek } from "./week-actions";
 
 export const metadata: Metadata = { title: "Rota week | ICCI Control Dashboard" };
 
@@ -34,6 +34,8 @@ const DONE: Record<string, { text: string; tone: "success" | "error" }> = {
   ended: { text: "That week has ended. Its rota can no longer be changed.", tone: "error" },
   "not-allowed": { text: "Your account is not allowed to do this.", tone: "error" },
   other: { text: "That could not be saved. Please try again.", tone: "error" },
+  "copy-none": { text: "Nothing to copy: last week had nobody on the same slots. Use a template, or put people on by hand.", tone: "error" },
+  "copy-not-empty": { text: "Someone is already on this week, so last week's people were not copied (names already given are never changed).", tone: "error" },
 };
 
 export default function RotaWeekPage(props: PageProps<"/rota">) {
@@ -77,6 +79,8 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
   const done =
     params.done === "assigned-more"
       ? assignedMoreNotice(added ?? 0, typeof params.failed === "string" && /^\d+$/.test(params.failed) ? Number(params.failed) : 0)
+      : params.done === "copied"
+      ? copiedNotice(added ?? 0, typeof params.failed === "string" && /^\d+$/.test(params.failed) ? Number(params.failed) : 0)
       : params.done === "template"
       ? { text: `Template used: ${added ?? "the"} empty ${added === 1 ? "slot" : "slots"} added. Click each slot to put a person on it.`, tone: "success" as const }
       : typeof params.done === "string"
@@ -105,6 +109,15 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
                 Use a template
               </LinkButton>
             )}
+            {/* D5 (owner, 27 Nov 2026): last week's people onto this week's empty slots. */}
+            {!ended && nobodyOn && loaded.entries.length > 0 && (
+              <form action={copyLastWeek.bind(null, monday)}>
+                <button type="submit" className={buttonClass("outline")}>
+                  <Copy aria-hidden size={18} />
+                  Copy last week&rsquo;s people
+                </button>
+              </form>
+            )}
             {!ended && (
               <LinkButton kind="outline" href={`/rota/add?week=${monday}`}>
                 Add a slot
@@ -131,6 +144,16 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
           This week
         </Link>
       )}
+      {/* D5: jump straight to a week ahead (Ramadan, Eid) instead of pressing Next ten times. */}
+      <form method="get" action="/rota" className="flex items-center gap-2">
+        <label htmlFor="go-to-date" className="text-sm font-semibold text-icci-ink-60">
+          Go to
+        </label>
+        <input id="go-to-date" type="date" name="week" defaultValue={monday} className="min-h-11 rounded-xl border border-icci-field bg-white px-3" />
+        <button type="submit" className={buttonClass("outline")}>
+          Show
+        </button>
+      </form>
       <Link className={nav} href={`/rota?week=${shiftWeek(monday, 1)}`}>
         Next week →
       </Link>
@@ -267,12 +290,29 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
         </table>
       </div>
 
+      {/* D5: phone day tabs, so today is one tap away instead of a long scroll. */}
+      <nav aria-label="Days of this week" className="sticky top-14 z-10 -mx-4 mb-3 flex gap-1.5 overflow-x-auto bg-icci-page/95 px-4 py-2 backdrop-blur md:hidden" data-testid="day-tabs">
+        {days.map((d) => (
+          <a
+            key={d}
+            href={`#day-${d}`}
+            className={cx(
+              "flex min-h-11 min-w-12 flex-col items-center justify-center rounded-xl border px-2.5 text-[13px] font-semibold leading-tight no-underline",
+              d === today ? "border-icci-green-dark bg-icci-green-dark text-white!" : "border-icci-line bg-white text-icci-green-dark!",
+            )}
+          >
+            {shortDayLabel(d)}
+          </a>
+        ))}
+      </nav>
+
       {/* Phone: the days one below the other. */}
       <div className="space-y-4 md:hidden" data-testid="week-list">
         {days.map((d) => {
           const ofDay = entries.filter((e) => e.assignment_date === d);
           return (
-            <Card key={d} padded={false} className="p-4">
+            <Card key={d} padded={false} className="scroll-mt-32 p-4">
+              <span id={`day-${d}`} className="block scroll-mt-32" />
               <h2 className="text-lg font-bold text-icci-green-dark">
                 {fullDayLabel(d)}
                 {d === today && <span className="ml-2 text-xs font-bold uppercase text-icci-green">Today</span>}
@@ -301,6 +341,12 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
 }
 
 /** A7: after "Also put this person on" other days. */
+function copiedNotice(saved: number, failed: number): { text: string; tone: "success" | "error" } {
+  const slots = (n: number) => `${n} ${n === 1 ? "slot" : "slots"}`;
+  if (failed === 0) return { text: `Last week's people copied onto ${slots(saved)}. Check the warnings, then publish.`, tone: "success" };
+  return { text: `Copied onto ${slots(saved)}; ${failed} could not be saved. Check those slots.`, tone: "error" };
+}
+
 function assignedMoreNotice(saved: number, failed: number): { text: string; tone: "success" | "error" } {
   const days = (n: number) => `${n} more ${n === 1 ? "day" : "days"}`;
   if (failed === 0) return { text: `Saved. The person is on ${days(saved)} too.`, tone: "success" };
@@ -329,7 +375,14 @@ function SlotCard({ e, ctx, compact = false }: { e: RotaEntry; ctx: Ctx; compact
       aria-label={`${type?.name ?? "Slot"} on ${fullDayLabel(e.assignment_date)}: ${person ?? "not filled yet"}${changed ? ", changed since publishing" : ""}${ws.length ? `, ${ws.length} ${ws.length === 1 ? "warning" : "warnings"}` : ""}`}
       className={cx(
         "block rounded-lg border px-2 py-1.5 text-sm text-icci-text no-underline transition-colors hover:border-icci-green hover:bg-icci-green-50",
-        worst === "red" ? "border-icci-error/60 bg-[var(--icci-bad-fill)]" : worst === "amber" ? "border-[var(--icci-warn-text)]/40 bg-[var(--icci-warn-fill)]" : "border-icci-line bg-white",
+        worst === "red"
+          ? "border-icci-error/60 bg-[var(--icci-bad-fill)]"
+          : worst === "amber"
+            ? "border-[var(--icci-warn-text)]/40 bg-[var(--icci-warn-fill)]"
+            : person
+              ? "border-icci-line bg-white"
+              : // D5: an empty slot looks empty, not like a filled one.
+                "border-dashed border-icci-field/70 bg-transparent",
       )}
     >
       {changed && (
@@ -338,7 +391,7 @@ function SlotCard({ e, ctx, compact = false }: { e: RotaEntry; ctx: Ctx; compact
         </span>
       )}
       {!compact && <span className="block font-semibold text-icci-green-dark">{type?.name}</span>}
-      <span className={cx("block font-semibold", !person && "text-[var(--icci-warn-text)]")} dir="auto" data-testid="slot-person">
+      <span className={cx("block font-semibold", !person && "font-medium text-icci-ink-60")} dir="auto" data-testid="slot-person">
         {person ?? "Not filled yet"}
       </span>
       <span className="block text-[13px] text-icci-ink-60">{timeText(e.slot_group, e.starts_at, e.ends_at)}</span>
