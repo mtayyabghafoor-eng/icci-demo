@@ -1,7 +1,10 @@
-// Who is signed in, and Sign out (bottom of the sidebar and the phone menu).
-import { LogOut } from "lucide-react";
+// Who is signed in, Help and Sign out (bottom of the sidebar and the phone menu).
+import { CircleHelp, LogOut } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import { cx } from "@/lib/ui/text";
+
+/** The user guide, served from public/help/ (behind the sign-in, like every page). */
+export const HELP_GUIDE = "/help/ICCI-User-Guide.pdf";
 
 export function AccountBlock({
   name,
@@ -32,6 +35,21 @@ export function AccountBlock({
           </span>
         </p>
       </div>
+      {/* E10: the user guide (a PDF, opened in a new tab; only for signed-in admins). */}
+      <a
+        href={HELP_GUIDE}
+        target="_blank"
+        rel="noopener"
+        title={compact ? "Help: the user guide" : undefined}
+        data-testid={testIds ? "help-link" : undefined}
+        className={cx(
+          "flex min-h-11 items-center gap-2 rounded-xl px-3 text-[15px] font-semibold text-white/90! no-underline transition-colors duration-150 hover:bg-white/8 hover:text-white!",
+          compact ? "justify-center lg:justify-start group-data-[open=true]/rail:justify-start" : "justify-start",
+        )}
+      >
+        <CircleHelp aria-hidden size={18} />
+        <span className={word}>Help: the user guide</span>
+      </a>
       <form action={signOut}>
         <button
           type="submit"
