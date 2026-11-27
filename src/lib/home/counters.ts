@@ -287,11 +287,23 @@ export function splitCards(cards: CounterCard[]): { attention: CounterCard[]; cl
  */
 export const APPROVAL_IDS = ["corrections-for-me", "disposals-for-me", "stocktake-for-me", "expenses-for-me"];
 
-/** The sentence under the greeting. D1: "2 urgent, 5 to do." */
-export function attentionSentence(urgent: number, toDo = 0): string {
-  if (urgent + toDo === 0) return "Nothing needs attention. Everything is clear.";
-  if (urgent === 0) return toDo === 1 ? "1 thing to do, nothing urgent." : `${toDo} things to do, nothing urgent.`;
-  return toDo === 0 ? `${urgent} urgent.` : `${urgent} urgent, ${toDo} to do.`;
+/**
+ * E1 (owner, 27 Nov 2026: "a lot of bombardment of information"): Home
+ * shows only the red counters in full ("Urgent"). Everything else (jobs and
+ * backlogs, then the all-clear ones) goes to a quiet row of small numbers,
+ * never red or amber. The approval queues stay in their own box.
+ */
+export function homeSections(cards: CounterCard[]): { urgent: CounterCard[]; quiet: CounterCard[] } {
+  const { attention, clear } = splitCards(cards.filter((c) => !APPROVAL_IDS.includes(c.id)));
+  const place = (id: string) => (ATTENTION_ORDER.includes(id) ? ATTENTION_ORDER.indexOf(id) : ATTENTION_ORDER.length);
+  const calm = [...clear].sort((a, b) => place(a.id) - place(b.id));
+  return { urgent: attention.filter((c) => c.tone === "red"), quiet: [...attention.filter((c) => c.tone !== "red"), ...calm] };
+}
+
+/** E1: the sentence under the greeting names only what is urgent. */
+export function urgentSentence(urgent: number): string {
+  if (urgent === 0) return "Nothing is urgent today.";
+  return urgent === 1 ? "1 thing is urgent today." : `${urgent} things are urgent today.`;
 }
 
 /** "Good morning" by the clock in Dublin, whatever the computer's own clock zone. */

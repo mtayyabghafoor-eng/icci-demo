@@ -43,8 +43,19 @@ export function shot(page: Page, name: string, project: string, slice = "03") {
     maskColor: "#1F2A27",
     // Do not let the screenshot tool restyle the text cursor (React notices the change).
     caret: "initial",
+    // E1: on a whole-page picture the PC menu used to stop halfway down and
+    // the phone's bottom bar floated mid-page, which made working screens
+    // look broken. For the picture only, the menu runs the full height and
+    // the bottom bar sits at the very end of the page.
+    style: SHOT_STYLE,
   }));
 }
+
+export const SHOT_STYLE = `
+  body { position: relative !important; height: auto !important; min-height: 100% !important; }
+  [data-testid="sidebar"] { position: absolute !important; top: 0 !important; bottom: 0 !important; height: auto !important; }
+  [data-testid="bottom-bar"] { position: absolute !important; bottom: 0 !important; }
+`;
 
 export async function enterPassword(page: Page, email: string, password = PASSWORD()) {
   await page.getByLabel("Email address").fill(email);

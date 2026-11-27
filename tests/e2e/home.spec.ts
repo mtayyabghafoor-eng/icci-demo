@@ -35,29 +35,47 @@ test("home page counters match their lists and open them", async ({ page }, info
   }
   await s(page, "home-counters", info.project.name);
 
-  // UI-4: a greeting with the admin's name, one plain sentence, quick actions.
+  // UI-4: a greeting with the admin's name and one plain sentence.
   await expect(page.getByTestId("greeting")).toContainText(centre.displayName);
   await expect(page.getByTestId("greeting")).toContainText(/Good (morning|afternoon|evening)/);
-  const attentionCards = page.getByRole("region", { name: "Needs attention" }).getByRole("link");
-  // D1: "2 urgent, 5 to do."
-  const tones = await attentionCards.evaluateAll((els) => els.map((e) => e.getAttribute("data-tone")));
-  const urgent = tones.filter((t) => t === "red").length;
-  const toDo = tones.length - urgent;
+  // E1: only red things are urgent, each said in words too, not by colour alone.
+  const urgentRegion = page.getByRole("region", { name: "Urgent" });
+  const urgentRows = urgentRegion.locator("[data-tone]");
+  const tones = await urgentRows.evaluateAll((els) => els.map((e) => e.getAttribute("data-tone")));
+  expect(tones.every((t) => t === "red")).toBe(true);
+  const urgent = tones.length;
   await expect(page.getByTestId("attention-line")).toHaveText(
-    urgent + toDo === 0
-      ? "Nothing needs attention. Everything is clear."
-      : urgent === 0
-        ? `${toDo} ${toDo === 1 ? "thing" : "things"} to do, nothing urgent.`
-        : toDo === 0
-          ? `${urgent} urgent.`
-          : `${urgent} urgent, ${toDo} to do.`,
+    urgent === 0 ? "Nothing is urgent today." : `${urgent} ${urgent === 1 ? "thing is" : "things are"} urgent today.`,
   );
-  // Every line in "Needs attention" says so in words, not colour alone.
-  for (const card of await attentionCards.all()) await expect(card).toContainText(/Urgent|To do/);
-  // UI-9: four headline numbers at the top; four big actions, the rest behind "More actions".
-  // D1: plain facts in a slim strip (nothing the list also counts), and the approvals box.
-  for (const id of ["items", "people", "books", "approvals"]) await expect(page.getByTestId(`headline-${id}`)).toBeVisible();
+  for (const row of await urgentRows.all()) await expect(row).toContainText(/urgent/i);
+
+  // E1 (owner, 27 Nov 2026): backlogs and plain totals sit in a quiet row, never red or amber.
+  const quiet = page.getByRole("region", { name: "Everything else" });
+  for (const id of ["counter-low-stock", "counter-missing-damaged", "headline-items", "headline-people", "headline-books"]) {
+    await expect(quiet.getByTestId(id)).toBeVisible();
+  }
+  const alarm = ["rgb(179, 38, 30)", "rgb(138, 90, 0)", "rgb(251, 231, 229)", "rgb(251, 241, 220)"];
+  const colours = await quiet.locator("a, a *").evaluateAll((els) =>
+    els.flatMap((e) => [getComputedStyle(e).color, getComputedStyle(e).backgroundColor]),
+  );
+  expect(colours.filter((c) => alarm.includes(c))).toEqual([]);
+  await expect(quiet.locator("[data-tone]")).toHaveCount(0);
+
+  // E1: nothing is counted twice anywhere on Home.
+  const ids = await page.locator('[data-testid^="counter-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
+  expect(new Set(ids).size).toBe(ids.length);
+  await expect(page.getByTestId("headline-approvals")).toBeVisible();
   await expect(page.getByTestId("headline-low-stock")).toHaveCount(0);
+
+  // E1 (owner): on a phone, Urgent comes before Quick actions, which come before the approvals.
+  const top = async (name: string) => (await page.getByRole("region", { name, exact: true }).boundingBox())!.y;
+  // On a PC they sit side by side (Urgent on the left), so level is fine there.
+  if (info.project.name === "phone") {
+    expect(await top("Urgent")).toBeLessThan(await top("Quick actions"));
+    expect(await top("Quick actions")).toBeLessThan(await top("For you to approve"));
+  } else {
+    expect(await top("Urgent")).toBeLessThanOrEqual(await top("Quick actions"));
+  }
   for (const action of ["Register an item", "Register a room", "Report a problem", "Move or report an asset"]) {
     await expect(page.getByRole("link", { name: new RegExp(`^${action}`) }).last()).toBeVisible();
   }

@@ -1,7 +1,7 @@
 // Slice 9: the words and colours on the home page counter cards.
 // The numbers themselves come from the database (tests/db/home-counters.test.ts).
 import { describe, expect, it } from "vitest";
-import { approvalsTotal, attentionSentence, counterCards, greeting, longDate, lowStockDetail, MAY_SEE_COUNTERS, splitCards, type HomeCounters } from "@/lib/home/counters";
+import { APPROVAL_IDS, approvalsTotal, counterCards, homeSections, urgentSentence, greeting, longDate, lowStockDetail, MAY_SEE_COUNTERS, splitCards, type HomeCounters } from "@/lib/home/counters";
 
 const zero: HomeCounters = {
   low_stock: 0,
@@ -152,12 +152,26 @@ describe("home page layout (UI-4)", () => {
     expect(clear).toHaveLength(10);
   });
 
-  it("says how many things need attention in plain words", () => {
-    expect(attentionSentence(0, 0)).toBe("Nothing needs attention. Everything is clear.");
-    expect(attentionSentence(0, 1)).toBe("1 thing to do, nothing urgent.");
-    expect(attentionSentence(0, 4)).toBe("4 things to do, nothing urgent.");
-    expect(attentionSentence(2, 0)).toBe("2 urgent.");
-    expect(attentionSentence(2, 5)).toBe("2 urgent, 5 to do.");
+  it("E1: says only how many things are urgent today", () => {
+    expect(urgentSentence(0)).toBe("Nothing is urgent today.");
+    expect(urgentSentence(1)).toBe("1 thing is urgent today.");
+    expect(urgentSentence(3)).toBe("3 things are urgent today.");
+  });
+
+  it("E1: only red counters are urgent; the rest go to the quiet row, jobs before all-clear, approvals never", () => {
+    const some = { ...zero, vetting_none: 1, renewals_due_30: 2, low_stock: 4, damaged: 1, corrections_for_me: 3, tickets_open: 2, tickets_urgent: 1 };
+    const { urgent, quiet } = homeSections(counterCards(some));
+    expect(urgent.map((c) => c.id)).toEqual(["vetting", "tickets"]);
+    expect(urgent.every((c) => c.tone === "red")).toBe(true);
+    // Amber jobs first (A5 order), then the all-clear ones (A5 order); no approval queue.
+    expect(quiet.map((c) => c.id)).toEqual(["renewals", "low-stock", "missing-damaged", "signoffs", "rota-today"]);
+    expect(quiet.some((c) => APPROVAL_IDS.includes(c.id))).toBe(false);
+  });
+
+  it("E1: nothing urgent when no counter is red", () => {
+    const { urgent, quiet } = homeSections(counterCards({ ...zero, low_stock: 9, missing: 3 }));
+    expect(urgent).toEqual([]);
+    expect(quiet.slice(0, 2).map((c) => c.id)).toEqual(["low-stock", "missing-damaged"]);
   });
 
   it("greets by the Dublin clock, summer time included", () => {

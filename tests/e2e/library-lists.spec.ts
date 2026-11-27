@@ -106,6 +106,11 @@ test("the lists, the Home card, and no download for the Library Operator", async
   await expect(card).toBeVisible();
   await expect(card).toContainText("Library books overdue");
   await expect(page.getByTestId("counter-low-stock")).toHaveCount(0);
+  // E1: the volunteer's two jobs come first, above the overdue card.
+  const lend = page.getByRole("main").getByRole("link", { name: /^Lend a book/ });
+  await expect(lend).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: /^Return a book/ })).toBeVisible();
+  expect((await lend.boundingBox())!.y).toBeLessThan((await card.boundingBox())!.y);
   await shot(page, "operator-home", project, SLICE);
 
   // Overdue: most overdue first, with the contact to phone.

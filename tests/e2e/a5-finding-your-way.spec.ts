@@ -26,7 +26,8 @@ async function signInAs(page: Page, path: string) {
 
 test("Home: red before amber, people and safety first, each line opens its filtered list", async ({ page }, info) => {
   await signInAs(page, "/");
-  const rows = page.getByRole("region", { name: "Needs attention" }).locator("[data-tone]");
+  // E1: the Urgent list keeps A5's order (people and safety first).
+  const rows = page.getByRole("region", { name: "Urgent" }).locator("[data-tone]");
   await expect(rows.first()).toBeVisible();
   const seen = await rows.evaluateAll((els) => els.map((e) => ({ id: e.getAttribute("data-testid")!.replace(/^counter-/, ""), tone: e.getAttribute("data-tone")! })));
   const key = (r: { id: string; tone: string }) => (r.tone === "red" ? 0 : 1) * 100 + ATTENTION_ORDER.indexOf(r.id);

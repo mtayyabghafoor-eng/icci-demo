@@ -59,7 +59,10 @@ audit log screens (owner chose option A; migration 0058). 0055 to 0058 are
 on ICCI Staging and main is pushed (26 Nov 2026). Round D (design and
 ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built and pushed;
 0059 is on ICCI Staging (27 Nov 2026). D8 (flip-book zoom and one search
-box for everything) is built, not pushed; no database change. The online accounts
+box for everything) is built, not pushed; no database change. Round E
+(docs/ROUND-E-PLAN.md, owner approved 27 Nov 2026): E1 (calm Home on PC
+and phone, honest whole-page screenshots) is built, not pushed; no
+database change. Next: E2 (list filters). The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -72,6 +75,18 @@ Not yet checked in real life (Phase 1): a real label printer, a real phone
 camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
+
+- Round E (27 Nov 2026, docs/ROUND-E-PLAN.md): one plan merging the
+  Gemini code audit, the Impeccable design review (26/40) and the "D9 phone
+  polish" plan, in ten slices E1 to E10. Owner chose every recommended
+  answer: phone Home is Urgent, Quick actions, approvals, Everything else;
+  phone lists fold filters whenever there are two or more drop-downs
+  (replaces rule A2); a Save bar on every form that records or edits;
+  tab titles show codes only (people pages stay "Person"); a Help link to
+  the user guide; the weekly count keeps last week's number for now.
+  E1 (owner: "a lot of bombardment of information"): backlogs and the
+  plain totals go to a quiet "Everything else" row, never red or amber;
+  only red counters show in full, as "Urgent".
 
 - D8 (27 Nov 2026, owner: "I can't read the flip book, there is no zoom";
   "people don't want to search for labels, more for items, names,
@@ -507,6 +522,15 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 27 Nov 2026, session 50. Owner approved docs/ROUND-E-PLAN.md ("All
+  recommended, go E1"). E1 built: calm Home. Only red items sit under
+  "Urgent"; backlogs and totals are quiet white tiles under "Everything
+  else"; Quick actions and the approvals card sit on the right on a PC,
+  after Urgent on a phone. Library desk leads with Lend and Return.
+  Screenshots now pin the sidebar and bottom bar. No database change.
+  Full suite after db:reset: unit 2094 passed, browser 411 passed
+  (15 skipped), build passed. Not pushed.
 
 - 27 Nov 2026, session 49 (continued). Owner said yes: 0059 put on ICCI
   Staging, main pushed (2f35b08d). Owner then asked for D8: flip-book zoom
