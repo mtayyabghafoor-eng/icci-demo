@@ -44,6 +44,9 @@ import {
 import { Suspense } from "react";
 import { ActionTile, ApprovalsBox, AttentionRow, Card, CardTitle, ClearChip, CounterCard, GlanceStrip, HeadlineCard, Notice, QuickAction, Skeleton } from "@/components/ui";
 import { requireAdmin, type CurrentAdmin } from "@/lib/auth/current-admin";
+import { GlobalSearch } from "@/components/shell/global-search";
+import { maySearch } from "@/lib/search/everything";
+import { searchHint } from "@/lib/search/hint";
 import { ExpenseLinkNote } from "./expenses/link-note";
 import {
   APPROVAL_IDS,
@@ -421,6 +424,7 @@ function CardGrid({ cards, quiet = false }: { cards: Counter[]; quiet?: boolean 
 /** The greeting band over the Centre photograph. */
 function Greeting({ me, line }: { me: CurrentAdmin; line: string }) {
   return (
+    <>
     <section className="relative isolate overflow-hidden rounded-3xl shadow-card" data-testid="greeting">
       <Image
         src="/brand/centre-front-1800.webp"
@@ -441,5 +445,12 @@ function Greeting({ me, line }: { me: CurrentAdmin; line: string }) {
         </p>
       </div>
     </section>
+    {/* D8: on a phone, the search box sits right under the greeting. */}
+    {maySearch(me.roleCode) && (
+      <div className="md:hidden" data-testid="home-search">
+        <GlobalSearch placeholder={searchHint(me.roleCode)} big />
+      </div>
+    )}
+    </>
   );
 }

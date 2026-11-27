@@ -57,8 +57,9 @@ are on ICCI Staging, main is pushed and the demo has 60 made-up claims
 and C1 are done (26 Nov 2026, migrations 0055 to 0057), and so is C5, the accounts and
 audit log screens (owner chose option A; migration 0058). 0055 to 0058 are
 on ICCI Staging and main is pushed (26 Nov 2026). Round D (design and
-ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built (27 Nov
-2026, migration 0059, committed, not pushed). The online accounts
+ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built and pushed;
+0059 is on ICCI Staging (27 Nov 2026). D8 (flip-book zoom and one search
+box for everything) is built, not pushed; no database change. The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -71,6 +72,18 @@ Not yet checked in real life (Phase 1): a real label printer, a real phone
 camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
+
+- D8 (27 Nov 2026, owner: "I can't read the flip book, there is no zoom";
+  "people don't want to search for labels, more for items, names,
+  policies, books"). Flip book: zoom to 400% with buttons, keys, pinch,
+  double-tap and Ctrl + wheel; drag to move; pages redrawn sharper; a
+  phone shows one page as wide as the screen. Search (not in PLAN.md;
+  owner chose "one box, live"): one box in the top bar (PC and tablet),
+  a search button on the phone's top bar and a big box under the phone's
+  Home greeting; a short list grouped by kind as you type; Enter opens a
+  results page; a label number or place code still opens at once. Each
+  role finds only the kinds its menu shows (Finance: no box; Library
+  Operator: books only), and the database's own rules apply on top.
 
 - Round D (27 Nov 2026, owner chose every recommended answer in
   docs/UI-REVIEW-2026-11-27.md): Home is calmer (red only for safety and
@@ -494,6 +507,14 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 27 Nov 2026, session 49 (continued). Owner said yes: 0059 put on ICCI
+  Staging, main pushed (2f35b08d). Owner then asked for D8: flip-book zoom
+  (buttons, pinch, double-tap, keys, drag, sharper redraw, full-width phone
+  page) and one search box for items, people, policies, books, companies,
+  places and vehicles (src/lib/search, /search page, /search/suggest).
+  Tests: tests/e2e/search.spec.ts (including signed-out, Finance and the
+  Library Operator) and zoom tests in policy-book.spec.ts.
 
 - 27 Nov 2026, session 49 (planning only, no code changed; owner asked
   for design, ease-of-use and access improvements after three Gemini UI

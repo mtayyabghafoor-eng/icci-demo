@@ -234,7 +234,7 @@ export function mayScan(roleCode: string): boolean {
 }
 
 /** Pages that are not in the menu but still need a name in the top bar. */
-const OTHER_PAGES: Record<string, string> = { "/scan": "Open a label", "/style": "Style sample" };
+const OTHER_PAGES: Record<string, string> = { "/scan": "Open a label", "/style": "Style sample", "/search": "Search" };
 
 /**
  * What the top bar calls this page: "Items and stock › Stock". A5: with a

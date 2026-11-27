@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
 import { ListMemory } from "@/components/ui/back-link";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { mayScan } from "@/lib/ui/menu";
+import { maySearch } from "@/lib/search/everything";
 import { signOut } from "../sign-in/actions";
 import { IdleWatcher } from "./idle-watcher";
 
@@ -24,8 +24,8 @@ export default function SignedInLayout({ children }: LayoutProps<"/">) {
 async function SignedInShell({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
   const out = signOut.bind(null, "signed-out");
-  // A5: the Library Operator opens book labels with the box too.
-  const canOpenLabels = mayScan(admin.roleCode);
+  // D8: one search box; the Library Operator searches books (and opens labels) with it.
+  const canSearch = maySearch(admin.roleCode);
   const account = (testIds: boolean, compact: boolean) => (
     <AccountBlock name={admin.displayName} role={admin.roleLabel} signOut={out} compact={compact} testIds={testIds} />
   );
@@ -39,7 +39,7 @@ async function SignedInShell({ children }: { children: React.ReactNode }) {
         Skip to the page
       </a>
       <Sidebar roleCode={admin.roleCode} account={account(true, true)} />
-      <TopBar canOpenLabels={canOpenLabels} roleCode={admin.roleCode} />
+      <TopBar canSearch={canSearch} roleCode={admin.roleCode} />
       {/* Room at the bottom on a phone so the bottom bar never covers a button. */}
       <div id="content" tabIndex={-1} className="flex flex-1 flex-col pb-24 outline-none md:pb-0 print:pb-0">
         {children}

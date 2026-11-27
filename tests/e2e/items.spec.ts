@@ -117,8 +117,8 @@ test("scan a new label, register, open, edit and see the history", async ({ page
   // A typed number that was never printed.
   // D1: on a PC the top bar's label box is the only one; on a phone the page has its own.
   if (project === "desktop") {
-    await page.getByRole("textbox", { name: "Open a label by its number" }).fill("ICCI-999999");
-    await page.getByRole("button", { name: "Go to this label" }).click();
+    await page.getByTestId("search-box").fill("ICCI-999999");
+    await page.getByTestId("search-box").press("Enter");
   } else {
     await page.getByPlaceholder("Label number, e.g. ICCI-000123").fill("ICCI-999999");
     await page.getByRole("button", { name: "Open label" }).click();

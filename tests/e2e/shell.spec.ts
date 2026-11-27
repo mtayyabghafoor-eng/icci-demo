@@ -94,11 +94,11 @@ test("Scan opens the label page; an unknown number is explained", async ({ page 
   await s(page, "scan", info.project.name);
 
   if (info.project.name === "desktop") {
-    // The top bar box opens a label from any page.
+    // The top bar's search box opens a label from any page (D8).
     await page.goto("/people");
-    const box = page.getByRole("search", { name: "Open a label" });
-    await box.getByLabel("Open a label by its number").fill("ICCI-999999");
-    await box.getByRole("button", { name: "Go to this label" }).click();
+    const box = page.getByRole("search", { name: "Search the dashboard" });
+    await box.getByRole("combobox").fill("ICCI-999999");
+    await box.getByRole("combobox").press("Enter");
     await expect(page.getByRole("heading", { level: 1, name: "Label not recognised" })).toBeVisible();
   }
 });

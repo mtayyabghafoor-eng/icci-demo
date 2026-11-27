@@ -65,6 +65,7 @@ test("Back returns to the list you came from, with its filter, and names it", as
   await page.goto("/");
   await page.goto("/people");
   await page.goto("/");
+  await expect(page.getByTestId("greeting")).toBeVisible(); // Home has had its moment to forget
   const { data } = await master().from("people").select("id").eq("active", true).limit(1).single();
   await page.goto(`/people/${data!.id}`);
   await expect(page.getByTestId("back-button")).toHaveAttribute("href", "/people");
@@ -74,8 +75,9 @@ test("the Open label box opens a room by its code; the menu has the two new line
   test.skip(isPhone(page), "The Open label box and the sidebar are on a PC and tablet only.");
   const { data: room } = await master().from("locations").select("id, code").eq("name", "Test Room A1").single();
   await signInAs(page, "/");
-  await page.getByRole("textbox", { name: "Open a label by its number" }).fill(placeCode(room!.code));
-  await page.getByRole("button", { name: "Go to this label" }).click();
+  // D8: the one search box still opens a typed place code straight away.
+  await page.getByTestId("search-box").fill(placeCode(room!.code));
+  await page.getByTestId("search-box").press("Enter");
   await expect(page).toHaveURL(new RegExp(`/places/${room!.id}$`));
 
   const menu = await mainMenu(page);

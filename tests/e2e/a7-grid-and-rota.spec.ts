@@ -62,7 +62,7 @@ test("a grid square opens Record sign-off with that person ticked; Save comes ba
   await row.getByTestId("grid-square-link").first().click();
   await expect(page).toHaveURL(new RegExp(`/sign-off\\?person=${person}&grid=status%3Dattention$`));
   await expect(page.getByRole("checkbox", { name })).toBeChecked();
-  await expect(page.getByTestId("back-button")).toHaveAttribute("href", "/policies/grid?status=attention");
+  await expect(page.getByTestId("back-button").filter({ visible: true })).toHaveAttribute("href", "/policies/grid?status=attention");
   await page.getByLabel("Date signed").fill(todayInDublin());
   await s(page, "signoff-ticked", project);
   await page.getByRole("button", { name: "Save" }).click();

@@ -1,18 +1,21 @@
 "use client";
 // The slim bar above every signed-in page (docs/UI-PLAN.md 4.1 and 4.3).
-// PC and tablet: where you are, and a box to open a label by its number.
-// Phone: the small logo and the page name. D1: Sign out lives in the Menu
-// only, so a slip of the thumb never ends the session.
+// PC and tablet: where you are, and (D8) one search box for everything,
+// which also opens a typed label number.
+// Phone: the small logo, the page name and a search button. D1: Sign out
+// lives in the Menu only, so a slip of the thumb never ends the session.
 // UI-9: inner pages put a "← Back" button in the slot before the page name
 // (BackLink); on a phone it takes the place of the logo.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ChevronRight, Search } from "lucide-react";
 import { Logo } from "@/components/ui";
 import { BACK_SLOT_ID } from "@/components/ui/back-link";
+import { searchHint } from "@/lib/search/hint";
 import { whereAmI } from "@/lib/ui/menu";
+import { GlobalSearch } from "./global-search";
 
-export function TopBar({ canOpenLabels, roleCode }: { canOpenLabels: boolean; roleCode: string }) {
+export function TopBar({ canSearch, roleCode }: { canSearch: boolean; roleCode: string }) {
   const here = whereAmI(usePathname(), roleCode);
   return (
     <header className="sticky top-0 z-20 border-b border-icci-line bg-white/92 backdrop-blur print:hidden">
@@ -31,28 +34,21 @@ export function TopBar({ canOpenLabels, roleCode }: { canOpenLabels: boolean; ro
           <span className="font-semibold text-icci-green-dark">{here?.page ?? "ICCI Control Dashboard"}</span>
         </p>
 
-        {canOpenLabels && (
-          <form action="/l" method="get" role="search" aria-label="Open a label" className="hidden items-center md:flex">
-            <label htmlFor="top-label-number" className="sr-only">
-              Open a label by its number
-            </label>
-            <input
-              id="top-label-number"
-              name="number"
-              required
-              placeholder="Label: 123 or ICCI-000123"
-              className="h-10 w-56 rounded-l-xl border border-r-0 border-icci-field bg-white px-3 font-mono text-sm placeholder:font-sans placeholder:text-icci-ink-60/70 focus:border-icci-green"
-            />
-            <button
-              type="submit"
-              aria-label="Go to this label"
-              className="flex h-10 w-11 items-center justify-center rounded-r-xl bg-icci-green-dark text-white hover:bg-icci-green-900"
+        {canSearch && (
+          <>
+            <div className="hidden md:block">
+              <GlobalSearch placeholder={searchHint(roleCode)} slashKey />
+            </div>
+            {/* Phone: the search page, one tap away. */}
+            <Link
+              href="/search"
+              aria-label="Search"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-icci-green-dark hover:bg-icci-green-50 md:hidden"
             >
-              <ArrowRight aria-hidden size={18} />
-            </button>
-          </form>
+              <Search aria-hidden size={22} />
+            </Link>
+          </>
         )}
-
       </div>
     </header>
   );
