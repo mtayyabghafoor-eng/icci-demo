@@ -8,7 +8,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { BackLink, buttonClass, CannotSee, ConfirmSubmit, PageNotice, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, ConfirmSubmit, LinkButton, PageNotice, SecondaryLink, Skeleton, StatusBadge } from "@/components/ui";
+import { BookOpen } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { formatDate, formatDateTime } from "@/lib/items/rules";
 import {
@@ -202,8 +203,20 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
                   {v.published_at ? ` Published by ${adminName(v.published_by)}, ${formatDateTime(v.published_at)}.` : ""}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {/* D7: read it as a book, in English and (if there is one) in Arabic. */}
+                  <LinkButton href={`/policies/${p.id}/versions/${v.id}/book`} kind={v.status === "draft" ? "outline" : "primary"} icon={BookOpen}>
+                    Read as a book
+                  </LinkButton>
+                  {v.file_path_ar && (
+                    <LinkButton href={`/policies/${p.id}/versions/${v.id}/book?lang=ar`} kind="outline" icon={BookOpen}>
+                      <span lang="ar" dir="rtl">
+                        اقرأ بالعربية
+                      </span>
+                      <span className="sr-only">(Read in Arabic)</span>
+                    </LinkButton>
+                  )}
                   {pdfLink.get(v.file_path) && (
-                    <a href={pdfLink.get(v.file_path) ?? undefined} target="_blank" rel="noopener noreferrer" className={buttonClass("outline")}>
+                    <a href={pdfLink.get(v.file_path) ?? undefined} target="_blank" rel="noopener noreferrer" className={buttonClass("ghost")}>
                       Open PDF
                     </a>
                   )}

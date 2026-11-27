@@ -567,12 +567,17 @@ if (!stocktakeCount) {
         const path = `policies/${policy.id}/${crypto.randomUUID()}.pdf`;
         const up = await uploader.storage.from("policy-files").upload(path, samplePolicyPdf(p.title, v.label), { contentType: "application/pdf" });
         if (up.error) throw up.error;
+        // D7: every made-up version also has its placeholder Arabic edition.
+        const pathAr = `policies/${policy.id}/${crypto.randomUUID()}.pdf`;
+        const upAr = await uploader.storage.from("policy-files").upload(pathAr, samplePolicyPdf(p.title, v.label, true), { contentType: "application/pdf" });
+        if (upAr.error) throw upAr.error;
         const { data: version, error: vError } = await uploader
           .from("policy_versions")
           .insert({
             policy_id: policy.id,
             version_label: v.label,
             file_path: path,
+            file_path_ar: pathAr,
             approved_on: addDays(today, -v.ago),
             next_review_on: addDays(today, v.reviewIn),
           })

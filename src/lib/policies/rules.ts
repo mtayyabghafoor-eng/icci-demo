@@ -56,6 +56,8 @@ export type PolicyVersion = {
   policy_id: string;
   version_label: string;
   file_path: string;
+  /** D7: the Arabic PDF, if there is one. */
+  file_path_ar: string | null;
   approved_on: string;
   next_review_on: string;
   status: "draft" | "published";
@@ -66,7 +68,7 @@ export type PolicyVersion = {
   updated_by: string | null;
 };
 export const POLICY_VERSION_COLUMNS =
-  "id, policy_id, version_label, file_path, approved_on, next_review_on, status, published_by, published_at, created_by, created_at, updated_by";
+  "id, policy_id, version_label, file_path, file_path_ar, approved_on, next_review_on, status, published_by, published_at, created_by, created_at, updated_by";
 
 /** The words for a version: the current one, a draft, or an older one that was replaced. */
 export function versionStatus(v: Pick<PolicyVersion, "id" | "status">, currentId: string | null): { word: string; tone: Tone } {
@@ -137,12 +139,13 @@ export function parseVersionForm(get: Get, today: string): Result<VersionValues>
 }
 
 /** The PDF sent with a form: null if none, a sentence if it is not acceptable. */
-export async function pdfFrom(form: FormData): Promise<File | null | string> {
-  const f = form.get("pdf");
+export async function pdfFrom(form: FormData, field: "pdf" | "pdf_ar" = "pdf"): Promise<File | null | string> {
+  const f = form.get(field);
+  const which = field === "pdf_ar" ? "The Arabic PDF" : "The PDF";
   if (!(f instanceof File) || f.size === 0) return null;
-  if (f.size > MAX_PDF_BYTES) return "The PDF is too large (over 10 MB).";
+  if (f.size > MAX_PDF_BYTES) return `${which} is too large (over 10 MB).`;
   const start = new Uint8Array(await f.slice(0, 5).arrayBuffer());
-  if (f.type !== "application/pdf" || new TextDecoder().decode(start) !== "%PDF-") return "The file must be a PDF.";
+  if (f.type !== "application/pdf" || new TextDecoder().decode(start) !== "%PDF-") return field === "pdf_ar" ? "The Arabic file must be a PDF." : "The file must be a PDF.";
   return f;
 }
 

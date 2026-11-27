@@ -503,8 +503,53 @@ export const SEED_POLICIES: SeedPolicy[] = [
 ];
 
 /** A one-page PDF that says it is a made-up sample (plain text, no real content). */
-export function samplePolicyPdf(title: string, version: string): Uint8Array {
-  return samplePdf([`${title} (${version})`, "SAMPLE - fictional document for testing only.", "Not a real ICCI policy."]);
+export function samplePolicyPdf(title: string, version: string, arabic = false): Uint8Array {
+  // D7: six made-up pages, so the flip book has pages to turn. The "Arabic
+  // edition" is placeholder text in English letters (no Arabic font is
+  // bundled for made-up files); its pages are read right to left.
+  const edition = arabic ? "Arabic edition (placeholder text)" : "English edition";
+  const topics = ["Purpose", "Who this applies to", "What we expect", "Reporting a concern", "Records we keep", "Review and sign-off"];
+  return samplePdfPages(
+    topics.map((topic, i) => [
+      `${title} (${version})`,
+      `${edition} - page ${i + 1} of ${topics.length}`,
+      `${i + 1}. ${topic}`,
+      "SAMPLE - fictional document for testing only.",
+      "Not a real ICCI policy. Every line here is made up.",
+    ]),
+  );
+}
+
+/** D7: a PDF with one page per list of lines (plain text, made up). */
+export function samplePdfPages(pages: string[][]): Uint8Array {
+  const safe = (t: string) => t.replace(/[^A-Za-z0-9 :.,()-]/g, "");
+  const n = pages.length;
+  const pageIds = pages.map((_, i) => 4 + i * 2);
+  const objects: string[] = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${n} >>`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  pages.forEach((lines, i) => {
+    const text = lines
+      .map(safe)
+      .map((l, k) => `BT /F1 ${k === 0 ? 20 : k === 2 ? 16 : 12} Tf 72 ${740 - k * 34} Td (${l}) Tj ET`)
+      .concat([`BT /F1 10 Tf 280 40 Td (${i + 1}) Tj ET`, "0.72 0.6 0.35 RG 2 w 72 600 m 523 600 l S"])
+      .join("\n");
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${pageIds[i] + 1} 0 R >>`);
+    objects.push(`<< /Length ${text.length} >>\nstream\n${text}\nendstream`);
+  });
+  let out = "%PDF-1.4\n";
+  const offsets: number[] = [];
+  objects.forEach((o, i) => {
+    offsets.push(out.length);
+    out += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = out.length;
+  out += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const off of offsets) out += `${String(off).padStart(10, "0")} 00000 n \n`;
+  out += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return new TextEncoder().encode(out);
 }
 
 /** A one-page PDF with these lines of plain text (P1.20 shares it for placeholder manuals). */

@@ -1,7 +1,8 @@
 // The documents of a make and model or of one item (slice P1.20): each one
 // opens through a private link that lasts 10 minutes. Admins add more and
 // hide a wrong one with a reason. Used on the model page and the item page.
-import { FileText, ImageIcon } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, FileText, ImageIcon } from "lucide-react";
 import { Card, CardTitle } from "@/components/ui";
 import { DOCUMENT_BUCKET, DOCUMENT_COLUMNS, DOCUMENT_KINDS, type DocumentRow } from "@/lib/documents/rules";
 import { formatDate } from "@/lib/items/rules";
@@ -40,6 +41,13 @@ export function DocumentList({ docs, returnTo, canHide = true }: { docs: (Docume
               <span className="text-sm text-icci-ink-60">
                 · {DOCUMENT_KINDS[d.kind]} · added {formatDate(d.created_at)}
               </span>
+              {/* D7: a PDF also reads as a book. */}
+              {d.file_path.endsWith(".pdf") && (
+                <Link href={`/documents/${d.id}/book`} className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold">
+                  <BookOpen aria-hidden size={16} />
+                  Read as a book
+                </Link>
+              )}
             </p>
             {canHide && returnTo && <HideDocumentForm id={d.id} title={d.title} returnTo={returnTo} />}
           </li>

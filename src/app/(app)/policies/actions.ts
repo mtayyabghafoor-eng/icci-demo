@@ -106,10 +106,17 @@ export async function uploadVersion(policyId: string, _state: PolicyFormState, f
   const pdf = await pdfFrom(form);
   if (typeof pdf === "string") return { error: pdf };
   if (!pdf) return { error: "Please choose the PDF of this version." };
+  // D7: the Arabic PDF is optional.
+  const pdfAr = await pdfFrom(form, "pdf_ar");
+  if (typeof pdfAr === "string") return { error: pdfAr };
   const supabase = await createClient();
   const saved = await savePdf(supabase, policyId, pdf);
   if ("error" in saved) return { error: saved.error };
-  const { error } = await supabase.from("policy_versions").insert({ policy_id: policyId, ...parsed.values, file_path: saved.path });
+  const savedAr = pdfAr ? await savePdf(supabase, policyId, pdfAr) : null;
+  if (savedAr && "error" in savedAr) return { error: savedAr.error };
+  const { error } = await supabase
+    .from("policy_versions")
+    .insert({ policy_id: policyId, ...parsed.values, file_path: saved.path, file_path_ar: savedAr?.path ?? null });
   if (error) return { error: friendlyPolicyError(error.message) };
   redirect(`/policies/${policyId}?done=draft-added`);
 }
@@ -122,12 +129,19 @@ export async function saveDraft(policyId: string, versionId: string, _state: Pol
   if (!parsed.ok) return { error: parsed.error };
   const pdf = await pdfFrom(form);
   if (typeof pdf === "string") return { error: pdf };
+  const pdfAr = await pdfFrom(form, "pdf_ar");
+  if (typeof pdfAr === "string") return { error: pdfAr };
   const supabase = await createClient();
   const changes: TablesUpdate<"policy_versions"> = { ...parsed.values };
   if (pdf) {
     const saved = await savePdf(supabase, policyId, pdf);
     if ("error" in saved) return { error: saved.error };
     changes.file_path = saved.path;
+  }
+  if (pdfAr) {
+    const savedAr = await savePdf(supabase, policyId, pdfAr);
+    if ("error" in savedAr) return { error: savedAr.error };
+    changes.file_path_ar = savedAr.path;
   }
   const { data, error } = await supabase.from("policy_versions").update(changes).eq("id", versionId).eq("policy_id", policyId).select("id");
   if (error) return { error: friendlyPolicyError(error.message) };

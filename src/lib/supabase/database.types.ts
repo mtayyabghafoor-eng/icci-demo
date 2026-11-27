@@ -1351,14 +1351,14 @@ isOneToOne: false
                   ]
                 },"policy_versions": {
                   Row: {
-                    "approved_on": string,"created_at": string,"created_by": string | null,"file_path": string,"id": string,"next_review_on": string,"policy_id": string,"published_at": string | null,"published_by": string | null,"status": string,"updated_at": string,"updated_by": string | null,"version_label": string
+                    "approved_on": string,"created_at": string,"created_by": string | null,"file_path": string,"file_path_ar": string | null,"id": string,"next_review_on": string,"policy_id": string,"published_at": string | null,"published_by": string | null,"status": string,"updated_at": string,"updated_by": string | null,"version_label": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "approved_on"?: string,"created_at"?: string,"created_by"?: string | null,"file_path"?: string,"id"?: string,"next_review_on"?: string,"policy_id"?: string,"published_at"?: string | null,"published_by"?: string | null,"status"?: string,"updated_at"?: string,"updated_by"?: string | null,"version_label"?: string
+                    "approved_on"?: string,"created_at"?: string,"created_by"?: string | null,"file_path"?: string,"file_path_ar"?: string | null,"id"?: string,"next_review_on"?: string,"policy_id"?: string,"published_at"?: string | null,"published_by"?: string | null,"status"?: string,"updated_at"?: string,"updated_by"?: string | null,"version_label"?: string
                   }
                   Update: {
-                    "approved_on"?: string,"created_at"?: string,"created_by"?: string | null,"file_path"?: string,"id"?: string,"next_review_on"?: string,"policy_id"?: string,"published_at"?: string | null,"published_by"?: string | null,"status"?: string,"updated_at"?: string,"updated_by"?: string | null,"version_label"?: string
+                    "approved_on"?: string,"created_at"?: string,"created_by"?: string | null,"file_path"?: string,"file_path_ar"?: string | null,"id"?: string,"next_review_on"?: string,"policy_id"?: string,"published_at"?: string | null,"published_by"?: string | null,"status"?: string,"updated_at"?: string,"updated_by"?: string | null,"version_label"?: string
                   }
                   Relationships: [
                     {

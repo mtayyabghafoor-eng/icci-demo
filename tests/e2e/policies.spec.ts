@@ -35,7 +35,7 @@ async function uploadDraft(page: Page, label: string, approvedOn: string, title:
   await page.getByLabel("Approval date").fill(approvedOn);
   // Filled in automatically: one year after approval.
   await expect(page.getByLabel("Next review date")).toHaveValue(addYears(approvedOn, 1));
-  await page.getByLabel("PDF").setInputFiles({ name: "policy.pdf", mimeType: "application/pdf", buffer: Buffer.from(samplePolicyPdf(title, label)) });
+  await page.getByLabel("PDF", { exact: true }).setInputFiles({ name: "policy.pdf", mimeType: "application/pdf", buffer: Buffer.from(samplePolicyPdf(title, label)) });
 }
 
 test("add a policy, upload a draft, and a different admin publishes it", async ({ page }, info) => {

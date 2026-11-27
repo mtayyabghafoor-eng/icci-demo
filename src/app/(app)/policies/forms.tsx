@@ -161,6 +161,16 @@ export function VersionForm({
         </p>
         <input id="pdf" type="file" name="pdf" accept="application/pdf" required={!draft} aria-describedby="pdf_hint" className={`${fieldClass} py-2.5`} />
       </div>
+      {/* D7: the same policy in Arabic, read right to left as a flip book. */}
+      <div>
+        <label htmlFor="pdf_ar" className="font-semibold">
+          {draft ? "Arabic PDF (only to add or change it)" : "Arabic PDF (optional)"}
+        </label>
+        <p id="pdf_ar_hint" className="text-sm">
+          The same policy in Arabic, 10 MB at most. It opens as a book that turns from right to left.
+        </p>
+        <input id="pdf_ar" type="file" name="pdf_ar" accept="application/pdf" aria-describedby="pdf_ar_hint" className={`${fieldClass} py-2.5`} />
+      </div>
       <p className="text-sm">This is saved as a draft. Another admin then checks it and publishes it.</p>
       <FormError message={state.error} />
       <div className="flex flex-wrap items-center gap-3">
