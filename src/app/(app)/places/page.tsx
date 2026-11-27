@@ -3,6 +3,7 @@
 // Centre Admins add, rename and switch off places from here.
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PlaceFinder } from "./place-finder";
 import { Suspense } from "react";
 import { MapPin, Plus } from "lucide-react";
 import { Card, EmptyState, LinkButton, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
@@ -65,13 +66,18 @@ async function Content({ searchParams }: { searchParams: PageProps<"/places">["s
           Start by adding a building.
         </EmptyState>
       ) : (
-        <div className="space-y-4" data-testid="places-tree">
-          {buildings.map((b) => (
-            <Card key={b.id}>
-              <Branch place={b} all={all} showOff={showOff} depth={0} />
-            </Card>
-          ))}
-        </div>
+        <>
+          <PlaceFinder />
+          <div className="space-y-4" data-testid="places-tree">
+            {buildings.map((b) => (
+              <div key={b.id} data-building>
+                <Card>
+                  <Branch place={b} all={all} showOff={showOff} depth={0} />
+                </Card>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </>
   );
@@ -80,9 +86,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/places">["s
 function Branch({ place, all, showOff, depth }: { place: Place; all: Place[]; showOff: boolean; depth: number }) {
   const inside = childrenOf(place.id, all, showOff);
   return (
-    <div className={depth > 0 ? "border-l-2 border-icci-line pl-4" : undefined}>
+    <div data-branch className={depth > 0 ? "border-l-2 border-icci-line pl-4" : undefined}>
       <p className="flex flex-wrap items-center gap-x-3 gap-y-1 py-1.5" data-testid="place-row" data-code={placeCode(place.code)}>
-        <span className="text-xs font-bold uppercase tracking-wider text-icci-ink-60">{KIND_WORD[place.kind]}</span>
+        <span className="text-[12.5px] font-bold uppercase tracking-wider text-icci-ink-60">{KIND_WORD[place.kind]}</span>
         <Link href={`/places/${place.id}`} className={depth === 0 ? "text-lg font-bold" : "font-semibold"}>
           {place.name}
         </Link>

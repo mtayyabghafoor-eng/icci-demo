@@ -2,7 +2,7 @@
 // Record sign-off: phone-friendly. Tick everyone on one signed sheet, enter
 // the date, and add a scan if there is one. Saved together or not at all.
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { buttonClass, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import { recordSignoffs, type SignoffFormState } from "../../signoff-actions";
@@ -29,16 +29,51 @@ export function SignoffForm({
   grid?: string | null;
 }) {
   const [state, action, pending] = useActionState<SignoffFormState, FormData>(recordSignoffs.bind(null, policyId, versionId), { error: null });
+  // D6: a name filter over a long list of tick boxes (people already ticked
+  // always stay in view), and the Save button says how many are ticked.
+  const [find, setFind] = useState("");
+  const [picked, setPicked] = useState<Set<string>>(() => new Set(ticked ? [ticked] : []));
+  const words = find.trim().toLowerCase();
+  const shows = (c: Candidate) => !words || picked.has(c.id) || `${c.name} ${c.note ?? ""}`.toLowerCase().includes(words);
   return (
     <form action={action} className="mt-4 space-y-5 rounded-2xl border border-icci-line bg-white p-5 shadow-card" aria-label="Record sign-off">
       {grid !== null && <input type="hidden" name="grid" value={grid} />}
       <fieldset>
         <legend className="font-semibold">Who signed</legend>
         <p className="text-sm">Tick everyone whose signature is on this sheet.</p>
+        {candidates.length > 12 && (
+          <label className="mt-3 block max-w-md">
+            <span className="text-sm font-semibold text-icci-ink-60">Find a name or section</span>
+            <input
+              type="search"
+              value={find}
+              onChange={(e) => setFind(e.target.value)}
+              placeholder="Type part of a name"
+              className={fieldClass}
+              dir="auto"
+              data-testid="signoff-find"
+            />
+          </label>
+        )}
         <div className="mt-2 grid gap-1 sm:grid-cols-2" data-testid="signoff-people">
           {candidates.map((c) => (
-            <label key={c.id} className={`flex min-h-11 items-center gap-3 ${c.isMe ? "opacity-60" : ""}`}>
-              <input type="checkbox" name="people" value={c.id} disabled={c.isMe} defaultChecked={c.id === ticked} className="h-5 w-5" />
+            <label key={c.id} hidden={!shows(c)} className={`flex min-h-11 items-center gap-3 ${c.isMe ? "opacity-60" : ""}`}>
+              <input
+                type="checkbox"
+                name="people"
+                value={c.id}
+                disabled={c.isMe}
+                defaultChecked={c.id === ticked}
+                onChange={(e) =>
+                  setPicked((was) => {
+                    const next = new Set(was);
+                    if (e.target.checked) next.add(c.id);
+                    else next.delete(c.id);
+                    return next;
+                  })
+                }
+                className="h-5 w-5"
+              />
               <span dir="auto">
                 {c.name}
                 {c.note && <span className="block text-sm">{c.note}</span>}
@@ -75,7 +110,7 @@ export function SignoffForm({
       <FormError message={state.error} />
       <div className="flex flex-wrap items-center gap-3">
         <button type="submit" disabled={pending} className={buttonClass("primary", "md", "px-6")}>
-          {pending ? "Saving…" : "Save"}
+          {pending ? "Saving…" : picked.size > 0 ? `Save (${picked.size} ${picked.size === 1 ? "person" : "people"} ticked)` : "Save"}
         </button>
         <Link href={grid !== null ? `/policies/grid${grid ? `?${grid}` : ""}` : `/policies/${policyId}`} className="inline-flex min-h-11 items-center px-2 font-semibold">
           Cancel

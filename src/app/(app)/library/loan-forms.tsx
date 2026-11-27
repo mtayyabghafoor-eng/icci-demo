@@ -3,7 +3,9 @@
 // tap), three fields or fewer, the due date filled in (21 days) and
 // changeable. Names are shown as typed, Arabic included (dir="auto").
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
+import { BarcodeCamera } from "@/components/shell/camera-scanner";
+import { labelFromScan } from "@/lib/items/scan";
 import { buttonClass, ConfirmSubmit, fieldClass } from "@/components/ui";
 import { FormError } from "@/app/sign-in/ui";
 import type { MarkKind } from "@/lib/library/lists";
@@ -28,8 +30,27 @@ type Typed = Record<string, string> | undefined;
 /** Lend or Return without the camera: type the label number. */
 export function FindCopyForm({ purpose }: { purpose: "lend" | "return" }) {
   const [state, action, pending] = useActionState<LibraryFormState, FormData>(findCopy.bind(null, purpose), { error: null });
+  const form = useRef<HTMLFormElement>(null);
   return (
-    <form key={state.attempt ?? 0} action={action} className={box} aria-label="Find the book">
+    <form ref={form} key={state.attempt ?? 0} action={action} className={box} aria-label="Find the book">
+      {/* D6: on Android phones and tablets (and a PC with a webcam) the book's label is scanned here. */}
+      <BarcodeCamera
+        target={{
+          formats: ["qr_code"],
+          accept: labelFromScan,
+          hrefFor: (label) => label,
+          title: "Scan the book's label",
+          hint: "Point the camera at the square code on the label inside the book.",
+          wrongCode: "That code is not an ICCI label. Point the camera at the square code on the book's label.",
+          testId: `${purpose}-camera`,
+          onValue: (label) => {
+            const box = form.current?.querySelector<HTMLInputElement>('input[name="label"]');
+            if (!box) return;
+            box.value = label;
+            form.current?.requestSubmit();
+          },
+        }}
+      />
       <div>
         <label htmlFor="label" className="font-semibold">
           Label number
@@ -207,6 +228,28 @@ export function MoveDueForm({ copyId, loanId, due, today, max }: { copyId: strin
   return (
     <form key={state.attempt ?? 0} action={action} className="space-y-3" aria-label="Move the due date">
       <DueField due={due} today={today} max={max} typed={state.values} label="New due date" />
+      {/* D6: one tap for the usual extensions, counted from today. */}
+      <div className="flex flex-wrap gap-2" data-testid="due-quick">
+        {[7, 14, 21].map((n) => {
+          const d = new Date(`${today}T12:00:00Z`);
+          d.setUTCDate(d.getUTCDate() + n);
+          const iso = d.toISOString().slice(0, 10);
+          if (iso > max) return null;
+          return (
+            <button
+              key={n}
+              type="button"
+              className={buttonClass("ghost", "md", "border border-icci-line")}
+              onClick={(e) => {
+                const box = e.currentTarget.form?.querySelector<HTMLInputElement>('input[name="due_on"]');
+                if (box) box.value = iso;
+              }}
+            >
+              +{n} days
+            </button>
+          );
+        })}
+      </div>
       <FormError message={state.error} />
       <button type="submit" disabled={pending} className={buttonClass("outline")}>
         {pending ? "Saving…" : "Move the due date"}

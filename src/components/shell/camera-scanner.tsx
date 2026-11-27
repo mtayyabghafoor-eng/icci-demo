@@ -41,6 +41,8 @@ export type ScanTarget = {
    * when the page comes back (permission is already given).
    */
   keepGoing?: string;
+  /** D6: use the value on this page (fill a box and send the form) instead of opening a page. */
+  onValue?: (value: string) => void;
 };
 
 const AGAIN_MS = 2 * 60 * 1000;
@@ -111,7 +113,8 @@ export function BarcodeCamera({ target }: { target: ScanTarget }) {
           if (value) {
             if (target.keepGoing) sessionStorage.setItem(`icci-camera-again-${target.keepGoing}`, String(Date.now()));
             stop();
-            router.push(target.hrefFor(value));
+            if (target.onValue) target.onValue(value);
+            else router.push(target.hrefFor(value));
             return;
           }
           setMessage(target.wrongCode);

@@ -132,6 +132,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
               <th className="px-3 py-2">Training</th>
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2">Details</th>
+              <th className="px-3 py-2">
+                <span className="sr-only">Record</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -148,6 +151,12 @@ async function List({ searchParams }: { searchParams: PageProps<"/people/trainin
                   <StatusBadge {...TRAINING_STATUS[r.status]} />
                 </td>
                 <td className="px-3 py-2 text-sm">{trainingLine(r, today)}</td>
+                <td className="px-3 py-2 text-right">
+                {/* D6: record it straight from the list. */}
+                <Link href={`/people/${r.person_id}/training`} className="inline-flex min-h-11 items-center whitespace-nowrap rounded-[10px] border border-icci-green/40 px-3 text-sm font-semibold no-underline hover:bg-icci-green-50">
+                  Record training
+                </Link>
+              </td>
               </tr>
             ))}
           </tbody>

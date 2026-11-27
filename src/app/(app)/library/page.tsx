@@ -9,12 +9,12 @@ import { requireAdmin } from "@/lib/auth/current-admin";
 import { BOOK_COLUMNS, formatIsbn, LANGUAGE_LABEL, mayUseLibrary, searchTerm, type BookRow } from "@/lib/library/rules";
 import { createClient } from "@/lib/supabase/server";
 import { DeskTabs } from "./desk-tabs";
-import { CannotSee, PrimaryLink, Skeleton } from "@/components/ui";
+import { CannotSee, Pagination, PrimaryLink, Skeleton } from "@/components/ui";
+import { PAGE_SIZE, readPage } from "@/lib/ui/text";
 
 export const metadata: Metadata = { title: "Library | ICCI Control Dashboard" };
 
 /** How many books one page shows. */
-const SHOWN = 100;
 
 export default function LibraryPage(props: PageProps<"/library">) {
   return (
@@ -42,7 +42,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/library">["sea
     if (/^[0-9X]{3,13}$/i.test(digits)) parts.push(`isbn.ilike.*${digits}*`);
     query = query.or(parts.join(","));
   }
-  const { data, count } = await query.order("title").limit(SHOWN);
+  // D6: the whole catalogue page by page ("1 to 50 of 640"), never a cut-off.
+  const page = readPage(params.page);
+  const { data, count } = await query.order("title").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
   const books = (data ?? []) as BookRow[];
   const total = count ?? books.length;
 
@@ -71,7 +73,7 @@ async function List({ searchParams }: { searchParams: PageProps<"/library">["sea
           ? q
             ? `No book matches “${q}”.`
             : "No books yet."
-          : `${total} ${total === 1 ? "book" : "books"}${q ? ` matching “${q}”` : ""}${total > SHOWN ? `, the first ${SHOWN} shown. Search to find others.` : ""}`}
+          : `${total} ${total === 1 ? "book" : "books"}${q ? ` matching “${q}”` : ""}`}
       </p>
       {books.length > 0 && (
         <>
@@ -122,6 +124,9 @@ async function List({ searchParams }: { searchParams: PageProps<"/library">["sea
               </li>
             ))}
           </ul>
+          {total > PAGE_SIZE && (
+            <Pagination page={page} size={PAGE_SIZE} total={total} hrefFor={(p) => `/library?${q ? `q=${encodeURIComponent(q)}&` : ""}page=${p}`} />
+          )}
         </>
       )}
     </>
