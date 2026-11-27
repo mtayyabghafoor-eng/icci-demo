@@ -13,7 +13,7 @@ import { CannotSee, Card, EmptyState, LinkButton, PageHeader, Skeleton } from "@
 import { CalendarDays, CircleAlert, Phone, TriangleAlert } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, SLOT_GROUP_LABEL, SLOT_GROUPS } from "@/lib/rota/rules";
-import { timeText, WARNING_COLUMNS, warningText, warningTone, type RotaWarning } from "@/lib/rota/week";
+import { personWarnings, timeText, WARNING_COLUMNS, warningText, warningTone, type RotaWarning } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
@@ -47,7 +47,9 @@ async function Content() {
   const { data } = await supabase.from("rota_entries").select(ENTRY_COLUMNS).eq("assignment_date", today).order("start_min", { nullsFirst: false }).order("id");
   const entries = (data ?? []) as RotaEntry[];
   const { data: warnData } = await supabase.from("rota_warnings").select(WARNING_COLUMNS).eq("assignment_date", today);
-  const warnings = (warnData ?? []) as RotaWarning[];
+  const allWarnings = (warnData ?? []) as RotaWarning[];
+  // E3: a missing prayer time is said once (RotaNotes), not beside each prayer.
+  const warnings = personWarnings(allWarnings);
   const warningsOf = (id: number) => warnings.filter((w) => w.assignment_id === id);
   const byId = new Map(entries.map((e) => [e.id, e]));
   const [types, names, places] = await Promise.all([
@@ -128,7 +130,7 @@ async function Content() {
         {entries.length - unfilled} of {entries.length} slots filled{unfilled > 0 && ` · ${unfilled} not filled yet`}
         {warnings.length > 0 && ` · ${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"} (shown beside each slot; they do not stop anything)`}
       </p>
-      <RotaNotes warnings={warnings} />
+      <RotaNotes warnings={allWarnings} period="today" />
       <div className="space-y-4">
         {SLOT_GROUPS.map((g) => {
           const inGroup = entries.filter((e) => e.slot_group === g);

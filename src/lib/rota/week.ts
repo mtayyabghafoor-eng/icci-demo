@@ -93,6 +93,20 @@ export type RotaWarning = {
 };
 export const WARNING_COLUMNS = "assignment_id, assignment_date, person_id, kind, other_assignment_id, vetting";
 
+/**
+ * E3: a missing prayer time is about the week, not the person on the slot,
+ * so it is said once at the top of the page and never beside each slot.
+ * These are the warnings about a person (double-booked, Garda vetting).
+ */
+export function personWarnings<W extends Pick<RotaWarning, "kind">>(warnings: W[]): W[] {
+  return warnings.filter((w) => w.kind !== "no_prayer_time");
+}
+
+/** E3: how many days have a prayer with no time entered (said once, at the top). */
+export function daysWithoutPrayerTime(warnings: Pick<RotaWarning, "kind" | "assignment_date">[]): number {
+  return new Set(warnings.filter((w) => w.kind === "no_prayer_time").map((w) => w.assignment_date)).size;
+}
+
 /** Vetting problems are red; the rest amber. */
 export function warningTone(kind: WarningKind): Tone {
   return kind === "vetting" ? "red" : "amber";

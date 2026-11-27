@@ -1,23 +1,39 @@
-import Link from "next/link";
-import type { RotaWarning } from "@/lib/rota/week";
+import { LinkButton, Notice } from "@/components/ui";
+import { daysWithoutPrayerTime, type RotaWarning } from "@/lib/rota/week";
 
 /**
- * A7: two short lines under the summary. Why "Use a template" is not offered
- * (it only fills an empty week, so it never overwrites names), and a link to
- * Prayer times when a prayer has no time yet. Shared with Today's rota.
+ * A7: short lines under the summary. Why "Use a template" is not offered
+ * (it only fills an empty week, so it never overwrites names), and missing
+ * prayer times. E3: missing prayer times are said once, here, with a button
+ * ("Prayer times missing for 5 days"), never beside every prayer slot.
+ * Shared with Today's rota.
  */
-export function RotaNotes({ warnings, showTemplateNote = false }: { warnings: RotaWarning[]; showTemplateNote?: boolean }) {
-  const noTime = warnings.some((w) => w.kind === "no_prayer_time");
-  if (!noTime && !showTemplateNote) return null;
+export function RotaNotes({
+  warnings,
+  showTemplateNote = false,
+  period = "week",
+}: {
+  warnings: Pick<RotaWarning, "kind" | "assignment_date">[];
+  showTemplateNote?: boolean;
+  period?: "week" | "today";
+}) {
+  const days = daysWithoutPrayerTime(warnings);
+  if (days === 0 && !showTemplateNote) return null;
   return (
-    <div className="-mt-2 mb-4 space-y-1 text-[15px] text-icci-ink-60">
-      {noTime && (
-        <p data-testid="prayer-time-note">
-          Some prayers have no time entered yet.{" "}
-          <Link href="/rota/prayer-times" className="font-semibold">
-            Enter prayer times
-          </Link>
-        </p>
+    <div className="-mt-2 mb-4 space-y-3 text-[15px] text-icci-ink-60">
+      {days > 0 && (
+        <Notice tone="warning" role="status" testId="prayer-time-note">
+          <span className="flex flex-wrap items-center justify-between gap-3">
+            <span>
+              {period === "today"
+                ? "Today's prayer times are not entered yet."
+                : `Prayer times missing for ${days} ${days === 1 ? "day" : "days"} of this week.`}
+            </span>
+            <LinkButton kind="outline" href="/rota/prayer-times">
+              Enter prayer times
+            </LinkButton>
+          </span>
+        </Notice>
       )}
       {showTemplateNote && (
         <p data-testid="template-note">

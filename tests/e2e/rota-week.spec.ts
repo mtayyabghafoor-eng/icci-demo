@@ -62,11 +62,12 @@ test("this week's made-up rota shows filled and empty slots, and its warnings in
   await expectCurrentMenuLink(page, "Rota week");
   await expect(page.getByTestId("week-title")).toHaveText(weekTitle(weekStartOf(todayInDublin())));
   await expect(page.getByTestId("week-summary")).toContainText(/\d+ of \d+ slots filled · 3 warnings/);
-  await expect(slots(page).filter({ hasText: "Not filled yet" }).first()).toBeVisible();
+  await expect(slots(page).filter({ hasText: "+ Fill" }).first()).toBeVisible();
   await expect(page.getByTestId("slot-warning").filter({ visible: true }).filter({ hasText: "Garda vetting expired before this day" })).toHaveCount(1);
   await expect(page.getByTestId("slot-warning").filter({ visible: true }).filter({ hasText: /^Also on Reception at 10:00–16:00 that day$/ })).toHaveCount(1);
   await expect(page.getByTestId("slot-warning").filter({ visible: true }).filter({ hasText: /^Also on Dhuhr at \d\d:\d\d that day$/ })).toHaveCount(1);
   await s(page, "rota-week", project);
+  await shot(page, "rota-week", project, "e3");
 });
 
 test("start a week, add a shift, put someone on it, then take them off", async ({ page }, info) => {
@@ -81,8 +82,14 @@ test("start a week, add a shift, put someone on it, then take them off", async (
   await page.getByRole("button", { name: /^Start this week.s rota$/ }).click();
   await expect(page.getByTestId("notice")).toContainText("Week started");
   await expect(page.getByTestId("week-summary")).toContainText(/^0 of \d+ slots filled/);
-  // No prayer times are entered that far ahead: each prayer slot says so.
-  await expect(slots(page).first()).toContainText("No prayer time entered for this day");
+  // No prayer times are entered that far ahead. E3: said once at the top,
+  // not on each of the 35 prayer slots; empty slots say "+ Fill".
+  await expect(page.getByTestId("prayer-time-note")).toHaveCount(1);
+  await expect(page.getByTestId("prayer-time-note")).toContainText("Prayer times missing for 7 days of this week.");
+  await expect(page.getByTestId("prayer-time-note").getByRole("link", { name: "Enter prayer times" })).toHaveAttribute("href", "/rota/prayer-times");
+  await expect(page.getByTestId("slot-warning")).toHaveCount(0);
+  await expect(slots(page).first()).toContainText("+ Fill");
+  await shot(page, "rota-week-no-prayer-times", project, "e3");
 
   await page.getByRole("link", { name: "Add a slot" }).click();
   const form = page.getByRole("form", { name: "Add a slot" });
@@ -110,7 +117,7 @@ test("start a week, add a shift, put someone on it, then take them off", async (
   await s(page, "rota-week-assigned", project);
 
   // On another slot that day, the picker says they are already on Security.
-  await slots(page).filter({ hasText: "Not filled yet" }).and(page.locator(`[data-date="${wednesday}"]`)).first().click();
+  await slots(page).filter({ hasText: "+ Fill" }).and(page.locator(`[data-date="${wednesday}"]`)).first().click();
   await page.getByRole("search", { name: "Search people" }).getByLabel("Name").fill(person);
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page.getByTestId("picker-busy")).toHaveText("Already on: Security 09:00–13:00");
@@ -121,7 +128,7 @@ test("start a week, add a shift, put someone on it, then take them off", async (
   await security().click();
   await page.getByRole("button", { name: `Take ${person} off this slot` }).click();
   await expect(page.getByTestId("notice")).toHaveText(/Taken off/);
-  await expect(security()).toContainText("Not filled yet");
+  await expect(security()).toContainText("+ Fill");
 });
 
 test("a week that has ended is locked", async ({ page }, info) => {

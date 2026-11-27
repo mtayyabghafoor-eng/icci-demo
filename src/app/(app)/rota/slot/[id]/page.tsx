@@ -10,7 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Suspense } from "react";
-import { buttonClass, CannotSee, Card, CardTitle, ConfirmSubmit, FactGrid, fieldClass, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
+import { BackLink, buttonClass, CannotSee, Card, CardTitle, ConfirmSubmit, FactGrid, fieldClass, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL } from "@/lib/rota/rules";
 import {
@@ -88,12 +88,15 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
   const { data: week } = await supabase.from("rota_weeks").select("week_start, status").eq("id", row.week_id).single();
   const monday = week!.week_start as string;
   const back = `/rota?week=${monday}`;
-  const crumbs = [{ href: back, label: weekTitle(monday) }, { label: "Slot" }];
+  // E3: one trail only. The top bar already says "Rota › Rota week", so the
+  // page gives "← Back to the week" there instead of a second breadcrumb.
+  const backLink = <BackLink href={back}>{`Back to the week of ${weekTitle(monday).replace(/^Week of /, "")}`}</BackLink>;
 
   if (row.removed_at) {
     return (
       <>
-        <PageHeader title="Rota Slot" crumbs={crumbs} />
+        {backLink}
+        <PageHeader title="Rota Slot" />
         <Notice tone="warning" title="This slot has changed" testId="slot-changed">
           Someone was put on, taken off, or the slot was removed after this page was opened.{" "}
           <Link href={back} className="font-semibold">
@@ -161,9 +164,9 @@ async function Content({ params, searchParams }: { params: PageProps<"/rota/slot
 
   return (
     <>
+      {backLink}
       <PageHeader
         title={`${type.name}, ${fullDayLabel(day)}`}
-        crumbs={crumbs}
         status={personName ? <StatusBadge word={`On it: ${personName}`} tone="green" /> : <StatusBadge word="Not filled yet" tone="amber" />}
       />
       {justAssigned && personName && (

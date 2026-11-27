@@ -4,7 +4,9 @@
 // form, Garda vetting on a given day, and the warnings in plain words.
 import { describe, expect, it } from "vitest";
 import {
+  daysWithoutPrayerTime,
   friendlyWeekError,
+  personWarnings,
   parseAddSlotForm,
   readWeek,
   shiftWeek,
@@ -171,4 +173,12 @@ describe("database messages in plain words", () => {
     expect(friendlyWeekError('duplicate key value violates unique constraint "rota_weeks_week_start_key"')).toMatch(/already has a rota/);
     expect(friendlyWeekError("weird")).toMatch(/could not be saved/);
   });
+});
+
+describe("E3: missing prayer times said once", () => {
+  const w = (kind: "double_booked" | "vetting" | "no_prayer_time", assignment_date: string) => ({ kind, assignment_date });
+  const all = [w("no_prayer_time", "2026-11-23"), w("no_prayer_time", "2026-11-23"), w("no_prayer_time", "2026-11-24"), w("vetting", "2026-11-23"), w("double_booked", "2026-11-25")];
+  it("counts the days with a prayer time missing, not the slots", () => expect(daysWithoutPrayerTime(all)).toBe(2));
+  it("keeps only the problems with a person beside a slot", () => expect(personWarnings(all).map((x) => x.kind)).toEqual(["vetting", "double_booked"]));
+  it("says nothing when every prayer has a time", () => expect(daysWithoutPrayerTime([w("vetting", "2026-11-23")])).toBe(0));
 });

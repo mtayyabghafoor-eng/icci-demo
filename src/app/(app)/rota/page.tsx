@@ -1,7 +1,9 @@
 // Rota week (slice P3.2): one week of slots, Monday to Sunday, in four groups
 // (prayers, Jumu'ah, shifts, on call). Click a slot to put someone on it.
-// Warnings (double-booking, Garda vetting, missing prayer time) sit beside
-// the slot in words, amber or red; they never block. A week is locked once
+// Warnings about the person (double-booking, Garda vetting) sit beside the
+// slot in words, amber or red; they never block. E3: a missing prayer time
+// is said once at the top ("Prayer times missing for 5 days"), and an empty
+// slot is a dashed outline with "+ Fill", so colour means a person problem. A week is locked once
 // its Sunday has passed. Slice P3.3: "Publish" opens the Publish page; once
 // published, slots changed since then are amber with the word "Changed".
 // Slice P3.4: "Use a template" while nobody is on the week yet. On a PC the days are columns; on a phone they are
@@ -13,7 +15,7 @@ import { Suspense } from "react";
 import { buttonClass, CannotSee, Card, EmptyState, LinkButton, Notice, PageHeader, Skeleton, StatusBadge } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/current-admin";
 import { fullDayLabel, MAY_SEE_ROTA, shortDayLabel, SLOT_GROUP_LABEL, SLOT_GROUPS, type SlotType } from "@/lib/rota/rules";
-import { readWeek, shiftWeek, timeText, WEEK_STATUS, warningText, warningTone, weekDays, weekEnded, weekStartOf, weekTitle, type RotaWarning } from "@/lib/rota/week";
+import { personWarnings, readWeek, shiftWeek, timeText, WEEK_STATUS, warningText, warningTone, weekDays, weekEnded, weekStartOf, weekTitle, type RotaWarning } from "@/lib/rota/week";
 import { createClient } from "@/lib/supabase/server";
 import { cx } from "@/lib/ui/text";
 import { todayInDublin } from "@/lib/vetting/rules";
@@ -55,6 +57,7 @@ type Ctx = {
   warnings: Map<number, RotaWarning[]>;
   byId: Map<number, RotaEntry>;
   changed: Set<number>;
+  ended: boolean;
 };
 
 async function Content({ searchParams }: { searchParams: PageProps<"/rota">["searchParams"] }) {
@@ -185,7 +188,9 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
     );
   }
 
-  const { entries, warnings } = loaded;
+  const { entries, warnings: allWarnings } = loaded;
+  // E3: only problems with a person are counted and shown beside a slot.
+  const warnings = personWarnings(allWarnings);
   const [types, names, placeList] = await Promise.all([
     loadSlotTypes(supabase),
     peopleNames(supabase, entries.flatMap((e) => (e.person_id ? [e.person_id] : []))),
@@ -198,6 +203,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
     warnings: new Map(),
     byId: new Map(entries.map((e) => [e.id, e])),
     changed: publishing?.changed ?? new Set(),
+    ended,
   };
   for (const w of warnings) ctx.warnings.set(w.assignment_id, [...(ctx.warnings.get(w.assignment_id) ?? []), w]);
   const days = weekDays(monday);
@@ -222,10 +228,10 @@ async function Content({ searchParams }: { searchParams: PageProps<"/rota">["sea
         </div>
       )}
       <p className="mb-4 text-[15px] text-icci-ink-60" data-testid="week-summary">
-        {filled} of {entries.length} slots filled · {warnings.length === 0 ? "no warnings" : `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`}
+        {filled} of {entries.length} slots filled · {warnings.length === 0 ? "no problems with people" : `${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"} about people`}
         {warnings.length > 0 && " (shown beside each slot; they do not stop anything)"}
       </p>
-      <RotaNotes warnings={warnings} showTemplateNote={!ended && !nobodyOn} />
+      <RotaNotes warnings={ended ? [] : allWarnings} showTemplateNote={!ended && !nobodyOn} />
       {publishing?.latest && nameOf && (
         <p className="-mt-2 mb-4 text-[15px] text-icci-ink-60" data-testid="published-line">
           Published {publishedAtText(publishing.latest.published_at)} by {nameOf(publishing.latest.published_by)}
@@ -391,10 +397,13 @@ function SlotCard({ e, ctx, compact = false }: { e: RotaEntry; ctx: Ctx; compact
         </span>
       )}
       {!compact && <span className="block font-semibold text-icci-green-dark">{type?.name}</span>}
-      <span className={cx("block font-semibold", !person && "font-medium text-icci-ink-60")} dir="auto" data-testid="slot-person">
-        {person ?? "Not filled yet"}
+      <span className={cx("block font-semibold", !person && "font-semibold text-icci-green")} dir="auto" data-testid="slot-person">
+        {person ?? (ctx.ended ? "Nobody" : "+ Fill")}
       </span>
-      <span className="block text-[13px] text-icci-ink-60">{timeText(e.slot_group, e.starts_at, e.ends_at)}</span>
+      {/* E3: a prayer with no time says nothing here; the notice at the top says it once. */}
+      {(e.starts_at || (e.slot_group !== "prayer" && e.slot_group !== "jumuah")) && (
+        <span className="block text-[13px] text-icci-ink-60">{timeText(e.slot_group, e.starts_at, e.ends_at)}</span>
+      )}
       {e.location_id && <span className="block text-[13px] text-icci-ink-60">{ctx.places.get(e.location_id)}</span>}
       {ws.map((w, i) => {
         const red = warningTone(w.kind) === "red";

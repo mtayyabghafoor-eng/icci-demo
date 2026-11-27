@@ -84,7 +84,7 @@ test("rota: the print page warns about unpublished changes; the template note; t
   await s(page, "print-unpublished-changes", project);
 
   await page.goto("/rota/today");
-  const { count } = await master().from("rota_warnings").select("assignment_id", { count: "exact", head: true }).eq("assignment_date", todayInDublin());
+  const { count } = await master().from("rota_warnings").select("assignment_id", { count: "exact", head: true }).eq("assignment_date", todayInDublin()).neq("kind", "no_prayer_time"); // E3: said once at the top instead
   await expect(page.getByTestId("slot-warning")).toHaveCount(count ?? 0);
   if (count) await expect(page.getByTestId("today-summary")).toContainText(/warnings?/);
   await s(page, "today-warnings", project);
