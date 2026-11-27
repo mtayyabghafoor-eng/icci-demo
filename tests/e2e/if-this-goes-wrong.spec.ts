@@ -8,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectSignInPage, mainMenu, shot, showFilters, applyFilters } from "./helpers";
+import { completeSignIn, expectSignInPage, mainMenu, shot, showFilters, applyFilters, openTicketMore } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -33,7 +33,8 @@ test("a broken lawnmower: who to call, warranty and manual; report it; pass it t
   await expect(card.getByTestId("who-to-call")).toContainText("Example Garden Machines Ltd");
   await expect(card.getByTestId("who-to-call").getByRole("link", { name: /^Call \+353/ })).toHaveAttribute("href", /^tel:\+353/);
   await expect(card.getByTestId("contact-person")).not.toContainText("nobody set yet");
-  await expect(card.getByRole("link", { name: "Mow 46 user manual (sample)" })).toBeVisible();
+  // E7: on the item page the manual is in the one documents card beside it.
+  await expect(page.getByTestId("documents").getByRole("link", { name: "Mow 46 user manual (sample)" })).toBeVisible();
   await expect(card).toContainText(/Warranty|warranty/);
   await s(page, "item-contact-card", project);
 
@@ -48,6 +49,7 @@ test("a broken lawnmower: who to call, warranty and manual; report it; pass it t
   await expect(page.getByTestId("ticket-history")).toContainText("Passed to Example Garden Machines Ltd (their job number DEMO-123)");
 
   // Pass it again (a second visit), the suggested company already chosen.
+  await openTicketMore(page);
   await page.getByTestId("fold-refer").locator("summary").click();
   const form = page.getByTestId("form-refer");
   await expect(form.getByRole("combobox", { name: "Company" })).toHaveValue(/[0-9a-f-]{36}/);

@@ -814,3 +814,103 @@ a.list-card:hover {
     font-size: 11px;
   }
 }
+
+/*
+  E7: one look for every signed-in page.
+  - One fixed left edge on a PC: pages no longer sit in the middle, so the
+    title does not jump between 280 and 500 pixels from page to page. (The
+    "not found" and error pages stay centred.)
+  - One title size on every page.
+*/
+@media screen and (width >= 48rem) {
+  #content > main:not([data-testid="page-error"]):not([data-testid="not-found"]) {
+    margin-inline: 0;
+    padding-inline: 2rem;
+  }
+}
+#content h1.page-title {
+  font-size: 28px;
+}
+@media (width >= 48rem) {
+  #content h1.page-title {
+    font-size: 34px;
+  }
+}
+
+/*
+  E7: facts on a record page, always label over value (two columns on a
+  PC, one on a phone). A label never parts from its value at a column break.
+*/
+.facts {
+  margin-top: 1rem;
+  border: 1px solid var(--icci-line);
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1.25rem;
+  box-shadow: var(--icci-shadow-card);
+  column-gap: 2rem;
+}
+@media (width >= 40rem) {
+  .facts {
+    column-count: 2;
+  }
+}
+.facts > dt,
+.facts > div > dt {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--icci-ink-60);
+  break-after: avoid;
+}
+.facts > dd,
+.facts > div > dd {
+  margin: 0.25rem 0 1rem;
+  break-before: avoid;
+  break-inside: avoid;
+}
+.facts > dd:last-child,
+.facts > div:last-child > dd {
+  margin-bottom: 0;
+}
+/* Facts already inside a card: no second border. */
+.facts.facts-bare {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  box-shadow: none;
+}
+.facts > div {
+  break-inside: avoid;
+}
+/* E7: a record's code (ICCI-001203, T-0086, EXP-0150) under its title, in the code font. */
+.code-tag {
+  font-family: var(--font-code), ui-monospace, monospace;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--icci-ink-60);
+}
+/* E7: a code inside a page title (Ticket T-0086, EXP-0150) in the code font. */
+.page-title .title-code {
+  font-family: var(--font-code), ui-monospace, monospace;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+/*
+  E7: a ticket's other steps sit behind "More" on a phone. On a PC the
+  "More" line is not shown and every step is in view, as before.
+*/
+@media (width >= 48rem) {
+  .ticket-more > summary {
+    display: none;
+  }
+  .ticket-more::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+}
+.ticket-more[open] > summary {
+  margin-bottom: 0.75rem;
+}

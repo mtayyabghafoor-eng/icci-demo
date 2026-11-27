@@ -40,7 +40,7 @@ async function Content({ params }: { params: PageProps<"/tickets/[id]/close">["p
   return (
     <>
       <BackLink href={`/tickets/${t.id}`}>Back to the ticket</BackLink>
-      <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Close Ticket {ticketNumber(t.id)}</h1>
+      <h1 className="page-title mt-2 text-[28px] md:text-[34px]">Close Ticket <span className="title-code">{ticketNumber(t.id)}</span></h1>
       <p className="mt-2 text-lg font-semibold" dir="auto">
         {shortDescription(t.description)}
       </p>

@@ -115,10 +115,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
         </section>
       )}
 
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">Category</dt>
+      <dl className="facts">
+        <dt>Category</dt>
         <dd>{r.category}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Owner</dt>
+        <dt>Owner</dt>
         <dd dir="auto" data-testid="owner">
           {o ? (
             <Link href={`/people/${o.id}`}>
@@ -129,15 +129,15 @@ async function Content({ params, searchParams }: Pick<PageProps<"/renewals/[id]"
             "Nobody"
           )}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Documents needed</dt>
+        <dt>Documents needed</dt>
         <dd className="whitespace-pre-line" dir="auto">
           {r.documents_needed ?? "None listed"}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Notes</dt>
+        <dt>Notes</dt>
         <dd className="whitespace-pre-line" dir="auto">
           {r.notes ?? "None"}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Added</dt>
+        <dt>Added</dt>
         <dd>
           By {adminName(r.created_by)}, {formatDateTime(r.created_at)}
         </dd>

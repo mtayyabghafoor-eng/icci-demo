@@ -142,18 +142,18 @@ async function Content({ params, searchParams }: Pick<PageProps<"/policies/[id]"
         <PageNotice floating tone={messageTone(done)} testId="notice">{done === "signed" && typeof n === "string" && /^\d+$/.test(n) && n !== "1" ? `Sign-offs recorded for ${n} people.` : DONE[done]}</PageNotice>
       )}
 
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[11rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">Owner</dt>
+      <dl className="facts">
+        <dt>Owner</dt>
         <dd dir="auto">
           {ownerRow ? `${ownerRow.full_name}${ownerRow.active ? "" : " (switched off)"}` : "Not known"}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Current version</dt>
+        <dt>Current version</dt>
         <dd data-testid="current-version">{p.current_label ?? "None published yet"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Approved</dt>
+        <dt>Approved</dt>
         <dd>{p.approved_on ? formatDate(p.approved_on) : "–"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Next review</dt>
+        <dt>Next review</dt>
         <dd>{p.next_review_on ? formatDate(p.next_review_on) : "–"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Must sign</dt>
+        <dt>Must sign</dt>
         <dd data-testid="must-sign">
           {p.must_sign === 0 ? "Nobody yet. Tick the roles below." : `${p.must_sign} switched-on ${p.must_sign === 1 ? "person" : "people"}`}
           {squares.length > 0 && (

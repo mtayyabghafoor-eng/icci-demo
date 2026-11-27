@@ -22,7 +22,19 @@ export async function documentsOf(owner: DocumentOwner): Promise<(DocumentRow & 
   return docs.map((d, i) => ({ ...d, url: signed?.[i]?.signedUrl ?? null }));
 }
 
-export function DocumentList({ docs, returnTo, canHide = true }: { docs: (DocumentRow & { url: string | null })[]; returnTo?: string; canHide?: boolean }) {
+export function DocumentList({
+  docs,
+  returnTo,
+  canHide = true,
+  markModel = false,
+}: {
+  docs: (DocumentRow & { url: string | null })[];
+  returnTo?: string;
+  /** E7: on an item page only the item's own documents can be hidden there. */
+  canHide?: boolean | ((d: DocumentRow) => boolean);
+  /** E7: say which documents belong to the make and model. */
+  markModel?: boolean;
+}) {
   return (
     <ul className="divide-y divide-icci-line" data-testid="documents">
       {docs.map((d) => {
@@ -39,7 +51,8 @@ export function DocumentList({ docs, returnTo, canHide = true }: { docs: (Docume
                 <span className="font-semibold">{d.title}</span>
               )}
               <span className="text-sm text-icci-ink-60">
-                · {DOCUMENT_KINDS[d.kind]} · added {formatDate(d.created_at)}
+                · {DOCUMENT_KINDS[d.kind]}
+                {markModel && d.model_id ? " for every one of this model" : ""} · added {formatDate(d.created_at)}
               </span>
               {/* D7: a PDF also reads as a book. */}
               {d.file_path.endsWith(".pdf") && (
@@ -49,7 +62,7 @@ export function DocumentList({ docs, returnTo, canHide = true }: { docs: (Docume
                 </Link>
               )}
             </p>
-            {canHide && returnTo && <HideDocumentForm id={d.id} title={d.title} returnTo={returnTo} />}
+            {(typeof canHide === "function" ? canHide(d) : canHide) && returnTo && <HideDocumentForm id={d.id} title={d.title} returnTo={returnTo} />}
           </li>
         );
       })}
@@ -57,18 +70,28 @@ export function DocumentList({ docs, returnTo, canHide = true }: { docs: (Docume
   );
 }
 
-export async function DocumentsCard({ owner, returnTo }: { owner: DocumentOwner; returnTo: string }) {
-  const docs = await documentsOf(owner);
+/**
+ * E7: on an item page, one card for every document: its make and model's
+ * manuals (kept once for every unit, hidden from the model page) and the
+ * item's own papers. Before, the model's manuals were listed twice.
+ */
+export async function DocumentsCard({ owner, returnTo, modelId }: { owner: DocumentOwner; returnTo: string; modelId?: string | null }) {
   const forModel = "model_id" in owner;
+  const [own, ofModel] = await Promise.all([documentsOf(owner), !forModel && modelId ? documentsOf({ model_id: modelId }) : []]);
+  const docs = [...ofModel, ...own];
   return (
     <Card>
-      <CardTitle>{forModel ? "Manuals and documents" : "This item's documents"}</CardTitle>
+      <CardTitle>Manuals and documents</CardTitle>
       <p className="text-sm text-icci-ink-60">
         {forModel
           ? "Kept once for every unit of this model: manuals, spec sheets, the maker's warranty terms."
-          : "Only for this one item: its warranty card, invoice, service reports, a photo of the maker's plate."}
+          : "The make and model's manuals, and this item's own papers: its warranty card, invoice, service reports, a photo of the maker's plate."}
       </p>
-      {docs.length === 0 ? <p className="mt-2">None added yet.</p> : <DocumentList docs={docs} returnTo={returnTo} />}
+      {docs.length === 0 ? (
+        <p className="mt-2">None added yet.</p>
+      ) : (
+        <DocumentList docs={docs} returnTo={returnTo} canHide={forModel ? true : (d) => d.item_id !== null} markModel={!forModel} />
+      )}
       <details className="mt-3">
         <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-icci-green">Add a document</summary>
         <AddDocumentForm owner={owner} returnTo={returnTo} defaultKind={forModel ? "manual" : "warranty"} />

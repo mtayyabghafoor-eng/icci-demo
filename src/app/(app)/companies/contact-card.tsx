@@ -69,7 +69,7 @@ export async function contactContext(supabase: Awaited<ReturnType<typeof createC
   return { item, companies, company, model, sub, main, call };
 }
 
-export async function ContactCard({ itemId }: { itemId: string }) {
+export async function ContactCard({ itemId, showDocuments = true }: { itemId: string; showDocuments?: boolean }) {
   const supabase = await createClient();
   const [context, tickets] = await Promise.all([
     contactContext(supabase, itemId),
@@ -85,7 +85,7 @@ export async function ContactCard({ itemId }: { itemId: string }) {
   const { data: person } = personId
     ? await supabase.from("people").select("full_name, phone").eq("id", personId).maybeSingle()
     : { data: null };
-  const [modelDocs, itemDocs] = await Promise.all([model ? documentsOf({ model_id: model.id }) : [], documentsOf({ item_id: itemId })]);
+  const [modelDocs, itemDocs] = showDocuments ? await Promise.all([model ? documentsOf({ model_id: model.id }) : [], documentsOf({ item_id: itemId })]) : [[], []];
   const docs = [...modelDocs, ...itemDocs];
 
   return (
@@ -152,6 +152,7 @@ export async function ContactCard({ itemId }: { itemId: string }) {
           .
         </p>
 
+        {showDocuments && (
         <div>
           <p className="font-semibold">Manuals and documents</p>
           {docs.length === 0 ? (
@@ -160,6 +161,7 @@ export async function ContactCard({ itemId }: { itemId: string }) {
             <DocumentList docs={docs} canHide={false} />
           )}
         </div>
+        )}
 
         <p className="text-sm text-icci-ink-60">
           {tickets.count ? `${tickets.count} maintenance ticket${tickets.count === 1 ? "" : "s"} so far for this item.` : "No maintenance tickets for this item before."}

@@ -163,15 +163,15 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
         <PageNotice floating tone={messageTone(done)} testId="notice">{DONE[done]}</PageNotice>
       )}
 
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">Role</dt>
+      <dl className="facts">
+        <dt>Role</dt>
         <dd>
           {lists.roleName.get(p.person_role_id)}
           {lists.roles.find((r) => r.id === p.person_role_id)?.needs_vetting ? " (needs Garda vetting)" : ""}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Section</dt>
+        <dt>Section</dt>
         <dd>{lists.sectionName.get(p.section_id)}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Phone</dt>
+        <dt>Phone</dt>
         {/* D3: tap to call or email from a phone. */}
         <dd>
           {p.phone ? (
@@ -182,7 +182,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
             "Not recorded"
           )}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Email</dt>
+        <dt>Email</dt>
         <dd className="break-all">
           {p.email ? (
             <a href={`mailto:${p.email}`} data-testid="person-email">
@@ -192,9 +192,9 @@ async function Content({ params, searchParams }: Pick<PageProps<"/people/[id]">,
             "Not recorded"
           )}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Start date</dt>
+        <dt>Start date</dt>
         <dd>{formatDate(p.start_date)}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Added</dt>
+        <dt>Added</dt>
         <dd>{formatDate(p.created_at)}</dd>
       </dl>
 

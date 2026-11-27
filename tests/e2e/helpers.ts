@@ -254,3 +254,14 @@ export async function signOutHere(page: Page) {
   await page.getByTestId("bottom-bar").getByRole("button", { name: "Menu" }).click();
   await page.getByRole("dialog", { name: "Menu" }).getByRole("button", { name: "Sign out" }).click();
 }
+
+/** E7: on a phone a ticket's other steps are behind "More"; open it (a PC shows them anyway). */
+export async function openTicketMore(page: Page) {
+  const more = page.getByTestId("ticket-more").filter({ visible: true }).first();
+  await expect(page.getByTestId("ticket-actions").filter({ visible: true }).first()).toBeVisible();
+  const summary = more.locator(":scope > summary");
+  if ((await summary.isVisible()) && (await more.getAttribute("open")) === null) {
+    await summary.click();
+    await expect(more).toHaveAttribute("open", "");
+  }
+}

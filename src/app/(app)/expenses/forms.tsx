@@ -338,12 +338,19 @@ export function ApproveForm({
   funds,
   suggestedFund,
   amountText,
+  amount,
+  paidTo,
+  payer,
 }: {
   claimId: number;
   kind: "approved" | "second_approved";
   funds: (Option & { restricted: boolean })[];
   suggestedFund: string | null;
   amountText: string;
+  /** E7: the amount on the button ("Approve €43.21") and who is paid back, beside it. */
+  amount: string;
+  paidTo: string;
+  payer: string;
 }) {
   const [state, send] = useActionState(decideClaim.bind(null, claimId, kind), none);
   const [fund, setFund] = useState(suggestedFund ?? (kind === "approved" ? (funds.find((f) => !f.restricted)?.id ?? "") : ""));
@@ -370,9 +377,20 @@ export function ApproveForm({
         <Input name="note" maxLength={1000} dir="auto" className="mt-1" />
       </label>
       <FormError message={state.error} />
+      <p className="text-[15px]" data-testid="approve-payee">
+        {paidTo ? (
+          <>
+            Paid to <strong dir="auto">{paidTo}</strong>, by <strong dir="auto">{payer}</strong>
+          </>
+        ) : (
+          <>
+            Paid by <strong dir="auto">{payer}</strong>
+          </>
+        )}
+      </p>
       <ConfirmSubmit
         kind="primary"
-        label={first ? "Approve" : "Give the second approval"}
+        label={first ? `Approve ${amount}` : `Give the second approval: ${amount}`}
         title={first ? "Approve this claim?" : "Give the second approval?"}
         confirmLabel={first ? "Yes, approve" : "Yes, approve"}
         testId={first ? "approve" : "second-approve"}

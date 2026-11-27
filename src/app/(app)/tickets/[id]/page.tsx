@@ -30,7 +30,12 @@ import { allCompanies, companyChoices } from "../../companies/data";
 import { ContactCard, contactContext } from "../../companies/contact-card";
 import { TicketExpenseClaims } from "../expense-claims";
 
-export const metadata: Metadata = { title: "Ticket | ICCI Control Dashboard" };
+// E7: the browser tab shows the ticket's number ("T-0086 | ICCI Control Dashboard").
+export async function generateMetadata(props: PageProps<"/tickets/[id]">): Promise<Metadata> {
+  const { id } = await props.params;
+  const n = Number(id);
+  return { title: `${Number.isSafeInteger(n) && n > 0 ? ticketNumber(n) : "Ticket"} | ICCI Control Dashboard` };
+}
 
 export default function TicketPage(props: PageProps<"/tickets/[id]">) {
   return (
@@ -147,7 +152,7 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
     <>
       <BackLink href="/tickets">All tickets</BackLink>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="page-title text-[28px] md:text-[34px]">Ticket {ticketNumber(t.id)}</h1>
+        <h1 className="page-title text-[28px] md:text-[34px]">Ticket <span className="title-code">{ticketNumber(t.id)}</span></h1>
         <StatusBadge {...STATUS_LABEL[t.status]} />
         {t.priority === "urgent" && <StatusBadge {...PRIORITY_LABEL.urgent} />}
       </div>
@@ -162,11 +167,11 @@ async function Content(props: { params: PageProps<"/tickets/[id]">["params"]; se
           <p className="whitespace-pre-line text-lg" dir="auto" data-testid="ticket-description">
             {t.description}
           </p>
-          <dl className="mt-4 grid gap-x-4 gap-y-2 sm:grid-cols-[140px_1fr]">
+          <dl className="facts facts-bare">
             {fields.map(([k, v]) => (
-              <div key={k} className="contents">
-                <dt className="text-sm font-semibold text-icci-ink-60">{k}</dt>
-                <dd className="mb-2 whitespace-pre-line sm:mb-0">{v}</dd>
+              <div key={k}>
+                <dt>{k}</dt>
+                <dd className="whitespace-pre-line">{v}</dd>
               </div>
             ))}
           </dl>

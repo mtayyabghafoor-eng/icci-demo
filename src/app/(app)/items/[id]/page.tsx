@@ -28,7 +28,15 @@ import { DocumentsCard } from "../../documents/documents-card";
 import { UUID } from "@/lib/forms";
 import { quantityWord } from "@/lib/ui/text";
 
-export const metadata: Metadata = { title: "Item | ICCI Control Dashboard" };
+// E7: the browser tab shows the label and the name ("ICCI-000042 · Projector").
+// Read under the admin's own sign-in, so nobody else learns a name from it.
+export async function generateMetadata(props: PageProps<"/items/[id]">): Promise<Metadata> {
+  const { id } = await props.params;
+  if (!UUID.test(id)) return { title: "Item | ICCI Control Dashboard" };
+  const supabase = await createClient();
+  const { data } = await supabase.from("items").select("label_serial, name").eq("id", id).maybeSingle();
+  return { title: data ? `${data.label_serial} · ${data.name} | ICCI Control Dashboard` : "Item | ICCI Control Dashboard" };
+}
 
 export default function ItemPage(props: PageProps<"/items/[id]">) {
   return (
@@ -133,6 +141,11 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
     ["Notes", item.notes || "None"],
   ];
   // D1: "Not recorded" details are listed once, in a single line.
+  const empty = consumable
+    ? movements.length === 0
+      ? ["stock entries"]
+      : []
+    : [...(assetEvents.length === 0 ? ["moves and reports"] : []), ...(tickets.length === 0 ? ["maintenance tickets"] : [])];
   const unknown = fields.filter(([, v]) => v === "Not recorded").map(([k]) => k);
   const known = fields.filter(([k, v]) => v !== "Not recorded" && !(k === "Notes" && v === "None"));
 
@@ -140,9 +153,11 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
     <>
       <BackLink href="/items">All items</BackLink>
       <div className="mt-2 flex flex-wrap items-center gap-3">
-        <h1 className="page-title text-[28px] md:text-[34px]">{item.name}</h1>
+        <h1 className="page-title text-[28px] md:text-[34px]" dir="auto">{item.name}</h1>
         <ItemStatus kind={item.kind} condition={item.condition} stock={level?.status} />
       </div>
+      {/* E7: the label number in the code font, under the name. */}
+      <p className="code-tag mt-2" data-testid="item-code">{item.label_serial}</p>
       {done === "registered" && <PageNotice floating>Item registered. Label {item.label_serial} now opens this page.</PageNotice>}
       {done === "saved" && <PageNotice floating>Changes saved. The history below shows what changed.</PageNotice>}
       {done === "counted" && <PageNotice floating>Count saved.</PageNotice>}
@@ -171,7 +186,12 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
         <section className="flex flex-col rounded-2xl border border-icci-line bg-white shadow-card p-5 max-md:[&>*:nth-child(2)]:mt-0" aria-label="Details">
           {/* D1: details in two columns; the ones not recorded yet are named once, not six times. */}
           <div className="max-md:order-last max-md:mt-5 max-md:border-t max-md:border-icci-line max-md:pt-4">
-            <FactGrid facts={known.map(([label, value]) => ({ label, value: <span className="whitespace-pre-line">{value}</span> }))} />
+            <FactGrid
+              facts={known.map(([label, value]) => ({
+                label,
+                value: <span className={label === "Label" || label === "Maker's serial number" ? "font-mono" : "whitespace-pre-line"} dir={label === "Notes" ? "auto" : undefined}>{value}</span>,
+              }))}
+            />
             {unknown.length > 0 && item.condition !== "disposed" && (
               <p className="mt-5 rounded-xl bg-icci-green-50 px-4 py-3 text-[15px] text-icci-ink-60" data-testid="not-recorded">
                 Not recorded yet: {unknown.join(", ").toLowerCase()}.{" "}
@@ -247,12 +267,19 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
       {/* P1.20 and P1.21: who to call, warranty, manuals and this item's own documents. */}
       {!consumable && item.condition !== "disposed" && (
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <ContactCard itemId={id} />
-          <DocumentsCard owner={{ item_id: id }} returnTo={`/items/${id}`} />
+          <ContactCard itemId={id} showDocuments={false} />
+          <DocumentsCard owner={{ item_id: id }} returnTo={`/items/${id}`} modelId={item.model_id} />
         </div>
       )}
 
-      {consumable && (
+      {/* E7: empty sections fold into one line instead of three headings that say "nothing". */}
+      {empty.length > 0 && (
+        <p className="mt-8 rounded-xl bg-icci-green-50 px-4 py-3 text-[15px] text-icci-ink-60" data-testid="nothing-yet">
+          Nothing yet: {empty.join(", ")}.
+        </p>
+      )}
+
+      {consumable && movements.length > 0 && (
         <section className="mt-8" aria-labelledby="stock-title">
           <h2 id="stock-title" className="text-lg font-bold text-icci-green-dark">
             Stock entries
@@ -260,9 +287,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
           <p className="text-sm">
             Counts, restocks and corrections. Entries are never changed: a wrong one is corrected. Newest first.
           </p>
-          {movements.length === 0 ? (
-            <p className="mt-3">No stock entries yet.</p>
-          ) : (
+          {(
             <ol className="mt-3 space-y-2" data-testid="stock-entries">
               {movements.map((m) => {
                 const corrected = m.corrects_id ? movementById.get(m.corrects_id) : undefined;
@@ -309,15 +334,13 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
         </section>
       )}
 
-      {!consumable && (
+      {!consumable && assetEvents.length > 0 && (
         <section className="mt-8" aria-labelledby="asset-title">
           <h2 id="asset-title" className="text-lg font-bold text-icci-green-dark">
             Moves and reports
           </h2>
           <p className="text-sm">Moves, damage, missing, found, repaired and disposal. Entries are never changed. Newest first.</p>
-          {assetEvents.length === 0 ? (
-            <p className="mt-3">Nothing reported yet.</p>
-          ) : (
+          {(
             <ol className="mt-3 space-y-2" data-testid="asset-events">
               {assetEvents.map((e) => {
                 const s = e.kind === "disposal" ? DISPOSAL_STATUS[e.status] : undefined;
@@ -352,15 +375,13 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
         </section>
       )}
 
-      {!consumable && (
+      {!consumable && tickets.length > 0 && (
         <section className="mt-8" aria-labelledby="tickets-title">
           <h2 id="tickets-title" className="text-lg font-bold text-icci-green-dark">
             Maintenance tickets
           </h2>
           <p className="text-sm">Problems reported with this asset. Not yet closed first.</p>
-          {tickets.length === 0 ? (
-            <p className="mt-3">No tickets for this asset.</p>
-          ) : (
+          {(
             <ul className="mt-3 space-y-2" data-testid="item-tickets">
               {tickets.map((t) => (
                 <li key={t.id}>
@@ -375,7 +396,7 @@ async function Content(props: { params: PageProps<"/items/[id]">["params"]; sear
                       </span>
                     </span>
                     <span className="mt-1 block text-sm">
-                      {ticketNumber(t.id)} · reported {formatDate(t.created_at)}
+                      <span className="font-mono">{ticketNumber(t.id)}</span> · reported {formatDate(t.created_at)}
                     </span>
                   </Link>
                 </li>

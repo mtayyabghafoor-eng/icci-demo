@@ -92,10 +92,10 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
         <PageNotice floating tone={messageTone(done)} testId="notice">{DONE[done]}</PageNotice>
       )}
 
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">Make and model</dt>
+      <dl className="facts">
+        <dt>Make and model</dt>
         <dd>{v.make_model ?? "Not recorded"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Keeper</dt>
+        <dt>Keeper</dt>
         <dd dir="auto" data-testid="keeper">
           {k ? (
             <Link href={`/people/${k.id}`}>
@@ -106,7 +106,7 @@ async function Content({ params, searchParams }: Pick<PageProps<"/vehicles/[id]"
             "Nobody"
           )}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Asset</dt>
+        <dt>Asset</dt>
         <dd>
           <Link href={`/items/${v.item_id}`}>
             {v.item_name} ({v.label_serial})

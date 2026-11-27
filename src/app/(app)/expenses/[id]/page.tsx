@@ -26,7 +26,12 @@ import { createClient } from "@/lib/supabase/server";
 import { loadExpenseNames, paidByText, paidToText } from "../data";
 import { ApproveForm, ReasonForm, WithdrawRepaymentForm } from "../forms";
 
-export const metadata: Metadata = { title: "Expense claim | ICCI Control Dashboard" };
+// E7: the browser tab shows the claim's number ("EXP-0150 | ICCI Control Dashboard").
+export async function generateMetadata(props: PageProps<"/expenses/[id]">): Promise<Metadata> {
+  const { id } = await props.params;
+  const n = Number(id);
+  return { title: `${Number.isSafeInteger(n) && n > 0 ? claimNumber(n) : "Expense claim"} | ICCI Control Dashboard` };
+}
 
 const DONE: Record<string, string> = {
   entered: "Claim saved. It now waits for another admin to approve it.",
@@ -112,7 +117,6 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
   const enteredByMe = claim.created_by === me.id || corrections.some((c) => c.state === "approved" && c.created_by === me.id);
   const waitingCorrection = corrections.find((c) => c.state === "waiting" || c.state === "second");
   const label = STATE_LABEL[entry.state];
-  const title = isCorrection ? `Correction ${claimNumber(entry.id)}` : claimNumber(entry.id);
   const fund = (fid: string | null) => (fid ? (names.fundName.get(fid) ?? "A fund") : "Not chosen yet");
   const amountText = `${formatEuro(entry.amount_cents)} for “${entry.description}”`;
 
@@ -246,7 +250,7 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
     <>
       <BackLink href={entry.state === "waiting" || entry.state === "second" ? "/expenses" : "/expenses?tab=all"}>Expenses</BackLink>
       <PageHeader
-        title={title}
+        title={isCorrection ? <>Correction <span className="title-code">{claimNumber(entry.id)}</span></> : <span className="title-code">{claimNumber(entry.id)}</span>}
         subtitle={<span dir="auto">{entry.description}</span>}
         status={
           <span className="flex flex-wrap gap-2" data-testid="claim-status">
@@ -312,6 +316,9 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
                     funds={names.funds.filter((f) => f.active)}
                     suggestedFund={entry.state === "second" ? null : entry.suggested_fund_id}
                     amountText={amountText}
+                    amount={formatEuro(entry.amount_cents)}
+                    paidTo={paidToText(entry, names)}
+                    payer={paidByText(entry, names)}
                   />
                   <details>
                     <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-icci-error">Reject this claim</summary>

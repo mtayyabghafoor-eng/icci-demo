@@ -2,7 +2,13 @@
 // "Report a problem": phone-first. What is wrong, where (unless it came from
 // an asset's page), and a photo in one tap. Priority starts on Normal and
 // "Reported by" starts with you, so most reports need only the description.
-import { startTransition, useActionState, useRef, useState, type FormEvent } from "react";
+import {
+  startTransition,
+  useActionState,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { FormError } from "@/app/sign-in/ui";
 import Link from "next/link";
 import {
@@ -15,7 +21,11 @@ import {
   type TicketStep,
 } from "@/lib/tickets/rules";
 import { PhotoInput } from "../items/photo-input";
-import { recordTicketStep, reportProblem, type TicketFormState } from "./actions";
+import {
+  recordTicketStep,
+  reportProblem,
+  type TicketFormState,
+} from "./actions";
 import { fieldClass, SaveBar } from "@/components/ui";
 
 const none: TicketFormState = { error: null };
@@ -43,7 +53,10 @@ export function ReportProblemForm({
   people: { id: string; full_name: string }[];
   myPersonId: string | null;
 }) {
-  const [state, send, pending] = useActionState(reportProblem.bind(null, itemId, damageId), none);
+  const [state, send, pending] = useActionState(
+    reportProblem.bind(null, itemId, damageId),
+    none,
+  );
   const [who, setWho] = useState(myPersonId ?? "");
   const photo = useRef<File | null>(null);
 
@@ -55,7 +68,10 @@ export function ReportProblemForm({
   };
 
   return (
-    <form onSubmit={onSubmit} className="mt-4 space-y-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card">
+    <form
+      onSubmit={onSubmit}
+      className="mt-4 space-y-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card"
+    >
       <label className="block">
         <span className="font-semibold">What is wrong?</span>
         <textarea
@@ -71,17 +87,31 @@ export function ReportProblemForm({
       {canMarkDamaged && (
         // A4 (owner's choice): one report. The tick also marks the item damaged, with the same words.
         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-icci-field bg-white px-4 py-3 has-[:checked]:border-icci-error/60 has-[:checked]:bg-[var(--icci-bad-fill)]">
-          <input type="checkbox" name="damaged" value="yes" className="mt-1 h-5 w-5 shrink-0" data-testid="mark-damaged" />
+          <input
+            type="checkbox"
+            name="damaged"
+            value="yes"
+            className="mt-1 h-5 w-5 shrink-0"
+            data-testid="mark-damaged"
+          />
           <span>
             <span className="block font-semibold">It is broken or damaged</span>
-            <span className="block text-sm text-icci-ink-60">Also marks the item damaged until it is repaired. Leave it off for a small fault.</span>
+            <span className="block text-sm text-icci-ink-60">
+              Also marks the item damaged until it is repaired. Leave it off for
+              a small fault.
+            </span>
           </span>
         </label>
       )}
       {!itemId && (
         <label className="block">
           <span className="font-semibold">Where?</span>
-          <select name="location_id" required defaultValue="" className={fieldClass}>
+          <select
+            name="location_id"
+            required
+            defaultValue=""
+            className={fieldClass}
+          >
             <option value="" disabled>
               Pick a place
             </option>
@@ -93,13 +123,21 @@ export function ReportProblemForm({
           </select>
         </label>
       )}
-      <PhotoInput label="Photo (optional)" onPhoto={(f) => (photo.current = f)} />
+      <PhotoInput
+        label="Photo (optional)"
+        onPhoto={(f) => (photo.current = f)}
+      />
       <fieldset>
         <legend className="font-semibold">How urgent?</legend>
         <div className="mt-1 flex gap-2">
           {[...TICKET_PRIORITIES].reverse().map((p) => (
             <label key={p} className={choice}>
-              <input type="radio" name="priority" value={p} defaultChecked={p === "normal"} />
+              <input
+                type="radio"
+                name="priority"
+                value={p}
+                defaultChecked={p === "normal"}
+              />
               {PRIORITY_LABEL[p].word}
             </label>
           ))}
@@ -107,7 +145,13 @@ export function ReportProblemForm({
       </fieldset>
       <label className="block">
         <span className="font-semibold">Reported by</span>
-        <select name="reported_by_person_id" required value={who} onChange={(e) => setWho(e.target.value)} className={fieldClass}>
+        <select
+          name="reported_by_person_id"
+          required
+          value={who}
+          onChange={(e) => setWho(e.target.value)}
+          className={fieldClass}
+        >
           <option value="" disabled>
             Pick a person
           </option>
@@ -123,7 +167,14 @@ export function ReportProblemForm({
       {who === "other" && (
         <label className="block">
           <span className="font-semibold">Their name</span>
-          <input name="reported_by" required maxLength={200} placeholder="e.g. A visitor told reception" className={fieldClass} dir="auto" />
+          <input
+            name="reported_by"
+            required
+            maxLength={200}
+            placeholder="e.g. A visitor told reception"
+            className={fieldClass}
+            dir="auto"
+          />
         </label>
       )}
       <FormError message={state.error} />
@@ -160,7 +211,10 @@ function StepForm({
   photo?: React.RefObject<File | null>;
   testId: string;
 }) {
-  const [state, send, pending] = useActionState(recordTicketStep.bind(null, ticketId, step), none);
+  const [state, send, pending] = useActionState(
+    recordTicketStep.bind(null, ticketId, step),
+    none,
+  );
   return (
     <form
       data-testid={testId}
@@ -181,20 +235,49 @@ function StepForm({
   );
 }
 
-function NoteBox({ label, required = false, hint }: { label: string; required?: boolean; hint?: string }) {
+function NoteBox({
+  label,
+  required = false,
+  hint,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+}) {
   return (
     <label className="block">
       <span className="font-semibold">{label}</span>
-      <textarea name="note" required={required} rows={2} maxLength={2000} placeholder={hint} className={fieldClass} dir="auto" />
+      <textarea
+        name="note"
+        required={required}
+        rows={2}
+        maxLength={2000}
+        placeholder={hint}
+        className={fieldClass}
+        dir="auto"
+      />
     </label>
   );
 }
 
 /** A folding section, so the page stays short on a phone. */
-function Fold({ title, children, testId }: { title: string; children: React.ReactNode; testId: string }) {
+function Fold({
+  title,
+  children,
+  testId,
+}: {
+  title: string;
+  children: React.ReactNode;
+  testId: string;
+}) {
   return (
-    <details className="rounded-xl border border-icci-line bg-white px-4 py-1" data-testid={testId}>
-      <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-icci-green">{title}</summary>
+    <details
+      className="rounded-xl border border-icci-line bg-white px-4 py-1"
+      data-testid={testId}
+    >
+      <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-icci-green">
+        {title}
+      </summary>
       <div className="pb-4 pt-1">{children}</div>
     </details>
   );
@@ -222,9 +305,18 @@ export function TicketActions({
   const notePhoto = useRef<File | null>(null);
   const noteFold = (
     <Fold title="Add a note" testId="fold-note">
-      <StepForm ticketId={ticketId} step="note" button="Add note" photo={notePhoto} testId="form-note">
+      <StepForm
+        ticketId={ticketId}
+        step="note"
+        button="Add note"
+        photo={notePhoto}
+        testId="form-note"
+      >
         <NoteBox label="Note" required hint="e.g. Part ordered, about a week" />
-        <PhotoInput label="Photo (optional)" onPhoto={(f) => (notePhoto.current = f)} />
+        <PhotoInput
+          label="Photo (optional)"
+          onPhoto={(f) => (notePhoto.current = f)}
+        />
       </StepForm>
     </Fold>
   );
@@ -233,8 +325,17 @@ export function TicketActions({
     return (
       <div className="space-y-3" data-testid="ticket-actions">
         <Fold title="Reopen this ticket" testId="fold-reopen">
-          <StepForm ticketId={ticketId} step="reopen" button="Reopen" testId="form-reopen">
-            <NoteBox label="Why is it being reopened?" required hint="e.g. Dripping again after the rain" />
+          <StepForm
+            ticketId={ticketId}
+            step="reopen"
+            button="Reopen"
+            testId="form-reopen"
+          >
+            <NoteBox
+              label="Why is it being reopened?"
+              required
+              hint="e.g. Dripping again after the rain"
+            />
           </StepForm>
         </Fold>
         {noteFold}
@@ -242,84 +343,174 @@ export function TicketActions({
     );
   }
 
+  // E7: one main button for the next step: an open ticket is started, a
+  // started or waiting one is closed. On a phone everything else is behind
+  // "More"; on a PC it is all shown, as before.
+  const startFirst = status === "open";
+  const closeLink = (primary: boolean) => (
+    <Link
+      href={`/tickets/${ticketId}/close`}
+      className={primary ? smallPrimary : secondary}
+    >
+      Close ticket
+    </Link>
+  );
   return (
     <div className="space-y-3" data-testid="ticket-actions">
       <div className="flex flex-wrap gap-2">
-        <Link href={`/tickets/${ticketId}/close`} className={smallPrimary}>
-          Close ticket
-        </Link>
-        {statusChoices(status).map((s) => (
-          <StatusButton key={s} ticketId={ticketId} status={s} />
-        ))}
+        {startFirst ? (
+          <StatusButton ticketId={ticketId} status="in_progress" primary />
+        ) : (
+          closeLink(true)
+        )}
       </div>
-      <Fold title={assignedPersonId ? "Assign to someone else" : "Assign"} testId="fold-assign">
-        <StepForm ticketId={ticketId} step="assign" button="Assign" testId="form-assign">
-          <label className="block">
-            <span className="font-semibold">Assign to</span>
-            <select name="person" required defaultValue="" className={fieldClass}>
-              <option value="" disabled>
-                Pick a person
-              </option>
-              {people
-                .filter((p) => p.id !== assignedPersonId)
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.full_name} ({p.role})
+      <details className="ticket-more" data-testid="ticket-more">
+        <summary className="flex min-h-11 cursor-pointer items-center rounded-[10px] border border-icci-line bg-white px-4 font-semibold text-icci-green">
+          More
+        </summary>
+        <div className="ticket-more-body space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {startFirst && closeLink(false)}
+            {statusChoices(status)
+              .filter((s) => !(startFirst && s === "in_progress"))
+              .map((s) => (
+                <StatusButton key={s} ticketId={ticketId} status={s} />
+              ))}
+          </div>
+          <Fold
+            title={assignedPersonId ? "Assign to someone else" : "Assign"}
+            testId="fold-assign"
+          >
+            <StepForm
+              ticketId={ticketId}
+              step="assign"
+              button="Assign"
+              testId="form-assign"
+            >
+              <label className="block">
+                <span className="font-semibold">Assign to</span>
+                <select
+                  name="person"
+                  required
+                  defaultValue=""
+                  className={fieldClass}
+                >
+                  <option value="" disabled>
+                    Pick a person
                   </option>
-                ))}
-            </select>
-          </label>
-          <NoteBox label="Note (optional)" hint="e.g. Plumber booked for Tuesday" />
-        </StepForm>
-      </Fold>
-      <Fold title="Change priority" testId="fold-priority">
-        <StepForm ticketId={ticketId} step="priority" button="Change priority" testId="form-priority">
-          <fieldset>
-            <legend className="font-semibold">New priority</legend>
-            <div className="mt-1 flex gap-2">
-              {[...TICKET_PRIORITIES].reverse().map((p) => (
-                <label key={p} className={choice}>
-                  <input type="radio" name="priority" value={p} required disabled={p === priority} />
-                  {PRIORITY_LABEL[p].word}
-                  {p === priority ? " (now)" : ""}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <NoteBox label="Note (optional)" hint="e.g. Water is reaching the carpet" />
-        </StepForm>
-      </Fold>
-      <Fold title="Passed to a company" testId="fold-refer">
-        <StepForm ticketId={ticketId} step="refer" button="Record it" testId="form-refer">
-          <p className="text-sm">When the problem is handed to an outside company. The assignee stays the person following it up.</p>
-          <label className="block">
-            <span className="font-semibold">Company</span>
-            <select name="company" required defaultValue={suggestedCompany ?? ""} className={fieldClass}>
-              <option value="" disabled>
-                Pick a company
-              </option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="font-semibold">Their job number (optional)</span>
-            <input name="job_ref" maxLength={60} className={fieldClass} placeholder="e.g. the number they gave on the phone" />
-          </label>
-          <NoteBox label="Note (optional)" hint="e.g. Engineer coming Thursday morning" />
-        </StepForm>
-      </Fold>
-      {noteFold}
+                  {people
+                    .filter((p) => p.id !== assignedPersonId)
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.full_name} ({p.role})
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <NoteBox
+                label="Note (optional)"
+                hint="e.g. Plumber booked for Tuesday"
+              />
+            </StepForm>
+          </Fold>
+          <Fold title="Change priority" testId="fold-priority">
+            <StepForm
+              ticketId={ticketId}
+              step="priority"
+              button="Change priority"
+              testId="form-priority"
+            >
+              <fieldset>
+                <legend className="font-semibold">New priority</legend>
+                <div className="mt-1 flex gap-2">
+                  {[...TICKET_PRIORITIES].reverse().map((p) => (
+                    <label key={p} className={choice}>
+                      <input
+                        type="radio"
+                        name="priority"
+                        value={p}
+                        required
+                        disabled={p === priority}
+                      />
+                      {PRIORITY_LABEL[p].word}
+                      {p === priority ? " (now)" : ""}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <NoteBox
+                label="Note (optional)"
+                hint="e.g. Water is reaching the carpet"
+              />
+            </StepForm>
+          </Fold>
+          <Fold title="Passed to a company" testId="fold-refer">
+            <StepForm
+              ticketId={ticketId}
+              step="refer"
+              button="Record it"
+              testId="form-refer"
+            >
+              <p className="text-sm">
+                When the problem is handed to an outside company. The assignee
+                stays the person following it up.
+              </p>
+              <label className="block">
+                <span className="font-semibold">Company</span>
+                <select
+                  name="company"
+                  required
+                  defaultValue={suggestedCompany ?? ""}
+                  className={fieldClass}
+                >
+                  <option value="" disabled>
+                    Pick a company
+                  </option>
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="font-semibold">
+                  Their job number (optional)
+                </span>
+                <input
+                  name="job_ref"
+                  maxLength={60}
+                  className={fieldClass}
+                  placeholder="e.g. the number they gave on the phone"
+                />
+              </label>
+              <NoteBox
+                label="Note (optional)"
+                hint="e.g. Engineer coming Thursday morning"
+              />
+            </StepForm>
+          </Fold>
+          {noteFold}
+        </div>
+      </details>
     </div>
   );
 }
 
 /** "Mark in progress", "Mark waiting" or "Back to open", in one tap. */
-function StatusButton({ ticketId, status }: { ticketId: number; status: Exclude<TicketStatus, "closed"> }) {
-  const [state, send, pending] = useActionState(recordTicketStep.bind(null, ticketId, "status"), none);
+function StatusButton({
+  ticketId,
+  status,
+  primary = false,
+}: {
+  ticketId: number;
+  status: Exclude<TicketStatus, "closed">;
+  primary?: boolean;
+}) {
+  const [state, send, pending] = useActionState(
+    recordTicketStep.bind(null, ticketId, "status"),
+    none,
+  );
   return (
     <form
       onSubmit={(e) => {
@@ -329,7 +520,11 @@ function StatusButton({ ticketId, status }: { ticketId: number; status: Exclude<
         startTransition(() => send(data));
       }}
     >
-      <button type="submit" disabled={pending} className={secondary}>
+      <button
+        type="submit"
+        disabled={pending}
+        className={primary ? smallPrimary : secondary}
+      >
         {STATUS_BUTTON[status]}
       </button>
       <FormError message={state.error} />
@@ -338,29 +533,61 @@ function StatusButton({ ticketId, status }: { ticketId: number; status: Exclude<
 }
 
 /** "Close a ticket": closing note, optional cost, and "Mark repaired" when the asset is damaged. */
-export function CloseTicketForm({ ticketId, canMarkRepaired }: { ticketId: number; canMarkRepaired: boolean }) {
+export function CloseTicketForm({
+  ticketId,
+  canMarkRepaired,
+}: {
+  ticketId: number;
+  canMarkRepaired: boolean;
+}) {
   // A4: a ticket on a damaged item is usually closed because it was repaired, so the tick starts on.
   const [repair, setRepair] = useState(canMarkRepaired);
   return (
     <div className="mt-4 rounded-2xl border border-icci-line bg-white p-5 shadow-card">
-      <StepForm ticketId={ticketId} step="close" button="Close ticket" testId="form-close">
-        <NoteBox label="Closing note: what was done?" required hint="e.g. Washer replaced and tested" />
+      <StepForm
+        ticketId={ticketId}
+        step="close"
+        button="Close ticket"
+        testId="form-close"
+      >
+        <NoteBox
+          label="Closing note: what was done?"
+          required
+          hint="e.g. Washer replaced and tested"
+        />
         <label className="block">
           <span className="font-semibold">Cost in euro (optional)</span>
-          <input name="cost" inputMode="decimal" placeholder="e.g. 45.50" className={fieldClass} />
-          <span className="mt-1 block text-sm">For information only. This is not an expense claim.</span>
+          <input
+            name="cost"
+            inputMode="decimal"
+            placeholder="e.g. 45.50"
+            className={fieldClass}
+          />
+          <span className="mt-1 block text-sm">
+            For information only. This is not an expense claim.
+          </span>
         </label>
         {canMarkRepaired && (
           <fieldset className="rounded-xl border border-icci-line px-4 py-3">
             <label className="flex min-h-11 items-center gap-2 font-semibold">
-              <input type="checkbox" checked={repair} onChange={(e) => setRepair(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={repair}
+                onChange={(e) => setRepair(e.target.checked)}
+              />
               Also mark the asset repaired
             </label>
             {repair && (
               <div className="mt-1 flex gap-3">
                 {(["good", "fair"] as const).map((c) => (
                   <label key={c} className={choice}>
-                    <input type="radio" name="repaired" value={c} required defaultChecked={c === "good"} />
+                    <input
+                      type="radio"
+                      name="repaired"
+                      value={c}
+                      required
+                      defaultChecked={c === "good"}
+                    />
                     {c === "good" ? "Good" : "Fair"}
                   </label>
                 ))}

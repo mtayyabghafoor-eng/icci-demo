@@ -90,7 +90,7 @@ export function FactGrid({ facts }: { facts: Array<{ label: string; value: React
     <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
       {facts.map((f) => (
         <div key={f.label}>
-          <dt className="text-[13px] font-semibold uppercase tracking-wide text-icci-ink-60">{f.label}</dt>
+          <dt className="text-sm font-semibold text-icci-ink-60">{f.label}</dt>
           <dd className="mt-1 text-base">{f.value}</dd>
         </div>
       ))}

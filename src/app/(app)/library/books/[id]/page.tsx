@@ -65,20 +65,20 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/books/
         <PageNotice floating testId="notice">{DONE[done]}</PageNotice>
       )}
 
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">Language</dt>
+      <dl className="facts">
+        <dt>Language</dt>
         <dd>{LANGUAGE_LABEL[book.language]}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">ISBN</dt>
+        <dt>ISBN</dt>
         <dd className="font-mono" data-testid="book-isbn">
           {book.isbn ? formatIsbn(book.isbn) : "None"}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Publisher</dt>
+        <dt>Publisher</dt>
         <dd dir="auto">{book.publisher ?? "Not recorded"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Year</dt>
+        <dt>Year</dt>
         <dd>{book.published_year ?? "Not recorded"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Details from</dt>
+        <dt>Details from</dt>
         <dd data-testid="book-source">{book.entered_by === "looked_up" ? "Open Library, checked when added" : "Typed by hand"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Added</dt>
+        <dt>Added</dt>
         <dd>{formatDate(book.created_at.slice(0, 10))}</dd>
       </dl>
 

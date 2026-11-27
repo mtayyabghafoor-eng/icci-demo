@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_ADMINS, seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { apiAs, completeSignIn, expectSignInPage, newTestLabel, shot } from "./helpers";
+import { apiAs, completeSignIn, expectSignInPage, newTestLabel, openTicketMore, shot } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const second = SEED_ADMINS.find((a) => a.email.startsWith("second.admin"))!;
@@ -42,6 +42,7 @@ const field = (page: Page, label: string) => page.locator("dt", { hasText: label
 const history = (page: Page) => page.getByTestId("ticket-history");
 
 async function openFold(page: Page, testId: string) {
+  await openTicketMore(page);
   const fold = page.getByTestId(testId);
   await fold.locator("summary").click();
   await expect(fold).toHaveAttribute("open", "");
@@ -60,6 +61,9 @@ test("take a ticket from open to closed, marking the asset repaired, then reopen
 
   await signInAs(page, centre, `/tickets/${id}`);
   const actions = page.getByTestId("ticket-actions");
+  // E7: the next step is the one main button; the rest are behind "More" on a phone.
+  await expect(actions.getByRole("button").first()).toHaveText("Mark in progress");
+  await openTicketMore(page);
   await expect(actions.getByRole("button")).toHaveText(["Mark in progress", "Mark waiting"]);
 
   // Assign to a made-up contractor.
@@ -75,6 +79,7 @@ test("take a ticket from open to closed, marking the asset repaired, then reopen
   await actions.getByRole("button", { name: "Mark in progress" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Status changed." })).toBeVisible();
   await expect(page.getByTestId("status").first()).toHaveText("In progress");
+  await openTicketMore(page);
   await expect(actions.getByRole("button")).toHaveText(["Mark waiting", "Back to open"]);
 
   // Urgent after all.
@@ -92,7 +97,8 @@ test("take a ticket from open to closed, marking the asset repaired, then reopen
   await expect(page.getByRole("status").filter({ hasText: "Note added." })).toBeVisible();
   await s(page, "ticket-in-progress", project);
 
-  // Close, with a cost, marking the asset repaired.
+  // Close, with a cost, marking the asset repaired: now the main button.
+  await expect(actions.getByRole("link", { name: "Close ticket" })).toHaveClass(/bg-icci-green-dark/);
   await actions.getByRole("link", { name: "Close ticket" }).click();
   await expect(page.getByRole("heading", { level: 1, name: /^Close Ticket T-\d{4}$/ })).toBeVisible();
   await page.getByRole("textbox", { name: /Closing note/ }).fill("Test: new hinge fitted and door rehung");

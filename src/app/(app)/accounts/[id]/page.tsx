@@ -71,22 +71,22 @@ async function Content({ params, searchParams }: Pick<PageProps<"/accounts/[id]"
         </PageNotice>
       )}
 
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">Email</dt>
+      <dl className="facts">
+        <dt>Email</dt>
         <dd>{a.email}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Role</dt>
+        <dt>Role</dt>
         <dd>{a.role_label}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Signs in with</dt>
+        <dt>Signs in with</dt>
         <dd>{a.sign_in_method === "authenticator" ? `Password and authenticator app${a.has_authenticator ? "" : " (not set up yet)"}` : "A code emailed to this address"}</dd>
         {a.temporary_password_until && (
           <>
-            <dt className="text-sm font-semibold text-icci-ink-60">Temporary password</dt>
+            <dt>Temporary password</dt>
             <dd>{s.word === "Temporary password ran out" ? "Ran out. Give a new one below." : `Works until ${formatDateTime(a.temporary_password_until)}.`}</dd>
           </>
         )}
-        <dt className="text-sm font-semibold text-icci-ink-60">Last sign-in</dt>
+        <dt>Last sign-in</dt>
         <dd>{a.last_sign_in_at ? formatDateTime(a.last_sign_in_at) : "Never"}</dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Person</dt>
+        <dt>Person</dt>
         <dd data-testid="linked-person">{a.person_name ? <a href={`/people/${a.person_id}`}>{a.person_name}</a> : "Not linked to anyone in the People directory"}</dd>
       </dl>
 

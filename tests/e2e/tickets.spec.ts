@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { seedAdmin } from "../../scripts/seed-data.mts";
 import { testAuthenticatorSecret } from "../../scripts/test-authenticators.mts";
-import { completeSignIn, expectCurrentMenuLink, expectSignInPage, newTestLabel, shot, showFilters, applyFilters } from "./helpers";
+import { completeSignIn, expectCurrentMenuLink, expectSignInPage, newTestLabel, shot, showFilters, applyFilters, openTicketMore } from "./helpers";
 
 const centre = seedAdmin("centre_admin");
 const finance = seedAdmin("finance");
@@ -87,7 +87,8 @@ test("report a problem from an asset's page; the asset lists its tickets", async
   const asset = await newTestAsset(project);
 
   await signInAs(page, centre, `/items/${asset.id}`);
-  await expect(page.getByText("No tickets for this asset.")).toBeVisible();
+  // E7: empty sections are folded into one line.
+  await expect(page.getByTestId("nothing-yet")).toHaveText("Nothing yet: moves and reports, maintenance tickets.");
   await page.getByRole("main").getByRole("link", { name: "Report a problem" }).click();
   await expect(page).toHaveURL(new RegExp(`/tickets/new\\?item=${asset.id}$`));
   await expect(page.getByRole("heading", { level: 1, name: "Report a Problem" })).toBeVisible();
@@ -188,7 +189,8 @@ test("A4: find the item from the menu, report it broken, close it repaired", asy
 
   // Closing: the repaired tick starts on.
   await page.getByTestId("item-tickets").getByRole("link").first().click();
-  await page.getByRole("link", { name: "Close ticket" }).first().click();
+  await openTicketMore(page);
+  await page.getByRole("link", { name: "Close ticket" }).filter({ visible: true }).first().click();
   await expect(page.getByRole("checkbox", { name: "Also mark the asset repaired" })).toBeChecked();
   await shot(page, "a4-close-repaired", project, "a4");
 });

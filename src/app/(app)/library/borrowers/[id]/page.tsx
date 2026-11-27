@@ -78,16 +78,16 @@ async function Content({ params, searchParams }: Pick<PageProps<"/library/borrow
       {typeof done === "string" && DONE[done] && (
         <PageNotice floating testId="notice">{DONE[done]}</PageNotice>
       )}
-      <dl className="mt-4 grid gap-x-6 gap-y-3 rounded-2xl border border-icci-line bg-white p-5 shadow-card sm:grid-cols-[10rem_1fr]">
-        <dt className="text-sm font-semibold text-icci-ink-60">{CONTACT_KIND_LABEL[b.contact_kind]}</dt>
+      <dl className="facts">
+        <dt>{CONTACT_KIND_LABEL[b.contact_kind]}</dt>
         <dd data-testid="borrower-contact">
           <ContactLink b={b} />
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Books out</dt>
+        <dt>Books out</dt>
         <dd data-testid="borrower-out">
           {out.length} of {MAX_BOOKS_OUT}
         </dd>
-        <dt className="text-sm font-semibold text-icci-ink-60">Added</dt>
+        <dt>Added</dt>
         <dd>{formatDate(b.created_at.slice(0, 10))}</dd>
       </dl>
       <div className="mt-4 flex flex-wrap items-start gap-3">
