@@ -35,7 +35,15 @@ export type ScanTarget = {
   hint: string;
   wrongCode: string;
   testId: string;
+  /**
+   * D4: scanning many labels in a row (a stocktake). When set, a successful
+   * scan remembers it for two minutes, and the camera starts again by itself
+   * when the page comes back (permission is already given).
+   */
+  keepGoing?: string;
 };
+
+const AGAIN_MS = 2 * 60 * 1000;
 
 const LABELS: ScanTarget = {
   formats: ["qr_code"],
@@ -77,6 +85,7 @@ export function BarcodeCamera({ target }: { target: ScanTarget }) {
     return stop;
   }, []);
 
+
   const start = async () => {
     const Detector = browserDetector();
     if (!Detector || !video.current) return;
@@ -100,6 +109,7 @@ export function BarcodeCamera({ target }: { target: ScanTarget }) {
         for (const code of codes) {
           const value = target.accept(code.rawValue);
           if (value) {
+            if (target.keepGoing) sessionStorage.setItem(`icci-camera-again-${target.keepGoing}`, String(Date.now()));
             stop();
             router.push(target.hrefFor(value));
             return;
@@ -113,6 +123,16 @@ export function BarcodeCamera({ target }: { target: ScanTarget }) {
       }
     }, 300);
   };
+
+  useEffect(() => {
+    if (!supported || !target.keepGoing) return;
+    const key = `icci-camera-again-${target.keepGoing}`;
+    const at = Number(sessionStorage.getItem(key) ?? 0);
+    sessionStorage.removeItem(key);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- starts the camera, as pressing the button would
+    if (at && Date.now() - at < AGAIN_MS) void start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when the camera becomes available
+  }, [supported]);
 
   if (!supported) return null;
   return (

@@ -68,7 +68,7 @@ test("count a shelf, add stock, correct an entry, a different admin approves it"
   await s(page, "count-shelf", project);
   await page.getByRole("button", { name: "Save count" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Count saved" })).toBeVisible();
-  await expect(quantityNow(page)).toHaveText("8 pack");
+  await expect(quantityNow(page)).toHaveText("8 packs");
   await expect(page.getByTestId("status").first()).toHaveText("In stock");
 
   // Add stock.
@@ -78,7 +78,7 @@ test("count a shelf, add stock, correct an entry, a different admin approves it"
   await s(page, "add-stock", project);
   await page.getByRole("button", { name: "Add stock" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Stock added" })).toBeVisible();
-  await expect(quantityNow(page)).toHaveText("13 pack");
+  await expect(quantityNow(page)).toHaveText("13 packs");
 
   // Correct the restock: it was really 7. The correction waits for approval.
   const entries = page.getByTestId("stock-entries");
@@ -89,10 +89,10 @@ test("count a shelf, add stock, correct an entry, a different admin approves it"
   await s(page, "correct-entry", project);
   await page.getByRole("button", { name: "Send for approval" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Correction sent" })).toBeVisible();
-  await expect(quantityNow(page)).toHaveText("13 pack"); // unchanged until approved
-  await expect(entries).toContainText("Correction: restock of 5 → 7 pack");
+  await expect(quantityNow(page)).toHaveText("13 packs"); // unchanged until approved
+  await expect(entries).toContainText("Correction: restock of 5 → 7 packs");
   await expect(entries).toContainText("Waiting for approval");
-  await expect(entries).toContainText("Restock: +5 pack"); // the original stays
+  await expect(entries).toContainText("Restock: +5 packs"); // the original stays
   await s(page, "item-stock-entries", project);
 
   // The same admin cannot approve it: no buttons, a plain explanation.
@@ -120,7 +120,7 @@ test("count a shelf, add stock, correct an entry, a different admin approves it"
   await expect(page.getByTestId("pending-correction").filter({ hasText: item.name })).toHaveCount(0);
 
   await page.goto(`/items/${item.id}`);
-  await expect(quantityNow(page)).toHaveText("15 pack");
+  await expect(quantityNow(page)).toHaveText("15 packs");
   await expect(page.getByTestId("stock-entries")).toContainText(`Approved by ${second.displayName}`);
 });
 
@@ -128,8 +128,8 @@ test("weekly count of a store room, then the low-stock list", async ({ page }, i
   const project = info.project.name;
   await signInAs(page, centre, "/stock/count");
   await expect(page.getByRole("heading", { level: 1, name: "Weekly count" })).toBeVisible();
-  await page.getByLabel("Store room").selectOption({ label: "Test Building B › Test Room B1 › Test Store Room B1-1" });
-  await page.getByRole("button", { name: "Open" }).click();
+  // D4: store rooms are a list of cards, each with when it was last counted.
+  await page.getByTestId("count-rooms").getByRole("link", { name: /^Test Store Room B1-1(?!d)/ }).click();
 
   await expect(page).toHaveURL(/\/stock\/count\?room=/);
   const boxes = page.locator('input[name^="qty:"]');

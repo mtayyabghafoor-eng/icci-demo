@@ -75,6 +75,7 @@ export function StocktakeCamera({ stocktakeId }: { stocktakeId: number }) {
         hint: "Point the camera at the square code on the item's or shelf's label.",
         wrongCode: "That code is not an ICCI item label. Point the camera at the square code on an item label.",
         testId: "stocktake-camera",
+        keepGoing: `stocktake-${stocktakeId}`,
       }}
     />
   );

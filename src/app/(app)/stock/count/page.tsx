@@ -8,7 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import { loadLookups } from "../../items/data";
 import type { StockLevel } from "../data";
 import { WeeklyCountForm, type CountRow } from "../forms";
-import { BackLink, fieldClass, PageNotice, Skeleton } from "@/components/ui";
+import { BackLink, fieldClass, PageNotice, Skeleton, StatusBadge } from "@/components/ui";
+import { ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Weekly count | ICCI Control Dashboard" };
 
@@ -37,6 +38,57 @@ async function Content({ searchParams }: { searchParams: PageProps<"/stock/count
   );
   const chosen = rooms.find((r) => r.id === room);
 
+  // D4: without a room chosen, every store room is listed with when it was
+  // last counted, so the room that is due stands out.
+  if (!chosen) {
+    const { data: all } = await supabase.from("stock_levels").select("location_id, last_counted_at");
+    const levels = (all ?? []) as Pick<StockLevel, "location_id" | "last_counted_at">[];
+    const now = Date.now();
+    const cards = rooms.map((r) => {
+      const inside = new Set(locationAndInside(r.id, lookups.locations));
+      const mine = levels.filter((l) => inside.has(l.location_id));
+      const counted = mine.map((l) => l.last_counted_at).filter((t): t is string => !!t).sort();
+      const last = counted.at(-1) ?? null;
+      const days = last ? Math.floor((now - new Date(last).getTime()) / 86_400_000) : null;
+      return { ...r, items: mine.length, days };
+    });
+    return (
+      <>
+        <p className="mt-2 text-icci-ink-60">Pick the store room you are standing in. Rooms not counted for over a week come first.</p>
+        <ul className="mt-4 space-y-2" data-testid="count-rooms">
+          {cards
+            .sort((a, b) => (b.days ?? 9999) - (a.days ?? 9999) || a.path.localeCompare(b.path))
+            .map((r) => {
+              const due = r.items > 0 && (r.days === null || r.days > 7);
+              return (
+                <li key={r.id}>
+                  <Link
+                    href={`/stock/count?room=${r.id}`}
+                    className="group flex min-h-16 items-center gap-3 rounded-2xl border border-icci-line bg-white p-4 text-icci-text! no-underline shadow-card transition-colors duration-150 hover:border-icci-gold-300 hover:bg-icci-green-50"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-icci-green-dark">{r.path.split(" › ").at(-1)}</span>
+                      <span className="block text-sm text-icci-ink-60">{r.path.split(" › ").slice(0, -1).join(" › ")}</span>
+                      <span className="mt-1 block text-sm">
+                        {r.items === 0 ? "Nothing kept here yet" : `${r.items} ${r.items === 1 ? "item" : "items"}`}
+                      </span>
+                    </span>
+                    {r.items > 0 && (
+                      <StatusBadge
+                        tone={due ? "amber" : "green"}
+                        word={r.days === null ? "Never counted" : r.days === 0 ? "Counted today" : r.days === 1 ? "Counted yesterday" : `Counted ${r.days} days ago`}
+                      />
+                    )}
+                    <ChevronRight aria-hidden size={18} className="shrink-0 text-icci-ink-60" />
+                  </Link>
+                </li>
+              );
+            })}
+        </ul>
+      </>
+    );
+  }
+
   let rows: CountRow[] = [];
   if (chosen) {
     const places = locationAndInside(chosen.id, lookups.locations);
@@ -64,7 +116,13 @@ async function Content({ searchParams }: { searchParams: PageProps<"/stock/count
           <Link href="/stock">See the low-stock list</Link>
         </PageNotice>
       )}
-      <form method="get" className="mt-4 flex flex-wrap items-end gap-2 rounded-2xl border border-icci-line bg-white shadow-card p-5">
+      <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="font-semibold text-icci-green-dark">{chosen.path}</span>
+        <Link href="/stock/count" className="inline-flex min-h-11 items-center text-sm font-semibold">
+          Another store room
+        </Link>
+      </p>
+      <form method="get" hidden className="mt-4 flex flex-wrap items-end gap-2 rounded-2xl border border-icci-line bg-white shadow-card p-5">
         <label className="block min-w-0 flex-1">
           <span className="font-semibold">Store room</span>
           <select name="room" defaultValue={chosen?.id ?? ""} required className={fieldClass}>

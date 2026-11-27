@@ -9,7 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/current-admin";
-import { formatDateTime } from "@/lib/items/rules";
+import { formatDateTime, locationAndInside } from "@/lib/items/rules";
 import {
   DIFFERENCE_EFFECT,
   DIFFERENCE_STATUS,
@@ -108,6 +108,20 @@ async function Content({
 
   async function openSection(props: { id: number; scanningHere: boolean; scans: typeof scans.latest }) {
     const items = await loadItems(supabase, props.scans.map((s) => s.item_id!).filter(Boolean));
+    // D4: the fixed assets the records say are in this room, and which of
+    // them have not been scanned yet, so the admin can look for them before
+    // leaving. Approval still works out the real differences.
+    const { data: expectedData } = await supabase
+      .from("items")
+      .select("id, name, label_serial, location_id")
+      .eq("kind", "fixed_asset")
+      .in("location_id", locationAndInside(st!.location_id, lookups.locations))
+      .or("condition.is.null,condition.not.in.(disposed,missing)")
+      .order("name");
+    const expected = (expectedData ?? []) as { id: string; name: string; label_serial: string; location_id: string }[];
+    const seen = new Set(props.scans.map((s) => s.item_id));
+    const stillToFind = expected.filter((e) => !seen.has(e.id));
+    const found = expected.length - stillToFind.length;
     return (
       <>
         <section className="mt-4 space-y-3 rounded-2xl border border-icci-line bg-white shadow-card p-5">
@@ -144,6 +158,44 @@ async function Content({
           <StocktakeCamera stocktakeId={props.id} />
           <LabelBox stocktakeId={props.id} />
         </section>
+
+        {expected.length > 0 && (
+          <section className="mt-6 rounded-2xl border border-icci-line bg-white p-4 shadow-card md:p-5" aria-labelledby="progress-title" data-testid="stocktake-progress">
+            <h2 id="progress-title" className="flex flex-wrap items-baseline justify-between gap-2 text-lg font-semibold">
+              <span>
+                {found} of {expected.length} expected assets found
+              </span>
+              {stillToFind.length === 0 && <StatusBadge word="All found" tone="green" />}
+            </h2>
+            <div
+              className="mt-3 h-2.5 overflow-hidden rounded-full bg-icci-panel"
+              role="progressbar"
+              aria-label="Expected assets found"
+              aria-valuemin={0}
+              aria-valuemax={expected.length}
+              aria-valuenow={found}
+            >
+              <div className="h-full rounded-full bg-icci-green transition-[width] duration-300" style={{ width: `${Math.round((found / expected.length) * 100)}%` }} />
+            </div>
+            {stillToFind.length > 0 && (
+              <details className="group mt-3" data-testid="still-to-find">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-icci-green [&::-webkit-details-marker]:hidden">
+                  Still to find ({stillToFind.length})
+                </summary>
+                <ul className="mt-1 divide-y divide-icci-line">
+                  {stillToFind.map((e) => (
+                    <li key={e.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2">
+                      <span className="font-semibold">{e.name}</span>
+                      <span className="text-sm text-icci-ink-60">
+                        <span className="font-mono">{e.label_serial}</span> · {(lookups.locationName.get(e.location_id) ?? "").replace(`${room} › `, "")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </section>
+        )}
 
         <section className="mt-6">
           <h2 className="text-lg font-semibold">Scanned so far</h2>

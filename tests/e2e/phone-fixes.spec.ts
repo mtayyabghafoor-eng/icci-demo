@@ -16,8 +16,8 @@ async function signInAs(page: Page, path: string) {
 }
 
 async function openStoreRoom(page: Page) {
-  await page.getByLabel("Store room").selectOption({ label: "Test Building B › Test Room B1 › Test Store Room B1-1" });
-  await page.getByRole("button", { name: "Open" }).click();
+  // D4: store rooms are a list of cards, each with when it was last counted.
+  await page.getByTestId("count-rooms").getByRole("link", { name: /^Test Store Room B1-1(?!d)/ }).click();
   await expect(page).toHaveURL(/\/stock\/count\?room=/);
   await expect(page.locator('input[name^="qty:"]').first()).toBeVisible();
 }

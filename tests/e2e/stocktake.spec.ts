@@ -144,7 +144,7 @@ test("run a stocktake of a room, and a different admin decides on each differenc
   await expect(page.getByTestId("group-missing").getByTestId("finding")).toHaveText([new RegExp(room.lostChair.name)]);
   await expect(page.getByTestId("group-move_here").getByTestId("finding")).toHaveCount(0);
   await expect(page.getByTestId("group-found").getByTestId("finding")).toHaveText([new RegExp(room.foundChair.name)]);
-  await expect(page.getByTestId("group-quantity").getByTestId("finding")).toContainText("12 roll expected, 9 roll found (3 fewer).");
+  await expect(page.getByTestId("group-quantity").getByTestId("finding")).toContainText("12 rolls expected, 9 rolls found (3 fewer).");
   await expect(page.getByText(`${room.unknownLabel}. Register their items afterwards.`)).toBeVisible();
   await s(page, "stocktake-finish", project);
   await page.getByRole("button", { name: "Send for approval" }).click();

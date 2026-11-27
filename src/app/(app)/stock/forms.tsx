@@ -1,6 +1,6 @@
 "use client";
 // The stock forms. Phone-first: big boxes, a number keypad, three fields or fewer.
-import { startTransition, useActionState, useEffect, useRef, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { FormError } from "@/app/sign-in/ui";
 import { decideCorrection, recordOne, recordWeeklyCount, requestCorrection, type StockFormState } from "./actions";
 import { Stepper } from "@/components/ui/stepper";
@@ -116,9 +116,12 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
     sending.current = false;
   }, [state]);
   useLeaveWarning(form, sending);
+  // D4: how many shelves have a number so far, shown beside Save.
+  const [done, setDone] = useState(0);
   return (
     <form
       ref={form}
+      onInput={() => setDone(Array.from(form.current?.querySelectorAll<HTMLInputElement>('input[name^="qty:"]') ?? []).filter((i) => i.value.trim() !== "").length)}
       onSubmit={(e) => {
         sending.current = true;
         keep(action)(e);
@@ -157,9 +160,15 @@ export function WeeklyCountForm({ roomId, rows }: { roomId: string; rows: CountR
       </ol>
       <div className="sticky-actions mt-4 space-y-2 border-t-2 border-icci-gold bg-icci-page py-3">
         <FormError message={state.error} />
-        <button type="submit" disabled={pending} className={primary}>
-          {pending ? "Saving…" : "Save count"}
-        </button>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button type="submit" disabled={pending} className={primary}>
+            {pending ? "Saving…" : "Save count"}
+          </button>
+          <span className="text-[15px] font-semibold text-icci-green-dark" data-testid="count-progress" aria-live="polite">
+            {done} of {rows.length} counted
+          </span>
+          <span className="sr-only">{done < rows.length ? "Empty boxes are skipped." : ""}</span>
+        </div>
       </div>
     </form>
   );
