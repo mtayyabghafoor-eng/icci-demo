@@ -64,7 +64,10 @@ box for everything) is built, not pushed; no database change. Round E
 and phone, honest whole-page screenshots) to E10 (Help link to the user
 guide) are built and pushed (28 Nov 2026, with the flip book fix); no
 database change in Round E. Next: retake the 41 user-guide pictures from
-the demo (the owner signs in for capture.mjs), when the owner asks. The online accounts
+the demo (the owner signs in for capture.mjs), when the owner asks. Phase 6
+(service registers, PLAN.md 5.6, docs/PHASE-6.md): P6.1 to P6.5 are built
+(28 Nov 2026, overnight, owner chose every recommended answer); committed,
+not pushed; migration 0060 is not on ICCI Staging yet. The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -77,6 +80,20 @@ Not yet checked in real life (Phase 1): a real label printer, a real phone
 camera scan of a printed label, and timing a 20-shelf weekly count.
 
 ## Decisions made
+
+- Phase 6 (28 Nov 2026, docs/PHASE-6.md; owner: "complete Phase 6 with the
+  recommended answers"): funeral, Shahada and Nikah registers, Super Admin
+  only, not on Home, search, reminders or exports. Funerals name the person
+  who died; no notes box; imam, officiant and on-duty people come from
+  People (rota's funeral on call ticked for you); numbers FU-/SH-/NK- with
+  the year, from the database, never reused; corrections are new versions
+  with a reason, cancel once with a reason, no approval step; Shahada and
+  Nikah for 18 or over only (a tick), funerals of children allowed with no
+  age stored; Nikah notes "also a civil marriage: yes, no, not known".
+  Claude's choices: Shahada witnesses optional, Nikah needs two; the year
+  in a number is the service date's; dates from 1950. ICCI's data
+  protection person must confirm the privacy notice and keeping period
+  before any real entry.
 
 - Round E (27 Nov 2026, docs/ROUND-E-PLAN.md): one plan merging the
   Gemini code audit, the Impeccable design review (26/40) and the "D9 phone
@@ -542,6 +559,17 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 28 Nov 2026, session 52 (Phase 6, owner asleep, said to build it with the
+  recommended answers). docs/PHASE-6.md written; P6.1 migration 0060 (three
+  register tables, numbers, corrections, cancel; tests first, 23 database
+  tests); P6.2 to P6.4 one shared set of screens for the three registers
+  (list, record, entry page with history, correct, cancel; 19 rule tests,
+  3 browser tests on PC and phone); P6.5 seed (10 made-up entries each) and
+  a privacy check (docs/PHASE-6.md section 7: 3 low findings, 1 to confirm).
+  Committed, not pushed, 0060 not on ICCI Staging. Next: owner reviews;
+  then 0060 to ICCI Staging, push, and a demo refill (needs his yes).
+  Full suite green: 2137 unit and database tests, 474 browser, build.
 
 - 28 Nov 2026, session 50 (continued). Owner: the policy flip book looked
   like "a minute document", full screen did not cover the screen and zoom
