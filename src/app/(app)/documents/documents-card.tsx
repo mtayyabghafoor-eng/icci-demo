@@ -41,8 +41,9 @@ export function DocumentList({
         const Icon = d.file_path.endsWith(".pdf") ? FileText : ImageIcon;
         return (
           <li key={d.id} className="py-2.5">
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <Icon aria-hidden size={18} className="text-icci-green-dark" />
+            {/* Round E fix: the title on its own line, then what it is and when it was added. */}
+            <p className="flex items-start gap-2">
+              <Icon aria-hidden size={18} className="mt-0.5 shrink-0 text-icci-green-dark" />
               {d.url ? (
                 <a dir="auto" href={d.url} target="_blank" rel="noopener noreferrer" className="font-semibold">
                   {d.title}
@@ -50,8 +51,10 @@ export function DocumentList({
               ) : (
                 <span dir="auto" className="font-semibold">{d.title}</span>
               )}
-              <span className="text-sm text-icci-ink-60">
-                · {DOCUMENT_KINDS[d.kind]}
+            </p>
+            <p className="flex flex-wrap items-center gap-x-3 ps-[26px] text-sm text-icci-ink-60">
+              <span>
+                {DOCUMENT_KINDS[d.kind]}
                 {markModel && d.model_id ? " for every one of this model" : ""} · added {formatDate(d.created_at)}
               </span>
               {/* D7: a PDF also reads as a book. */}

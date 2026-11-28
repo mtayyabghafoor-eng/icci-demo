@@ -268,7 +268,8 @@ async function Content(props: { params: PageProps<"/expenses/[id]">["params"]; s
       )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-        <Card>
+        {/* Round E fix: as tall as the receipt, not stretched to the other column. */}
+        <Card className="lg:self-start">
           <CardTitle>Receipt</CardTitle>
           {entry.receipt_lost_reason ? (
             <Notice tone="warning" title="No receipt" testId="receipt-lost-note">

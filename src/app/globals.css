@@ -391,8 +391,8 @@ header:has(#top-bar-back > *) .top-bar-logo {
 */
 /*
   E4: the saved message never covers a page title, its badge or its
-  buttons: on a PC it sits at the bottom right; on a phone just under the
-  top bar, so the Save bar at the bottom stays free.
+  buttons: on a PC it sits at the bottom right; on a phone just above the
+  bottom bar (and above a Save bar).
 */
 .icci-toast {
   position: fixed;
@@ -409,13 +409,20 @@ header:has(#top-bar-back > *) .top-bar-logo {
   opacity: 0;
   transform: translateY(0.5rem);
 }
+/*
+  Round E fix (owner, 27 Nov 2026): on a phone the message sat over the
+  page title. It now sits just above the bottom bar, and above the Save
+  bar on a form that has one, so it covers neither the title nor a button.
+*/
 @media (width < 48rem) {
   .icci-toast {
-    top: 4rem;
     right: 1rem;
     left: 1rem;
-    bottom: auto;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
     width: auto;
+  }
+  body:has(.save-bar) .icci-toast {
+    bottom: calc(10.75rem + env(safe-area-inset-bottom));
   }
 }
 @keyframes icci-toast-in {

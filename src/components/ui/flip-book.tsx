@@ -13,7 +13,14 @@
 // wheel. While zoomed, drag (or scroll) to move around the page; taps and
 // swipes stop turning pages until "Fit page". Each page is drawn again,
 // sharper, once the zoom settles, so small print stays crisp.
-import { ArrowLeft, ArrowRight, Download, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
+//
+// Round E (owner, 27 Nov 2026, "like a minute document; full screen does
+// not cover the screen; zoom makes one part bigger only"): the book now
+// fills the width and the rest of the screen's height (all of it in full
+// screen), with the buttons in one bar above it. Zoom makes the whole page
+// bigger, evenly, inside that area. "Fit width" fills the width; on a PC
+// "One page" shows a single page as wide as the screen.
+import { ArrowLeft, ArrowRight, BookOpen, Download, FileText, Maximize2, Minimize2, MoveHorizontal, ZoomIn, ZoomOut } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { cx } from "@/lib/ui/text";
 import { buttonClass } from "./button";
@@ -40,7 +47,8 @@ function spreadsOf(pages: number, double: boolean): Array<[number | null, number
 }
 
 /** The zoom the buttons and gestures may reach, in quarter steps for buttons. */
-function clampZoom(z: number, fine: boolean) {
+function clampZoom(z: number, fine: boolean | "exact") {
+  if (fine === "exact") return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
   const step = fine ? 0.05 : 0.25;
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(z / step) * step));
 }
@@ -55,13 +63,18 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
   const [images, setImages] = useState<Record<number, Picture>>({});
   const imagesRef = useRef<Record<number, Picture>>({});
   const [problem, setProblem] = useState<string | null>(null);
-  const [double, setDouble] = useState(true);
+  const [wide, setWide] = useState(true);
+  const [onePage, setOnePage] = useState(false);
+  const double = wide && !onePage;
+  const bar = useRef<HTMLDivElement>(null);
+  const outer = useRef<HTMLDivElement>(null);
+  /** The room the book has on screen (CSS pixels), measured. */
+  const [area, setArea] = useState({ w: 0, h: 0 });
   const [at, setAt] = useState(0);
   const [turn, setTurn] = useState<{ to: number; forward: boolean; go: boolean } | null>(null);
   const [full, setFull] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [settled, setSettled] = useState(1);
-  const [boxWidth, setBoxWidth] = useState(0);
   const zoomRef = useRef(1);
   const scrollTo = useRef<{ x: number; y: number } | null>(null);
   const drawing = useRef(new Set<string>());
@@ -98,20 +111,43 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
   // Two pages side by side on wider screens, one on a phone.
   useEffect(() => {
     const wide = window.matchMedia("(min-width: 48rem)");
-    const set = () => setDouble(wide.matches);
+    const set = () => setWide(wide.matches);
     set();
     wide.addEventListener("change", set);
     return () => wide.removeEventListener("change", set);
   }, []);
 
-  // How wide the book is on screen, so pages are drawn at the size shown.
+  // The room the book has: the whole width, and the screen's height below
+  // the top bar and the button bar (all of the screen in full screen).
+  // On a phone (not full screen) the page is as wide as the screen and the
+  // page scrolls down, as before.
+  const fill = wide || full;
   useEffect(() => {
-    const v = view.current;
-    if (!v) return;
-    const seen = new ResizeObserver(() => setBoxWidth(v.clientWidth));
-    seen.observe(v);
-    return () => seen.disconnect();
-  }, [problem]);
+    const o = outer.current;
+    if (!o) return;
+    const measure = () => {
+      const style = getComputedStyle(o);
+      const w = o.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const top = full ? 0 : ((document.querySelector("header.sticky") as HTMLElement | null)?.offsetHeight ?? 0);
+      const pad = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const h = window.innerHeight - top - (bar.current?.offsetHeight ?? 0) - pad - (full ? 48 : 28);
+      setArea({ w: Math.max(0, Math.floor(w)), h: Math.max(320, Math.floor(h)) });
+    };
+    measure();
+    const seen = new ResizeObserver(measure);
+    seen.observe(o);
+    if (bar.current) seen.observe(bar.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      seen.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [problem, full]);
+  const cols = double ? 2 : 1;
+  /** The book's width when the whole spread (or page) fits: zoom 100%. */
+  const fit = area.w === 0 ? 0 : fill ? Math.min(area.w, (area.h * cols) / ratio) : area.w;
+  /** The zoom at which the book is exactly as wide as the room. */
+  const widthZoom = fit > 0 ? area.w / fit : 1;
 
   const spreads = useMemo(() => spreadsOf(pages, double), [pages, double]);
   const last = Math.max(0, spreads.length - 1);
@@ -119,7 +155,7 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
 
   // ---- Zoom -------------------------------------------------------------
   /** Zoom to z, keeping the point under the finger (or the middle) still. */
-  const zoomTo = useCallback((next: number, point?: { x: number; y: number }, fine = false) => {
+  const zoomTo = useCallback((next: number, point?: { x: number; y: number }, fine: boolean | "exact" = false) => {
     const v = view.current;
     const old = zoomRef.current;
     const z = clampZoom(next, fine);
@@ -191,15 +227,15 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
     }
   }, []);
   useEffect(() => {
-    if (!pages || !boxWidth) return;
+    if (!pages || !fit) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     // Phones refuse very large pictures (about 16 million dots), so stay under that.
     const most = Math.floor(Math.sqrt(14_000_000 / ratio));
     const size = (cssWidth: number) => Math.min(most, Math.max(800, Math.ceil((cssWidth * dpr) / 400) * 400));
-    const pageWidth = boxWidth / (double ? 2 : 1);
+    const pageWidth = fit / cols;
     for (const s of [here, here + 1, here - 1, here + 2])
       for (const p of spreads[s] ?? []) if (p) void draw(p, size(pageWidth * (s === here ? settled : 1)));
-  }, [here, spreads, draw, pages, boxWidth, double, settled, ratio]);
+  }, [here, spreads, draw, pages, fit, cols, settled, ratio]);
   useEffect(() => () => Object.values(imagesRef.current).forEach((p) => URL.revokeObjectURL(p.url)), []);
 
   // ---- Turning ------------------------------------------------------------
@@ -341,6 +377,24 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
     }, TAP_MS);
   };
 
+  // On a PC, once the book opens, bring it up under the top bar so it fills the screen.
+  const shown = useRef(false);
+  useEffect(() => {
+    if (!pages || shown.current || !wide) return;
+    shown.current = true;
+    frame.current?.scrollIntoView({ block: "start" });
+  }, [pages, wide]);
+
+  /** One page or two side by side (PC): keep the page being read in view. */
+  const switchPages = () => {
+    const first = (spreads[here] ?? []).find((p): p is number => p !== null) ?? 1;
+    zoomTo(1);
+    setOnePage((one) => {
+      setAt(one ? Math.floor(first / 2) : first - 1);
+      return !one;
+    });
+  };
+
   useEffect(() => {
     const changed = () => setFull(document.fullscreenElement === frame.current);
     document.addEventListener("fullscreenchange", changed);
@@ -423,16 +477,25 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
       <button type="button" onClick={() => zoomTo(1)} disabled={!zoomed} className={buttonClass("ghost", "md", full ? "text-white!" : undefined)}>
         Fit page
       </button>
+      {fill && widthZoom > 1.02 && (
+        <button
+          type="button"
+          onClick={() => {
+            zoomTo(widthZoom, undefined, "exact");
+            scrollTo.current = { x: 0, y: 0 };
+          }}
+          disabled={Math.abs(zoom - widthZoom) < 0.01}
+          className={buttonClass("ghost", "md", full ? "text-white!" : undefined)}
+          data-testid="fit-width"
+        >
+          <MoveHorizontal aria-hidden size={18} />
+          Fit width
+        </button>
+      )}
     </div>
   );
-
-  // The book's size: on a PC it fits the screen's height; on a phone it
-  // takes the whole width (zoom in to read; scroll down for the rest).
-  const maxWidth = double
-    ? `min(100%, calc((100vh - ${full ? 12 : 21}rem) / ${ratio} * 2 + 3rem))`
-    : full
-      ? `min(100%, calc((100vh - 12rem) / ${ratio} + 1rem))`
-      : "100%";
+  const ghost = buttonClass("ghost", "md", full ? "text-white!" : undefined);
+  const height = fill ? area.h : fit > 0 ? (fit * ratio) / cols : undefined;
 
   return (
     <section
@@ -441,92 +504,98 @@ export function FlipBook({ src, dir, title, downloadName }: { src: string; dir: 
       data-testid="flip-book"
       data-dir={dir}
       data-pages={pages}
-      className={cx("flex flex-col gap-4", full && "h-full justify-center overflow-auto bg-icci-green-900 p-4")}
+      className={cx("flex scroll-mt-20 flex-col gap-3", full && "h-full overflow-auto bg-icci-green-900 p-2 sm:p-4")}
     >
+      {/* The buttons, in one bar above the book (it wraps on a narrow screen). */}
+      <div ref={bar} className={cx("flex flex-wrap items-center justify-between gap-x-4 gap-y-2", full && "text-white")} data-testid="flip-bar">
+        <div className="flex items-center gap-2">
+          {rtl ? onButton : backButton}
+          <p className="min-w-28 text-center text-[15px] font-semibold" aria-live="polite" data-testid="flip-page-line">
+            {pageLine}
+          </p>
+          {rtl ? backButton : onButton}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          {zoomBar}
+          {wide && (
+            <button type="button" onClick={switchPages} className={ghost} data-testid="pages-switch">
+              {onePage ? <BookOpen aria-hidden size={18} /> : <FileText aria-hidden size={18} />}
+              {onePage ? "Two pages" : "One page"}
+            </button>
+          )}
+          <button type="button" className={ghost} onClick={() => (document.fullscreenElement ? document.exitFullscreen() : frame.current?.requestFullscreen())}>
+            {full ? <Minimize2 aria-hidden size={18} /> : <Maximize2 aria-hidden size={18} />}
+            {full ? "Leave full screen" : "Full screen"}
+          </button>
+          <a href={src} download={downloadName} className={ghost}>
+            <Download aria-hidden size={18} />
+            Open the PDF
+          </a>
+        </div>
+      </div>
+
       {problem ? (
         <p role="alert" className="rounded-xl border border-icci-error/30 bg-[var(--icci-bad-fill)] px-4 py-3">
           {problem}
         </p>
       ) : (
-        <div className="relative mx-auto w-full select-none rounded-2xl bg-gradient-to-b from-icci-green-dark to-icci-green-900 p-2 shadow-raised sm:p-6" style={{ maxWidth }}>
+        <div ref={outer} className="relative w-full select-none rounded-2xl bg-gradient-to-b from-icci-green-dark to-icci-green-900 p-1.5 shadow-raised sm:p-2">
           <div
             ref={view}
             data-testid="flip-viewport"
-            data-zoom={zoom}
+            data-zoom={Math.round(zoom * 100) / 100}
             className={cx("relative rounded-md", zoomed ? "cursor-grab overflow-auto overscroll-contain active:cursor-grabbing" : "overflow-hidden")}
-            style={{ aspectRatio: `${double ? 2 : 1} / ${ratio}`, touchAction: zoomed ? "pan-x pan-y" : "pan-y" }}
+            style={{ height, touchAction: zoomed ? "pan-x pan-y" : "pan-y" }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={() => (press.current = null)}
           >
-            <div
-              className="relative grid [perspective:2200px]"
-              style={{ gridTemplateColumns: double ? "1fr 1fr" : "1fr", aspectRatio: `${double ? 2 : 1} / ${ratio}`, width: `${zoom * 100}%` }}
-            >
-              {pages === 0 ? (
-                <div className="col-span-full flex items-center justify-center text-white/80" role="status">
-                  Opening the book…
-                </div>
-              ) : (
-                <>
-                  {page(under[0], double ? "left" : "single")}
-                  {double && page(under[1], "right")}
-                  {double && <span aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-black/20" />}
-                  {turn && (
-                    <div
-                      aria-hidden
-                      className={cx("absolute inset-y-0 [transform-style:preserve-3d]", double ? "w-1/2" : "inset-x-0", double && (leafRight ? "right-0" : "left-0"))}
-                      style={{
-                        transformOrigin: double ? (leafRight ? "left center" : "right center") : rtl ? "right center" : "left center",
-                        transform: turn.go
-                          ? double
-                            ? `rotateY(${leafRight ? -180 : 180}deg)`
-                            : `translateX(${(turn.forward ? -1 : 1) * (rtl ? -1 : 1) * 105}%) rotateY(${(turn.forward ? -1 : 1) * (rtl ? -1 : 1) * 25}deg)`
-                          : "none",
-                        transition: `transform ${TURN_MS}ms cubic-bezier(.3,.7,.2,1), opacity ${TURN_MS}ms`,
-                        opacity: !double && turn.go ? 0 : 1,
-                      }}
-                    >
-                      <div className="absolute inset-0 [backface-visibility:hidden]">{page(leafFront, double ? (leafRight ? "right" : "left") : "single")}</div>
-                      {double && (
-                        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">{page(leafBack, leafRight ? "left" : "right")}</div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
+            {/* Centred while it fits; once zoomed past the room, it scrolls from its own edge. */}
+            <div className="flex min-h-full w-max min-w-full">
+              <div
+                className="relative m-auto grid [perspective:2200px]"
+                style={{ gridTemplateColumns: double ? "1fr 1fr" : "1fr", width: fit * zoom, height: (fit * zoom * ratio) / cols }}
+              >
+                {pages === 0 ? (
+                  <div className="col-span-full flex items-center justify-center text-white/80" role="status">
+                    Opening the book…
+                  </div>
+                ) : (
+                  <>
+                    {page(under[0], double ? "left" : "single")}
+                    {double && page(under[1], "right")}
+                    {double && <span aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-black/20" />}
+                    {turn && (
+                      <div
+                        aria-hidden
+                        className={cx("absolute inset-y-0 [transform-style:preserve-3d]", double ? "w-1/2" : "inset-x-0", double && (leafRight ? "right-0" : "left-0"))}
+                        style={{
+                          transformOrigin: double ? (leafRight ? "left center" : "right center") : rtl ? "right center" : "left center",
+                          transform: turn.go
+                            ? double
+                              ? `rotateY(${leafRight ? -180 : 180}deg)`
+                              : `translateX(${(turn.forward ? -1 : 1) * (rtl ? -1 : 1) * 105}%) rotateY(${(turn.forward ? -1 : 1) * (rtl ? -1 : 1) * 25}deg)`
+                            : "none",
+                          transition: `transform ${TURN_MS}ms cubic-bezier(.3,.7,.2,1), opacity ${TURN_MS}ms`,
+                          opacity: !double && turn.go ? 0 : 1,
+                        }}
+                      >
+                        <div className="absolute inset-0 [backface-visibility:hidden]">{page(leafFront, double ? (leafRight ? "right" : "left") : "single")}</div>
+                        {double && (
+                          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">{page(leafBack, leafRight ? "left" : "right")}</div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className={cx("flex flex-wrap items-center justify-between gap-3", full && "text-white")}>
-        {/* The button that goes on sits on the side the pages turn towards. */}
-        <div className="flex items-center gap-2">{rtl ? onButton : backButton}</div>
-        <p className="text-[15px] font-semibold" aria-live="polite" data-testid="flip-page-line">
-          {pageLine}
-        </p>
-        <div className="flex items-center gap-2">{rtl ? backButton : onButton}</div>
-      </div>
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-        {zoomBar}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <a href={src} download={downloadName} className={buttonClass("ghost", "md", full ? "text-white!" : undefined)}>
-            <Download aria-hidden size={18} />
-            Open the PDF
-          </a>
-          <button
-            type="button"
-            className={buttonClass("ghost", "md", full ? "text-white!" : undefined)}
-            onClick={() => (document.fullscreenElement ? document.exitFullscreen() : frame.current?.requestFullscreen())}
-          >
-            {full ? <Minimize2 aria-hidden size={18} /> : <Maximize2 aria-hidden size={18} />}
-            {full ? "Leave full screen" : "Full screen"}
-          </button>
-        </div>
-      </div>
-      <p className={cx("text-center text-sm", full ? "text-white/80" : "text-icci-ink-60")}>
+      <p className={cx("text-center text-sm text-icci-ink-60", full && "hidden")}>
         {zoomed ? "Drag to move around the page. “Fit page” shows the whole page again." : "To read small print: pinch, double-tap the spot, or use the + button."}
       </p>
     </section>

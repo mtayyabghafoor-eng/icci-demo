@@ -62,10 +62,9 @@ ease of use, docs/UI-REVIEW-2026-11-27.md) D1 to D7 is built and pushed;
 box for everything) is built, not pushed; no database change. Round E
 (docs/ROUND-E-PLAN.md, owner approved 27 Nov 2026): E1 (calm Home on PC
 and phone, honest whole-page screenshots) to E10 (Help link to the user
-guide) are all built and committed, not pushed; no database change in
-Round E. Next: owner review of the Round E report, then push (the demo
-redeploys from main), then retake the 41 user-guide pictures from the
-demo (the owner signs in for capture.mjs). The online accounts
+guide) are built and pushed (28 Nov 2026, with the flip book fix); no
+database change in Round E. Next: retake the 41 user-guide pictures from
+the demo (the owner signs in for capture.mjs), when the owner asks. The online accounts
 screen still needs SUPABASE_SECRET_KEY in Vercel's settings (owner). The two
 paid-plan items of C3 wait for the paid plans. Before real use: Resend as Supabase's mail sender, then switch
 on the code email wording (supabase/config.toml).
@@ -543,6 +542,18 @@ camera scan of a printed label, and timing a 20-shelf weekly count.
   admin; the owner may prefer otherwise.
 
 ## Session log
+
+- 28 Nov 2026, session 50 (continued). Owner: the policy flip book looked
+  like "a minute document", full screen did not cover the screen and zoom
+  made "one part bigger only"; fix that and the open issues, then push.
+  Flip book: fills the width and the rest of the screen's height (all of
+  it in full screen), buttons in one bar above it, zoom grows the whole
+  page evenly, new "Fit width" and (PC) "One page" buttons. Phone saved
+  message now sits above the bottom bar (and above a Save bar), never
+  over the title; the receipt card is only as tall as the receipt; a
+  document's details sit on their own line. Full suite after db:reset:
+  unit and database 2098 passed, browser 468 passed (18 skipped), build
+  passed. Pushed to main (no database change; Staging stays at 0059).
 
 - 27 Nov 2026, session 50 (continued). Owner: "Complete all the remaining
   steps, and then do final analysis and check and provide report". Built

@@ -67,7 +67,11 @@ test("a saved message never covers the page title", async ({ page }) => {
   const t = (await toast.boundingBox())!;
   const title = (await page.getByRole("heading", { level: 1 }).boundingBox())!;
   const overlaps = t.x < title.x + title.width && title.x < t.x + t.width && t.y < title.y + title.height && title.y < t.y + t.height;
-  if (!isPhone(page)) expect(overlaps).toBe(false);
-  // Never over the bottom bar on a phone, where the Save bar lives.
-  if (isPhone(page)) expect(t.y).toBeLessThan(200);
+  expect(overlaps).toBe(false);
+  // On a phone it sits just above the bottom bar, never over it.
+  if (isPhone(page)) {
+    const bottom = (await page.getByTestId("bottom-bar").boundingBox())!;
+    expect(t.y + t.height).toBeLessThanOrEqual(bottom.y + 1);
+    expect(t.y).toBeGreaterThan(title.y + title.height);
+  }
 });
