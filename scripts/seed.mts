@@ -1302,6 +1302,101 @@ if (process.env.CRON_SECRET?.trim()) {
   }
 }
 
+// 24. Service registers (Phase 6): only if all three are empty. Ten made-up
+// entries each, recorded by the signed-in Super Admin as on screen (only a
+// Super Admin may), spread over the past year; one correction and one
+// cancellation in each, so the history shows. Development names say "Test";
+// the demo gets invented names (never real people) and 01 000 phone numbers.
+{
+  const counts = await Promise.all(
+    ["funeral_entries", "shahada_entries", "nikah_entries"].map((t) => admin.from(t).select("id", { count: "exact", head: true })),
+  );
+  for (const c of counts) if (c.error) throw c.error;
+  if (counts.every((c) => !c.count)) {
+    const sa = await signedInAs("super.admin@icci-prototype.test");
+    const { data: staff, error: staffError } = await admin
+      .from("people")
+      .select("id, person_roles(name)")
+      .eq("active", true)
+      .not("full_name", "like", "Test run%")
+      .order("full_name");
+    if (staffError) throw staffError;
+    const rows = (staff ?? []) as unknown as { id: string; person_roles: { name: string } | null }[];
+    const imams = rows.filter((p) => p.person_roles?.name === "Imam").map((p) => p.id);
+    const others = rows.filter((p) => p.person_roles?.name !== "Imam").map((p) => p.id);
+    if (imams.length === 0) throw new Error("The register seed needs at least one switched-on Imam in People.");
+    const demo = environment === "staging";
+    const pick = <T,>(list: T[], i: number) => list[i % list.length];
+    const day = (i: number) => addDays(todayInDublin(), -(12 + i * 33));
+    const devName = (what: string, i: number) => `Test ${what} Example ${i + 1}`;
+    const DEMO_DECEASED = ["Abdul-Hakim Rahmani", "Salma Benali", "Mansur Qadri", "Hafsa Darwish", "Jamil Okonkwo-Ali", "Ruqayya Sheikh", "Tawfiq Lamrani", "Najla Haidari", "Ismail Barakzai", "Samira Toure"];
+    const DEMO_FAMILY = ["Karim Rahmani", "Yasmin Benali", "Adel Qadri", "Hamid Darwish", "Aisha Okonkwo-Ali", "Faisal Sheikh", "Leila Lamrani", "Rami Haidari", "Nadia Barakzai", "Moussa Toure"];
+    const DEMO_SHAHADA = ["Adam Collins", "Maryam O'Brien", "Yahya Kowalski", "Safiya Murphy", "Isa Fernandes", "Khadija Byrne", "Nuh Petrov", "Sumayya Walsh", "Dawud Nolan", "Amina Keane"];
+    const DEMO_SPOUSES: [string, string][] = [
+      ["Tariq Mansour", "Huda Selim"], ["Bilal Ahmadi", "Sara Kaddour"], ["Anwar Rashid", "Lina Hamdan"], ["Zaid Khoury", "Rania Aziz"], ["Harun Malik", "Iman Chaudhry"],
+      ["Faris Yilmaz", "Noor Hussain"], ["Usama Bakr", "Dalia Fathi"], ["Kamal Siddiq", "Reem Najjar"], ["Hadi Osman", "Asma Latif"], ["Nabil Karimi", "Mona Saleh"],
+    ];
+    const DEMO_WITNESS = ["Sami Haddad", "Ali Mansour", "Ziyad Rahman", "Musa Kareem", "Jabir Nasr", "Rashid Fadel"];
+    const witness = (i: number) => (demo ? pick(DEMO_WITNESS, i) : devName("Witness", i % 6));
+    const must = async <T,>(p: PromiseLike<{ data: T | null; error: { message: string } | null }>) => {
+      const r = await p;
+      if (r.error) throw new Error(r.error.message);
+      return r.data as T;
+    };
+    for (let i = 0; i < 10; i++) {
+      await must(
+        sa.from("funeral_entries").insert({
+          service_date: day(i),
+          deceased_name: demo ? DEMO_DECEASED[i] : devName("Deceased", i),
+          family_contact_name: demo ? DEMO_FAMILY[i] : devName("Family Contact", i),
+          family_contact_phone: i % 3 === 2 ? null : `01 000 ${String(5100 + i * 7).padStart(4, "0")}`,
+          ghusl: i % 4 !== 3,
+          kafan: i % 2 === 0,
+          janazah_prayer: true,
+          family_room: i % 3 === 0,
+          on_duty_person_ids: [...new Set([pick(imams, i), ...(others.length ? [pick(others, i)] : [])])],
+        }),
+      );
+      await must(
+        sa.from("shahada_entries").insert({
+          service_date: day(i),
+          person_name: demo ? DEMO_SHAHADA[i] : devName("Shahada Person", i),
+          imam_person_id: pick(imams, i),
+          witness_1: witness(i),
+          witness_2: i % 3 === 0 ? null : witness(i + 1),
+          adult_confirmed: true,
+        }),
+      );
+      await must(
+        sa.from("nikah_entries").insert({
+          service_date: day(i),
+          spouse_1_name: demo ? DEMO_SPOUSES[i][0] : devName("Spouse One", i),
+          spouse_2_name: demo ? DEMO_SPOUSES[i][1] : devName("Spouse Two", i),
+          officiant_person_id: pick(imams, i + 1),
+          witness_1: witness(i + 2),
+          witness_2: witness(i + 3),
+          wali_name: i % 2 === 0 ? witness(i + 4) : null,
+          civil_registration: (["yes", "yes", "no", "unknown"] as const)[i % 4],
+          adults_confirmed: true,
+        }),
+      );
+    }
+    // One correction and one cancellation in each register.
+    for (const table of ["funeral_entries", "shahada_entries", "nikah_entries"] as const) {
+      const list = await must(sa.from(table).select("*").order("id"));
+      const [fixMe, cancelMe] = [(list as Record<string, unknown>[])[1], (list as Record<string, unknown>[])[4]];
+      const copy = Object.fromEntries(
+        Object.entries(fixMe).filter(([k]) => !["id", "number", "first_id", "corrects_id", "correction_reason", "cancelled_at", "cancelled_by", "cancelled_reason", "created_by", "created_at", "updated_by", "updated_at"].includes(k)),
+      );
+      await must(sa.from(table).insert({ ...copy, service_date: addDays(fixMe.service_date as string, -1), corrects_id: fixMe.id, correction_reason: demo ? "Date was one day out" : "Test: date was one day out" }));
+      await must(sa.from(table).update({ cancelled_reason: demo ? "Entered twice" : "Test: entered twice" }).eq("id", cancelMe.id as number));
+    }
+    console.log("Service registers: 10 made-up funerals, Shahadas and Nikahs each, with one correction and one cancellation each.");
+  } else {
+    console.log("Service registers: entries already there.");
+  }
+}
+
 // 21. On the staging demo, nobody keeps the seed's authenticator keys: they are
 // removed, so each account sets up its own phone at its first sign-in (the
 // normal set-up screen), and no key is left on this computer.

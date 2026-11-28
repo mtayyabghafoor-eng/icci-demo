@@ -92,9 +92,9 @@ Migrations go to ICCI Staging before main is pushed, as always.
 
 ## 4. Made-up data
 
-Seed entries use obviously invented names (as elsewhere), Dublin 01 000
-phone numbers, and certificate numbers starting "TEST". The demo gets about
-ten entries per register.
+Seed entries use obviously made-up names ("Test ... Example" in development,
+invented names on the demo) and Dublin 01 000 phone numbers. Numbers come
+from the database, as for real entries. Ten entries per register.
 
 ## 5. Questions for the owner
 
@@ -129,3 +129,53 @@ Each has a recommendation. "All recommended" is a fine answer.
 10. **Privacy check.** A: build now on made-up data; ICCI's data protection
     person confirms the privacy notice and how long entries are kept before
     any real entry *(recommended)*. B: wait for that answer before building.
+
+## 6. As built (28 Nov 2026), and choices Claude made where the plan was silent
+
+- Shahada witnesses are optional (up to two), so an older Shahada with no
+  witnesses on record can still be entered. Nikah needs both.
+- Funerals get a number too (FU-2026-0001), like the other two, so every
+  entry can be found by number.
+- The number's year is the year of the service date, not the day it was
+  typed in. A correction keeps the number even if it changes the date.
+- Dates from 1 January 1950 onwards, never in the future.
+- The funeral form ticks whoever the rota has on "Funeral on call" that day
+  (draft or published weeks) until the admin ticks people by hand.
+- A person picked from People must be switched on; a correction may keep
+  someone who has been switched off since.
+- Menu: a "Service registers" group (Funerals, Shahada, Nikah) between
+  Library and Administration, shown to Super Admins only.
+- Tests: 23 database tests (every other role, a deactivated account, a
+  password-only Super Admin and a signed-out visitor are refused; numbers;
+  corrections; cancelling; no deletes; audit log), 19 rule tests, and 3
+  browser tests on a PC and a phone. Seed: 10 made-up entries per register
+  with one correction and one cancellation each (demo names are invented).
+
+## 7. Privacy and security check (slice P6.5)
+
+Checked by reading the code and database rules, 28 Nov 2026.
+
+**Holds**
+- Row-level security on all three tables and their views: Super Admin only,
+  for reading, adding and cancelling. Proved by the database tests.
+- Numbers are given out by a database function that refuses anyone but a
+  Super Admin; it is not reachable from the website's public interface.
+- The audit log keeps a copy of every entry and change, and only a Super
+  Admin can read it (since migration 0014).
+- Nothing else reads the registers: not Home, the search box, reminders,
+  the Board report, CSV downloads or the monthly export. The browser tab
+  shows the entry's number only, never a name.
+- No notes box; the forms say what must never be written.
+
+**Low findings (not fixed; owner to decide)**
+1. A name typed into the register's search box goes into the page address
+   (as every list in the app does). The web host's own access logs may keep
+   page addresses for a few days. Option: search registers by number only,
+   or send the search without putting it in the address.
+2. The Back button remembers the last list address, including a search,
+   in that browser tab only, until the tab is closed.
+3. Backups and the monthly database export (AFTERCARE.md) contain the
+   registers, so they must be stored as carefully as the app itself.
+4. **Not certain:** ICCI's privacy notice and how long these entries are
+   kept. ICCI's data protection person should confirm both before the first
+   real entry (question 10).
