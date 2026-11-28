@@ -16,6 +16,8 @@ const AREAS = {
   // Round C5.
   accounts: "Your account cannot manage accounts. Only a Super Admin can.",
   "audit-log": "Your account cannot see the audit log. Only a Super Admin can.",
+  // Phase 6.
+  registers: "Your account cannot see the service registers. Only a Super Admin can.",
 } as const;
 
 export type CannotSeeArea = keyof typeof AREAS;

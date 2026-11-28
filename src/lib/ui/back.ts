@@ -33,6 +33,9 @@ export const BACK_LISTS: Record<string, string> = {
   "/library/lost": "Lost and withdrawn",
   "/library/most-borrowed": "Most borrowed",
   "/library/borrowers": "Borrowers",
+  "/registers/funerals": "Funeral register",
+  "/registers/shahada": "Shahada register",
+  "/registers/nikah": "Nikah register",
 };
 
 /** For a Back button's own address: the lists that lead to that kind of page. */
@@ -43,6 +46,9 @@ const STAND_INS: Record<string, string[]> = {
   "/renewals": ["/renewals"],
   "/vehicles": ["/vehicles", "/renewals"],
   "/tickets": ["/tickets"],
+  "/registers/funerals": ["/registers/funerals"],
+  "/registers/shahada": ["/registers/shahada"],
+  "/registers/nikah": ["/registers/nikah"],
   "/library": ["/library", "/library/overview", "/library/on-loan", "/library/overdue", "/library/lost", "/library/most-borrowed"],
   "/library/borrowers": ["/library/borrowers", "/library/overview", "/library/on-loan", "/library/overdue"],
 };

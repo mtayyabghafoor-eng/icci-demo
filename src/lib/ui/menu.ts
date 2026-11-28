@@ -51,7 +51,10 @@ export type IconKey =
   | "boardReport"
   | "repay"
   | "accounts"
-  | "auditLog";
+  | "auditLog"
+  | "funeralRegister"
+  | "shahadaRegister"
+  | "nikahRegister";
 
 export type MenuLink = {
   href: string;
@@ -169,6 +172,15 @@ export const MENU: MenuGroup[] = [
       { href: "/library/lost", label: "Lost and withdrawn", icon: "lostBooks", roles: OPERATOR },
       { href: "/library/overview", label: "Library overview", icon: "libraryOverview", roles: ADMINS },
       { href: "/library", label: "Library desk", icon: "library", roles: ADMINS },
+    ],
+  },
+  {
+    // Phase 6 (PLAN.md 5.6, docs/PHASE-6.md): Super Admins only.
+    title: "Service registers",
+    links: [
+      { href: "/registers/funerals", label: "Funerals", icon: "funeralRegister", roles: SUPER },
+      { href: "/registers/shahada", label: "Shahada", icon: "shahadaRegister", roles: SUPER },
+      { href: "/registers/nikah", label: "Nikah", icon: "nikahRegister", roles: SUPER },
     ],
   },
   {

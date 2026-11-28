@@ -18,6 +18,8 @@ const REFUSALS = new Set([
   "review-passed",
   "withdraw-reason",
   "withdraw-refused",
+  "cancel-reason",
+  "cancel-refused",
   "failed",
   "test-failed",
   "test-not-set-up",

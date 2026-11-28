@@ -1,5 +1,8 @@
 // Which Lucide icon each menu link uses (docs/UI-PLAN.md 3.6).
 import {
+  BadgeCheck,
+  Flower2,
+  HeartHandshake,
   Inbox,
   ScrollText,
   UserCog,
@@ -101,4 +104,7 @@ export const MENU_ICONS: Record<IconKey, LucideIcon> = {
   repay: HandCoins,
   accounts: UserCog,
   auditLog: ScrollText,
+  funeralRegister: Flower2,
+  shahadaRegister: BadgeCheck,
+  nikahRegister: HeartHandshake,
 };
