@@ -599,6 +599,32 @@ isOneToOne: false
       referencedColumns: ["person_id"]
     }
                   ]
+                },"funeral_entries": {
+                  Row: {
+                    "cancelled_at": string | null,"cancelled_by": string | null,"cancelled_reason": string | null,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"deceased_name": string,"family_contact_name": string,"family_contact_phone": string | null,"family_room": boolean,"first_id": number,"ghusl": boolean,"id": number,"janazah_prayer": boolean,"kafan": boolean,"number": string,"on_duty_person_ids": (string)[],"service_date": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string,"created_by"?: string | null,"deceased_name"?: string,"family_contact_name"?: string,"family_contact_phone"?: string | null,"family_room"?: boolean,"first_id"?: number,"ghusl"?: boolean,"id"?: never,"janazah_prayer"?: boolean,"kafan"?: boolean,"number"?: string,"on_duty_person_ids"?: (string)[],"service_date"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string,"created_by"?: string | null,"deceased_name"?: string,"family_contact_name"?: string,"family_contact_phone"?: string | null,"family_room"?: boolean,"first_id"?: number,"ghusl"?: boolean,"id"?: never,"janazah_prayer"?: boolean,"kafan"?: boolean,"number"?: string,"on_duty_person_ids"?: (string)[],"service_date"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "funeral_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "funeral_entries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "funeral_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "funeral_register"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"item_categories": {
                   Row: {
                     "active": boolean,"contact_person_id": string | null,"created_at": string,"created_by": string | null,"icon": string,"id": string,"name": string,"parent_id": string | null,"service_company_id": string | null,"updated_at": string,"updated_by": string | null
@@ -1130,6 +1156,74 @@ isOneToOne: false
     },{
       foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
       columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "policy_grid"
+      referencedColumns: ["person_id"]
+    }
+                  ]
+                },"nikah_entries": {
+                  Row: {
+                    "adults_confirmed": boolean,"cancelled_at": string | null,"cancelled_by": string | null,"cancelled_reason": string | null,"civil_registration": string,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"first_id": number,"id": number,"number": string,"officiant_person_id": string,"service_date": string,"spouse_1_name": string,"spouse_2_name": string,"updated_at": string,"updated_by": string | null,"wali_name": string | null,"witness_1": string,"witness_2": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "adults_confirmed"?: boolean,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"civil_registration"?: string,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string,"created_by"?: string | null,"first_id"?: number,"id"?: never,"number"?: string,"officiant_person_id"?: string,"service_date"?: string,"spouse_1_name"?: string,"spouse_2_name"?: string,"updated_at"?: string,"updated_by"?: string | null,"wali_name"?: string | null,"witness_1"?: string,"witness_2"?: string
+                  }
+                  Update: {
+                    "adults_confirmed"?: boolean,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"civil_registration"?: string,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string,"created_by"?: string | null,"first_id"?: number,"id"?: never,"number"?: string,"officiant_person_id"?: string,"service_date"?: string,"spouse_1_name"?: string,"spouse_2_name"?: string,"updated_at"?: string,"updated_by"?: string | null,"wali_name"?: string | null,"witness_1"?: string,"witness_2"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "nikah_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "nikah_entries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "nikah_register"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
 isOneToOne: false
       referencedRelation: "policy_grid"
       referencedColumns: ["person_id"]
@@ -1847,6 +1941,74 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"shahada_entries": {
+                  Row: {
+                    "adult_confirmed": boolean,"cancelled_at": string | null,"cancelled_by": string | null,"cancelled_reason": string | null,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"first_id": number,"id": number,"imam_person_id": string,"number": string,"person_name": string,"service_date": string,"updated_at": string,"updated_by": string | null,"witness_1": string | null,"witness_2": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "adult_confirmed"?: boolean,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string,"created_by"?: string | null,"first_id"?: number,"id"?: never,"imam_person_id"?: string,"number"?: string,"person_name"?: string,"service_date"?: string,"updated_at"?: string,"updated_by"?: string | null,"witness_1"?: string | null,"witness_2"?: string | null
+                  }
+                  Update: {
+                    "adult_confirmed"?: boolean,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string,"created_by"?: string | null,"first_id"?: number,"id"?: never,"imam_person_id"?: string,"number"?: string,"person_name"?: string,"service_date"?: string,"updated_at"?: string,"updated_by"?: string | null,"witness_1"?: string | null,"witness_2"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "shahada_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "shahada_entries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "shahada_register"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "policy_grid"
+      referencedColumns: ["person_id"]
+    }
+                  ]
                 },"stock_movements": {
                   Row: {
                     "corrects_id": number | null,"created_at": string,"created_by": string | null,"decided_at": string | null,"decided_by": string | null,"decision_note": string | null,"id": number,"item_id": string,"kind": string,"quantity": number,"reason": string | null,"status": string,"stocktake_difference_id": number | null,"updated_at": string,"updated_by": string | null
@@ -2548,6 +2710,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"funeral_register": {
+                  Row: {
+                    "cancelled_at": string | null,"cancelled_by": string | null,"cancelled_reason": string | null,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"deceased_name": string,"family_contact_name": string,"family_contact_phone": string | null,"family_room": boolean,"first_id": number,"first_recorded_at": string | null,"ghusl": boolean,"id": number,"janazah_prayer": boolean,"kafan": boolean,"number": string,"on_duty_person_ids": (string)[],"service_date": string,"updated_at": string,"updated_by": string | null,"versions": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"deceased_name"?: string | null,"family_contact_name"?: string | null,"family_contact_phone"?: string | null,"family_room"?: boolean | null,"first_id"?: number | null,"first_recorded_at"?: never,"ghusl"?: boolean | null,"id"?: number | null,"janazah_prayer"?: boolean | null,"kafan"?: boolean | null,"number"?: string | null,"on_duty_person_ids"?: (string)[] | null,"service_date"?: string | null,"updated_at"?: string | null,"updated_by"?: string | null,"versions"?: never
+                         }
+                        Update: {
+                           "cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"deceased_name"?: string | null,"family_contact_name"?: string | null,"family_contact_phone"?: string | null,"family_room"?: boolean | null,"first_id"?: number | null,"first_recorded_at"?: never,"ghusl"?: boolean | null,"id"?: number | null,"janazah_prayer"?: boolean | null,"kafan"?: boolean | null,"number"?: string | null,"on_duty_person_ids"?: (string)[] | null,"service_date"?: string | null,"updated_at"?: string | null,"updated_by"?: string | null,"versions"?: never
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "funeral_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "funeral_entries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "funeral_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "funeral_register"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"library_book_list": {
                   Row: {
                     "active": boolean,"author": string | null,"copies": number | null,"created_at": string,"id": string,"isbn": string | null,"language": string,"published_year": number | null,"publisher": string | null,"title": string
@@ -2743,6 +2931,74 @@ isOneToOne: false
     },{
       foreignKeyName: "maintenance_tickets_reported_by_person_id_fkey"
       columns: ["reported_by_person_id"]
+isOneToOne: false
+      referencedRelation: "policy_grid"
+      referencedColumns: ["person_id"]
+    }
+                  ]
+                },"nikah_register": {
+                  Row: {
+                    "adults_confirmed": boolean,"cancelled_at": string | null,"cancelled_by": string | null,"cancelled_reason": string | null,"civil_registration": string,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"first_id": number,"first_recorded_at": string | null,"id": number,"number": string,"officiant_person_id": string,"service_date": string,"spouse_1_name": string,"spouse_2_name": string,"updated_at": string,"updated_by": string | null,"versions": number | null,"wali_name": string | null,"witness_1": string,"witness_2": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "adults_confirmed"?: boolean | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"civil_registration"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"first_id"?: number | null,"first_recorded_at"?: never,"id"?: number | null,"number"?: string | null,"officiant_person_id"?: string | null,"service_date"?: string | null,"spouse_1_name"?: string | null,"spouse_2_name"?: string | null,"updated_at"?: string | null,"updated_by"?: string | null,"versions"?: never,"wali_name"?: string | null,"witness_1"?: string | null,"witness_2"?: string | null
+                         }
+                        Update: {
+                           "adults_confirmed"?: boolean | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"civil_registration"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"first_id"?: number | null,"first_recorded_at"?: never,"id"?: number | null,"number"?: string | null,"officiant_person_id"?: string | null,"service_date"?: string | null,"spouse_1_name"?: string | null,"spouse_2_name"?: string | null,"updated_at"?: string | null,"updated_by"?: string | null,"versions"?: never,"wali_name"?: string | null,"witness_1"?: string | null,"witness_2"?: string | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "nikah_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "nikah_entries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "nikah_register"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "nikah_entries_officiant_person_id_fkey"
+      columns: ["officiant_person_id"]
 isOneToOne: false
       referencedRelation: "policy_grid"
       referencedColumns: ["person_id"]
@@ -3053,6 +3309,74 @@ isOneToOne: false
                   ComputedFields: never
                   Relationships: [
                     
+                  ]
+                },"shahada_register": {
+                  Row: {
+                    "adult_confirmed": boolean,"cancelled_at": string | null,"cancelled_by": string | null,"cancelled_reason": string | null,"correction_reason": string | null,"corrects_id": number | null,"created_at": string,"created_by": string | null,"first_id": number,"first_recorded_at": string | null,"id": number,"imam_person_id": string,"number": string,"person_name": string,"service_date": string,"updated_at": string,"updated_by": string | null,"versions": number | null,"witness_1": string | null,"witness_2": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "adult_confirmed"?: boolean | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"first_id"?: number | null,"first_recorded_at"?: never,"id"?: number | null,"imam_person_id"?: string | null,"number"?: string | null,"person_name"?: string | null,"service_date"?: string | null,"updated_at"?: string | null,"updated_by"?: string | null,"versions"?: never,"witness_1"?: string | null,"witness_2"?: string | null
+                         }
+                        Update: {
+                           "adult_confirmed"?: boolean | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"cancelled_reason"?: string | null,"correction_reason"?: string | null,"corrects_id"?: number | null,"created_at"?: string | null,"created_by"?: string | null,"first_id"?: number | null,"first_recorded_at"?: never,"id"?: number | null,"imam_person_id"?: string | null,"number"?: string | null,"person_name"?: string | null,"service_date"?: string | null,"updated_at"?: string | null,"updated_by"?: string | null,"versions"?: never,"witness_1"?: string | null,"witness_2"?: string | null
+                         }
+                        Relationships: [
+                    {
+      foreignKeyName: "shahada_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "shahada_entries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_corrects_id_fkey"
+      columns: ["corrects_id"]
+isOneToOne: true
+      referencedRelation: "shahada_register"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_list"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_training_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "people_vetting_list"
+      referencedColumns: ["person_id"]
+    },{
+      foreignKeyName: "shahada_entries_imam_person_id_fkey"
+      columns: ["imam_person_id"]
+isOneToOne: false
+      referencedRelation: "policy_grid"
+      referencedColumns: ["person_id"]
+    }
                   ]
                 },"stock_levels": {
                   Row: {
